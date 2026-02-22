@@ -126,7 +126,7 @@ export const generateMetadata = async ({
     : `${movie.title} (${movie.productionYear}) - szczegóły filmu w serwisie Klaps.`;
 
   return {
-    title: `${movie.title} - Klaps`,
+    title: movie.title,
     description,
   };
 };
