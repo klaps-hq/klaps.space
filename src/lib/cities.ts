@@ -1,9 +1,14 @@
 import { ICity, ICityDetails } from "@/interfaces/ICities";
-import { apiFetch, apiFetchWithFallback } from "./client";
+import { apiFetch } from "./client";
 
 export const getCities = async (): Promise<ICity[]> => {
-  const cities = await apiFetch<ICity[]>("/cities");
-  return cities;
+  try {
+    const cities = await apiFetch<ICity[]>("/cities");
+    return cities;
+  } catch (error) {
+    console.warn("Falling back to empty cities list:", error);
+    return [];
+  }
 };
 
 export const getCityById = async (id: number): Promise<ICityDetails> => {
@@ -12,10 +17,6 @@ export const getCityById = async (id: number): Promise<ICityDetails> => {
 };
 
 export const getCityBySlug = async (slug: string): Promise<ICityDetails> => {
-  const city = await apiFetchWithFallback<ICityDetails>([
-    `/cities/${slug}`,
-    `/cities/by-slug/${slug}`,
-    `/cities/slug/${slug}`,
-  ]);
+  const city = await apiFetch<ICityDetails>(`/cities/${slug}`);
   return city;
 };

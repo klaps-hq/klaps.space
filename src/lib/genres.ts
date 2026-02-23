@@ -1,5 +1,5 @@
 import { IGenre } from "@/interfaces/IMovies";
-import { apiFetch, apiFetchWithFallback } from "./client";
+import { apiFetch } from "./client";
 
 export const getGenres = async (): Promise<IGenre[]> => {
   const genres = await apiFetch<IGenre[]>("/genres");
@@ -7,10 +7,6 @@ export const getGenres = async (): Promise<IGenre[]> => {
 };
 
 export const getGenreBySlug = async (slug: string): Promise<IGenre> => {
-  const genre = await apiFetchWithFallback<IGenre>([
-    `/genres/${slug}`,
-    `/genres/by-slug/${slug}`,
-    `/genres/slug/${slug}`,
-  ]);
+  const genre = await apiFetch<IGenre>(`/genres/${slug}`);
   return genre;
 };
