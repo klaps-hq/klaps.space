@@ -9,14 +9,19 @@ interface GetCinemasParams {
 export const getCinemas = async (
   params: GetCinemasParams = {}
 ): Promise<{ data: ICinemaGroup[] }> => {
-  const response = await apiFetch<{ data: ICinemaGroup[] }>("/cinemas", {
-    params: {
-      cityId: params.cityId ?? "",
-      limit: params.limit?.toString() ?? "50",
-    },
-  });
+  try {
+    const response = await apiFetch<{ data: ICinemaGroup[] }>("/cinemas", {
+      params: {
+        cityId: params.cityId ?? "",
+        limit: params.limit?.toString() ?? "50",
+      },
+    });
 
-  return response;
+    return response;
+  } catch (error) {
+    console.warn("Falling back to empty cinemas list:", error);
+    return { data: [] };
+  }
 };
 
 export const getCinemaById = async (id: string): Promise<ICinema> => {

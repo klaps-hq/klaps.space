@@ -15,10 +15,18 @@ export default async function HomeLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [cinemasResponse, multiCityMovies] = await Promise.all([
+  const [cinemasResult, moviesResult] = await Promise.allSettled([
     getCinemas({ limit: 16 }),
     getMultiCityMovies({ limit: 8 }),
   ]);
+
+  const cinemasResponse =
+    cinemasResult.status === "fulfilled"
+      ? cinemasResult.value
+      : { data: [] as Awaited<ReturnType<typeof getCinemas>>["data"] };
+
+  const multiCityMovies =
+    moviesResult.status === "fulfilled" ? moviesResult.value : [];
 
   let randomScreening = null;
   try {

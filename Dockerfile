@@ -13,11 +13,10 @@ COPY . .
 ARG NEXT_PUBLIC_SITE_URL=https://klaps.space
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ARG API_URL
-ARG INTERNAL_API_KEY
 ENV API_URL=$API_URL
-ENV INTERNAL_API_KEY=$INTERNAL_API_KEY
 
-RUN npm run build
+RUN --mount=type=secret,id=internal_api_key \
+    INTERNAL_API_KEY="$(cat /run/secrets/internal_api_key)" npm run build
 
 # Stage 3: Production runner
 FROM node:22-alpine AS runner
