@@ -3,6 +3,7 @@ import StudioCinemaItem from "./studio-cinema-item";
 
 type StudioCinema = {
   id: number;
+  slug: string;
   name: string;
   cityName: string;
 };

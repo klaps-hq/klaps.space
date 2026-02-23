@@ -7,7 +7,7 @@ const META_SEPARATOR = " · ";
 const MAX_VISIBLE_GENRES = 2;
 const GENRE_SEPARATOR = "/";
 
-const defaultBuildGenreHref = (genre: IGenre) => `/gatunki/${genre.id}`;
+const defaultBuildGenreHref = (genre: IGenre) => `/gatunki/${genre.slug}`;
 
 interface MovieMetaProps {
   duration: number | null;

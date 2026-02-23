@@ -1,11 +1,12 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import SectionHeader from "@/components/common/section-header";
+import Breadcrumbs from "@/components/ui/breadcrumbs";
 import ScreeningsPageContent from "./_components/screenings-page-content";
 import ScreeningsPageLoader from "./_components/screenings-page-loader";
 import { SITE_URL } from "@/lib/site-config";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type SearchParams = {
   city?: string;
@@ -26,11 +27,14 @@ const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
   return (
     <main className="bg-black min-h-screen px-8 py-24 md:py-32">
       <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
-        <SectionHeader
-          prefix="Repertuar"
-          title="Seanse"
+        <div className="flex flex-col gap-6">
+          <Breadcrumbs items={[{ name: "Seanse", href: "/seanse" }]} />
+          <SectionHeader
+            prefix="Repertuar"
+            title="Seanse"
           description="Pełna lista seansów specjalnych i klasyki filmowej w kinach studyjnych w całej Polsce."
-        />
+          />
+        </div>
 
         <Suspense fallback={<ScreeningsPageLoader />}>
           <ScreeningsPageContent searchParams={params} />
@@ -41,11 +45,23 @@ const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
 };
 
 export const metadata: Metadata = {
-  title: "Seanse",
+  title: "Seanse specjalne w kinach studyjnych - repertuar",
   description:
-    "Pełna lista seansów specjalnych i klasyki filmowej w kinach studyjnych w całej Polsce. Filtruj po mieście, dacie i gatunku.",
+    "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce. Filtruj po mieście, dacie i gatunku.",
+  keywords: [
+    "seanse specjalne",
+    "repertuar kin studyjnych",
+    "klasyka filmowa w kinie",
+    "retrospektywy filmowe",
+    "pokazy specjalne kino",
+  ],
   alternates: {
     canonical: `${SITE_URL}/seanse`,
+  },
+  openGraph: {
+    title: "Seanse specjalne w kinach studyjnych - repertuar",
+    description:
+      "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce.",
   },
 };
 

@@ -8,10 +8,11 @@ import ScreeningInfo from "./_components/screening-info";
 import ScreeningCinema from "./_components/screening-cinema";
 import ScreeningTicketButton from "./_components/screening-ticket-button";
 import JsonLd from "@/components/common/json-ld";
+import Breadcrumbs from "@/components/ui/breadcrumbs";
 import { SITE_URL } from "@/lib/site-config";
 import { IScreeningDetail } from "@/interfaces/IScreenings";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type ScreeningPageProps = {
   params: Promise<{ id: string }>;
@@ -37,7 +38,7 @@ const buildScreeningJsonLd = ({ movie, screening }: IScreeningDetail) => {
     workPresented: {
       "@type": "Movie",
       name: movie.title,
-      url: `${SITE_URL}/filmy/${movie.id}`,
+      url: `${SITE_URL}/filmy/${movie.slug}`,
       ...(movie.description && { description: movie.description }),
       ...(movie.posterUrl && { image: movie.posterUrl }),
     },
@@ -74,6 +75,12 @@ const ScreeningPage = async ({ params }: ScreeningPageProps) => {
       <JsonLd data={buildScreeningJsonLd({ movie, screening })} />
       <main className="bg-black min-h-screen px-8 py-24 md:py-32">
         <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
+          <Breadcrumbs
+            items={[
+              { name: "Seanse", href: "/seanse" },
+              { name: `${movie.title} - Seans` },
+            ]}
+          />
           <ScreeningHero movie={movie} />
 
           <SectionDivider />
@@ -100,15 +107,34 @@ export const generateMetadata = async ({
   const { id } = await params;
   const { movie, screening } = await getScreeningById(Number(id));
 
+  const dateFormatted = new Date(screening.dateTime).toLocaleDateString(
+    "pl-PL",
+    { day: "numeric", month: "long", year: "numeric" }
+  );
+
+  const title = `${movie.title} - seans w ${screening.cinema.name}, ${screening.cinema.city.name}`;
   const description = movie.description
-    ? movie.description.slice(0, 160)
-    : `${movie.title} (${movie.productionYear}) - seans w ${screening.cinema.name}, ${screening.cinema.city.name}.`;
+    ? `${movie.description.slice(0, 100)} Seans ${dateFormatted} w ${screening.cinema.name}, ${screening.cinema.city.name}.`
+    : `${movie.title} (${movie.productionYear}) - seans specjalny ${dateFormatted} w ${screening.cinema.name}, ${screening.cinema.city.name}.`;
 
   return {
-    title: `${movie.title} - Seans`,
+    title,
     description,
+    keywords: [
+      movie.title,
+      `${movie.title} seans`,
+      screening.cinema.name,
+      `seans specjalny ${screening.cinema.city.name}`,
+    ],
     alternates: {
       canonical: `${SITE_URL}/seanse/${id}`,
+    },
+    openGraph: {
+      title,
+      description,
+      ...(movie.posterUrl && {
+        images: [{ url: movie.posterUrl, alt: movie.title }],
+      }),
     },
   };
 };

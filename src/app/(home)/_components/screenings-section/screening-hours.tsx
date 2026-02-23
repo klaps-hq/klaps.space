@@ -20,7 +20,7 @@ const ScreeningHours: React.FC<ScreeningHoursProps> = ({ screenings }) => {
     <div className="flex flex-wrap gap-2 mt-2">
       {sortedScreenings.map((screening) => (
         <Button key={screening.id} variant="secondary" size="sm" asChild>
-          <Link href={`/seanse/${screening.id}`}>{screening.time}</Link>
+          <Link href={`/seanse/${screening.id}`} aria-label={`Seans o ${screening.time}`}>{screening.time}</Link>
         </Button>
       ))}
     </div>

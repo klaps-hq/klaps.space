@@ -11,7 +11,7 @@ const CityCard: React.FC<CityCardProps> = ({ city, cinemasCount }) => {
   return (
     <li>
       <Link
-        href={`/miasta/${city.id}`}
+        href={`/miasta/${city.slug}`}
         className="group flex items-baseline justify-between gap-4 py-4 transition-colors duration-200 hover:text-blood-red focus-visible:text-blood-red focus-visible:outline-none"
       >
         <span className="text-white text-lg md:text-xl font-semibold uppercase tracking-wide group-hover:text-blood-red group-focus-visible:text-blood-red transition-colors duration-200">

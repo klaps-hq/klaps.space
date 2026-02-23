@@ -1,5 +1,6 @@
 export interface IGenre {
   id: number;
+  slug: string;
   name: string;
 }
 
@@ -18,6 +19,7 @@ export interface IMovieCountry {
 
 export interface IMovieSummary {
   id: number;
+  slug: string;
   title: string;
   titleOriginal: string | null;
   productionYear: number;
@@ -33,6 +35,7 @@ export interface IMovieHero extends IMovieSummary {
 
 export interface IMovie {
   id: number;
+  slug: string;
   title: string;
   titleOriginal: string | null;
   description: string | null;
@@ -56,6 +59,7 @@ export interface IMovie {
 
 export interface IMultiCityMovie {
   id: number;
+  slug: string;
   title: string;
   productionYear: number;
   posterUrl: string | null;

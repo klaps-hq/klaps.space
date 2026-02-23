@@ -39,7 +39,7 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 
   const moviePages: MetadataRoute.Sitemap = moviesResponse.data.map(
     (movie) => ({
-      url: `${SITE_URL}/filmy/${movie.id}`,
+      url: `${SITE_URL}/filmy/${movie.slug}`,
       lastModified: now,
       changeFrequency: "daily" as const,
       priority: 0.7,
@@ -49,7 +49,7 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   const cinemaPages: MetadataRoute.Sitemap = cinemasResponse.data.flatMap(
     (group) =>
       group.cinemas.map((cinema) => ({
-        url: `${SITE_URL}/kina/${cinema.id}`,
+        url: `${SITE_URL}/kina/${cinema.slug}`,
         lastModified: now,
         changeFrequency: "daily" as const,
         priority: 0.6,
@@ -57,14 +57,14 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   );
 
   const cityPages: MetadataRoute.Sitemap = cities.map((city) => ({
-    url: `${SITE_URL}/miasta/${city.id}`,
+    url: `${SITE_URL}/miasta/${city.slug}`,
     lastModified: now,
     changeFrequency: "daily" as const,
     priority: 0.6,
   }));
 
   const genrePages: MetadataRoute.Sitemap = genres.map((genre) => ({
-    url: `${SITE_URL}/gatunki/${genre.id}`,
+    url: `${SITE_URL}/gatunki/${genre.slug}`,
     lastModified: now,
     changeFrequency: "weekly" as const,
     priority: 0.5,

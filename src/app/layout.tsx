@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
-
-export const dynamic = "force-dynamic";
-
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import ScrollToTop from "@/components/common/scroll-to-top";
+import JsonLd from "@/components/common/json-ld";
 import { CityProvider } from "@/contexts/city-context";
 import { getCities } from "@/lib/cities";
 import { SITE_URL } from "@/lib/site-config";
@@ -25,26 +23,47 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Klaps - Repertuar seansów specjalnych i klasyki filmowej",
+    default:
+      "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych w Polsce",
     template: "%s - Klaps",
   },
   description:
-    "Ogólnopolski przewodnik po seansach specjalnych, klasyce i retrospektywach w kinach studyjnych. Sprawdź co grają.",
+    "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych w Polsce. Repertuar, filmy i kina w jednym miejscu.",
+  keywords: [
+    "kina studyjne",
+    "seanse specjalne",
+    "klasyka filmowa",
+    "retrospektywy filmowe",
+    "kino niezależne",
+    "repertuar kin studyjnych",
+    "filmy klasyczne w kinie",
+    "pokazy specjalne",
+    "kino artystyczne",
+    "wznowienia filmowe",
+  ],
   openGraph: {
     type: "website",
     locale: "pl_PL",
     siteName: "Klaps",
+    title:
+      "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych w Polsce",
+    description:
+      "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych. Sprawdź co grają.",
     images: [
       {
         url: "/klaps-og.png",
         width: 1200,
         height: 630,
-        alt: "Klaps - Repertuar seansów specjalnych i klasyki filmowej",
+        alt: "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
+    title:
+      "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych w Polsce",
+    description:
+      "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych.",
     images: ["/klaps-og.png"],
   },
 };
@@ -94,6 +113,18 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "Klaps",
+            url: SITE_URL,
+            logo: `${SITE_URL}/favicon.svg`,
+            description:
+              "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych w Polsce.",
+            sameAs: ["https://github.com/Biplo12/klaps"],
+          }}
+        />
         <CityProvider cities={cities}>
           <Header cities={cities} />
 

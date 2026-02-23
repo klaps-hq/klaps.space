@@ -2,9 +2,10 @@ import { Metadata } from "next";
 import { getCinemas } from "@/lib/cinemas";
 import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
+import Breadcrumbs from "@/components/ui/breadcrumbs";
 import CinemasList from "./_components/cinemas-list";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 const CinemasPage = async () => {
   const { data: cinemaGroups } = await getCinemas({ limit: 200 });
@@ -12,11 +13,14 @@ const CinemasPage = async () => {
   return (
     <main className="bg-black min-h-screen px-8 py-24 md:py-32">
       <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
-        <SectionHeader
-          prefix="Lista kin"
-          title="Kina studyjne w Polsce"
-          description="Miejsca, w których kino jest czymś więcej niż rozrywką."
-        />
+        <div className="flex flex-col gap-6">
+          <Breadcrumbs items={[{ name: "Kina", href: "/kina" }]} />
+          <SectionHeader
+            prefix="Lista kin"
+            title="Kina studyjne w Polsce"
+            description="Miejsca, w których kino jest czymś więcej niż rozrywką."
+          />
+        </div>
 
         <CinemasList cinemaGroups={cinemaGroups} />
       </div>
@@ -27,9 +31,21 @@ const CinemasPage = async () => {
 export const metadata: Metadata = {
   title: "Kina studyjne w Polsce",
   description:
-    "Pełna lista kin studyjnych w Polsce. Znajdź kino niezależne w swoim mieście.",
+    "Pełna lista kin studyjnych i niezależnych w Polsce. Znajdź kino artystyczne w swoim mieście i sprawdź aktualny repertuar seansów specjalnych.",
+  keywords: [
+    "kina studyjne w Polsce",
+    "kina niezależne",
+    "kino artystyczne",
+    "lista kin studyjnych",
+    "kino studyjne w moim mieście",
+  ],
   alternates: {
     canonical: `${SITE_URL}/kina`,
+  },
+  openGraph: {
+    title: "Kina studyjne w Polsce - pełna lista",
+    description:
+      "Pełna lista kin studyjnych i niezależnych w Polsce. Znajdź kino artystyczne w swoim mieście.",
   },
 };
 

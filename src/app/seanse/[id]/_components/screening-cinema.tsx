@@ -15,7 +15,7 @@ const ScreeningCinema: React.FC<ScreeningCinemaProps> = ({ cinema }) => {
 
       <div className="flex flex-col gap-2 border-l-4 border-l-blood-red pl-4">
         <Link
-          href={`/kina/${cinema.id}`}
+          href={`/kina/${cinema.slug}`}
           className="text-white text-lg md:text-xl font-bold hover:text-blood-red transition-colors"
         >
           {cinema.name}

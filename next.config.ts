@@ -4,7 +4,6 @@ const nextConfig: NextConfig = {
   output: "standalone",
   reactCompiler: true,
   images: {
-    domains: ["localhost", "fwcdn.pl"],
     remotePatterns: [
       {
         protocol: "https",

@@ -46,7 +46,7 @@ const MultiCityPosterDetails: React.FC<MultiCityPosterDetailsProps> = ({
           {movie.description}
         </p>
       )}
-      <LinkWithArrow href={`/filmy/${movie.id}`} label="Zobacz szczegóły" />
+      <LinkWithArrow href={`/filmy/${movie.slug}`} label="Zobacz szczegóły" />
     </>
   );
 };

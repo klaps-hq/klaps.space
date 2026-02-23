@@ -6,7 +6,7 @@ import { getGenres } from "@/lib/genres";
 import SectionHeader from "@/components/common/section-header";
 import SitemapContent from "./_components/sitemap-content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 const SitemapPage = async () => {
   const [{ data: cinemaGroups }, { data: movies }, genres] = await Promise.all([

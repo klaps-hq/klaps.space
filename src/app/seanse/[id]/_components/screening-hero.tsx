@@ -33,7 +33,7 @@ const ScreeningHero: React.FC<ScreeningHeroProps> = ({ movie }) => {
         <div className="flex flex-col gap-2">
           <h1 className="text-white text-3xl md:text-5xl font-bold uppercase tracking-wide leading-tight">
             <Link
-              href={`/filmy/${movie.id}`}
+              href={`/filmy/${movie.slug}`}
               className="hover:text-blood-red transition-colors"
             >
               {movie.title}

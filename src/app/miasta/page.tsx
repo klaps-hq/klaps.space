@@ -2,9 +2,10 @@ import { Metadata } from "next";
 import { getCinemas } from "@/lib/cinemas";
 import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
+import Breadcrumbs from "@/components/ui/breadcrumbs";
 import CitiesList from "./_components/cities-list";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 const CitiesPage = async () => {
   const { data: cinemaGroups } = await getCinemas({ limit: 500 });
@@ -12,11 +13,14 @@ const CitiesPage = async () => {
   return (
     <main className="bg-black min-h-screen px-8 py-24 md:py-32">
       <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
-        <SectionHeader
-          prefix="Miasta"
-          title="Miasta z kinami"
-          description="Wybierz miasto i sprawdź, jakie seanse czekają na Ciebie w Twoim regionie."
-        />
+        <div className="flex flex-col gap-6">
+          <Breadcrumbs items={[{ name: "Miasta", href: "/miasta" }]} />
+          <SectionHeader
+            prefix="Miasta"
+            title="Miasta z kinami"
+            description="Wybierz miasto i sprawdź, jakie seanse czekają na Ciebie w Twoim regionie."
+          />
+        </div>
 
         <CitiesList cinemaGroups={cinemaGroups} />
       </div>
@@ -25,11 +29,23 @@ const CitiesPage = async () => {
 };
 
 export const metadata: Metadata = {
-  title: "Miasta",
+  title: "Kina studyjne w miastach Polski",
   description:
-    "Lista miast z kinami w Polsce. Znajdź kino niezależne w swoim mieście i sprawdź aktualne seanse.",
+    "Wybierz miasto i sprawdź kina studyjne w swoim regionie. Repertuar seansów specjalnych, klasyki filmowej i retrospektyw w miastach w całej Polsce.",
+  keywords: [
+    "kina studyjne w miastach",
+    "kino studyjne Warszawa",
+    "kino studyjne Kraków",
+    "kino studyjne Wrocław",
+    "kina niezależne miasta",
+  ],
   alternates: {
     canonical: `${SITE_URL}/miasta`,
+  },
+  openGraph: {
+    title: "Kina studyjne w miastach Polski",
+    description:
+      "Wybierz miasto i sprawdź kina studyjne w swoim regionie. Seanse specjalne i klasyka filmowa.",
   },
 };
 

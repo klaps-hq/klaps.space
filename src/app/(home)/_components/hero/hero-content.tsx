@@ -19,7 +19,7 @@ const TRUST_LINE =
   "Aktualne seanse z kin w całej Polsce. Dane z publicznych źródeł.";
 
 const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
-  const movieDetailsHref = `/filmy/${screening.movie.id}`;
+  const movieDetailsHref = `/filmy/${screening.movie.slug}`;
 
   return (
     <div className="z-10 absolute bottom-8 left-4 right-4 md:bottom-auto md:top-1/2 md:left-8 md:right-auto md:-translate-y-1/2 flex flex-col gap-2 md:gap-4">

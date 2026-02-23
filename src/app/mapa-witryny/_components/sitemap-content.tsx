@@ -58,7 +58,7 @@ const SitemapContent: React.FC<SitemapContentProps> = ({
   const citiesGroup: SitemapGroup = {
     heading: "Miasta",
     links: sortedGroups.map((group) => ({
-      href: `/miasta/${group.city.id}`,
+      href: `/miasta/${group.city.slug}`,
       label: group.city.name,
     })),
   };
@@ -67,7 +67,7 @@ const SitemapContent: React.FC<SitemapContentProps> = ({
     heading: "Kina",
     links: sortedGroups.flatMap((group) =>
       group.cinemas.map((cinema) => ({
-        href: `/kina/${cinema.id}`,
+        href: `/kina/${cinema.slug}`,
         label: cinema.name,
       }))
     ),
@@ -76,7 +76,7 @@ const SitemapContent: React.FC<SitemapContentProps> = ({
   const moviesGroup: SitemapGroup = {
     heading: "Filmy",
     links: [...movies].map((movie) => ({
-      href: `/filmy/${movie.id}`,
+      href: `/filmy/${movie.slug}`,
       label: movie.title,
     })),
   };
@@ -86,7 +86,7 @@ const SitemapContent: React.FC<SitemapContentProps> = ({
     links: [...genres]
       .sort((a, b) => a.name.localeCompare(b.name, "pl"))
       .map((genre) => ({
-        href: `/gatunki/${genre.id}`,
+        href: `/gatunki/${genre.slug}`,
         label: genre.name,
       })),
   };

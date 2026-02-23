@@ -1,5 +1,5 @@
 import { ICinema, ICinemaGroup } from "@/interfaces/ICinema";
-import { apiFetch } from "./client";
+import { apiFetch, apiFetchWithFallback } from "./client";
 
 interface GetCinemasParams {
   cityId?: string | null;
@@ -21,5 +21,14 @@ export const getCinemas = async (
 
 export const getCinemaById = async (id: string): Promise<ICinema> => {
   const cinema = await apiFetch<ICinema>(`/cinemas/${id}`);
+  return cinema;
+};
+
+export const getCinemaBySlug = async (slug: string): Promise<ICinema> => {
+  const cinema = await apiFetchWithFallback<ICinema>([
+    `/cinemas/${slug}`,
+    `/cinemas/by-slug/${slug}`,
+    `/cinemas/slug/${slug}`,
+  ]);
   return cinema;
 };

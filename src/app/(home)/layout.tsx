@@ -8,7 +8,7 @@ import { getCinemas } from "@/lib/cinemas";
 import { getMultiCityMovies } from "@/lib/movies";
 import { getRandomScreening } from "@/lib/screenings";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function HomeLayout({
   children,

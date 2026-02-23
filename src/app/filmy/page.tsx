@@ -2,12 +2,13 @@ import { Metadata } from "next";
 import { getMovies } from "@/lib/movies";
 import { getGenres } from "@/lib/genres";
 import SectionHeader from "@/components/common/section-header";
+import Breadcrumbs from "@/components/ui/breadcrumbs";
 import MoviesGrid from "./_components/movies-grid";
 import MoviesPageFilters from "./_components/movies-page-filters";
 import PaginatedNav from "@/components/common/paginated-nav";
 import { SITE_URL } from "@/lib/site-config";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type MoviesPageProps = {
   searchParams: Promise<{ page?: string; search?: string; genre?: string }>;
@@ -38,11 +39,14 @@ const MoviesPage = async ({ searchParams }: MoviesPageProps) => {
   return (
     <main className="bg-black min-h-screen px-8 py-24 md:py-32">
       <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
-        <SectionHeader
-          prefix="Katalog"
-          title="Filmy"
-          description="Klasyka, retrospektywy i seanse specjalne w kinach studyjnych w całej Polsce."
-        />
+        <div className="flex flex-col gap-6">
+          <Breadcrumbs items={[{ name: "Filmy", href: "/filmy" }]} />
+          <SectionHeader
+            prefix="Katalog"
+            title="Filmy"
+            description="Klasyka, retrospektywy i seanse specjalne w kinach studyjnych w całej Polsce."
+          />
+        </div>
 
         <MoviesPageFilters genres={genres} />
 
@@ -59,11 +63,23 @@ const MoviesPage = async ({ searchParams }: MoviesPageProps) => {
 };
 
 export const metadata: Metadata = {
-  title: "Filmy",
+  title: "Filmy klasyczne w kinach - katalog",
   description:
-    "Katalog filmów dostępnych w serwisie Klaps. Klasyka, retrospektywy i seanse specjalne w kinach studyjnych.",
+    "Katalog filmów klasycznych dostępnych w kinach studyjnych w Polsce. Retrospektywy, wznowienia i seanse specjalne na dużym ekranie.",
+  keywords: [
+    "filmy klasyczne w kinie",
+    "stare filmy w kinie",
+    "retrospektywy filmowe",
+    "wznowienia filmowe",
+    "katalog filmów kina studyjne",
+  ],
   alternates: {
     canonical: `${SITE_URL}/filmy`,
+  },
+  openGraph: {
+    title: "Filmy klasyczne w kinach studyjnych - katalog",
+    description:
+      "Katalog filmów klasycznych dostępnych w kinach studyjnych w Polsce. Retrospektywy, wznowienia i seanse specjalne.",
   },
 };
 

@@ -4,7 +4,7 @@ import {
   IMultiCityMovie,
   PaginatedResponse,
 } from "@/interfaces/IMovies";
-import { apiFetch } from "./client";
+import { apiFetch, apiFetchWithFallback } from "./client";
 
 interface GetMultiCityMoviesParams {
   limit?: number;
@@ -44,5 +44,14 @@ export const getMovies = async (
 
 export const getMovieById = async (id: number): Promise<IMovie> => {
   const movie = await apiFetch<IMovie>(`/movies/${id}`);
+  return movie;
+};
+
+export const getMovieBySlug = async (slug: string): Promise<IMovie> => {
+  const movie = await apiFetchWithFallback<IMovie>([
+    `/movies/${slug}`,
+    `/movies/by-slug/${slug}`,
+    `/movies/slug/${slug}`,
+  ]);
   return movie;
 };

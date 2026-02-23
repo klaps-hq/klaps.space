@@ -38,7 +38,7 @@ const MultiCityItem: React.FC<MultiCityItemProps> = ({
       onFocus={handleMouseEnter}
     >
       <Link
-        href={`/filmy/${movie.id}`}
+        href={`/filmy/${movie.slug}`}
         className={cn(
           "text-lg md:text-xl font-semibold transition-colors duration-200",
           isActive ? "text-blood-red" : "text-white hover:text-blood-red"

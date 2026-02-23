@@ -3,6 +3,7 @@ import { PaginatedResponse } from "./IMovies";
 
 export interface ICity {
   id: number;
+  slug: string;
   name: string;
   nameDeclinated: string;
 }

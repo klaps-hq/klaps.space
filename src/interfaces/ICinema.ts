@@ -2,6 +2,7 @@ import { ICity } from "./ICities";
 
 export interface ICinemaSummary {
   id: number;
+  slug: string;
   name: string;
   street: string | null;
   city: ICity;
@@ -9,6 +10,7 @@ export interface ICinemaSummary {
 
 export interface ICinema {
   id: number;
+  slug: string;
   name: string;
   street: string | null;
   city: ICity;
