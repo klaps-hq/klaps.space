@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import HowItWorksPageContent from "./_components/how-it-works-page-content";
+import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 
 const HowItWorksPage = () => {
@@ -14,9 +15,12 @@ const HowItWorksPage = () => {
 };
 
 export const metadata: Metadata = {
-  title: "Jak to działa — Klaps",
+  title: "Jak to działa",
   description:
     "Dowiedz się skąd Klaps pobiera repertuar, jak filtruje seanse i jak korzystać z serwisu.",
+  alternates: {
+    canonical: `${SITE_URL}/jak-to-dziala`,
+  },
 };
 
 export default HowItWorksPage;

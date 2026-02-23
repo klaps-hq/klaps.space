@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { getCinemas } from "@/lib/cinemas";
+import { SITE_URL } from "@/lib/site-config";
 import { getMovies } from "@/lib/movies";
 import { getGenres } from "@/lib/genres";
 import SectionHeader from "@/components/common/section-header";
@@ -34,9 +35,12 @@ const SitemapPage = async () => {
 };
 
 export const metadata: Metadata = {
-  title: "Mapa witryny - Klaps",
+  title: "Mapa witryny",
   description:
     "Mapa witryny serwisu Klaps. Przeglądaj wszystkie dostępne strony i podstrony w jednym miejscu.",
+  alternates: {
+    canonical: `${SITE_URL}/mapa-witryny`,
+  },
 };
 
 export default SitemapPage;

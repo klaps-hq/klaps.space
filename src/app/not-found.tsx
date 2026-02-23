@@ -2,9 +2,13 @@ import { Metadata } from "next";
 import NotFoundHero from "./_components/not-found/not-found-hero";
 
 export const metadata: Metadata = {
-  title: "404 - Nie znaleziono - Klaps",
+  title: "404 - Nie znaleziono",
   description:
     "Strona, której szukasz, nie istnieje. Wróć do repertuaru kin studyjnych.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 const NotFoundPage = () => {

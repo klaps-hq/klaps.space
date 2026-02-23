@@ -59,7 +59,7 @@ const MoviesPage = async ({ searchParams }: MoviesPageProps) => {
 };
 
 export const metadata: Metadata = {
-  title: "Filmy - Klaps",
+  title: "Filmy",
   description:
     "Katalog filmów dostępnych w serwisie Klaps. Klasyka, retrospektywy i seanse specjalne w kinach studyjnych.",
   alternates: {

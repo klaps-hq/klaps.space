@@ -87,8 +87,11 @@ export const generateMetadata = async ({
   const cinema = await getCinemaById(id);
 
   return {
-    title: `${cinema.name} — Klaps`,
+    title: cinema.name,
     description: `Kino studyjne ${cinema.name} w ${cinema.city.name}. Sprawdź aktualne seanse.`,
+    alternates: {
+      canonical: `${SITE_URL}/kina/${id}`,
+    },
   };
 };
 

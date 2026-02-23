@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import PrivacyPolicyPageContent from "./_components/privacy-policy-page-content";
+import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 
 const PrivacyPolicyPage = () => {
@@ -17,9 +18,12 @@ const PrivacyPolicyPage = () => {
 };
 
 export const metadata: Metadata = {
-  title: "Polityka prywatności - Klaps",
+  title: "Polityka prywatności",
   description:
     "Polityka prywatności serwisu Klaps. Informacje o przetwarzaniu danych, plikach cookies i prawach użytkowników.",
+  alternates: {
+    canonical: `${SITE_URL}/polityka-prywatnosci`,
+  },
 };
 
 export default PrivacyPolicyPage;

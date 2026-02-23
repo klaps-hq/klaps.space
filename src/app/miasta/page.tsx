@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { getCinemas } from "@/lib/cinemas";
+import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 import CitiesList from "./_components/cities-list";
 
@@ -24,9 +25,12 @@ const CitiesPage = async () => {
 };
 
 export const metadata: Metadata = {
-  title: "Miasta - Klaps",
+  title: "Miasta",
   description:
     "Lista miast z kinami w Polsce. Znajdź kino niezależne w swoim mieście i sprawdź aktualne seanse.",
+  alternates: {
+    canonical: `${SITE_URL}/miasta`,
+  },
 };
 
 export default CitiesPage;

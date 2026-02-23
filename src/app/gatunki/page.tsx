@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { getGenres } from "@/lib/genres";
+import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 import GenresList from "./_components/genres-list";
 
@@ -24,9 +25,12 @@ const GenresPage = async () => {
 };
 
 export const metadata: Metadata = {
-  title: "Gatunki - Klaps",
+  title: "Gatunki filmowe",
   description:
     "Lista gatunków filmowych dostępnych w serwisie Klaps. Przeglądaj klasykę, retrospektywy i seanse specjalne według gatunku.",
+  alternates: {
+    canonical: `${SITE_URL}/gatunki`,
+  },
 };
 
 export default GenresPage;

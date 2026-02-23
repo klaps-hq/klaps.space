@@ -58,16 +58,6 @@ const buildMovieJsonLd = (movie: IMovie) => {
     }));
   }
 
-  if (movie.ratings.users) {
-    jsonLd.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: movie.ratings.users.score,
-      ratingCount: movie.ratings.users.votes,
-      bestRating: 10,
-      worstRating: 1,
-    };
-  }
-
   return jsonLd;
 };
 
@@ -128,6 +118,9 @@ export const generateMetadata = async ({
   return {
     title: movie.title,
     description,
+    alternates: {
+      canonical: `${SITE_URL}/filmy/${id}`,
+    },
   };
 };
 

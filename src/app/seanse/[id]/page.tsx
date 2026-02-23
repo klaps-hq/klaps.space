@@ -105,8 +105,11 @@ export const generateMetadata = async ({
     : `${movie.title} (${movie.productionYear}) - seans w ${screening.cinema.name}, ${screening.cinema.city.name}.`;
 
   return {
-    title: `${movie.title} - Seans - Klaps`,
+    title: `${movie.title} - Seans`,
     description,
+    alternates: {
+      canonical: `${SITE_URL}/seanse/${id}`,
+    },
   };
 };
 

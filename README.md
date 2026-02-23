@@ -37,7 +37,7 @@ Klaps is a Polish nationwide guide to special screenings, classic cinema, and re
 ## Features
 
 - **Screening listings** — browse and filter special screenings by city, genre, date, and keyword
-- **Movie catalog** — detailed movie pages with descriptions, cast, directors, ratings, and trailers
+- **Movie catalog** — detailed movie pages with descriptions, cast, directors, and trailers
 - **Cinema directory** — cinema pages with address, interactive map (Leaflet), and current screenings
 - **City pages** — per-city overview with cinema counts, screening stats, and listings
 - **Genre pages** — paginated movie collections by genre
@@ -88,7 +88,7 @@ src/
 | `/seanse`               | All screenings with filters (city, genre, date, search) and pagination                                   |
 | `/seanse/[id]`          | Screening detail — movie info, screening time, cinema, ticket link                                       |
 | `/filmy`                | Movie catalog with search, genre filter, and pagination                                                  |
-| `/filmy/[id]`           | Movie detail — description, cast, directors, ratings, trailer, screenings                                |
+| `/filmy/[id]`           | Movie detail — description, cast, directors, trailer, screenings                                         |
 | `/kina`                 | Cinema directory grouped by city                                                                         |
 | `/kina/[id]`            | Cinema detail — info, interactive map, current screenings                                                |
 | `/miasta`               | Cities list with cinema counts                                                                           |
@@ -194,18 +194,18 @@ The project uses **GitHub Actions** for CI/CD (`.github/workflows/deploy.yml`):
 
 **Required GitHub Secrets:**
 
-| Secret              | Description                              |
-| ------------------- | ---------------------------------------- |
-| `SERVER_IP`         | Deployment server IP                     |
-| `SERVER_USER`       | SSH user                                 |
-| `SERVER_SSH_KEY`    | SSH private key                          |
-| `API_URL`           | Backend API URL                          |
-| `INTERNAL_API_KEY`  | API authentication key                   |
-| `GA_MEASUREMENT_ID` | Google Analytics measurement ID          |
-| `GHCR_PAT`         | GitHub Container Registry token          |
-| `DEPLOY_DIR`        | Base deploy path on server               |
+| Secret              | Description                             |
+| ------------------- | --------------------------------------- |
+| `SERVER_IP`         | Deployment server IP                    |
+| `SERVER_USER`       | SSH user                                |
+| `SERVER_SSH_KEY`    | SSH private key                         |
+| `API_URL`           | Backend API URL                         |
+| `INTERNAL_API_KEY`  | API authentication key                  |
+| `GA_MEASUREMENT_ID` | Google Analytics measurement ID         |
+| `GHCR_PAT`          | GitHub Container Registry token         |
+| `DEPLOY_DIR`        | Base deploy path on server              |
 | `DOCKER_IMAGE`      | Full Docker image name (e.g. ghcr.io/…) |
-| `DOMAIN`            | Site domain (per environment)            |
+| `DOMAIN`            | Site domain (per environment)           |
 
 ## Environment Variables
 

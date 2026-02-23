@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import FaqPageContent from "./_components/faq-page-content";
+import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 
 const FaqPage = () => {
@@ -17,9 +18,12 @@ const FaqPage = () => {
 };
 
 export const metadata: Metadata = {
-  title: "FAQ - Klaps",
+  title: "FAQ",
   description:
     "Najczęściej zadawane pytania dotyczące serwisu Klaps. Dowiedz się więcej o seansach, repertuarze, kinach i funkcjach serwisu.",
+  alternates: {
+    canonical: `${SITE_URL}/faq`,
+  },
 };
 
 export default FaqPage;

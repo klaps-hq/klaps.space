@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import AboutPageContent from "./_components/about-page-content";
+import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 
 const AboutPage = () => {
@@ -14,9 +15,12 @@ const AboutPage = () => {
 };
 
 export const metadata: Metadata = {
-  title: "O projekcie — Klaps",
+  title: "O projekcie",
   description:
     "Czym jest Klaps, jaki problem rozwiązuje i dlaczego kino klasyczne zasługuje na jedno, czytelne miejsce w sieci.",
+  alternates: {
+    canonical: `${SITE_URL}/o-projekcie`,
+  },
 };
 
 export default AboutPage;

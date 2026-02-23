@@ -29,7 +29,7 @@ export async function apiFetch<T>(
         ...options.headers,
         "x-internal-api-key": INTERNAL_API_KEY,
       },
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
 
     if (!res.ok) {

@@ -95,8 +95,11 @@ export const generateMetadata = async ({
   const { city } = await getCityById(Number(id));
 
   return {
-    title: `Kina studyjne w ${city.nameDeclinated} - Klaps`,
+    title: `Kina studyjne w ${city.nameDeclinated}`,
     description: `Kina studyjne i aktualne seanse w ${city.nameDeclinated}. Sprawdź repertuar kin niezależnych.`,
+    alternates: {
+      canonical: `${SITE_URL}/miasta/${id}`,
+    },
   };
 };
 

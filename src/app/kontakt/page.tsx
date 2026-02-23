@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import ContactPageContent from "./_components/contact-page-content";
+import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 
 const ContactPage = () => {
@@ -14,9 +15,12 @@ const ContactPage = () => {
 };
 
 export const metadata: Metadata = {
-  title: "Kontakt — Klaps",
+  title: "Kontakt",
   description:
     "Skontaktuj się z zespołem Klaps. Napisz w sprawie współpracy, zgłoś błąd lub podziel się opinią.",
+  alternates: {
+    canonical: `${SITE_URL}/kontakt`,
+  },
 };
 
 export default ContactPage;

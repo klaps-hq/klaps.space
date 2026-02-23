@@ -89,11 +89,11 @@ export const generateMetadata = async ({
   const genre = genres.find((g) => g.id === Number(id));
 
   if (!genre) {
-    return { title: "Gatunek - Klaps" };
+    return { title: "Gatunek" };
   }
 
   return {
-    title: `${genre.name} - Klaps`,
+    title: genre.name,
     description: `Filmy z gatunku ${genre.name.toLowerCase()} w kinach studyjnych. Seanse specjalne, klasyka i retrospektywy.`,
     alternates: {
       canonical: `${SITE_URL}/gatunki/${id}`,

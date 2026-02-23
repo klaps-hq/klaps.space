@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { getCinemas } from "@/lib/cinemas";
+import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 import CinemasList from "./_components/cinemas-list";
 
@@ -24,9 +25,12 @@ const CinemasPage = async () => {
 };
 
 export const metadata: Metadata = {
-  title: "Kina studyjne w Polsce — Klaps",
+  title: "Kina studyjne w Polsce",
   description:
     "Pełna lista kin studyjnych w Polsce. Znajdź kino niezależne w swoim mieście.",
+  alternates: {
+    canonical: `${SITE_URL}/kina`,
+  },
 };
 
 export default CinemasPage;

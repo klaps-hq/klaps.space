@@ -51,10 +51,6 @@ export interface IMovie {
   countryOfOrigin?: IMovieCountry[] | null;
   screenwriters?: IMoviePerson[] | null;
   genres: IGenre[];
-  ratings: {
-    users: { score: number; votes: number } | null;
-    critics: { score: number; votes: number } | null;
-  };
   sourceUrl: string;
 }
 
