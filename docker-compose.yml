@@ -13,6 +13,13 @@ services:
       - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}.entrypoints=websecure"
       - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}.tls.certresolver=leresolver"
       - "traefik.http.services.klaps-frontend-${ENV_SUFFIX:-prod}.loadbalancer.server.port=3000"
+      - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}-www.rule=Host(`www.${DOMAIN}`)"
+      - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}-www.entrypoints=websecure"
+      - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}-www.tls.certresolver=leresolver"
+      - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}-www.middlewares=klaps-www-redirect-${ENV_SUFFIX:-prod}"
+      - "traefik.http.middlewares.klaps-www-redirect-${ENV_SUFFIX:-prod}.redirectregex.regex=^https?://www\\.(.*)"
+      - "traefik.http.middlewares.klaps-www-redirect-${ENV_SUFFIX:-prod}.redirectregex.replacement=https://$${1}"
+      - "traefik.http.middlewares.klaps-www-redirect-${ENV_SUFFIX:-prod}.redirectregex.permanent=true"
     networks:
       - traefik_public
 
