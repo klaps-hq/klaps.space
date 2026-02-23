@@ -4,10 +4,14 @@ import HeroContent from "./hero-content";
 import { IRandomScreening } from "@/interfaces/IScreenings";
 
 interface HeroProps {
-  screening: IRandomScreening;
+  screening: IRandomScreening | null;
 }
 
 const Hero: React.FC<HeroProps> = async ({ screening }) => {
+  if (!screening) {
+    return null;
+  }
+
   const movieTitle = screening.movie.title;
 
   return (

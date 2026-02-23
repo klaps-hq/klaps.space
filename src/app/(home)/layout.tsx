@@ -15,13 +15,17 @@ export default async function HomeLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [randomScreening, cinemasResponse, multiCityMovies] = await Promise.all(
-    [
-      getRandomScreening(),
-      getCinemas({ limit: 16 }),
-      getMultiCityMovies({ limit: 8 }),
-    ]
-  );
+  const [cinemasResponse, multiCityMovies] = await Promise.all([
+    getCinemas({ limit: 16 }),
+    getMultiCityMovies({ limit: 8 }),
+  ]);
+
+  let randomScreening = null;
+  try {
+    randomScreening = await getRandomScreening();
+  } catch (error) {
+    console.warn("Random screening unavailable, skipping hero section:", error);
+  }
 
   return (
     <>
