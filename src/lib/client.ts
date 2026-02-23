@@ -20,7 +20,10 @@ export async function apiFetch<T>(
   options: RequestInit & { params?: Record<string, string> } = {}
 ): Promise<T> {
   try {
-    const url = new URL(path, getApiBaseUrl());
+    const baseUrl = getApiBaseUrl();
+    const normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+    const normalizedPath = path.startsWith("/") ? path.slice(1) : path;
+    const url = new URL(normalizedPath, normalizedBaseUrl);
 
     if (options.params) {
       Object.entries(options.params).forEach(([key, value]) => {
