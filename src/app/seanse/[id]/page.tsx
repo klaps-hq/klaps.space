@@ -21,7 +21,7 @@ const buildScreeningJsonLd = ({ movie, screening }: IScreeningDetail) => {
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "ScreeningEvent",
-    name: `${movie.title} — Seans`,
+    name: `${movie.title} - Seans`,
     startDate: screening.dateTime,
     url: `${SITE_URL}/seanse/${screening.id}`,
     location: {

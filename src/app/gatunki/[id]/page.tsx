@@ -19,7 +19,7 @@ type GenrePageProps = {
 const buildGenreJsonLd = (genre: IGenre, movies: readonly IMovieSummary[]) => ({
   "@context": "https://schema.org",
   "@type": "CollectionPage",
-  name: `${genre.name} — Filmy`,
+  name: `${genre.name} - Filmy`,
   url: `${SITE_URL}/gatunki/${genre.id}`,
   description: `Filmy z gatunku ${genre.name.toLowerCase()} dostępne w serwisie Klaps.`,
   mainEntity: {

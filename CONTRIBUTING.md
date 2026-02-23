@@ -22,8 +22,8 @@ Thanks for your interest in contributing to Klaps! Here's how to get started.
 
 ## Branching
 
-- `main` — production, protected
-- `dev` — development, PRs target this branch
+- `main` - production, protected
+- `dev` - development, PRs target this branch
 
 Create a feature branch from `dev`:
 
@@ -35,12 +35,12 @@ git checkout -b feature/your-feature-name
 
 ## Code Style
 
-- **TypeScript** — strict mode, no `any`
-- **Tailwind CSS** — for all styling, no CSS files
-- **Naming** — descriptive names, `handle` prefix for event handlers (e.g. `handleClick`)
-- **Components** — arrow functions with `const`, typed props
-- **Early returns** — prefer early returns for readability
-- **Imports** — use `@/` path aliases
+- **TypeScript** - strict mode, no `any`
+- **Tailwind CSS** - for all styling, no CSS files
+- **Naming** - descriptive names, `handle` prefix for event handlers (e.g. `handleClick`)
+- **Components** - arrow functions with `const`, typed props
+- **Early returns** - prefer early returns for readability
+- **Imports** - use `@/` path aliases
 
 Run linting before committing:
 
@@ -53,7 +53,7 @@ bun run lint
 1. Make sure your code passes `bun run lint` and `bun run build`
 2. Write a clear PR title and description
 3. Target the `dev` branch
-4. Keep PRs focused — one feature or fix per PR
+4. Keep PRs focused - one feature or fix per PR
 5. If your change affects the UI, include a screenshot
 
 ## Commit Messages

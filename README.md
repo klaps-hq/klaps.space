@@ -17,7 +17,7 @@
 
 ---
 
-Klaps is a Polish nationwide guide to special screenings, classic cinema, and retrospectives. It aggregates screening data from public sources across cinemas in Poland and presents them in a clean, filterable interface — so you never miss a screening worth attending.
+Klaps is a Polish nationwide guide to special screenings, classic cinema, and retrospectives. It aggregates screening data from public sources across cinemas in Poland and presents them in a clean, filterable interface - so you never miss a screening worth attending.
 
 ## Tech Stack
 
@@ -36,16 +36,16 @@ Klaps is a Polish nationwide guide to special screenings, classic cinema, and re
 
 ## Features
 
-- **Screening listings** — browse and filter special screenings by city, genre, date, and keyword
-- **Movie catalog** — detailed movie pages with descriptions, cast, directors, and trailers
-- **Cinema directory** — cinema pages with address, interactive map (Leaflet), and current screenings
-- **City pages** — per-city overview with cinema counts, screening stats, and listings
-- **Genre pages** — paginated movie collections by genre
-- **Smart filtering** — persistent city preference (cookie + URL sync), date tabs, genre and search filters
-- **SEO optimized** — dynamic `sitemap.xml`, `robots.txt`, Open Graph / Twitter Cards, JSON-LD structured data (WebSite, Movie, ScreeningEvent, MovieTheater, CollectionPage), canonical URLs
-- **Responsive design** — mobile-first layout with desktop navigation
-- **Accessibility** — semantic HTML, ARIA labels, keyboard navigation
-- **Static pages** — FAQ, About, How It Works, Terms, Privacy Policy, Accessibility Statement, Contact, Sitemap
+- **Screening listings** - browse and filter special screenings by city, genre, date, and keyword
+- **Movie catalog** - detailed movie pages with descriptions, cast, directors, and trailers
+- **Cinema directory** - cinema pages with address, interactive map (Leaflet), and current screenings
+- **City pages** - per-city overview with cinema counts, screening stats, and listings
+- **Genre pages** - paginated movie collections by genre
+- **Smart filtering** - persistent city preference (cookie + URL sync), date tabs, genre and search filters
+- **SEO optimized** - dynamic `sitemap.xml`, `robots.txt`, Open Graph / Twitter Cards, JSON-LD structured data (WebSite, Movie, ScreeningEvent, MovieTheater, CollectionPage), canonical URLs
+- **Responsive design** - mobile-first layout with desktop navigation
+- **Accessibility** - semantic HTML, ARIA labels, keyboard navigation
+- **Static pages** - FAQ, About, How It Works, Terms, Privacy Policy, Accessibility Statement, Contact, Sitemap
 
 ## Project Structure
 
@@ -84,17 +84,17 @@ src/
 
 | Route                   | Description                                                                                              |
 | ----------------------- | -------------------------------------------------------------------------------------------------------- |
-| `/`                     | Home — hero with random screening, screening listings, how it works, mission, cinemas, multi-city movies |
+| `/`                     | Home - hero with random screening, screening listings, how it works, mission, cinemas, multi-city movies |
 | `/seanse`               | All screenings with filters (city, genre, date, search) and pagination                                   |
-| `/seanse/[id]`          | Screening detail — movie info, screening time, cinema, ticket link                                       |
+| `/seanse/[id]`          | Screening detail - movie info, screening time, cinema, ticket link                                       |
 | `/filmy`                | Movie catalog with search, genre filter, and pagination                                                  |
-| `/filmy/[id]`           | Movie detail — description, cast, directors, trailer, screenings                                         |
+| `/filmy/[id]`           | Movie detail - description, cast, directors, trailer, screenings                                         |
 | `/kina`                 | Cinema directory grouped by city                                                                         |
-| `/kina/[id]`            | Cinema detail — info, interactive map, current screenings                                                |
+| `/kina/[id]`            | Cinema detail - info, interactive map, current screenings                                                |
 | `/miasta`               | Cities list with cinema counts                                                                           |
-| `/miasta/[id]`          | City detail — stats, cinemas, screenings                                                                 |
+| `/miasta/[id]`          | City detail - stats, cinemas, screenings                                                                 |
 | `/gatunki`              | Genre list                                                                                               |
-| `/gatunki/[id]`         | Genre detail — paginated movie collection                                                                |
+| `/gatunki/[id]`         | Genre detail - paginated movie collection                                                                |
 | `/faq`                  | Frequently asked questions                                                                               |
 | `/o-projekcie`          | About the project                                                                                        |
 | `/jak-to-dziala`        | How it works                                                                                             |

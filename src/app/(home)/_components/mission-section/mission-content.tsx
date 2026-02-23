@@ -9,7 +9,7 @@ const MissionContent: React.FC = () => {
         <p>
           Klaps to ogólnopolski repertuar seansów specjalnych, klasyki
           i&nbsp;filmów spoza głównego obiegu. Zbieramy program kin studyjnych
-          oraz wybrane seanse z&nbsp;większych sieci kinowych&nbsp;— wszędzie
+          oraz wybrane seanse z&nbsp;większych sieci kinowych&nbsp;- wszędzie
           tam, gdzie stare filmy wracają na duży ekran.
         </p>
 
