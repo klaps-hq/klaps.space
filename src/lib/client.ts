@@ -1,5 +1,12 @@
-const API_URL = process.env.API_URL!;
-const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY!;
+const API_URL = process.env.API_URL;
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY;
+
+const getApiBaseUrl = (): string => {
+  if (!API_URL) {
+    throw new Error("Missing API_URL environment variable.");
+  }
+  return API_URL;
+};
 
 export class ApiNotFoundError extends Error {
   constructor(path: string) {
@@ -13,7 +20,7 @@ export async function apiFetch<T>(
   options: RequestInit & { params?: Record<string, string> } = {}
 ): Promise<T> {
   try {
-    const url = new URL(`${API_URL}${path}`);
+    const url = new URL(path, getApiBaseUrl());
 
     if (options.params) {
       Object.entries(options.params).forEach(([key, value]) => {
@@ -27,7 +34,7 @@ export async function apiFetch<T>(
       ...options,
       headers: {
         ...options.headers,
-        "x-internal-api-key": INTERNAL_API_KEY,
+        ...(INTERNAL_API_KEY && { "x-internal-api-key": INTERNAL_API_KEY }),
       },
       next: { revalidate: 300 },
     });

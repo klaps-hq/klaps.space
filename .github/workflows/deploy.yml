@@ -53,6 +53,8 @@ jobs:
           push: true
           build-args: |
             NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
+            API_URL=${{ secrets.API_URL }}
+            INTERNAL_API_KEY=${{ secrets.INTERNAL_API_KEY }}
           tags: |
             ${{ secrets.DOCKER_IMAGE }}:${{ needs.setup.outputs.image_tag }}
             ${{ secrets.DOCKER_IMAGE }}:${{ github.sha }}
