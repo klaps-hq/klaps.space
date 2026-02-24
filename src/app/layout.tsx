@@ -122,7 +122,7 @@ export default async function RootLayout({
             logo: `${SITE_URL}/favicon.svg`,
             description:
               "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych w Polsce.",
-            sameAs: ["https://github.com/Biplo12/klaps"],
+            sameAs: ["https://github.com/klaps-hq/klaps.space"],
           }}
         />
         <CityProvider cities={cities}>

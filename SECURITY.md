@@ -6,7 +6,7 @@ If you discover a security vulnerability in Klaps, please report it responsibly.
 
 ### How to Report
 
-Send an email to: **security@klaps.space** (or contact via [GitHub](https://github.com/Biplo12))
+Send an email to: **security@klaps.space** (or contact via [GitHub](https://github.com/klaps-hq))
 
 Include:
 
@@ -26,7 +26,7 @@ Include:
 This policy covers:
 
 - [klaps.space](https://klaps.space) (frontend)
-- [Klaps backend API](https://github.com/Biplo12/klaps-nest-backend)
+- [Klaps backend API](https://github.com/klaps-hq/api.klaps.space)
 
 Out of scope:
 
