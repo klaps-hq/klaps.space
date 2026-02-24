@@ -13,3 +13,4 @@ out
 Dockerfile
 docker-compose.yml
 package-lock.json
+.env.example
