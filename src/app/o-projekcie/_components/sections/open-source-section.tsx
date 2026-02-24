@@ -2,8 +2,8 @@ import React from "react";
 import ContentSection from "@/components/common/content-section";
 import AboutBorderedList from "../about-bordered-list";
 
-const GITHUB_FRONTEND = "https://github.com/Biplo12/klaps";
-const GITHUB_BACKEND = "https://github.com/Biplo12/klaps-nest-backend";
+const GITHUB_FRONTEND = "https://github.com/klaps-hq/klaps.space";
+const GITHUB_BACKEND = "https://github.com/klaps-hq/api.klaps.space";
 
 const OpenSourceSection: React.FC = () => {
   return (
@@ -25,7 +25,7 @@ const OpenSourceSection: React.FC = () => {
               className="text-blood-red hover:underline"
               aria-label="Repozytorium frontend na GitHubie"
             >
-              github.com/Biplo12/klaps
+              github.com/klaps-hq/klaps.space
             </a>
           </>,
           <>
@@ -38,7 +38,7 @@ const OpenSourceSection: React.FC = () => {
               className="text-blood-red hover:underline"
               aria-label="Repozytorium backend na GitHubie"
             >
-              github.com/Biplo12/klaps-nest-backend
+              github.com/klaps-hq/api.klaps.space
             </a>
           </>,
         ]}

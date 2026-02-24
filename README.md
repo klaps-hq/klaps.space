@@ -188,7 +188,7 @@ The project uses **GitHub Actions** for CI/CD (`.github/workflows/deploy.yml`):
 **Pipeline steps:**
 
 1. Build Docker image with `NEXT_PUBLIC_SITE_URL`
-2. Push to GitHub Container Registry (`ghcr.io/biplo12/klaps`)
+2. Push to GitHub Container Registry (`ghcr.io/klaps-hq/klaps.space`)
 3. SCP `docker-compose.yml` to server
 4. SSH deploy: pull image, recreate container, prune old images
 
@@ -220,10 +220,10 @@ The project uses **GitHub Actions** for CI/CD (`.github/workflows/deploy.yml`):
 
 Klaps is an open-source project. The source code is publicly available on GitHub:
 
-| Component              | Repository                                                                             |
-| ---------------------- | -------------------------------------------------------------------------------------- |
-| **Frontend** (Next.js) | [github.com/Biplo12/klaps](https://github.com/Biplo12/klaps)                           |
-| **Backend** (NestJS)   | [github.com/Biplo12/klaps-nest-backend](https://github.com/Biplo12/klaps-nest-backend) |
+| Component              | Repository                                                                         |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| **Frontend** (Next.js) | [github.com/klaps-hq/klaps.space](https://github.com/klaps-hq/klaps.space)         |
+| **Backend** (NestJS)   | [github.com/klaps-hq/api.klaps.space](https://github.com/klaps-hq/api.klaps.space) |
 
 > The scrapper responsible for collecting screening data is not publicly available for legal reasons.
 

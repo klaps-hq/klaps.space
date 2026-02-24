@@ -1,7 +1,7 @@
 services:
   klaps-frontend:
     container_name: klaps-frontend-${ENV_SUFFIX:-prod}
-    image: ghcr.io/biplo12/klaps:${IMAGE_TAG:-latest}
+    image: ghcr.io/klaps-hq/klaps.space:${IMAGE_TAG:-latest}
     restart: unless-stopped
     env_file:
       - .env
