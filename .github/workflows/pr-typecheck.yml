@@ -1,5 +1,4 @@
 name: PR Typecheck
-# Separate workflow keeps required checks modular and easy to manage.
 
 on:
   pull_request:
