@@ -1,16 +1,12 @@
 import React from "react";
 import Link from "next/link";
 import { IScreening } from "@/interfaces/IScreenings";
-import { Button } from "@/components/ui/button";
 import { formatDatePL } from "@/lib/utils";
 
 type MovieScreeningRowProps = {
   screenings: IScreening[];
   showDate?: boolean;
 };
-
-const hasTicketUrl = (screening: IScreening): boolean =>
-  !!screening.ticketUrl && screening.ticketUrl.trim().length > 0;
 
 const ScreeningTime: React.FC<{ screening: IScreening }> = ({ screening }) => {
   return (

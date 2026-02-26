@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
   useEffect,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -43,6 +44,42 @@ interface CityProviderProps {
   cities: ICity[];
 }
 
+const HYDRATION_SUBSCRIBE = () => () => {};
+
+const resolveInitialCityId = (
+  cities: ICity[],
+  pathname: string
+): number | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  let resolved: number | null = null;
+
+  if (pathname === "/" || pathname === "/seanse") {
+    const params = new URLSearchParams(window.location.search);
+    const urlCity = params.get("city");
+    if (urlCity) {
+      const parsed = Number(urlCity);
+      if (cities.some((city) => city.id === parsed)) {
+        resolved = parsed;
+      }
+    }
+  }
+
+  if (resolved !== null) {
+    return resolved;
+  }
+
+  const stored = localStorage.getItem(PREFERRED_CITY_KEY);
+  if (!stored) {
+    return null;
+  }
+
+  const parsed = Number(stored);
+  return cities.some((city) => city.id === parsed) ? parsed : null;
+};
+
 export const CityProvider = ({ children, cities }: CityProviderProps) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -52,45 +89,23 @@ export const CityProvider = ({ children, cities }: CityProviderProps) => {
     [cities]
   );
 
-  const [cityId, setCityIdState] = useState<number | null>(null);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [cityId, setCityIdState] = useState<number | null>(() =>
+    resolveInitialCityId(cities, pathname)
+  );
+  const isHydrated = useSyncExternalStore(
+    HYDRATION_SUBSCRIBE,
+    () => true,
+    () => false
+  );
 
-  // Hydrate from localStorage + URL params after mount (avoids SSR mismatch)
   useEffect(() => {
-    let resolved: number | null = null;
-
-    // URL param takes priority on screening pages
-    if (pathname === "/" || pathname === "/seanse") {
-      const params = new URLSearchParams(window.location.search);
-      const urlCity = params.get("city");
-      if (urlCity) {
-        const parsed = Number(urlCity);
-        if (cities.some((c) => c.id === parsed)) {
-          resolved = parsed;
-        }
-      }
+    if (cityId === null) {
+      return;
     }
 
-    // Fall back to localStorage
-    if (resolved === null) {
-      const stored = localStorage.getItem(PREFERRED_CITY_KEY);
-      if (stored) {
-        const parsed = Number(stored);
-        if (cities.some((c) => c.id === parsed)) {
-          resolved = parsed;
-        }
-      }
-    }
-
-    setCityIdState(resolved);
-    setIsHydrated(true);
-
-    // Sync to storage if resolved from URL
-    if (resolved !== null) {
-      localStorage.setItem(PREFERRED_CITY_KEY, String(resolved));
-      setPreferredCityCookie(resolved);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    localStorage.setItem(PREFERRED_CITY_KEY, String(cityId));
+    setPreferredCityCookie(cityId);
+  }, [cityId]);
 
   const cityName = useMemo(
     () => (cityId ? cities.find((c) => c.id === cityId)?.name ?? "Wszystkie miasta" : "Wszystkie miasta"),
