@@ -16,7 +16,7 @@ const WhyCinemaSection: React.FC = () => {
       </p>
 
       <p>
-        Klaps nie jest projektem „przeciwko streamingowi". Jest projektem
+        Klaps nie jest projektem &quot;przeciwko streamingowi&quot;. Jest projektem
         przypominającym, że kino jako przestrzeń nadal ma sens – szczególnie
         w&nbsp;przypadku filmów, które powstały z&nbsp;myślą o&nbsp;kinowej
         sali, odpowiedniej skali obrazu i&nbsp;skupionej uwadze widza.
