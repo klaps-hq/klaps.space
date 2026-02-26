@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { getMovies } from "@/lib/movies";
 import { getGenres } from "@/lib/genres";
 import SectionHeader from "@/components/common/section-header";
@@ -13,6 +14,11 @@ export const revalidate = 300;
 type MoviesPageProps = {
   searchParams: Promise<{ page?: string; search?: string; genre?: string }>;
 };
+
+const hasQueryParams = (params: { page?: string; search?: string; genre?: string }) =>
+  Object.values(params).some(
+    (value) => typeof value === "string" && value.trim().length > 0
+  );
 
 const MoviesPage = async ({ searchParams }: MoviesPageProps) => {
   const params = await searchParams;
@@ -36,6 +42,10 @@ const MoviesPage = async ({ searchParams }: MoviesPageProps) => {
     return `/filmy?${urlParams.toString()}`;
   };
 
+  const genreLinks = [...genres]
+    .sort((a, b) => a.name.localeCompare(b.name, "pl"))
+    .slice(0, 12);
+
   return (
     <main className="bg-black min-h-screen px-8 py-24 md:py-32">
       <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
@@ -52,6 +62,34 @@ const MoviesPage = async ({ searchParams }: MoviesPageProps) => {
 
         <MoviesGrid movies={movies} showHoverOverlay={false} />
 
+        <section className="flex flex-col gap-4">
+          <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
+            Stare filmy w kinach
+          </h2>
+          <p className="text-white/80 max-w-4xl">
+            Odkrywaj klasykę i retrospektywy na dużym ekranie. Przeglądaj repertuar
+            według gatunku albo sprawdź kina studyjne, które aktualnie pokazują
+            starsze filmy.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {genreLinks.map((item) => (
+              <Link
+                key={item.id}
+                href={`/gatunki/${item.slug}`}
+                className="inline-flex border border-white/15 px-3 py-1 text-xs uppercase tracking-widest text-white/80 hover:text-blood-red hover:border-blood-red/40 transition-colors"
+              >
+                {item.name}
+              </Link>
+            ))}
+            <Link
+              href="/kina"
+              className="inline-flex border border-white/15 px-3 py-1 text-xs uppercase tracking-widest text-white/80 hover:text-blood-red hover:border-blood-red/40 transition-colors"
+            >
+              Wszystkie kina studyjne
+            </Link>
+          </div>
+        </section>
+
         <PaginatedNav
           currentPage={meta.page}
           totalPages={meta.totalPages}
@@ -62,25 +100,37 @@ const MoviesPage = async ({ searchParams }: MoviesPageProps) => {
   );
 };
 
-export const metadata: Metadata = {
-  title: "Filmy klasyczne w kinach - katalog",
-  description:
-    "Katalog filmów klasycznych dostępnych w kinach studyjnych w Polsce. Retrospektywy, wznowienia i seanse specjalne na dużym ekranie.",
-  keywords: [
-    "filmy klasyczne w kinie",
-    "stare filmy w kinie",
-    "retrospektywy filmowe",
-    "wznowienia filmowe",
-    "katalog filmów kina studyjne",
-  ],
-  alternates: {
-    canonical: `${SITE_URL}/filmy`,
-  },
-  openGraph: {
-    title: "Filmy klasyczne w kinach studyjnych - katalog",
+export const generateMetadata = async ({
+  searchParams,
+}: MoviesPageProps): Promise<Metadata> => {
+  const params = await searchParams;
+
+  return {
+    title: "Filmy klasyczne i stare filmy w kinach - katalog",
     description:
-      "Katalog filmów klasycznych dostępnych w kinach studyjnych w Polsce. Retrospektywy, wznowienia i seanse specjalne.",
-  },
+      "Katalog klasyki filmowej i stare filmy w kinach studyjnych w Polsce. Retrospektywy, wznowienia i seanse specjalne na dużym ekranie.",
+    keywords: [
+      "filmy klasyczne w kinach",
+      "stare filmy w kinach",
+      "retrospektywy filmowe",
+      "wznowienia filmowe",
+      "katalog filmów kina studyjne",
+    ],
+    alternates: {
+      canonical: `${SITE_URL}/filmy`,
+    },
+    ...(hasQueryParams(params) && {
+      robots: {
+        index: false,
+        follow: true,
+      },
+    }),
+    openGraph: {
+      title: "Filmy klasyczne i stare filmy w kinach studyjnych - katalog",
+      description:
+        "Katalog klasyki filmowej i stare filmy w kinach studyjnych w Polsce. Retrospektywy, wznowienia i seanse specjalne.",
+    },
+  };
 };
 
 export default MoviesPage;

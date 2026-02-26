@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { CalendarDays, Clock3, MapPin } from "lucide-react";
+import { CalendarDays, Clapperboard, Clock3, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ICity } from "@/interfaces/ICities";
 import { ICinemaSummary } from "@/interfaces/ICinema";
@@ -18,6 +18,7 @@ const chipClasses =
 const HeroScreeningMeta: React.FC<HeroScreeningMetaProps> = ({
   formattedDate,
   screeningTime,
+  cinema,
   city,
 }) => {
   return (
@@ -41,6 +42,17 @@ const HeroScreeningMeta: React.FC<HeroScreeningMetaProps> = ({
       >
         <MapPin className="size-3.5 text-blood-red" aria-hidden />
         {city.name}
+      </Link>
+
+      <Link
+        href={`/kina/${cinema.slug}`}
+        className={cn(
+          chipClasses,
+          "hover:text-blood-red transition-colors duration-200"
+        )}
+      >
+        <Clapperboard className="size-3.5 text-blood-red" aria-hidden />
+        {cinema.name}
       </Link>
     </div>
   );

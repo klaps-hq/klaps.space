@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: "/", label: "Strona główna" },
   { href: "/seanse", label: "Seanse" },
   { href: "/filmy", label: "Filmy" },
+  { href: "/gatunki", label: "Gatunki" },
   { href: "/kina", label: "Kina" },
   { href: "/miasta", label: "Miasta" },
   { href: "/o-projekcie", label: "O projekcie" },

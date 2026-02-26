@@ -1,5 +1,6 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import Link from "next/link";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getCinemaBySlug } from "@/lib/cinemas";
 import { getScreenings } from "@/lib/screenings";
 import { ApiNotFoundError } from "@/lib/client";
@@ -12,12 +13,21 @@ import Breadcrumbs from "@/components/ui/breadcrumbs";
 import { SITE_URL } from "@/lib/site-config";
 import { ICinema } from "@/interfaces/ICinema";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
+import { IGenre } from "@/interfaces/IMovies";
 
 export const revalidate = 300;
 
 type CinemaPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+const hasQueryParams = (params: Record<string, string | string[] | undefined>) =>
+  Object.values(params).some((value) =>
+    Array.isArray(value)
+      ? value.some((item) => item.trim().length > 0)
+      : typeof value === "string" && value.trim().length > 0
+  );
 
 const buildCinemaJsonLd = (cinema: ICinema) => {
   const jsonLd: Record<string, unknown> = {
@@ -56,6 +66,11 @@ const CinemaPage = async ({ params }: CinemaPageProps) => {
 
   try {
     cinema = await getCinemaBySlug(slug);
+
+    if (cinema.slug !== slug) {
+      permanentRedirect(`/kina/${cinema.slug}`);
+    }
+
     const cityScreenings = await getScreenings({
       cityId: cinema.city.id.toString(),
       limit: 1000,
@@ -73,6 +88,17 @@ const CinemaPage = async ({ params }: CinemaPageProps) => {
     throw error;
   }
 
+  const cinemaGenres = Array.from(
+    new Map<string, IGenre>(
+      screenings
+        .flatMap((group) => group.movie.genres)
+        .filter((genre) => genre.slug)
+        .map((genre) => [genre.slug, genre])
+    ).values()
+  )
+    .sort((a, b) => a.name.localeCompare(b.name, "pl"))
+    .slice(0, 10);
+
   return (
     <>
       <JsonLd data={buildCinemaJsonLd(cinema)} />
@@ -86,6 +112,31 @@ const CinemaPage = async ({ params }: CinemaPageProps) => {
           />
           <CinemaHeader cinema={cinema} />
           <SectionDivider />
+          <section className="flex flex-col gap-6">
+            <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
+              O kinie i repertuarze
+            </h2>
+            <p className="text-white/80 leading-relaxed max-w-4xl">
+              {cinema.name} to kino studyjne w {cinema.city.name}. Na tej stronie
+              znajdziesz aktualne seanse specjalne, klasykę filmową i
+              retrospektywy prezentowane lokalnie
+              {cinema.street ? ` przy ${cinema.street}` : ""}.
+            </p>
+            {cinemaGenres.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {cinemaGenres.map((genre) => (
+                  <Link
+                    key={genre.id}
+                    href={`/gatunki/${genre.slug}`}
+                    className="inline-flex border border-white/15 px-3 py-1 text-xs uppercase tracking-widest text-white/80 hover:text-blood-red hover:border-blood-red/40 transition-colors"
+                  >
+                    {genre.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+          <SectionDivider />
           <CinemaMapLazy cinema={cinema} />
           <SectionDivider />
           <CinemaScreenings screenings={screenings} />
@@ -97,8 +148,10 @@ const CinemaPage = async ({ params }: CinemaPageProps) => {
 
 export const generateMetadata = async ({
   params,
+  searchParams,
 }: CinemaPageProps): Promise<Metadata> => {
   const { slug } = await params;
+  const queryParams = searchParams ? await searchParams : {};
   const cinema = await getCinemaBySlug(slug);
 
   const title = `${cinema.name} - kino studyjne ${cinema.city.name}`;
@@ -114,8 +167,14 @@ export const generateMetadata = async ({
       `seanse specjalne ${cinema.city.name}`,
     ],
     alternates: {
-      canonical: `${SITE_URL}/kina/${slug}`,
+      canonical: `${SITE_URL}/kina/${cinema.slug}`,
     },
+    ...(hasQueryParams(queryParams) && {
+      robots: {
+        index: false,
+        follow: true,
+      },
+    }),
     openGraph: {
       title,
       description,

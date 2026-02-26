@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getMovieBySlug } from "@/lib/movies";
 import { getMovieScreenings } from "@/lib/screenings";
 import { getPreferredCityId } from "@/lib/get-preferred-city";
@@ -18,7 +18,15 @@ export const revalidate = 300;
 
 type MoviePageProps = {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+const hasQueryParams = (params: Record<string, string | string[] | undefined>) =>
+  Object.values(params).some((value) =>
+    Array.isArray(value)
+      ? value.some((item) => item.trim().length > 0)
+      : typeof value === "string" && value.trim().length > 0
+  );
 
 const buildMovieJsonLd = (movie: IMovie) => {
   const jsonLd: Record<string, unknown> = {
@@ -71,6 +79,11 @@ const MoviePage = async ({ params }: MoviePageProps) => {
 
   try {
     movie = await getMovieBySlug(slug);
+
+    if (movie.slug !== slug) {
+      permanentRedirect(`/filmy/${movie.slug}`);
+    }
+
     screenings = await getMovieScreenings({
       movieId: movie.id.toString(),
       cityId,
@@ -116,8 +129,10 @@ const MoviePage = async ({ params }: MoviePageProps) => {
 
 export const generateMetadata = async ({
   params,
+  searchParams,
 }: MoviePageProps): Promise<Metadata> => {
   const { slug } = await params;
+  const queryParams = searchParams ? await searchParams : {};
   const movie = await getMovieBySlug(slug);
 
   const genreNames = movie.genres.map((g) => g.name).join(", ");
@@ -134,7 +149,7 @@ export const generateMetadata = async ({
     ? `${movie.description.slice(0, 130)} Sprawdź seanse w kinach studyjnych.`
     : descriptionParts.join(" ");
 
-  const title = `${movie.title} (${movie.productionYear}) - seanse w kinach`;
+  const title = `${movie.title} - seanse w kinach (${movie.productionYear})`;
 
   return {
     title,
@@ -142,15 +157,22 @@ export const generateMetadata = async ({
     keywords: [
       movie.title,
       movie.titleOriginal,
+      `${movie.title} seanse w kinach`,
       `${movie.title} kino`,
       `${movie.title} seans specjalny`,
       ...movie.genres.map((g) => g.name.toLowerCase()),
     ].filter(Boolean) as string[],
     alternates: {
-      canonical: `${SITE_URL}/filmy/${slug}`,
+      canonical: `${SITE_URL}/filmy/${movie.slug}`,
     },
+    ...(hasQueryParams(queryParams) && {
+      robots: {
+        index: false,
+        follow: true,
+      },
+    }),
     openGraph: {
-      title: `${movie.title} (${movie.productionYear})`,
+      title: `${movie.title} - seanse w kinach`,
       description,
       ...(movie.posterUrl && {
         images: [{ url: movie.posterUrl, alt: movie.title }],
