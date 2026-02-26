@@ -61,7 +61,6 @@ const MovieCard: React.FC<MovieCardProps> = ({
           duration={movie.duration}
           productionYear={movie.productionYear}
           genres={movie.genres}
-          buildGenreHref={(genre) => `/seanse?genre=${genre.id}`}
           className="text-sm"
         />
 

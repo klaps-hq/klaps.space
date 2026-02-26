@@ -119,7 +119,6 @@ const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
           duration={screening.movie.duration}
           productionYear={screening.movie.productionYear}
           genres={screening.movie.genres}
-          buildGenreHref={(genre) => `/seanse?genre=${genre.id}`}
         />
 
         <p className="text-base md:text-xl lg:text-2xl text-white font-light italic max-w-[650px] line-clamp-3">

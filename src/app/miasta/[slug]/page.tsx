@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getCityBySlug } from "@/lib/cities";
 import { getCinemas } from "@/lib/cinemas";
 import { ApiNotFoundError } from "@/lib/client";
@@ -17,7 +17,15 @@ export const revalidate = 300;
 
 type CityPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+const hasQueryParams = (params: Record<string, string | string[] | undefined>) =>
+  Object.values(params).some((value) =>
+    Array.isArray(value)
+      ? value.some((item) => item.trim().length > 0)
+      : typeof value === "string" && value.trim().length > 0
+  );
 
 const buildCityJsonLd = (
   city: ICity,
@@ -39,6 +47,11 @@ const CityPage = async ({ params }: CityPageProps) => {
 
   try {
     cityData = await getCityBySlug(slug);
+
+    if (cityData.city.slug !== slug) {
+      permanentRedirect(`/miasta/${cityData.city.slug}`);
+    }
+
     cinemasResponse = await getCinemas({
       cityId: cityData.city.id.toString(),
       limit: 100,
@@ -98,8 +111,10 @@ const CityPage = async ({ params }: CityPageProps) => {
 
 export const generateMetadata = async ({
   params,
+  searchParams,
 }: CityPageProps): Promise<Metadata> => {
   const { slug } = await params;
+  const queryParams = searchParams ? await searchParams : {};
   const { city } = await getCityBySlug(slug);
 
   const title = `Kina studyjne ${city.name} - repertuar seansów specjalnych`;
@@ -116,8 +131,14 @@ export const generateMetadata = async ({
       `kino niezależne ${city.name}`,
     ],
     alternates: {
-      canonical: `${SITE_URL}/miasta/${slug}`,
+      canonical: `${SITE_URL}/miasta/${city.slug}`,
     },
+    ...(hasQueryParams(queryParams) && {
+      robots: {
+        index: false,
+        follow: true,
+      },
+    }),
     openGraph: {
       title,
       description,

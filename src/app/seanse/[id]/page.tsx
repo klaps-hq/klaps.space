@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getScreeningById } from "@/lib/screenings";
 import { ApiNotFoundError } from "@/lib/client";
 import SectionDivider from "@/components/ui/section-divider";
@@ -16,7 +16,15 @@ export const revalidate = 300;
 
 type ScreeningPageProps = {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+const hasQueryParams = (params: Record<string, string | string[] | undefined>) =>
+  Object.values(params).some((value) =>
+    Array.isArray(value)
+      ? value.some((item) => item.trim().length > 0)
+      : typeof value === "string" && value.trim().length > 0
+  );
 
 const buildScreeningJsonLd = ({ movie, screening }: IScreeningDetail) => {
   const jsonLd: Record<string, unknown> = {
@@ -63,6 +71,9 @@ const ScreeningPage = async ({ params }: ScreeningPageProps) => {
 
   try {
     ({ movie, screening } = await getScreeningById(Number(id)));
+    if (id !== screening.id.toString()) {
+      permanentRedirect(`/seanse/${screening.id}`);
+    }
   } catch (error) {
     if (error instanceof ApiNotFoundError) {
       notFound();
@@ -103,8 +114,10 @@ const ScreeningPage = async ({ params }: ScreeningPageProps) => {
 
 export const generateMetadata = async ({
   params,
+  searchParams,
 }: ScreeningPageProps): Promise<Metadata> => {
   const { id } = await params;
+  const queryParams = searchParams ? await searchParams : {};
   const { movie, screening } = await getScreeningById(Number(id));
 
   const dateFormatted = new Date(screening.dateTime).toLocaleDateString(
@@ -127,8 +140,14 @@ export const generateMetadata = async ({
       `seans specjalny ${screening.cinema.city.name}`,
     ],
     alternates: {
-      canonical: `${SITE_URL}/seanse/${id}`,
+      canonical: `${SITE_URL}/seanse/${screening.id}`,
     },
+    ...(hasQueryParams(queryParams) && {
+      robots: {
+        index: false,
+        follow: true,
+      },
+    }),
     openGraph: {
       title,
       description,
