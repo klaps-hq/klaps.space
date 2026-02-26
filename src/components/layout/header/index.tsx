@@ -40,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ cities }) => {
       <header
         className={cn(
           "flex items-center justify-between px-4 md:px-8 w-full z-50 py-4 fixed top-0 left-0 right-0 transition-all duration-300",
-          hasScrolled || isMenuOpen || hasCitySelect
+          hasScrolled || isMenuOpen
             ? "bg-black/95 backdrop-blur-sm"
             : "bg-linear-to-b from-black via-black/60 to-transparent"
         )}
