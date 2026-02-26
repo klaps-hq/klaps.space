@@ -41,7 +41,7 @@ const HeaderCitySelect: React.FC<HeaderCitySelectProps> = ({
 
   const selectedOption: CityOption | null =
     isHydrated && cityId !== null
-      ? (options.find((o) => o.value === cityId) ?? null)
+      ? options.find((o) => o.value === cityId) ?? null
       : null;
 
   const handleCityChange = (option: CityOption | null) => {
@@ -71,7 +71,7 @@ const HeaderCitySelect: React.FC<HeaderCitySelectProps> = ({
           }
           className={cn(
             "transition-all [&_input]:tracking-[0.15em] [&_input]:font-medium [&_input]:text-white/90 [&_input]:placeholder:text-white/60",
-            sizeStyles[size],
+            sizeStyles[size]
           )}
         />
         <ComboboxContent>

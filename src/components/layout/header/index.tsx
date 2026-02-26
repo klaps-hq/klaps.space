@@ -27,6 +27,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ cities }) => {
   const hasScrolled = useHeaderScroll({ threshold: 50 });
+  const hasCitySelect = Boolean(cities && cities.length > 0);
   const {
     isOpen: isMenuOpen,
     handleToggle,
@@ -41,13 +42,13 @@ const Header: React.FC<HeaderProps> = ({ cities }) => {
           "flex items-center justify-between px-4 md:px-8 w-full z-50 py-4 fixed top-0 left-0 right-0 transition-all duration-300",
           hasScrolled || isMenuOpen
             ? "bg-black/95 backdrop-blur-sm"
-            : "bg-gradient-to-b from-black via-black/60 to-transparent"
+            : "bg-linear-to-b from-black via-black/60 to-transparent"
         )}
       >
         <Logo />
         <div className="hidden xl:flex items-center gap-4">
           <DesktopNav links={NAV_LINKS} />
-          {cities && cities.length > 0 && (
+          {hasCitySelect && (
             <>
               <div className="h-4 w-px bg-white/20" aria-hidden />
               <HeaderCitySelect size="sm" />

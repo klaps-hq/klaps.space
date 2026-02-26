@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
 import {
@@ -11,6 +12,12 @@ import { cn } from "@/lib/utils";
 import ScreeningsSectionHeader from "./screenings-section-header";
 import ScreeningsSectionCta from "./screenings-section-cta";
 import MoviesGrid from "@/app/filmy/_components/movies-grid";
+import {
+  reducedMotionStaggerContainerVariants,
+  reducedMotionStaggerItemVariants,
+  staggerContainerVariants,
+  staggerItemVariants,
+} from "@/components/animations/motion-presets";
 
 interface ScreeningsSectionContentProps {
   screenings: IScreeningGroup[];
@@ -21,8 +28,16 @@ const ScreeningsSectionContentInner: React.FC<
   ScreeningsSectionContentProps
 > = ({ screenings, genres }) => {
   const { isPending } = useScreeningsTransition();
+  const prefersReducedMotion = useReducedMotion();
 
   const movies = screenings.map((screening) => screening.movie);
+
+  const containerVariants = prefersReducedMotion
+    ? reducedMotionStaggerContainerVariants
+    : staggerContainerVariants;
+  const itemVariants = prefersReducedMotion
+    ? reducedMotionStaggerItemVariants
+    : staggerItemVariants;
 
   return (
     <div
@@ -31,15 +46,30 @@ const ScreeningsSectionContentInner: React.FC<
         isPending && "opacity-50 pointer-events-none"
       )}
     >
-      <ScreeningsSectionHeader genres={genres} />
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={containerVariants}
+      >
+        <motion.div variants={itemVariants}>
+          <ScreeningsSectionHeader genres={genres} />
+        </motion.div>
 
-      <MoviesGrid
-        screenings={screenings}
-        movies={movies}
-        showDescription={true}
-      />
+        <motion.div variants={itemVariants}>
+          <MoviesGrid
+            screenings={screenings}
+            movies={movies}
+            showDescription={true}
+          />
+        </motion.div>
 
-      {screenings.length >= 12 && <ScreeningsSectionCta />}
+        {screenings.length >= 12 && (
+          <motion.div variants={itemVariants}>
+            <ScreeningsSectionCta />
+          </motion.div>
+        )}
+      </motion.div>
     </div>
   );
 };

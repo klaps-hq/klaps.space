@@ -1,6 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import { ChevronRight, Home } from "lucide-react";
 import JsonLd from "@/components/common/json-ld";
 import { SITE_URL } from "@/lib/site-config";
 
@@ -31,26 +30,21 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
         }}
       />
 
-      <nav aria-label="Breadcrumb" className="w-full">
-        <ol className="inline-flex flex-wrap items-center gap-1.5 border border-white/10 bg-white/2 px-3 py-2 text-[11px] md:text-xs uppercase tracking-[0.16em]">
+      <nav aria-label="Breadcrumb" className="w-full overflow-x-auto">
+        <ol className="inline-flex items-center gap-2 whitespace-nowrap text-[11px] md:text-xs uppercase tracking-[0.12em]">
           {allItems.map((item, index) => {
             const isLast = index === allItems.length - 1;
-            const isHome = index === 0;
 
             return (
-              <li
-                key={`${item.name}-${index}`}
-                className="flex items-center gap-3"
-              >
+              <li key={`${item.name}-${index}`} className="flex items-center gap-2">
                 {index > 0 && (
-                  <ChevronRight
-                    className="size-3 text-neutral-700 shrink-0"
-                    aria-hidden="true"
-                  />
+                  <span className="text-white/25 select-none" aria-hidden="true">
+                    &gt;
+                  </span>
                 )}
                 {isLast ? (
                   <span
-                    className="text-white/90 truncate max-w-[220px] md:max-w-[320px]"
+                    className="max-w-[220px] truncate text-white/90 md:max-w-[320px]"
                     aria-current="page"
                   >
                     {item.name}
@@ -58,18 +52,11 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
                 ) : (
                   <Link
                     href={item.href ?? "/"}
-                    className="text-neutral-500 hover:text-blood-red transition-colors duration-300 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blood-red/80 rounded-sm px-1 py-0.5"
+                    className="max-w-[220px] truncate text-white/45 transition-colors duration-300 hover:text-white/85 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blood-red/80 md:max-w-[320px]"
                     tabIndex={0}
-                    aria-label={
-                      isHome
-                        ? "Przejdź do strony głównej"
-                        : `Przejdź do ${item.name}`
-                    }
+                    aria-label={`Przejdź do ${item.name}`}
                   >
-                    {isHome && (
-                      <Home className="size-3.5 shrink-0" aria-hidden="true" />
-                    )}
-                    <span>{item.name}</span>
+                    {item.name}
                   </Link>
                 )}
               </li>

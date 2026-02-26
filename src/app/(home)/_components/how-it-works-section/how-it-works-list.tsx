@@ -1,5 +1,14 @@
+"use client";
+
 import React from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import HowItWorksStep from "./how-it-works-step";
+import {
+  reducedMotionStaggerContainerVariants,
+  reducedMotionStaggerItemVariants,
+  staggerContainerVariants,
+  staggerItemVariants,
+} from "@/components/animations/motion-presets";
 
 const STEPS = [
   {
@@ -23,17 +32,34 @@ const STEPS = [
 ];
 
 const HowItWorksList: React.FC = () => {
+  const prefersReducedMotion = useReducedMotion();
+
+  const containerVariants = prefersReducedMotion
+    ? reducedMotionStaggerContainerVariants
+    : staggerContainerVariants;
+
+  const itemVariants = prefersReducedMotion
+    ? reducedMotionStaggerItemVariants
+    : staggerItemVariants;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+    <motion.div
+      className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={containerVariants}
+    >
       {STEPS.map((step) => (
-        <HowItWorksStep
-          key={step.number}
-          number={step.number}
-          title={step.title}
-          description={step.description}
-        />
+        <motion.div key={step.number} variants={itemVariants}>
+          <HowItWorksStep
+            number={step.number}
+            title={step.title}
+            description={step.description}
+          />
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 };
 
