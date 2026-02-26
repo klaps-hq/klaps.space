@@ -29,7 +29,7 @@ const PhilosophySection: React.FC = () => {
           </>,
           <>
             <span className="text-white/80 font-medium">Inkluzywność</span> –
-            projekt nie dzieli kin na „lepsze" i&nbsp;„gorsze"
+            projekt nie dzieli kin na &quot;lepsze&quot; i&nbsp;&quot;gorsze&quot;
           </>,
         ]}
       />

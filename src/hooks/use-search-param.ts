@@ -20,16 +20,22 @@ export const useSearchParam = (): UseSearchParamReturn => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const paramValue = searchParams.get(SEARCH_PARAM_KEY) ?? "";
-  const [searchQuery, setSearchQuery] = useState(paramValue);
+  const [pendingSearchQuery, setPendingSearchQuery] = useState(paramValue);
+  const [isDebouncing, setIsDebouncing] = useState(false);
+  const searchQuery = isDebouncing ? pendingSearchQuery : paramValue;
 
   useEffect(() => {
-    if (timeoutRef.current) return;
-    setSearchQuery(paramValue);
-  }, [paramValue]);
+    return () => {
+      if (!timeoutRef.current) return;
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    };
+  }, []);
 
   const handleSearchChange = useCallback(
     (value: string) => {
-      setSearchQuery(value);
+      setPendingSearchQuery(value);
+      setIsDebouncing(true);
 
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -37,6 +43,7 @@ export const useSearchParam = (): UseSearchParamReturn => {
 
       timeoutRef.current = setTimeout(() => {
         timeoutRef.current = null;
+        setIsDebouncing(false);
 
         const params = new URLSearchParams(searchParams.toString());
 
