@@ -45,18 +45,18 @@ const HomePage = async ({ searchParams }: HomeProps) => {
 export const metadata: Metadata = {
   title: {
     absolute:
-      "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych w Polsce",
+      "Klaps - Seanse w kinach studyjnych i stare filmy w kinach",
   },
   description:
-    "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych w Polsce. Repertuar, filmy i kina w jednym miejscu.",
+    "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i starych filmach w kinach studyjnych w Polsce. Repertuar, filmy i kina w jednym miejscu.",
   alternates: {
     canonical: SITE_URL,
   },
   openGraph: {
     title:
-      "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych w Polsce",
+      "Klaps - Seanse w kinach studyjnych i stare filmy w kinach",
     description:
-      "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych. Sprawdź co grają.",
+      "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i starych filmach w kinach studyjnych. Sprawdź co grają.",
   },
 };
 

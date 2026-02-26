@@ -8,6 +8,15 @@ import { getScreenings } from "@/lib/screenings";
 
 export const revalidate = 3600;
 
+const sanitizeSlug = (slug: string | null | undefined) => slug?.trim() ?? "";
+const isValidSlug = (slug: string) =>
+  slug.length > 0 && !slug.includes("/") && !slug.includes("?") && !slug.includes("#");
+const sanitizeNumericId = (value: unknown) => {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
+};
+const isValidDate = (value: string) => !Number.isNaN(new Date(value).getTime());
+
 const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   const now = new Date().toISOString();
 
@@ -46,60 +55,66 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   ];
 
   const moviePages: MetadataRoute.Sitemap = movies
-    .filter((movie) => !!movie.slug)
-    .map(
-    (movie) => ({
-      url: `${SITE_URL}/filmy/${movie.slug}`,
+    .map((movie) => sanitizeSlug(movie.slug))
+    .filter(isValidSlug)
+    .map((slug) => ({
+      url: `${SITE_URL}/filmy/${encodeURIComponent(slug)}`,
       lastModified: now,
       changeFrequency: "daily" as const,
       priority: 0.7,
-    })
-  );
+    }));
 
   const cinemaPages: MetadataRoute.Sitemap = cinemaGroups.flatMap(
     (group) =>
       group.cinemas
-        .filter((cinema) => !!cinema.slug)
+        .map((cinema) => sanitizeSlug(cinema.slug))
+        .filter(isValidSlug)
         .map((cinema) => ({
-        url: `${SITE_URL}/kina/${cinema.slug}`,
-        lastModified: now,
-        changeFrequency: "daily" as const,
-        priority: 0.6,
-      }))
-  );
-
-  const cityPages: MetadataRoute.Sitemap = cities
-    .filter((city) => !!city.slug)
-    .map((city) => ({
-    url: `${SITE_URL}/miasta/${city.slug}`,
-    lastModified: now,
-    changeFrequency: "daily" as const,
-    priority: 0.6,
-  }));
-
-  const genrePages: MetadataRoute.Sitemap = genres
-    .filter((genre) => !!genre.slug)
-    .map((genre) => ({
-    url: `${SITE_URL}/gatunki/${genre.slug}`,
-    lastModified: now,
-    changeFrequency: "weekly" as const,
-    priority: 0.5,
-  }));
-
-  const nowDate = new Date();
-  const screeningPages: MetadataRoute.Sitemap = screeningGroups.flatMap(
-    (group) =>
-      group.screenings
-        .filter((screening) => new Date(screening.dateTime) >= nowDate)
-        .map((screening) => ({
-          url: `${SITE_URL}/seanse/${screening.id}`,
-          lastModified: screening.dateTime,
+          url: `${SITE_URL}/kina/${encodeURIComponent(cinema)}`,
+          lastModified: now,
           changeFrequency: "daily" as const,
           priority: 0.6,
         }))
   );
 
-  return [
+  const cityPages: MetadataRoute.Sitemap = cities
+    .map((city) => sanitizeSlug(city.slug))
+    .filter(isValidSlug)
+    .map((city) => ({
+      url: `${SITE_URL}/miasta/${encodeURIComponent(city)}`,
+      lastModified: now,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    }));
+
+  const genrePages: MetadataRoute.Sitemap = genres
+    .map((genre) => sanitizeSlug(genre.slug))
+    .filter(isValidSlug)
+    .map((genre) => ({
+      url: `${SITE_URL}/gatunki/${encodeURIComponent(genre)}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    }));
+
+  const nowDate = new Date();
+  const screeningPages: MetadataRoute.Sitemap = screeningGroups.flatMap(
+    (group) =>
+      group.screenings
+        .filter(
+          (screening) =>
+            isValidDate(screening.dateTime) && new Date(screening.dateTime) >= nowDate
+        )
+        .map((screening) => ({
+          url: `${SITE_URL}/seanse/${sanitizeNumericId(screening.id)}`,
+          lastModified: screening.dateTime,
+          changeFrequency: "daily" as const,
+          priority: 0.6,
+        }))
+        .filter((item) => !item.url.endsWith("/null"))
+  );
+
+  const allPages = [
     ...staticPages,
     ...moviePages,
     ...cinemaPages,
@@ -107,6 +122,8 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
     ...genrePages,
     ...screeningPages,
   ];
+
+  return Array.from(new Map(allPages.map((item) => [item.url, item])).values());
 };
 
 export default sitemap;

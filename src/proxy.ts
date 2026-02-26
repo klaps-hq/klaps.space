@@ -19,6 +19,18 @@ const SLUG_ROUTES: Record<string, string> = {
 };
 
 const IS_NUMERIC = /^\d+$/;
+const NOINDEX_QUERY_PREFIXES = new Set([
+  "filmy",
+  "kina",
+  "miasta",
+  "gatunki",
+  "seanse",
+]);
+
+const shouldNoindexForQueryPath = (pathname: string) => {
+  const [firstSegment] = pathname.split("/").filter(Boolean);
+  return Boolean(firstSegment && NOINDEX_QUERY_PREFIXES.has(firstSegment));
+};
 
 const fetchSlugById = async (
   apiEntity: string,
@@ -73,6 +85,10 @@ export async function proxy(request: NextRequest) {
 
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
     response.headers.set(key, value);
+  }
+
+  if (search && shouldNoindexForQueryPath(pathname)) {
+    response.headers.set("X-Robots-Tag", "noindex, follow");
   }
 
   return response;
