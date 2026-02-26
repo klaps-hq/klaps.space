@@ -3,6 +3,7 @@ import ScreeningsSectionContent from "./screenings-section-content";
 import { getScreenings } from "@/lib/screenings";
 import { getGenres } from "@/lib/genres";
 import { getPreferredCityId } from "@/lib/get-preferred-city";
+import SectionReveal from "@/components/animations/section-reveal";
 
 interface ScreeningsSectionProps {
   searchParams?: {
@@ -31,11 +32,11 @@ const ScreeningsSection = async ({ searchParams }: ScreeningsSectionProps) => {
   ]);
 
   return (
-    <section id="seanse" className="bg-black px-8 py-16 min-h-screen">
+    <SectionReveal id="seanse" className="bg-black px-8 py-16 min-h-screen" delay={0.04}>
       <div className="max-w-[1400px] mx-auto">
         <ScreeningsSectionContent screenings={screenings} genres={genres} />
       </div>
-    </section>
+    </SectionReveal>
   );
 };
 

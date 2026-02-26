@@ -32,7 +32,7 @@ const NavLink: React.FC<NavLinkProps> = ({
       onClick={onClick}
       tabIndex={tabIndex}
       className={cn(
-        "relative font-medium uppercase tracking-[0.2em] transition-colors duration-300 focus-visible:outline focus-visible:ring-2 focus-visible:ring-blood-red focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+        "relative font-medium uppercase tracking-[0.16em] transition-colors duration-300 focus-visible:outline focus-visible:ring-2 focus-visible:ring-blood-red focus-visible:ring-offset-2 focus-visible:ring-offset-black",
         "after:absolute after:left-0 after:bottom-0 after:h-px after:bg-blood-red after:transition-all after:duration-300",
         isActive
           ? "text-blood-red after:w-full"

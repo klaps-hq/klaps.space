@@ -44,7 +44,7 @@ const MobileNav: React.FC<MobileNavProps> = ({
           label={link.label}
           onClick={onClose}
           tabIndex={isOpen ? 0 : -1}
-          className="text-xl"
+          className="text-2xl"
         />
       ))}
     </nav>

@@ -3,6 +3,7 @@ import StudioCinemasList from "./studio-cinemas-list";
 import LinkWithArrow from "@/components/ui/read-more-link";
 import SectionHeader from "@/components/common/section-header";
 import { ICinemaGroup } from "@/interfaces/ICinema";
+import SectionReveal from "@/components/animations/section-reveal";
 
 interface StudioCinemasSectionProps {
   cinemaGroups: ICinemaGroup[];
@@ -19,7 +20,7 @@ const StudioCinemasSection: React.FC<StudioCinemasSectionProps> = ({
   );
 
   return (
-    <section className="bg-black px-8 py-24 md:py-32">
+    <SectionReveal className="bg-black px-8 py-24 md:py-32" delay={0.1}>
       <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
         <SectionHeader
           prefix="Lista kin"
@@ -30,7 +31,7 @@ const StudioCinemasSection: React.FC<StudioCinemasSectionProps> = ({
 
         <LinkWithArrow href="/kina" label="Zobacz wszystkie kina" />
       </div>
-    </section>
+    </SectionReveal>
   );
 };
 
