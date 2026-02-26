@@ -5,16 +5,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors duration-200 cursor-pointer disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 !outline-none",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-[color,background-color,border-color,transform,box-shadow] duration-200 cursor-pointer disabled:pointer-events-none disabled:opacity-50 disabled:transform-none [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 !outline-none",
   {
     variants: {
       variant: {
         default:
           "rounded-md bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         primary:
-          "rounded-none bg-blood-red text-white font-semibold uppercase tracking-[0.2em] hover:bg-blood-red/90",
+          "rounded-none bg-blood-red text-white font-semibold uppercase tracking-[0.2em] shadow-[0_0_0_0_rgba(220,19,1,0)] hover:bg-blood-red/90 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(220,19,1,0.75)]",
         secondary:
-          "rounded-none border-2 border-blood-red bg-transparent text-white font-semibold uppercase tracking-[0.2em] hover:bg-blood-red hover:text-white",
+          "rounded-none border-2 border-blood-red bg-transparent text-white font-semibold uppercase tracking-[0.2em] hover:bg-blood-red hover:text-white hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(220,19,1,0.6)]",
         destructive:
           "rounded-md bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:

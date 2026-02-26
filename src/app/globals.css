@@ -106,7 +106,8 @@ body {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: black;
+    @apply text-foreground;
   }
   [data-slot="button"] {
     @apply outline-none border-0;

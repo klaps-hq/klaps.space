@@ -5,6 +5,7 @@ import SectionHeader from "@/components/common/section-header";
 import { Button } from "@/components/ui/button";
 import MultiCityInteractive from "./multi-city-interactive";
 import { IMultiCityMovie } from "@/interfaces/IMovies";
+import SectionReveal from "@/components/animations/section-reveal";
 
 interface MultiCitySectionProps {
   movies: IMultiCityMovie[];
@@ -19,7 +20,7 @@ const MultiCitySection: React.FC<MultiCitySectionProps> = ({ movies }) => {
   const mostPlayedMovie = sortedMovies[0];
 
   return (
-    <section className="bg-black px-8 py-24 md:py-32">
+    <SectionReveal className="bg-black px-8 py-24 md:py-32" delay={0.12}>
       <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
         <SectionHeader
           prefix="W kinach w całej Polsce"
@@ -39,7 +40,7 @@ const MultiCitySection: React.FC<MultiCitySectionProps> = ({ movies }) => {
           </Link>
         </Button>
       </div>
-    </section>
+    </SectionReveal>
   );
 };
 

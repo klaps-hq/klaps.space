@@ -1,7 +1,11 @@
+"use client";
+
 import React from "react";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { IRandomScreening } from "@/interfaces/IScreenings";
 import { cn, getTitleSizeClasses } from "@/lib/utils";
 import MovieMeta from "./movie-meta";
+import HeroScreeningMeta from "./hero-screening-meta";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -18,15 +22,85 @@ const SCREENINGS_SECTION_ID = "#seanse";
 const TRUST_LINE =
   "Aktualne seanse z kin w całej Polsce. Dane z publicznych źródeł.";
 
+const contentContainerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const contentItemVariants: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.7,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const reducedMotionContainerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const reducedMotionItemVariants: Variants = {
+  hidden: { opacity: 0, y: 0 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.2,
+      ease: "linear",
+    },
+  },
+};
+
 const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
+  const prefersReducedMotion = useReducedMotion();
   const movieDetailsHref = `/filmy/${screening.movie.slug}`;
+  const screeningDate = new Date(screening.screening.dateTime);
+  const formattedDate = new Intl.DateTimeFormat("pl-PL", {
+    day: "2-digit",
+    month: "long",
+  }).format(screeningDate);
+
+  const containerVariants = prefersReducedMotion
+    ? reducedMotionContainerVariants
+    : contentContainerVariants;
+
+  const itemVariants = prefersReducedMotion
+    ? reducedMotionItemVariants
+    : contentItemVariants;
 
   return (
-    <div className="z-10 absolute bottom-8 left-4 right-4 md:bottom-auto md:top-1/2 md:left-8 md:right-auto md:-translate-y-1/2 flex flex-col gap-2 md:gap-4">
-      <div className="flex flex-col gap-6">
+    <motion.div
+      className="z-10 absolute bottom-8 left-4 right-4 md:bottom-auto md:top-1/2 md:left-8 md:right-auto md:-translate-y-1/2 flex flex-col gap-2 md:gap-4"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.6 }}
+      variants={containerVariants}
+    >
+      <motion.div className="flex flex-col gap-6" variants={itemVariants}>
         <Badge variant="label" suffix={HERO_LABEL_SUB}>
           {HERO_LABEL_MAIN}
         </Badge>
+
+        <HeroScreeningMeta
+          formattedDate={formattedDate}
+          screeningTime={screening.screening.time}
+          cinema={screening.screening.cinema}
+          city={screening.screening.cinema.city}
+        />
 
         <h1
           className={cn(
@@ -38,9 +112,9 @@ const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
             {screening.movie.title}
           </span>
         </h1>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col gap-3">
+      <motion.div className="flex flex-col gap-3" variants={itemVariants}>
         <MovieMeta
           duration={screening.movie.duration}
           productionYear={screening.movie.productionYear}
@@ -65,8 +139,8 @@ const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
         <p className="text-xs md:text-sm italic text-[#B3B3B3] max-w-[500px] pt-2 md:pt-4 hidden sm:block">
           {TRUST_LINE}
         </p>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
