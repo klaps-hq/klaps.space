@@ -9,13 +9,18 @@ import MoviesPageFilters from "./_components/movies-page-filters";
 import PaginatedNav from "@/components/common/paginated-nav";
 import { SITE_URL } from "@/lib/site-config";
 
+const PAGE_LIMIT = 24;
 export const revalidate = 300;
 
 type MoviesPageProps = {
   searchParams: Promise<{ page?: string; search?: string; genre?: string }>;
 };
 
-const hasQueryParams = (params: { page?: string; search?: string; genre?: string }) =>
+const hasQueryParams = (params: {
+  page?: string;
+  search?: string;
+  genre?: string;
+}) =>
   Object.values(params).some(
     (value) => typeof value === "string" && value.trim().length > 0
   );
@@ -27,7 +32,7 @@ const MoviesPage = async ({ searchParams }: MoviesPageProps) => {
   const [{ data: movies, meta }, genres] = await Promise.all([
     getMovies({
       page: page ? Number(page) : 1,
-      limit: 24,
+      limit: PAGE_LIMIT,
       search,
       genreId: genre,
     }),
@@ -39,6 +44,7 @@ const MoviesPage = async ({ searchParams }: MoviesPageProps) => {
     urlParams.set("page", targetPage.toString());
     if (search) urlParams.set("search", search);
     if (genre) urlParams.set("genre", genre);
+
     return `/filmy?${urlParams.toString()}`;
   };
 
@@ -59,18 +65,19 @@ const MoviesPage = async ({ searchParams }: MoviesPageProps) => {
         </div>
 
         <MoviesPageFilters genres={genres} />
-
         <MoviesGrid movies={movies} showHoverOverlay={false} />
 
         <section className="flex flex-col gap-4">
           <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
             Stare filmy w kinach
           </h2>
+
           <p className="text-white/80 max-w-4xl">
-            Odkrywaj klasykę i retrospektywy na dużym ekranie. Przeglądaj repertuar
-            według gatunku albo sprawdź kina studyjne, które aktualnie pokazują
-            starsze filmy.
+            Odkrywaj klasykę i retrospektywy na dużym ekranie. Przeglądaj
+            repertuar według gatunku albo sprawdź kina studyjne, które aktualnie
+            pokazują starsze filmy.
           </p>
+
           <div className="flex flex-wrap gap-2">
             {genreLinks.map((item) => (
               <Link
@@ -81,6 +88,7 @@ const MoviesPage = async ({ searchParams }: MoviesPageProps) => {
                 {item.name}
               </Link>
             ))}
+
             <Link
               href="/kina"
               className="inline-flex border border-white/15 px-3 py-1 text-xs uppercase tracking-widest text-white/80 hover:text-blood-red hover:border-blood-red/40 transition-colors"

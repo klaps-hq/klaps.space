@@ -14,7 +14,8 @@ const MovieDetailsItem: React.FC<MovieDetailsItemProps> = ({
       <dt className="text-neutral-500 text-sm uppercase tracking-widest">
         {label}
       </dt>
-      <dd className="text-white text-base md:text-lg leading-relaxed break-words">
+
+      <dd className="text-white text-base md:text-lg leading-relaxed wrap-break-words">
         {value}
       </dd>
     </div>
