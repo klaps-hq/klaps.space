@@ -19,6 +19,8 @@ import {
   staggerItemVariants,
 } from "@/components/animations/motion-presets";
 
+const ITEMS_PER_PAGE = 12;
+
 interface ScreeningsSectionContentProps {
   screenings: IScreeningGroup[];
   genres: IGenre[];
@@ -51,6 +53,7 @@ const ScreeningsSectionContentInner: React.FC<
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
         variants={containerVariants}
+        className="flex flex-col gap-10"
       >
         <motion.div variants={itemVariants}>
           <ScreeningsSectionHeader genres={genres} />
@@ -64,7 +67,7 @@ const ScreeningsSectionContentInner: React.FC<
           />
         </motion.div>
 
-        {screenings.length >= 12 && (
+        {screenings.length >= ITEMS_PER_PAGE && (
           <motion.div variants={itemVariants}>
             <ScreeningsSectionCta />
           </motion.div>

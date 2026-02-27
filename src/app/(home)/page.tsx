@@ -3,11 +3,7 @@ import { Suspense } from "react";
 import ScreeningsSection from "./_components/screenings-section";
 import ScreeningsSectionLoader from "./_components/screenings-section/screenings-section-loader";
 import JsonLd from "@/components/common/json-ld";
-import {
-  SITE_URL,
-  SITE_NAME,
-  SITE_DESCRIPTION,
-} from "@/lib/site-config";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site-config";
 
 type SearchParams = {
   city?: string;
@@ -35,6 +31,7 @@ const HomePage = async ({ searchParams }: HomeProps) => {
           description: SITE_DESCRIPTION,
         }}
       />
+
       <Suspense fallback={<ScreeningsSectionLoader />}>
         <ScreeningsSection searchParams={params} />
       </Suspense>
@@ -44,8 +41,7 @@ const HomePage = async ({ searchParams }: HomeProps) => {
 
 export const metadata: Metadata = {
   title: {
-    absolute:
-      "Klaps - Seanse w kinach studyjnych i stare filmy w kinach",
+    absolute: "Klaps - Seanse w kinach studyjnych i stare filmy w kinach",
   },
   description:
     "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i starych filmach w kinach studyjnych w Polsce. Repertuar, filmy i kina w jednym miejscu.",
@@ -53,8 +49,7 @@ export const metadata: Metadata = {
     canonical: SITE_URL,
   },
   openGraph: {
-    title:
-      "Klaps - Seanse w kinach studyjnych i stare filmy w kinach",
+    title: "Klaps - Seanse w kinach studyjnych i stare filmy w kinach",
     description:
       "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i starych filmach w kinach studyjnych. Sprawdź co grają.",
   },
