@@ -182,6 +182,8 @@ export const generateMetadata = async ({
   const genreLower = genre.name.toLowerCase();
   const title = `${genre.name} - filmy w kinach studyjnych`;
   const description = `Filmy z gatunku ${genreLower} dostępne w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy - ${genreLower} na dużym ekranie.`;
+  const url = `${SITE_URL}/gatunki/${genre.slug}`;
+  const image = `${SITE_URL}/klaps-og.png`;
 
   return {
     title,
@@ -193,7 +195,7 @@ export const generateMetadata = async ({
       `${genreLower} klasyka filmowa`,
     ],
     alternates: {
-      canonical: `${SITE_URL}/gatunki/${genre.slug}`,
+      canonical: url,
     },
     ...(hasQueryParams(queryParams) && {
       robots: {
@@ -204,6 +206,21 @@ export const generateMetadata = async ({
     openGraph: {
       title,
       description,
+      url,
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: `${genre.name} - filmy w kinach studyjnych`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
     },
   };
 };

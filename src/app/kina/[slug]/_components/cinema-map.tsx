@@ -31,7 +31,11 @@ const CinemaMap: React.FC<CinemaMapProps> = ({ cinema }) => {
   const position: L.LatLngExpression = [cinema.latitude, cinema.longitude];
 
   return (
-    <div className="relative w-full aspect-video max-h-[500px]">
+    <div
+      className="relative w-full aspect-video max-h-[500px]"
+      data-nosnippet
+      aria-label="Interaktywna mapa kina"
+    >
       <div className="absolute -top-3 -left-3 w-16 h-16 border-t-2 border-l-2 border-blood-red z-10 pointer-events-none" />
       <div className="absolute -bottom-3 -right-3 w-16 h-16 border-b-2 border-r-2 border-blood-red z-10 pointer-events-none" />
 

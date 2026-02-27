@@ -67,6 +67,17 @@ export const metadata: Metadata = {
       "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych.",
     images: ["/klaps-og.png"],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": 160,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
+  },
 };
 
 export default async function RootLayout({
