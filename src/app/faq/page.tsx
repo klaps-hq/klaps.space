@@ -4,114 +4,7 @@ import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 import JsonLd from "@/components/common/json-ld";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
-
-const FAQ_ITEMS = [
-  {
-    question: "Czym jest Klaps?",
-    answer:
-      "Klaps to niezależny serwis internetowy, który agreguje informacje o seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych na terenie całej Polski.",
-  },
-  {
-    question: "Czy korzystanie z serwisu jest bezpłatne?",
-    answer:
-      "Tak. Klaps jest projektem niekomercyjnym i w pełni bezpłatnym. Nie wymaga rejestracji, logowania ani podawania jakichkolwiek danych osobowych.",
-  },
-  {
-    question: "Kto stoi za projektem Klaps?",
-    answer:
-      "Klaps jest projektem niezależnym, tworzonym z pasji do kina studyjnego. Nie jest powiązana z żadnym kinem, dystrybutorem ani siecią kinową.",
-  },
-  {
-    question: "Czy muszę się rejestrować, żeby korzystać z serwisu?",
-    answer:
-      "Nie. Serwis nie wymaga rejestracji ani zakładania konta. Wszystkie funkcje są dostępne od razu po wejściu na stronę.",
-  },
-  {
-    question: "Jak mogę się z Wami skontaktować?",
-    answer:
-      "Najwygodniej przez stronę kontakt, e-mail: kontakt@klaps.space lub przez nasze profile: Threads, X, Instagram i Facebook.",
-  },
-  {
-    question: "Skąd pochodzą informacje o seansach?",
-    answer:
-      "Informacje o seansach są pozyskiwane automatycznie z publicznie dostępnych źródeł kin. Dane są regularnie aktualizowane, aby zapewnić jak największą dokładność.",
-  },
-  {
-    question: "Jak często aktualizowany jest repertuar?",
-    answer:
-      "Repertuar jest aktualizowany regularnie, mniej więcej raz w tygodniu. Częstotliwość zależy od tego, kiedy poszczególne kina publikują swoje repertuary.",
-  },
-  {
-    question: "Czy wszystkie seanse w serwisie to seanse specjalne?",
-    answer:
-      "Tak. Klaps koncentruje się wyłącznie na seansach specjalnych, takich jak pokazy klasyki filmowej, retrospektywy, pokazy z cykli tematycznych oraz inne wyjątkowe wydarzenia kinowe. Nie prezentujemy standardowego repertuaru komercyjnego.",
-  },
-  {
-    question: "Co zrobić, jeśli informacje o seansie są nieaktualne?",
-    answer:
-      "Zawsze rekomendujemy weryfikację szczegółów seansu (data, godzina, cena) bezpośrednio na stronie kina. Jeśli zauważysz błąd, możesz skontaktować się z nami przez stronę kontaktową.",
-  },
-  {
-    question: "Czy mogę filtrować seanse według gatunku lub daty?",
-    answer:
-      "Tak. Serwis umożliwia filtrowanie seansów po mieście, kinie, gatunku filmowym oraz dacie. Filtry są dostępne na stronie seansów.",
-  },
-  {
-    question: "Jakie kina są uwzględnione w serwisie?",
-    answer:
-      "Serwis obejmuje kina studyjne oraz wybrane kina sieciowe w całej Polsce, które organizują seanse specjalne, pokazy klasyki filmowej lub retrospektywy.",
-  },
-  {
-    question: "Czy mogę zaproponować dodanie kina do serwisu?",
-    answer:
-      "Tak. Jeśli znasz kino, które organizuje seanse specjalne i nie jest jeszcze uwzględnione w serwisie, skontaktuj się z nami przez stronę kontaktową. Rozpatrzymy każde zgłoszenie.",
-  },
-  {
-    question: "Jak mogę przeglądać kina w moim mieście?",
-    answer:
-      "Możesz wybrać swoje miasto z listy rozwijanej w nagłówku strony lub przejść do zakładki Miasta, gdzie znajdziesz pełną listę miast z informacjami o dostępnych kinach i seansach.",
-  },
-  {
-    question: "Ile miast jest dostępnych w serwisie?",
-    answer:
-      "Liczba miast stale rośnie. Aktualną listę wszystkich dostępnych miast znajdziesz na stronie Miasta.",
-  },
-  {
-    question: "Czy mogę kupić bilety przez Klaps?",
-    answer:
-      "Nie. Klaps nie pośredniczy w sprzedaży biletów ani rezerwacji miejsc. Serwis wyłącznie agreguje i prezentuje informacje o seansach.",
-  },
-  {
-    question: "Jak mogę kupić bilet na seans?",
-    answer:
-      "Klaps nie umożliwia zakupu biletów. Aby kupić bilet, sprawdź szczegóły seansu bezpośrednio na stronie danego kina. Zakup odbywa się wyłącznie między Tobą a kinem.",
-  },
-  {
-    question: "Czy ceny biletów podane w serwisie są aktualne?",
-    answer:
-      "Serwis Klaps nie prezentuje cen biletów. Informacje o cenach dostępne są bezpośrednio na stronach poszczególnych kin.",
-  },
-  {
-    question: "Jak zmienić wybrane miasto?",
-    answer:
-      "Miasto możesz zmienić w każdej chwili, korzystając z listy rozwijanej w nagłówku strony. Twój wybór zostanie zapamiętany w przeglądarce, dzięki czemu przy kolejnej wizycie serwis automatycznie wyświetli seanse z Twojego miasta.",
-  },
-  {
-    question: "Czy serwis działa na urządzeniach mobilnych?",
-    answer:
-      "Tak. Serwis jest w pełni responsywny i dostosowany do korzystania na telefonach, tabletach oraz komputerach.",
-  },
-  {
-    question: "Dlaczego strona nie wyświetla się poprawnie?",
-    answer:
-      "Upewnij się, że korzystasz z aktualnej wersji przeglądarki. Serwis działa najlepiej w przeglądarkach Chrome, Firefox, Safari i Edge. Jeśli problem nadal występuje, skontaktuj się z nami.",
-  },
-  {
-    question: "Czy mogę zaproponować nową funkcję?",
-    answer:
-      "Oczywiście. Chętnie wysłuchamy Twoich sugestii. Skontaktuj się z nami przez stronę kontaktową lub bezpośrednio na adres e-mail.",
-  },
-];
+import FAQ_ITEMS from "./faq.json";
 
 const buildFaqJsonLd = () => ({
   "@context": "https://schema.org",
@@ -134,11 +27,9 @@ const FaqPage = () => {
         <div className="max-w-[1100px] mx-auto flex flex-col gap-16">
           <div className="flex flex-col gap-6">
             <Breadcrumbs items={[{ name: "FAQ", href: "/faq" }]} />
-            <SectionHeader
-              prefix="FAQ"
-              title="Najczęściej zadawane pytania"
-            />
+            <SectionHeader prefix="FAQ" title="Najczęściej zadawane pytania" />
           </div>
+
           <FaqPageContent />
         </div>
       </main>
@@ -154,7 +45,7 @@ export const metadata: Metadata = {
     "kina studyjne pytania",
     "seanse specjalne FAQ",
     "jak działa Klaps",
-    "bilety kino studyjne",
+    "FAQ o kinach studyjnych",
   ],
   alternates: {
     canonical: `${SITE_URL}/faq`,

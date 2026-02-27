@@ -31,6 +31,7 @@ const AccessibilityPageContent: React.FC = () => {
   return (
     <div className="flex gap-16">
       <AccessibilitySidebar links={SIDEBAR_LINKS} activeId={activeId} />
+
       <div className="flex flex-col gap-20 flex-1 min-w-0">
         <CommitmentSection />
         <StandardsSection />
