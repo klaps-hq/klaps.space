@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import SocialLinks from "@/components/common/social-links";
 
 const FooterBrand: React.FC = () => {
   return (
@@ -15,6 +16,11 @@ const FooterBrand: React.FC = () => {
         Ogólnopolski repertuar seansów specjalnych, klasyki i&nbsp;filmów spoza
         głównego obiegu.
       </p>
+
+      <SocialLinks
+        className="pt-1"
+        focusRingOffsetClassName="focus-visible:ring-offset-dark-ink"
+      />
     </div>
   );
 };
