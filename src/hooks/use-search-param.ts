@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useScreeningsTransition } from "@/contexts/screenings-transition-context";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 const SEARCH_PARAM_KEY = "search";
-const SEARCH_DEBOUNCE_DELAY_MS = 500;
+const SEARCH_DEBOUNCE_DELAY_MS = 400;
 
 interface UseSearchParamReturn {
   searchQuery: string;
@@ -20,17 +20,16 @@ export const useSearchParam = (): UseSearchParamReturn => {
   const { startTransition } = useScreeningsTransition();
 
   const searchParamValue = searchParams.get(SEARCH_PARAM_KEY) ?? "";
-  const prevSearchParamValueRef = useRef(searchParamValue);
 
   const [searchQuery, setSearchQuery] = useState(searchParamValue);
   const debouncedSearchQuery = useDebouncedValue(searchQuery, {
     delayMs: SEARCH_DEBOUNCE_DELAY_MS,
   });
 
-  if (prevSearchParamValueRef.current !== searchParamValue) {
-    prevSearchParamValueRef.current = searchParamValue;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- only sync when URL param changes externally
+  useEffect(() => {
     setSearchQuery(searchParamValue);
-  }
+  }, [searchParamValue]);
 
   useEffect(() => {
     const trimmed = debouncedSearchQuery.trim();
