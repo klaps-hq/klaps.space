@@ -53,11 +53,15 @@ export const generateMetadata = async ({
   searchParams,
 }: ScreeningsPageProps): Promise<Metadata> => {
   const params = await searchParams;
+  const title = "Seanse specjalne w kinach studyjnych - repertuar";
+  const description =
+    "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce. Filtruj po mieście, dacie i gatunku.";
+  const url = `${SITE_URL}/seanse`;
+  const image = `${SITE_URL}/klaps-og.png`;
 
   return {
-    title: "Seanse specjalne w kinach studyjnych - repertuar",
-    description:
-      "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce. Filtruj po mieście, dacie i gatunku.",
+    title,
+    description,
     keywords: [
       "seanse specjalne",
       "repertuar kin studyjnych",
@@ -66,7 +70,7 @@ export const generateMetadata = async ({
       "pokazy specjalne kino",
     ],
     alternates: {
-      canonical: `${SITE_URL}/seanse`,
+      canonical: url,
     },
     ...(hasQueryParams(params) && {
       robots: {
@@ -75,9 +79,23 @@ export const generateMetadata = async ({
       },
     }),
     openGraph: {
-      title: "Seanse specjalne w kinach studyjnych - repertuar",
-      description:
-        "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce.",
+      title,
+      description,
+      url,
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: "Seanse specjalne w kinach studyjnych",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
     },
   };
 };

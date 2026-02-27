@@ -119,6 +119,8 @@ export const generateMetadata = async ({
 
   const title = `Kina studyjne ${city.name} - repertuar seansów specjalnych`;
   const description = `Kina studyjne i niezależne w ${city.nameDeclinated}. Aktualne seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź repertuar kin w ${city.nameDeclinated}.`;
+  const url = `${SITE_URL}/miasta/${city.slug}`;
+  const image = `${SITE_URL}/klaps-og.png`;
 
   return {
     title,
@@ -131,7 +133,7 @@ export const generateMetadata = async ({
       `kino niezależne ${city.name}`,
     ],
     alternates: {
-      canonical: `${SITE_URL}/miasta/${city.slug}`,
+      canonical: url,
     },
     ...(hasQueryParams(queryParams) && {
       robots: {
@@ -142,6 +144,21 @@ export const generateMetadata = async ({
     openGraph: {
       title,
       description,
+      url,
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: `${city.name} - kina studyjne i repertuar`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
     },
   };
 };
