@@ -37,6 +37,7 @@ const ScreeningsSectionContentInner: React.FC<
   const containerVariants = prefersReducedMotion
     ? reducedMotionStaggerContainerVariants
     : staggerContainerVariants;
+
   const itemVariants = prefersReducedMotion
     ? reducedMotionStaggerItemVariants
     : staggerItemVariants;
@@ -53,7 +54,7 @@ const ScreeningsSectionContentInner: React.FC<
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
         variants={containerVariants}
-        className="flex flex-col gap-10"
+        className="flex flex-col gap-10 items-center"
       >
         <motion.div variants={itemVariants}>
           <ScreeningsSectionHeader genres={genres} />
