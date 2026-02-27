@@ -54,7 +54,7 @@ const ScreeningsSectionContentInner: React.FC<
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
         variants={containerVariants}
-        className="flex flex-col gap-10 items-center"
+        className="flex flex-col gap-10"
       >
         <motion.div variants={itemVariants}>
           <ScreeningsSectionHeader genres={genres} />
@@ -69,7 +69,7 @@ const ScreeningsSectionContentInner: React.FC<
         </motion.div>
 
         {screenings.length >= ITEMS_PER_PAGE && (
-          <motion.div variants={itemVariants}>
+          <motion.div variants={itemVariants} className="mx-auto">
             <ScreeningsSectionCta />
           </motion.div>
         )}
