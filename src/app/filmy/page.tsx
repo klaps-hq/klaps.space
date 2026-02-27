@@ -104,11 +104,15 @@ export const generateMetadata = async ({
   searchParams,
 }: MoviesPageProps): Promise<Metadata> => {
   const params = await searchParams;
+  const title = "Filmy klasyczne i stare filmy w kinach - katalog";
+  const description =
+    "Katalog klasyki filmowej i stare filmy w kinach studyjnych w Polsce. Retrospektywy, wznowienia i seanse specjalne na dużym ekranie.";
+  const url = `${SITE_URL}/filmy`;
+  const image = `${SITE_URL}/klaps-og.png`;
 
   return {
-    title: "Filmy klasyczne i stare filmy w kinach - katalog",
-    description:
-      "Katalog klasyki filmowej i stare filmy w kinach studyjnych w Polsce. Retrospektywy, wznowienia i seanse specjalne na dużym ekranie.",
+    title,
+    description,
     keywords: [
       "filmy klasyczne w kinach",
       "stare filmy w kinach",
@@ -117,7 +121,7 @@ export const generateMetadata = async ({
       "katalog filmów kina studyjne",
     ],
     alternates: {
-      canonical: `${SITE_URL}/filmy`,
+      canonical: url,
     },
     ...(hasQueryParams(params) && {
       robots: {
@@ -126,9 +130,23 @@ export const generateMetadata = async ({
       },
     }),
     openGraph: {
-      title: "Filmy klasyczne i stare filmy w kinach studyjnych - katalog",
-      description:
-        "Katalog klasyki filmowej i stare filmy w kinach studyjnych w Polsce. Retrospektywy, wznowienia i seanse specjalne.",
+      title,
+      description,
+      url,
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: "Filmy klasyczne i stare filmy w kinach studyjnych",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
     },
   };
 };

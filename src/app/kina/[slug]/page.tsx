@@ -22,7 +22,9 @@ type CinemaPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const hasQueryParams = (params: Record<string, string | string[] | undefined>) =>
+const hasQueryParams = (
+  params: Record<string, string | string[] | undefined>
+) =>
   Object.values(params).some((value) =>
     Array.isArray(value)
       ? value.some((item) => item.trim().length > 0)
@@ -75,6 +77,7 @@ const CinemaPage = async ({ params }: CinemaPageProps) => {
       cityId: cinema.city.id.toString(),
       limit: 1000,
     });
+
     screenings = cityScreenings
       .map((group) => ({
         ...group,
@@ -105,23 +108,23 @@ const CinemaPage = async ({ params }: CinemaPageProps) => {
       <main className="bg-black min-h-screen px-8 py-24 md:py-32">
         <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
           <Breadcrumbs
-            items={[
-              { name: "Kina", href: "/kina" },
-              { name: cinema.name },
-            ]}
+            items={[{ name: "Kina", href: "/kina" }, { name: cinema.name }]}
           />
           <CinemaHeader cinema={cinema} />
           <SectionDivider />
+
           <section className="flex flex-col gap-6">
             <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
               O kinie i repertuarze
             </h2>
+
             <p className="text-white/80 leading-relaxed max-w-4xl">
-              {cinema.name} to kino studyjne w {cinema.city.name}. Na tej stronie
-              znajdziesz aktualne seanse specjalne, klasykę filmową i
+              {cinema.name} to kino studyjne w {cinema.city.name}. Na tej
+              stronie znajdziesz aktualne seanse specjalne, klasykę filmową i
               retrospektywy prezentowane lokalnie
               {cinema.street ? ` przy ${cinema.street}` : ""}.
             </p>
+
             {cinemaGenres.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {cinemaGenres.map((genre) => (
@@ -136,8 +139,23 @@ const CinemaPage = async ({ params }: CinemaPageProps) => {
               </div>
             )}
           </section>
+
           <SectionDivider />
-          <CinemaMapLazy cinema={cinema} />
+
+          <section className="flex flex-col gap-4">
+            <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
+              Lokalizacja kina
+            </h2>
+
+            <p className="text-white/80 max-w-4xl">
+              {cinema.street
+                ? `${cinema.name}, ${cinema.street}, ${cinema.city.name}.`
+                : `${cinema.name}, ${cinema.city.name}.`}
+            </p>
+
+            <CinemaMapLazy cinema={cinema} />
+          </section>
+
           <SectionDivider />
           <CinemaScreenings screenings={screenings} />
         </div>
@@ -156,6 +174,8 @@ export const generateMetadata = async ({
 
   const title = `${cinema.name} - kino studyjne ${cinema.city.name}`;
   const description = `${cinema.name} - kino studyjne w ${cinema.city.name}. Repertuar seansów specjalnych, klasyki filmowej i retrospektyw. Sprawdź co grają.`;
+  const url = `${SITE_URL}/kina/${cinema.slug}`;
+  const image = `${SITE_URL}/klaps-og.png`;
 
   return {
     title,
@@ -167,7 +187,7 @@ export const generateMetadata = async ({
       `seanse specjalne ${cinema.city.name}`,
     ],
     alternates: {
-      canonical: `${SITE_URL}/kina/${cinema.slug}`,
+      canonical: url,
     },
     ...(hasQueryParams(queryParams) && {
       robots: {
@@ -178,6 +198,21 @@ export const generateMetadata = async ({
     openGraph: {
       title,
       description,
+      url,
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: `${cinema.name} - kino studyjne w ${cinema.city.name}`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
     },
   };
 };
