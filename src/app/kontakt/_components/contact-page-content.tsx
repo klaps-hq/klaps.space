@@ -1,5 +1,6 @@
 import React from "react";
 import ContentSection from "@/components/common/content-section";
+import SocialLinks from "@/components/common/social-links";
 import ContactInfoItem from "./contact-info-item";
 import ContactSidebar from "./contact-sidebar";
 import { CONTACT_EMAIL } from "@/constants";
@@ -42,6 +43,15 @@ const ContactPageContent: React.FC = () => {
             nieaktualną informację, również daj nam znać. Każda informacja
             pomaga rozwijać projekt.
           </p>
+        </ContentSection>
+
+        <ContentSection id="social-media" title="Social media">
+          <p>
+            Możesz też skontaktować się z nami przez nasze profile w mediach
+            społecznościowych:
+          </p>
+
+          <SocialLinks />
         </ContentSection>
 
         <ContentSection id="uwagi" title="Zgłoszenia i uwagi">
