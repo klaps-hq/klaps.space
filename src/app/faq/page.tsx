@@ -27,6 +27,11 @@ const FAQ_ITEMS = [
       "Nie. Serwis nie wymaga rejestracji ani zakładania konta. Wszystkie funkcje są dostępne od razu po wejściu na stronę.",
   },
   {
+    question: "Jak mogę się z Wami skontaktować?",
+    answer:
+      "Najwygodniej przez stronę kontakt, e-mail: kontakt@klaps.space lub przez nasze profile: Threads, X, Instagram i Facebook.",
+  },
+  {
     question: "Skąd pochodzą informacje o seansach?",
     answer:
       "Informacje o seansach są pozyskiwane automatycznie z publicznie dostępnych źródeł kin. Dane są regularnie aktualizowane, aby zapewnić jak największą dokładność.",

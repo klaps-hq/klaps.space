@@ -7,6 +7,7 @@ import Footer from "@/components/layout/footer";
 import ScrollToTop from "@/components/common/scroll-to-top";
 import JsonLd from "@/components/common/json-ld";
 import { CityProvider } from "@/contexts/city-context";
+import { SOCIAL_PROFILE_URLS } from "@/constants";
 import { getCities } from "@/lib/cities";
 import { SITE_URL } from "@/lib/site-config";
 
@@ -122,7 +123,10 @@ export default async function RootLayout({
             logo: `${SITE_URL}/favicon.svg`,
             description:
               "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych w Polsce.",
-            sameAs: ["https://github.com/klaps-hq/klaps.space"],
+            sameAs: [
+              ...SOCIAL_PROFILE_URLS,
+              "https://github.com/klaps-hq/klaps.space",
+            ],
           }}
         />
         <CityProvider cities={cities}>
