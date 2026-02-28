@@ -24,6 +24,31 @@
       }
     ],
     "paths": {
+      "@/components/*": [
+        "./src/app/(frontend)/components/*"
+      ],
+      "@/lib/*": [
+        "./src/app/(frontend)/lib/*"
+      ],
+      "@/hooks/*": [
+        "./src/app/(frontend)/hooks/*"
+      ],
+      "@/contexts/*": [
+        "./src/app/(frontend)/contexts/*"
+      ],
+      "@/constants": [
+        "./src/app/(frontend)/constants/index.ts"
+      ],
+      "@/constants/*": [
+        "./src/app/(frontend)/constants/*"
+      ],
+      "@/interfaces/*": [
+        "./src/app/(frontend)/interfaces/*"
+      ],
+      "@/app/*": [
+        "./src/app/*",
+        "./src/app/(frontend)/*"
+      ],
       "@/*": [
         "./src/*"
       ]
