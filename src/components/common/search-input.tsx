@@ -54,6 +54,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         <button
           type="button"
           onClick={handleClear}
+          aria-label="Wyczyść wyszukiwanie"
           className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors cursor-pointer"
         >
           <X className="size-4" />

@@ -16,9 +16,11 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
       <span className="text-blood-red text-sm uppercase tracking-widest">
         {prefix}
       </span>
+
       <span className="text-white text-4xl md:text-6xl font-bold uppercase">
         {title}
       </span>
+
       {description && (
         <p className="text-neutral-400 text-base md:text-lg max-w-xl leading-relaxed">
           {description}

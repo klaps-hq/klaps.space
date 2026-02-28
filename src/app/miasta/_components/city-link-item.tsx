@@ -18,7 +18,7 @@ const CityLinkItem: React.FC<CityLinkItemProps> = ({ city, cinemasCount }) => {
           {city.name}
         </span>
 
-        <span className="hidden md:block text-neutral-600 text-sm leading-snug shrink-0">
+        <span className="text-neutral-600 text-sm leading-snug shrink-0">
           {cinemasCount}{" "}
           {cinemasCount === 1 ? "kino" : cinemasCount < 5 ? "kina" : "kin"}
         </span>

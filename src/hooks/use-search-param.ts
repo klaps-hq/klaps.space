@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useScreeningsTransition } from "@/contexts/screenings-transition-context";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 const SEARCH_PARAM_KEY = "search";
-const DEBOUNCE_DELAY = 300;
+const SEARCH_DEBOUNCE_DELAY_MS = 400;
 
 interface UseSearchParamReturn {
   searchQuery: string;
@@ -17,54 +18,53 @@ export const useSearchParam = (): UseSearchParamReturn => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { startTransition } = useScreeningsTransition();
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const paramValue = searchParams.get(SEARCH_PARAM_KEY) ?? "";
-  const [pendingSearchQuery, setPendingSearchQuery] = useState(paramValue);
-  const [isDebouncing, setIsDebouncing] = useState(false);
-  const searchQuery = isDebouncing ? pendingSearchQuery : paramValue;
+  const searchParamValue = searchParams.get(SEARCH_PARAM_KEY) ?? "";
+
+  const [searchQuery, setSearchQuery] = useState(searchParamValue);
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, {
+    delayMs: SEARCH_DEBOUNCE_DELAY_MS,
+  });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- only sync when URL param changes externally
+  useEffect(() => {
+    setSearchQuery(searchParamValue);
+  }, [searchParamValue]);
 
   useEffect(() => {
-    return () => {
-      if (!timeoutRef.current) return;
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    };
+    const trimmed = debouncedSearchQuery.trim();
+    const currentParam = searchParamValue.trim();
+
+    if (trimmed === currentParam) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (trimmed) {
+      params.set(SEARCH_PARAM_KEY, trimmed);
+    } else {
+      params.delete(SEARCH_PARAM_KEY);
+    }
+
+    params.delete("page");
+
+    const queryString = params.toString();
+    const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+
+    startTransition(() => {
+      router.replace(newUrl, { scroll: false });
+    });
+  }, [
+    debouncedSearchQuery,
+    pathname,
+    router,
+    searchParamValue,
+    searchParams,
+    startTransition,
+  ]);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
   }, []);
-
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      setPendingSearchQuery(value);
-      setIsDebouncing(true);
-
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      timeoutRef.current = setTimeout(() => {
-        timeoutRef.current = null;
-        setIsDebouncing(false);
-
-        const params = new URLSearchParams(searchParams.toString());
-
-        if (value.trim()) {
-          params.set(SEARCH_PARAM_KEY, value.trim());
-        } else {
-          params.delete(SEARCH_PARAM_KEY);
-        }
-
-        params.delete("page");
-
-        const queryString = params.toString();
-        const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
-
-        startTransition(() => {
-          router.replace(newUrl, { scroll: false });
-        });
-      }, DEBOUNCE_DELAY);
-    },
-    [searchParams, pathname, router, startTransition]
-  );
 
   return { searchQuery, handleSearchChange };
 };

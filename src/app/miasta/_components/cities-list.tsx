@@ -1,27 +1,27 @@
 import React from "react";
-import { ICinemaGroup } from "@/interfaces/ICinema";
 import CitiesLetterGroup from "./cities-letter-group";
+import { ICity } from "@/interfaces/ICities";
 
 interface CitiesListProps {
-  cinemaGroups: ICinemaGroup[];
+  cities: ICity[];
 }
 
-const CitiesList: React.FC<CitiesListProps> = ({ cinemaGroups }) => {
-  if (cinemaGroups.length === 0) {
+const CitiesList: React.FC<CitiesListProps> = ({ cities }) => {
+  if (cities.length === 0) {
     return (
       <p className="text-neutral-500 text-base">Brak miast do wyświetlenia.</p>
     );
   }
 
-  const sortedGroups = [...cinemaGroups].sort((a, b) =>
-    a.city.name.localeCompare(b.city.name, "pl")
+  const sortedGroups = [...cities].sort((a, b) =>
+    a.name.localeCompare(b.name, "pl")
   );
 
-  const letterGroups = sortedGroups.reduce<Record<string, ICinemaGroup[]>>(
-    (acc, group) => {
-      const letter = group.city.name[0].toUpperCase();
+  const letterGroups = sortedGroups.reduce<Record<string, ICity[]>>(
+    (acc, city) => {
+      const letter = city.name[0].toUpperCase();
       if (!acc[letter]) acc[letter] = [];
-      acc[letter].push(group);
+      acc[letter].push(city);
       return acc;
     },
     {}
@@ -37,7 +37,7 @@ const CitiesList: React.FC<CitiesListProps> = ({ cinemaGroups }) => {
         <CitiesLetterGroup
           key={letter}
           letter={letter}
-          cinemaGroups={letterGroups[letter]}
+          cities={letterGroups[letter]}
         />
       ))}
     </div>

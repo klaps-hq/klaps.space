@@ -11,6 +11,7 @@ const FaqItem: React.FC<FaqItemProps> = ({ question, children }) => {
       <h3 className="text-white/80 font-medium text-base md:text-lg leading-snug">
         {question}
       </h3>
+
       <div className="text-neutral-400 text-base md:text-lg leading-[1.8] tracking-[0.01em]">
         {children}
       </div>

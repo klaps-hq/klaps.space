@@ -32,7 +32,11 @@ const ScreeningsSection = async ({ searchParams }: ScreeningsSectionProps) => {
   ]);
 
   return (
-    <SectionReveal id="seanse" className="bg-black px-8 py-16 min-h-screen" delay={0.04}>
+    <SectionReveal
+      id="seanse"
+      className="bg-black px-8 py-16 min-h-screen"
+      delay={0.04}
+    >
       <div className="max-w-[1400px] mx-auto">
         <ScreeningsSectionContent screenings={screenings} genres={genres} />
       </div>
