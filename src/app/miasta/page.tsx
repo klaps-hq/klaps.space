@@ -1,14 +1,14 @@
 import { Metadata } from "next";
-import { getCinemas } from "@/lib/cinemas";
 import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import CitiesList from "./_components/cities-list";
+import { getCities } from "@/lib/cities";
 
 export const revalidate = 300;
 
 const CitiesPage = async () => {
-  const { data: cinemaGroups } = await getCinemas({ limit: 500 });
+  const cities = await getCities();
 
   return (
     <main className="bg-black min-h-screen px-8 py-24 md:py-32">
@@ -22,7 +22,7 @@ const CitiesPage = async () => {
           />
         </div>
 
-        <CitiesList cinemaGroups={cinemaGroups} />
+        <CitiesList cities={cities} />
       </div>
     </main>
   );

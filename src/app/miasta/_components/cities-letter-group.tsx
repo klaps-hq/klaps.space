@@ -1,15 +1,15 @@
 import React from "react";
-import { ICinemaGroup } from "@/interfaces/ICinema";
 import CityLinkItem from "./city-link-item";
+import { ICity } from "@/interfaces/ICities";
 
 interface CitiesLetterGroupProps {
   letter: string;
-  cinemaGroups: ICinemaGroup[];
+  cities: ICity[];
 }
 
 const CitiesLetterGroup: React.FC<CitiesLetterGroupProps> = ({
   letter,
-  cinemaGroups,
+  cities,
 }) => {
   return (
     <div>
@@ -18,11 +18,11 @@ const CitiesLetterGroup: React.FC<CitiesLetterGroupProps> = ({
       </h2>
 
       <ul className="divide-y divide-neutral-800">
-        {cinemaGroups.map((group) => (
+        {cities.map((city) => (
           <CityLinkItem
-            key={group.city.id}
-            city={group.city}
-            cinemasCount={group.cinemas.length}
+            key={city.id}
+            city={city}
+            cinemasCount={city.numberOfCinemas}
           />
         ))}
       </ul>
