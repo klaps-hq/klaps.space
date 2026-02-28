@@ -6,6 +6,7 @@ export interface ICity {
   slug: string;
   name: string;
   nameDeclinated: string;
+  numberOfCinemas: number;
 }
 
 export interface ICityDetails extends ICity {
