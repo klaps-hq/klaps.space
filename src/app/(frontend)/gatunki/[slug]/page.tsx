@@ -47,7 +47,7 @@ const GenrePage = async ({ params, searchParams }: GenrePageProps) => {
   const queryParams = await searchParams;
   const page = queryParams.page;
 
-  let genre;
+  let genre: IGenre;
 
   try {
     genre = await getGenreBySlug(slug);
@@ -58,23 +58,26 @@ const GenrePage = async ({ params, searchParams }: GenrePageProps) => {
     notFound();
   }
 
-  const [{ data: movies, meta }, screeningGroups, allGenres] = await Promise.all([
-    getMovies({
-      genreId: genre.id.toString(),
-      page: page ? Number(page) : 1,
-      limit: 24,
-    }),
-    getScreenings({
-      genreId: genre.id.toString(),
-      limit: 500,
-    }),
-    getGenres(),
-  ]);
+  const [{ data: movies, meta }, screeningGroups, allGenres] =
+    await Promise.all([
+      getMovies({
+        genreId: genre.id.toString(),
+        page: page ? Number(page) : 1,
+        limit: 24,
+      }),
+      getScreenings({
+        genreId: genre.id.toString(),
+        limit: 500,
+      }),
+      getGenres(),
+    ]);
 
   const cinemas = Array.from(
     new Map(
       screeningGroups
-        .flatMap((group) => group.screenings.map((screening) => screening.cinema))
+        .flatMap((group) =>
+          group.screenings.map((screening) => screening.cinema)
+        )
         .map((cinema) => [cinema.slug, cinema])
     ).values()
   )
@@ -103,10 +106,11 @@ const GenrePage = async ({ params, searchParams }: GenrePageProps) => {
               { name: genre.name },
             ]}
           />
+
           <SectionHeader
             prefix="Gatunek"
             title={genre.name}
-            description={`W kategorii ${genre.name.toLowerCase()} znajdziesz ${meta.total} filmów dostępnych w repertuarach kin studyjnych w Polsce.`}
+            description={genre?.description ?? undefined}
           />
 
           <GenreMovies movies={movies} />

@@ -2,6 +2,7 @@ export interface IGenre {
   id: number;
   slug: string;
   name: string;
+  description: string | null;
 }
 
 export interface IMoviePerson {

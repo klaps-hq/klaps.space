@@ -20,7 +20,9 @@ type CityPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const hasQueryParams = (params: Record<string, string | string[] | undefined>) =>
+const hasQueryParams = (
+  params: Record<string, string | string[] | undefined>
+) =>
   Object.values(params).some((value) =>
     Array.isArray(value)
       ? value.some((item) => item.trim().length > 0)
@@ -82,15 +84,12 @@ const CityPage = async ({ params }: CityPageProps) => {
       <main className="bg-black min-h-screen px-8 py-24 md:py-32">
         <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
           <Breadcrumbs
-            items={[
-              { name: "Miasta", href: "/miasta" },
-              { name: city.name },
-            ]}
+            items={[{ name: "Miasta", href: "/miasta" }, { name: city.name }]}
           />
           <SectionHeader
             prefix="Miasto"
             title={city.name}
-            description={`Kina i aktualne seanse w ${city.nameDeclinated}.`}
+            description={city?.description ?? undefined}
           />
 
           <CityStats

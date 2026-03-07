@@ -22,7 +22,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
       </span>
 
       {description && (
-        <p className="text-neutral-400 text-base md:text-lg max-w-xl leading-relaxed">
+        <p className="text-neutral-400 text-base md:text-lg max-w-xl leading-relaxed mt-1">
           {description}
         </p>
       )}

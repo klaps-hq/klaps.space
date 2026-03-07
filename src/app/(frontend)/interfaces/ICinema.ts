@@ -14,6 +14,7 @@ export interface ICinema {
   name: string;
   street: string | null;
   city: ICity;
+  description: string | null;
   latitude: number | null;
   longitude: number | null;
   sourceUrl: string;

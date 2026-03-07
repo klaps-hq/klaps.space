@@ -5,7 +5,6 @@ import { getCinemaBySlug } from "@/lib/cinemas";
 import { getScreenings } from "@/lib/screenings";
 import { ApiNotFoundError } from "@/lib/client";
 import SectionDivider from "@/components/ui/section-divider";
-import CinemaHeader from "./_components/cinema-header";
 import CinemaMapLazy from "./_components/cinema-map-lazy";
 import CinemaScreenings from "./_components/cinema-screenings";
 import JsonLd from "@/components/common/json-ld";
@@ -14,6 +13,7 @@ import { SITE_URL } from "@/lib/site-config";
 import { ICinema } from "@/interfaces/ICinema";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
+import SectionHeader from "@/components/common/section-header";
 
 export const revalidate = 300;
 
@@ -110,48 +110,25 @@ const CinemaPage = async ({ params }: CinemaPageProps) => {
           <Breadcrumbs
             items={[{ name: "Kina", href: "/kina" }, { name: cinema.name }]}
           />
-          <CinemaHeader cinema={cinema} />
+          <SectionHeader
+            prefix="Kino"
+            title={cinema.name}
+            description={cinema?.description ?? undefined}
+          />
           <SectionDivider />
 
-          <section className="flex flex-col gap-6">
-            <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
-              O kinie i repertuarze
-            </h2>
+          <section className="flex flex-col gap-8">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
+                Lokalizacja kina
+              </h2>
 
-            <p className="text-white/80 leading-relaxed max-w-4xl">
-              {cinema.name} to kino studyjne w {cinema.city.name}. Na tej
-              stronie znajdziesz aktualne seanse specjalne, klasykę filmową i
-              retrospektywy prezentowane lokalnie
-              {cinema.street ? ` przy ${cinema.street}` : ""}.
-            </p>
-
-            {cinemaGenres.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {cinemaGenres.map((genre) => (
-                  <Link
-                    key={genre.id}
-                    href={`/gatunki/${genre.slug}`}
-                    className="inline-flex border border-white/15 px-3 py-1 text-xs uppercase tracking-widest text-white/80 hover:text-blood-red hover:border-blood-red/40 transition-colors"
-                  >
-                    {genre.name}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <SectionDivider />
-
-          <section className="flex flex-col gap-4">
-            <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
-              Lokalizacja kina
-            </h2>
-
-            <p className="text-white/80 max-w-4xl">
-              {cinema.street
-                ? `${cinema.name}, ${cinema.street}, ${cinema.city.name}.`
-                : `${cinema.name}, ${cinema.city.name}.`}
-            </p>
+              <address className="text-white/80 max-w-4xl">
+                {cinema.street
+                  ? `${cinema.name}, ${cinema.street}, ${cinema.city.name}.`
+                  : `${cinema.name}, ${cinema.city.name}.`}
+              </address>
+            </div>
 
             <CinemaMapLazy cinema={cinema} />
           </section>

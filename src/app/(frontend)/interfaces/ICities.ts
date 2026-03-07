@@ -7,6 +7,7 @@ export interface ICity {
   name: string;
   nameDeclinated: string;
   numberOfCinemas: number;
+  description: string | null;
 }
 
 export interface ICityDetails extends ICity {
