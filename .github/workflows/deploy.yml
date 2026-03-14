@@ -54,6 +54,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
             API_URL=${{ secrets.API_URL }}
+            MAINTENANCE_MODE=${{ secrets.MAINTENANCE_MODE }}
           secrets: |
             internal_api_key=${{ secrets.INTERNAL_API_KEY }}
           tags: |
@@ -97,6 +98,7 @@ jobs:
             INTERNAL_API_KEY=${{ secrets.INTERNAL_API_KEY }}
             GA_MEASUREMENT_ID=${{ secrets.GA_MEASUREMENT_ID }}
             DOMAIN=${{ env.DOMAIN }}
+            MAINTENANCE_MODE=${{ secrets.MAINTENANCE_MODE }}
             ENVEOF
 
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
