@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import NotFoundHero from "./_components/not-found/not-found-hero";
+import NotFoundHero from "./(frontend)/not-found/not-found-hero";
 
 export const metadata: Metadata = {
   title: "404 - Nie znaleziono",

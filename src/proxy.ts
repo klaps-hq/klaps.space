@@ -52,6 +52,10 @@ const fetchSlugById = async (
 };
 
 export async function proxy(request: NextRequest) {
+  if (process.env.MAINTENANCE_MODE === "true" && !request.nextUrl.pathname.startsWith("/maintenance")) {
+    return NextResponse.rewrite(new URL("/maintenance", request.url));
+  }
+
   const { hostname, pathname, search } = request.nextUrl;
 
   if (hostname.startsWith("www.")) {

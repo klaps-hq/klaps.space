@@ -23,10 +23,10 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   const [moviesResult, cinemasResult, citiesResult, genresResult, screeningsResult] =
     await Promise.allSettled([
       getMovies({ page: 1, limit: 1000 }),
-      getCinemas({ limit: 5000 }),
+      getCinemas(),
       getCities(),
       getGenres(),
-      getScreenings({ limit: 1000 }),
+      getScreenings(),
     ]);
 
   const movies = moviesResult.status === "fulfilled" ? moviesResult.value.data : [];
