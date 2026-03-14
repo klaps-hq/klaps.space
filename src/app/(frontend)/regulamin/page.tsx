@@ -1,6 +1,4 @@
-import { Metadata } from "next";
 import TermsPageContent from "./_components/terms-page-content";
-import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 
 const TermsPage = () => {
@@ -12,15 +10,6 @@ const TermsPage = () => {
       </div>
     </main>
   );
-};
-
-export const metadata: Metadata = {
-  title: "Regulamin",
-  description:
-    "Regulamin korzystania z serwisu Klaps. Zasady, odpowiedzialność, prawa autorskie i dane kontaktowe.",
-  alternates: {
-    canonical: `${SITE_URL}/regulamin`,
-  },
 };
 
 export default TermsPage;

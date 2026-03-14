@@ -14,7 +14,6 @@ interface GetScreeningsParams {
   dateFrom?: string | null;
   dateTo?: string | null;
   search?: string | null;
-  limit?: number;
 }
 
 interface GetPaginatedScreeningsParams extends GetScreeningsParams {
@@ -24,7 +23,6 @@ interface GetPaginatedScreeningsParams extends GetScreeningsParams {
 interface GetMovieScreeningsParams {
   movieId: string;
   cityId?: string | null;
-  limit?: number;
 }
 
 export const getScreenings = async (
@@ -41,7 +39,6 @@ export const getScreenings = async (
         dateFrom: params.dateFrom ?? "",
         dateTo: params.dateTo ?? "",
         search: params.search ?? "",
-        limit: params.limit?.toString() ?? "10",
       },
     });
 
@@ -61,7 +58,6 @@ export const getMovieScreenings = async (
       params: {
         movieId: params.movieId,
         cityId: params.cityId ?? "",
-        limit: params.limit?.toString() ?? "100",
       },
     }
   );
@@ -83,8 +79,6 @@ export const getPaginatedScreenings = async (
         dateFrom: params.dateFrom ?? "",
         dateTo: params.dateTo ?? "",
         search: params.search ?? "",
-        page: (params.page ?? 1).toString(),
-        limit: (params.limit ?? 24).toString(),
       },
     });
 

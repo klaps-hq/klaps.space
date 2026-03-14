@@ -1,6 +1,4 @@
-import { Metadata } from "next";
 import { getGenres } from "@/lib/genres";
-import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import GenresList from "./_components/genres-list";
@@ -26,26 +24,6 @@ const GenresPage = async () => {
       </div>
     </main>
   );
-};
-
-export const metadata: Metadata = {
-  title: "Gatunki filmowe - klasyka i retrospektywy w kinach",
-  description:
-    "Przeglądaj filmy klasyczne według gatunku. Dramat, thriller, komedia i inne gatunki w seansach specjalnych w kinach studyjnych w Polsce.",
-  keywords: [
-    "gatunki filmowe",
-    "filmy klasyczne gatunki",
-    "dramat kino studyjne",
-    "seanse specjalne gatunek",
-  ],
-  alternates: {
-    canonical: `${SITE_URL}/gatunki`,
-  },
-  openGraph: {
-    title: "Gatunki filmowe - klasyka i retrospektywy w kinach studyjnych",
-    description:
-      "Przeglądaj filmy klasyczne według gatunku. Seanse specjalne w kinach studyjnych w Polsce.",
-  },
 };
 
 export default GenresPage;

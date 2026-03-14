@@ -1,9 +1,9 @@
-import { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getMovieBySlug } from "@/lib/movies";
 import { getMovieScreenings } from "@/lib/screenings";
 import { getPreferredCityId } from "@/lib/get-preferred-city";
 import { ApiNotFoundError } from "@/lib/client";
+import { tmdbImageUrl } from "@/lib/tmdb";
 import SectionDivider from "@/components/ui/section-divider";
 import MovieHero from "./_components/movie-hero";
 import MovieDetailsSections from "./_components/movie-details-sections";
@@ -18,15 +18,7 @@ export const revalidate = 300;
 
 type MoviePageProps = {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
-
-const hasQueryParams = (params: Record<string, string | string[] | undefined>) =>
-  Object.values(params).some((value) =>
-    Array.isArray(value)
-      ? value.some((item) => item.trim().length > 0)
-      : typeof value === "string" && value.trim().length > 0
-  );
 
 const buildMovieJsonLd = (movie: IMovie) => {
   const jsonLd: Record<string, unknown> = {
@@ -50,7 +42,7 @@ const buildMovieJsonLd = (movie: IMovie) => {
   }
 
   if (movie.posterUrl) {
-    jsonLd.image = movie.posterUrl;
+    jsonLd.image = tmdbImageUrl(movie.posterUrl, "w780");
   }
 
   if (movie.directors?.length) {
@@ -87,7 +79,6 @@ const MoviePage = async ({ params }: MoviePageProps) => {
     screenings = await getMovieScreenings({
       movieId: movie.id.toString(),
       cityId,
-      limit: 1000,
     });
   } catch (error) {
     if (error instanceof ApiNotFoundError) {
@@ -125,60 +116,6 @@ const MoviePage = async ({ params }: MoviePageProps) => {
       </main>
     </>
   );
-};
-
-export const generateMetadata = async ({
-  params,
-  searchParams,
-}: MoviePageProps): Promise<Metadata> => {
-  const { slug } = await params;
-  const queryParams = searchParams ? await searchParams : {};
-  const movie = await getMovieBySlug(slug);
-
-  const genreNames = movie.genres.map((g) => g.name).join(", ");
-  const directorNames = movie.directors?.map((d) => d.name).join(", ");
-
-  const descriptionParts = [
-    `${movie.title} (${movie.productionYear})`,
-    genreNames && `- ${genreNames}`,
-    directorNames && `reż. ${directorNames}`,
-    "- seanse specjalne w kinach studyjnych w Polsce.",
-  ].filter(Boolean);
-
-  const description = movie.description
-    ? `${movie.description.slice(0, 130)} Sprawdź seanse w kinach studyjnych.`
-    : descriptionParts.join(" ");
-
-  const title = `${movie.title} - seanse w kinach (${movie.productionYear})`;
-
-  return {
-    title,
-    description,
-    keywords: [
-      movie.title,
-      movie.titleOriginal,
-      `${movie.title} seanse w kinach`,
-      `${movie.title} kino`,
-      `${movie.title} seans specjalny`,
-      ...movie.genres.map((g) => g.name.toLowerCase()),
-    ].filter(Boolean) as string[],
-    alternates: {
-      canonical: `${SITE_URL}/filmy/${movie.slug}`,
-    },
-    ...(hasQueryParams(queryParams) && {
-      robots: {
-        index: false,
-        follow: true,
-      },
-    }),
-    openGraph: {
-      title: `${movie.title} - seanse w kinach`,
-      description,
-      ...(movie.posterUrl && {
-        images: [{ url: movie.posterUrl, alt: movie.title }],
-      }),
-    },
-  };
 };
 
 export default MoviePage;

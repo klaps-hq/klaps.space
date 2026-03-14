@@ -1,4 +1,3 @@
-import { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getCityBySlug } from "@/lib/cities";
 import { getCinemas } from "@/lib/cinemas";
@@ -17,17 +16,7 @@ export const revalidate = 300;
 
 type CityPageProps = {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
-
-const hasQueryParams = (
-  params: Record<string, string | string[] | undefined>
-) =>
-  Object.values(params).some((value) =>
-    Array.isArray(value)
-      ? value.some((item) => item.trim().length > 0)
-      : typeof value === "string" && value.trim().length > 0
-  );
 
 const buildCityJsonLd = (
   city: ICity,
@@ -106,60 +95,6 @@ const CityPage = async ({ params }: CityPageProps) => {
       </main>
     </>
   );
-};
-
-export const generateMetadata = async ({
-  params,
-  searchParams,
-}: CityPageProps): Promise<Metadata> => {
-  const { slug } = await params;
-  const queryParams = searchParams ? await searchParams : {};
-  const { city } = await getCityBySlug(slug);
-
-  const title = `Kina studyjne ${city.name} - repertuar seansów specjalnych`;
-  const description = `Kina studyjne i niezależne w ${city.nameDeclinated}. Aktualne seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź repertuar kin w ${city.nameDeclinated}.`;
-  const url = `${SITE_URL}/miasta/${city.slug}`;
-  const image = `${SITE_URL}/klaps-og.png`;
-
-  return {
-    title,
-    description,
-    keywords: [
-      `kino studyjne ${city.name}`,
-      `kina ${city.name}`,
-      `seanse specjalne ${city.name}`,
-      `repertuar kin ${city.name}`,
-      `kino niezależne ${city.name}`,
-    ],
-    alternates: {
-      canonical: url,
-    },
-    ...(hasQueryParams(queryParams) && {
-      robots: {
-        index: false,
-        follow: true,
-      },
-    }),
-    openGraph: {
-      title,
-      description,
-      url,
-      images: [
-        {
-          url: image,
-          width: 1200,
-          height: 630,
-          alt: `${city.name} - kina studyjne i repertuar`,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [image],
-    },
-  };
 };
 
 export default CityPage;

@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "fwcdn.pl",
+        hostname: "image.tmdb.org",
       },
       {
         protocol: "https",

@@ -1,6 +1,4 @@
-import { Metadata } from "next";
 import { getCinemas } from "@/lib/cinemas";
-import { SITE_URL } from "@/lib/site-config";
 import { getMovies } from "@/lib/movies";
 import { getGenres } from "@/lib/genres";
 import SectionHeader from "@/components/common/section-header";
@@ -10,7 +8,7 @@ export const revalidate = 300;
 
 const SitemapPage = async () => {
   const [{ data: cinemaGroups }, { data: movies }, genres] = await Promise.all([
-    getCinemas({ limit: 500 }),
+    getCinemas(),
     getMovies({ limit: 1000 }),
     getGenres(),
   ]);
@@ -32,15 +30,6 @@ const SitemapPage = async () => {
       </div>
     </main>
   );
-};
-
-export const metadata: Metadata = {
-  title: "Mapa witryny",
-  description:
-    "Mapa witryny serwisu Klaps. Przeglądaj wszystkie dostępne strony i podstrony w jednym miejscu.",
-  alternates: {
-    canonical: `${SITE_URL}/mapa-witryny`,
-  },
 };
 
 export default SitemapPage;

@@ -1,6 +1,4 @@
-import { Metadata } from "next";
 import ContactPageContent from "./_components/contact-page-content";
-import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 
@@ -16,20 +14,6 @@ const ContactPage = () => {
       </div>
     </main>
   );
-};
-
-export const metadata: Metadata = {
-  title: "Kontakt",
-  description:
-    "Skontaktuj się z zespołem Klaps. Współpraca z kinami studyjnymi, zgłoszenia błędów, propozycje nowych kin i funkcji serwisu.",
-  alternates: {
-    canonical: `${SITE_URL}/kontakt`,
-  },
-  openGraph: {
-    title: "Kontakt - Klaps",
-    description:
-      "Skontaktuj się z zespołem Klaps. Współpraca z kinami studyjnymi, zgłoszenia i propozycje.",
-  },
 };
 
 export default ContactPage;

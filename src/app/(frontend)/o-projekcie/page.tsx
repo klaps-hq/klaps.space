@@ -1,6 +1,4 @@
-import { Metadata } from "next";
 import AboutPageContent from "./_components/about-page-content";
-import { SITE_URL } from "@/lib/site-config";
 import SectionHeader from "@/components/common/section-header";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 
@@ -16,26 +14,6 @@ const AboutPage = () => {
       </div>
     </main>
   );
-};
-
-export const metadata: Metadata = {
-  title: "O Klaps - przewodnik po kinach studyjnych w Polsce",
-  description:
-    "Czym jest Klaps, jaki problem rozwiązuje i dlaczego kino klasyczne zasługuje na jedno, czytelne miejsce w sieci. Przewodnik po seansach specjalnych w kinach studyjnych.",
-  keywords: [
-    "Klaps",
-    "przewodnik po kinach studyjnych",
-    "seanse specjalne Polska",
-    "klasyka filmowa w kinie",
-  ],
-  alternates: {
-    canonical: `${SITE_URL}/o-projekcie`,
-  },
-  openGraph: {
-    title: "O projekcie Klaps - przewodnik po kinach studyjnych",
-    description:
-      "Czym jest Klaps i dlaczego kino klasyczne zasługuje na jedno, czytelne miejsce w sieci.",
-  },
 };
 
 export default AboutPage;

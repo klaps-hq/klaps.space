@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
+import { tmdbImageUrl } from "@/lib/tmdb";
 
 interface HeroBackdropMotionProps {
   backdropUrl: string;
@@ -28,7 +29,7 @@ const HeroBackdropMotion: React.FC<HeroBackdropMotionProps> = ({
       }
     >
       <Image
-        src={backdropUrl}
+        src={tmdbImageUrl(backdropUrl, "w1280")}
         alt={`Plakat filmowy: ${movieTitle}`}
         width={1920}
         height={1080}

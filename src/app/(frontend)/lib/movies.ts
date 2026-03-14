@@ -6,9 +6,7 @@ import {
 } from "@/interfaces/IMovies";
 import { apiFetch } from "./client";
 
-interface GetMultiCityMoviesParams {
-  limit?: number;
-}
+interface GetMultiCityMoviesParams {}
 
 interface GetMoviesParams {
   page?: number;
@@ -21,11 +19,7 @@ export const getMultiCityMovies = async (
   params: GetMultiCityMoviesParams = {}
 ): Promise<IMultiCityMovie[]> => {
   try {
-    const movies = await apiFetch<IMultiCityMovie[]>("/movies/multi-city", {
-      params: {
-        limit: params.limit?.toString() ?? "100",
-      },
-    });
+    const movies = await apiFetch<IMultiCityMovie[]>("/movies/multi-city");
     return movies;
   } catch (error) {
     console.warn("Falling back to empty multi-city movies list:", error);

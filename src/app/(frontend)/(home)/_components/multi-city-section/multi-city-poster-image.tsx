@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import { tmdbImageUrl } from "@/lib/tmdb";
 
 interface MultiCityPosterImageProps {
   posterUrl: string;
@@ -16,7 +17,7 @@ const MultiCityPosterImage: React.FC<MultiCityPosterImageProps> = ({
       <div className="absolute -bottom-3 -right-3 w-16 h-16 border-b-2 border-r-2 border-blood-red z-10 pointer-events-none" />
 
       <Image
-        src={posterUrl}
+        src={tmdbImageUrl(posterUrl)}
         alt={`Plakat filmu ${title}`}
         fill
         className="object-cover"

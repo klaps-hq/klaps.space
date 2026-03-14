@@ -27,8 +27,6 @@ const ScreeningsPageContent = async ({
       dateFrom: searchParams.dateFrom,
       dateTo: searchParams.dateTo,
       search: searchParams.search,
-      page: currentPage,
-      limit: 24,
     }),
     getGenres(),
   ]);
