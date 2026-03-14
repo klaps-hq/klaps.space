@@ -12,8 +12,9 @@ type CityPageParams = {
 };
 
 const hasQueryParams = (
-  params: Record<string, string | string[] | undefined>
+  params: Record<string, string | string[] | undefined> | null | undefined
 ) =>
+  params != null &&
   Object.values(params).some((value) =>
     Array.isArray(value)
       ? value.some((item) => item.trim().length > 0)

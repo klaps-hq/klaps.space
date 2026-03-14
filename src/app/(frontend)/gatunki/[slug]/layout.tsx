@@ -11,7 +11,8 @@ type GenrePageParams = {
   searchParams: Promise<Record<string, string | undefined>>;
 };
 
-const hasQueryParams = (params: Record<string, string | undefined>) =>
+const hasQueryParams = (params: Record<string, string | undefined> | null | undefined) =>
+  params != null &&
   Object.values(params).some(
     (value) => typeof value === "string" && value.trim().length > 0
   );

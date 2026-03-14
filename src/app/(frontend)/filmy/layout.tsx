@@ -11,7 +11,8 @@ type MoviesSearchParams = {
   genre?: string;
 };
 
-const hasQueryParams = (params: MoviesSearchParams) =>
+const hasQueryParams = (params: MoviesSearchParams | null | undefined) =>
+  params != null &&
   Object.values(params).some(
     (value) => typeof value === "string" && value.trim().length > 0
   );

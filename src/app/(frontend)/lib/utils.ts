@@ -84,6 +84,13 @@ export const truncateText = (text: string, maxLength: number) => {
   return text.slice(0, maxLength).trim() + "…";
 };
 
+export function getYouTubeEmbedUrl(url: string): string | null {
+  const match = url.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match?.[1] ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
 export const getTitleSizeClasses = (title: string): string => {
   const length = title.length;
 

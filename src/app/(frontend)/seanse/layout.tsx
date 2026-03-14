@@ -14,7 +14,8 @@ type SearchParams = {
   page?: string;
 };
 
-const hasQueryParams = (params: SearchParams) =>
+const hasQueryParams = (params: SearchParams | null | undefined) =>
+  params != null &&
   Object.values(params).some(
     (value) => typeof value === "string" && value.trim().length > 0
   );
