@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { existsSync } from "fs";
+import { join } from "path";
+
+const isMaintenanceMode = () =>
+  existsSync(join(process.cwd(), "maintenance.flag"));
 
 const API_URL = process.env.API_URL!;
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY!;
@@ -52,6 +57,10 @@ const fetchSlugById = async (
 };
 
 export async function proxy(request: NextRequest) {
+  if (isMaintenanceMode() && !request.nextUrl.pathname.startsWith("/maintenance")) {
+    return NextResponse.rewrite(new URL("/maintenance", request.url));
+  }
+
   const { hostname, pathname, search } = request.nextUrl;
 
   if (hostname.startsWith("www.")) {
