@@ -36,4 +36,5 @@ jobs:
         env:
           NEXT_PUBLIC_SITE_URL: https://example.com
           API_URL: https://example.com
+          MAINTENANCE_MODE: false
         run: bun run build

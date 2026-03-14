@@ -14,6 +14,8 @@ ARG NEXT_PUBLIC_SITE_URL=https://klaps.space
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ARG API_URL
 ENV API_URL=$API_URL
+ARG MAINTENANCE_MODE
+ENV MAINTENANCE_MODE=$MAINTENANCE_MODE
 
 RUN --mount=type=secret,id=internal_api_key \
     INTERNAL_API_KEY="$(cat /run/secrets/internal_api_key)" npm run build
