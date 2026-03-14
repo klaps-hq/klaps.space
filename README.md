@@ -119,6 +119,7 @@ Create a `.env` file in the project root:
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 API_URL=http://localhost:4000
 INTERNAL_API_KEY=your-api-key
+MAINTENANCE_MODE=false
 ```
 
 ### Install & Run
@@ -202,6 +203,7 @@ The project uses **GitHub Actions** for CI/CD (`.github/workflows/deploy.yml`):
 | `API_URL`           | Backend API URL                         |
 | `INTERNAL_API_KEY`  | API authentication key                  |
 | `GA_MEASUREMENT_ID` | Google Analytics measurement ID         |
+| `MAINTENANCE_MODE`  | Maintenance mode (true/false)           |
 | `GHCR_PAT`          | GitHub Container Registry token         |
 | `DEPLOY_DIR`        | Base deploy path on server              |
 | `DOCKER_IMAGE`      | Full Docker image name (e.g. ghcr.io/…) |
@@ -215,6 +217,7 @@ The project uses **GitHub Actions** for CI/CD (`.github/workflows/deploy.yml`):
 | `API_URL`              | Yes      | Backend API base URL                         |
 | `INTERNAL_API_KEY`     | Yes      | Key for authenticating API requests          |
 | `GA_MEASUREMENT_ID`    | No       | Google Analytics measurement ID (production) |
+| `MAINTENANCE_MODE`     | No       | Maintenance mode (true/false)                |
 
 ## Open Source
 
