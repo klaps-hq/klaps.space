@@ -17,7 +17,6 @@ interface ScreeningsPageContentProps {
 const ScreeningsPageContent = async ({
   searchParams,
 }: ScreeningsPageContentProps) => {
-  const currentPage = searchParams.page ? Number(searchParams.page) : 1;
   const cityId = await getPreferredCityId(searchParams);
 
   const [screeningsResponse, genres] = await Promise.all([
@@ -35,8 +34,6 @@ const ScreeningsPageContent = async ({
   const screenings = isPaginated ? screeningsResponse.data : screeningsResponse;
   const page = isPaginated ? screeningsResponse.meta.page : 1;
   const totalPages = isPaginated ? screeningsResponse.meta.totalPages : 1;
-
-  console.log(screeningsResponse);
 
   return (
     <ScreeningsPageInner

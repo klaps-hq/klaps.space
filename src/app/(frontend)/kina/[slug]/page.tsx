@@ -10,7 +10,7 @@ import Breadcrumbs from "@/components/ui/breadcrumbs";
 import { SITE_URL } from "@/lib/site-config";
 import { ICinema } from "@/interfaces/ICinema";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
-import { IGenre } from "@/interfaces/IMovies";
+
 import SectionHeader from "@/components/common/section-header";
 
 export const revalidate = 300;
@@ -77,17 +77,6 @@ const CinemaPage = async ({ params }: CinemaPageProps) => {
     }
     throw error;
   }
-
-  const cinemaGenres = Array.from(
-    new Map<string, IGenre>(
-      screenings
-        .flatMap((group) => group.movie.genres)
-        .filter((genre) => genre.slug)
-        .map((genre) => [genre.slug, genre])
-    ).values()
-  )
-    .sort((a, b) => a.name.localeCompare(b.name, "pl"))
-    .slice(0, 10);
 
   return (
     <>

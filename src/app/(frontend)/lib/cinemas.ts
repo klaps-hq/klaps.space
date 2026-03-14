@@ -18,7 +18,7 @@ function groupCinemasByCity(cinemas: ICinemaSummary[]): ICinemaGroup[] {
       group = { city: cinema.city, cinemas: [] };
       map.set(cityId, group);
     }
-    const { city: _, ...rest } = cinema;
+    const { city: _city, ...rest } = cinema;
     group.cinemas.push(rest);
   }
 

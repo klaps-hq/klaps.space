@@ -6,8 +6,6 @@ import {
 } from "@/interfaces/IMovies";
 import { apiFetch } from "./client";
 
-interface GetMultiCityMoviesParams {}
-
 interface GetMoviesParams {
   page?: number;
   limit?: number;
@@ -15,9 +13,7 @@ interface GetMoviesParams {
   genreId?: string | null;
 }
 
-export const getMultiCityMovies = async (
-  params: GetMultiCityMoviesParams = {}
-): Promise<IMultiCityMovie[]> => {
+export const getMultiCityMovies = async (): Promise<IMultiCityMovie[]> => {
   try {
     const movies = await apiFetch<IMultiCityMovie[]>("/movies/multi-city");
     return movies;
