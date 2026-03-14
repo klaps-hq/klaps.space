@@ -90,7 +90,7 @@ export const getPaginatedScreenings = async (
       meta: {
         total: 0,
         page: params.page ?? 1,
-        limit: params.limit ?? 24,
+        limit: 24,
         totalPages: 0,
       },
     };
