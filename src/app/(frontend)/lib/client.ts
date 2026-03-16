@@ -15,6 +15,18 @@ export class ApiNotFoundError extends Error {
   }
 }
 
+export async function fetchOrNotFound<T>(fn: () => Promise<T>): Promise<T> {
+  const { notFound } = await import("next/navigation");
+  try {
+    return await fn();
+  } catch (error) {
+    if (error instanceof ApiNotFoundError) {
+      notFound();
+    }
+    throw error;
+  }
+}
+
 export async function apiFetch<T>(
   path: string,
   options: RequestInit & { params?: Record<string, string> } = {}
