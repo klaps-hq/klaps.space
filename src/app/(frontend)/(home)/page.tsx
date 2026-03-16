@@ -47,11 +47,9 @@ const HomePage = async ({ searchParams }: HomeProps) => {
   return (
     <>
       <Hero screening={randomScreening} />
-
       <Suspense fallback={<ScreeningsSectionLoader />}>
         <ScreeningsSection searchParams={params} />
       </Suspense>
-
       <SectionDivider />
       <HowItWorksSection />
       <SectionDivider />
@@ -63,6 +61,5 @@ const HomePage = async ({ searchParams }: HomeProps) => {
     </>
   );
 };
-
 
 export default HomePage;
