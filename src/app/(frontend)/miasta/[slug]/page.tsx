@@ -7,28 +7,13 @@ import CityStats from "./_components/city-stats";
 import CityCinemas from "./_components/city-cinemas";
 import CityScreenings from "./_components/city-screenings";
 import SectionHeader from "@/components/common/section-header";
-import JsonLd from "@/components/common/json-ld";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
-import { SITE_URL } from "@/lib/site-config";
-import { ICity } from "@/interfaces/ICities";
 
 export const revalidate = 300;
 
 type CityPageProps = {
   params: Promise<{ slug: string }>;
 };
-
-const buildCityJsonLd = (
-  city: ICity,
-  cinemasCount: number,
-  screeningsCount: number
-) => ({
-  "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  name: `Kina i seanse w ${city.nameDeclinated}`,
-  url: `${SITE_URL}/miasta/${city.slug}`,
-  description: `${cinemasCount} kin i ${screeningsCount} seansów specjalnych w ${city.nameDeclinated}.`,
-});
 
 const CityPage = async ({ params }: CityPageProps) => {
   const { slug } = await params;
@@ -45,7 +30,6 @@ const CityPage = async ({ params }: CityPageProps) => {
 
     cinemasResponse = await getCinemas({
       cityId: cityData.city.id.toString(),
-      limit: 100,
     });
   } catch (error) {
     if (error instanceof ApiNotFoundError) {
@@ -68,9 +52,7 @@ const CityPage = async ({ params }: CityPageProps) => {
   );
 
   return (
-    <>
-      <JsonLd data={buildCityJsonLd(city, cinemasCount, screeningsCount)} />
-      <main className="bg-black min-h-screen px-8 py-24 md:py-32">
+    <main className="bg-black min-h-screen px-8 py-24 md:py-32">
         <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
           <Breadcrumbs
             items={[{ name: "Miasta", href: "/miasta" }, { name: city.name }]}
@@ -92,8 +74,7 @@ const CityPage = async ({ params }: CityPageProps) => {
           <SectionDivider />
           <CityScreenings screenings={screenings} />
         </div>
-      </main>
-    </>
+    </main>
   );
 };
 

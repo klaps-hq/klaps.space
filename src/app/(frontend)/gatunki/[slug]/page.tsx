@@ -6,10 +6,8 @@ import { getScreenings } from "@/lib/screenings";
 import SectionHeader from "@/components/common/section-header";
 import GenreMovies from "./_components/genre-movies";
 import PaginatedNav from "@/components/common/paginated-nav";
-import JsonLd from "@/components/common/json-ld";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
-import { SITE_URL } from "@/lib/site-config";
-import { IGenre, IMovieSummary } from "@/interfaces/IMovies";
+import { IGenre } from "@/interfaces/IMovies";
 
 export const revalidate = 300;
 
@@ -17,24 +15,6 @@ type GenrePageProps = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<Record<string, string | undefined>>;
 };
-
-const buildGenreJsonLd = (genre: IGenre, movies: readonly IMovieSummary[]) => ({
-  "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  name: `${genre.name} - Filmy`,
-  url: `${SITE_URL}/gatunki/${genre.slug}`,
-  description: `Filmy z gatunku ${genre.name.toLowerCase()} dostępne w serwisie Klaps.`,
-  mainEntity: {
-    "@type": "ItemList",
-    numberOfItems: movies.length,
-    itemListElement: movies.map((movie, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      url: `${SITE_URL}/filmy/${movie.slug}`,
-      name: movie.title,
-    })),
-  },
-});
 
 const GenrePage = async ({ params, searchParams }: GenrePageProps) => {
   const { slug } = await params;
@@ -89,9 +69,7 @@ const GenrePage = async ({ params, searchParams }: GenrePageProps) => {
   };
 
   return (
-    <>
-      <JsonLd data={buildGenreJsonLd(genre, movies)} />
-      <main className="bg-black min-h-screen px-8 py-24 md:py-32">
+    <main className="bg-black min-h-screen px-8 py-24 md:py-32">
         <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
           <Breadcrumbs
             items={[
@@ -156,8 +134,7 @@ const GenrePage = async ({ params, searchParams }: GenrePageProps) => {
             buildHref={buildPaginationHref}
           />
         </div>
-      </main>
-    </>
+    </main>
   );
 };
 

@@ -1,8 +1,6 @@
 import { ICinema, ICinemaGroup, ICinemaSummary } from "@/interfaces/ICinema";
 import { apiFetch } from "./client";
 
-const CINEMAS_LIMIT = 20;
-
 interface GetCinemasParams {
   cityId?: string | null;
   limit?: number;
@@ -34,7 +32,7 @@ export const getCinemas = async (
     >("/cinemas", {
       params: {
         cityId: params.cityId ?? "",
-        limit: (params.limit ?? CINEMAS_LIMIT).toString(),
+        limit: params.limit?.toString() ?? "",
       },
     });
 
@@ -62,9 +60,7 @@ export const getCinemasWithCoordinates = async (): Promise<ICinema[]> => {
   try {
     const { data: groups } = await getCinemas({ limit: 1000 });
 
-    const slugs = groups.flatMap((g) =>
-      g.cinemas.map((c) => c.slug)
-    );
+    const slugs = groups.flatMap((g) => g.cinemas.map((c) => c.slug));
 
     const results = await Promise.allSettled(
       slugs.map((slug) => getCinemaBySlug(slug))
