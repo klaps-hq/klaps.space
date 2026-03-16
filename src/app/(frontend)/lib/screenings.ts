@@ -15,6 +15,7 @@ interface GetScreeningsParams {
   dateFrom?: string | null;
   dateTo?: string | null;
   search?: string | null;
+  limit?: number | null;
 }
 
 interface GetPaginatedScreeningsParams extends GetScreeningsParams {
@@ -40,6 +41,7 @@ export const getScreenings = async (
         dateFrom: params.dateFrom ?? "",
         dateTo: params.dateTo ?? "",
         search: params.search ?? "",
+        limit: params.limit ? params.limit.toString() : "",
       },
     });
 

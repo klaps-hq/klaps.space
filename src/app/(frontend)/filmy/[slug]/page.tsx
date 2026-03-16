@@ -6,7 +6,7 @@ import MovieScreenings from "./_components/movie-screenings";
 import MovieTrailer from "./_components/movie-trailer";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 type MoviePageProps = {
   params: Promise<{ slug: string }>;

@@ -26,6 +26,7 @@ const ScreeningsSection = async ({ searchParams }: ScreeningsSectionProps) => {
       dateFrom: params?.dateFrom,
       dateTo: params?.dateTo,
       search: params?.search,
+      limit: 12,
     }),
     getGenres(),
   ]);

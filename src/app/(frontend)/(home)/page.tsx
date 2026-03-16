@@ -30,7 +30,7 @@ const HomePage = async ({ searchParams }: HomeProps) => {
 
   const [cinemasResult, moviesResult, screeningResult] =
     await Promise.allSettled([
-      getCinemas(),
+      getCinemas({ limit: 12 }),
       getMultiCityMovies(),
       getRandomScreening(),
     ]);
