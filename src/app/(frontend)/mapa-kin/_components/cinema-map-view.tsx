@@ -74,6 +74,7 @@ const CinemaMapView: React.FC<CinemaMapViewProps> = ({ cinemas }) => {
               clusterColors={["#dc1301", "#b01001", "#8a0d01"]}
               clusterThresholds={[10, 30]}
               pointColor="#dc1301"
+              pointRadius={10}
               onPointClick={(feature, coordinates) => {
                 setSelected({
                   name: feature.properties?.name ?? "",

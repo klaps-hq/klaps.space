@@ -2,9 +2,12 @@ import { Metadata } from "next";
 import { getScreeningById } from "@/lib/screenings";
 import { tmdbImageUrl } from "@/lib/tmdb";
 import { SITE_URL } from "@/lib/site-config";
+import { IScreeningDetail } from "@/interfaces/IScreenings";
+import JsonLd from "@/components/common/json-ld";
 
 type ScreeningLayoutProps = {
   children: React.ReactNode;
+  params: Promise<{ id: string }>;
 };
 
 type ScreeningPageParams = {
@@ -19,6 +22,43 @@ const hasQueryParams = (params: Record<string, string | string[] | undefined> | 
       ? value.some((item) => item.trim().length > 0)
       : typeof value === "string" && value.trim().length > 0
   );
+
+const buildScreeningJsonLd = ({ movie, screening }: IScreeningDetail) => {
+  const jsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "ScreeningEvent",
+    name: `${movie.title} - Seans`,
+    startDate: screening.dateTime,
+    url: `${SITE_URL}/seanse/${screening.id}`,
+    location: {
+      "@type": "MovieTheater",
+      name: screening.cinema.name,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: screening.cinema.street ?? undefined,
+        addressLocality: screening.cinema.city.name,
+        addressCountry: "PL",
+      },
+    },
+    workPresented: {
+      "@type": "Movie",
+      name: movie.title,
+      url: `${SITE_URL}/filmy/${movie.slug}`,
+      ...(movie.description && { description: movie.description }),
+      ...(movie.posterUrl && { image: tmdbImageUrl(movie.posterUrl, "w780") }),
+    },
+  };
+
+  if (screening.ticketUrl) {
+    jsonLd.offers = {
+      "@type": "Offer",
+      url: screening.ticketUrl,
+      availability: "https://schema.org/InStock",
+    };
+  }
+
+  return jsonLd;
+};
 
 export const generateMetadata = async ({
   params,
@@ -66,8 +106,17 @@ export const generateMetadata = async ({
   };
 };
 
-export default function ScreeningLayout({
+export default async function ScreeningLayout({
   children,
+  params,
 }: Readonly<ScreeningLayoutProps>) {
-  return children;
+  const { id } = await params;
+  const screeningDetail = await getScreeningById(Number(id));
+
+  return (
+    <>
+      <JsonLd data={buildScreeningJsonLd(screeningDetail)} />
+      {children}
+    </>
+  );
 }
