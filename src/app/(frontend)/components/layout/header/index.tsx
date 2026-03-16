@@ -18,6 +18,7 @@ const NAV_LINKS = [
   { href: "/gatunki", label: "Gatunki" },
   { href: "/kina", label: "Kina" },
   { href: "/miasta", label: "Miasta" },
+  { href: "/mapa-kin", label: "Mapa kin" },
   { href: "/o-projekcie", label: "O projekcie" },
   { href: "/kontakt", label: "Kontakt" },
 ] as const;
