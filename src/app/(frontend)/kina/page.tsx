@@ -6,7 +6,11 @@ import CinemasList from "./_components/cinemas-list";
 export const revalidate = 300;
 
 const CinemasPage = async () => {
-  const { data: cinemaGroups } = await getCinemas();
+  const { data: cinemaGroups } = await getCinemas({ limit: 1000 });
+
+  const sortedGroups = [...cinemaGroups].sort((a, b) =>
+    a.city.name.localeCompare(b.city.name, "pl")
+  );
 
   return (
     <main className="bg-black min-h-screen px-8 py-24 md:py-32">
@@ -20,7 +24,7 @@ const CinemasPage = async () => {
           />
         </div>
 
-        <CinemasList cinemaGroups={cinemaGroups} />
+        <CinemasList cinemaGroups={sortedGroups} />
       </div>
     </main>
   );

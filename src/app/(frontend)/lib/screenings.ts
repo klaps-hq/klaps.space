@@ -1,3 +1,4 @@
+import { permanentRedirect } from "next/navigation";
 import {
   IScreening,
   IScreeningGroup,
@@ -5,7 +6,7 @@ import {
   IRandomScreening,
 } from "@/interfaces/IScreenings";
 import { PaginatedResponse } from "@/interfaces/IMovies";
-import { apiFetch } from "./client";
+import { apiFetch, fetchOrNotFound } from "./client";
 
 interface GetScreeningsParams {
   cityId?: string | null;
@@ -14,6 +15,7 @@ interface GetScreeningsParams {
   dateFrom?: string | null;
   dateTo?: string | null;
   search?: string | null;
+  limit?: number | null;
 }
 
 interface GetPaginatedScreeningsParams extends GetScreeningsParams {
@@ -39,6 +41,7 @@ export const getScreenings = async (
         dateFrom: params.dateFrom ?? "",
         dateTo: params.dateTo ?? "",
         search: params.search ?? "",
+        limit: params.limit ? params.limit.toString() : "",
       },
     });
 
@@ -114,6 +117,20 @@ export const getRandomScreening = async (): Promise<IRandomScreening> => {
   }
 
   return screening;
+};
+
+export const getScreeningPageData = async (
+  id: number
+): Promise<IScreeningDetail> => {
+  return fetchOrNotFound(async () => {
+    const detail = await getScreeningById(id);
+
+    if (id !== detail.screening.id) {
+      permanentRedirect(`/seanse/${detail.screening.id}`);
+    }
+
+    return detail;
+  });
 };
 
 export const groupScreeningsByCinema = (

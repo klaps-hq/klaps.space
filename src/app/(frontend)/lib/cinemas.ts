@@ -1,7 +1,8 @@
+import { permanentRedirect } from "next/navigation";
 import { ICinema, ICinemaGroup, ICinemaSummary } from "@/interfaces/ICinema";
-import { apiFetch } from "./client";
-
-const CINEMAS_LIMIT = 20;
+import { IScreeningGroup } from "@/interfaces/IScreenings";
+import { apiFetch, fetchOrNotFound } from "./client";
+import { getScreenings } from "./screenings";
 
 interface GetCinemasParams {
   cityId?: string | null;
@@ -34,7 +35,7 @@ export const getCinemas = async (
     >("/cinemas", {
       params: {
         cityId: params.cityId ?? "",
-        limit: (params.limit ?? CINEMAS_LIMIT).toString(),
+        limit: params.limit?.toString() ?? "",
       },
     });
 
@@ -62,9 +63,7 @@ export const getCinemasWithCoordinates = async (): Promise<ICinema[]> => {
   try {
     const { data: groups } = await getCinemas({ limit: 1000 });
 
-    const slugs = groups.flatMap((g) =>
-      g.cinemas.map((c) => c.slug)
-    );
+    const slugs = groups.flatMap((g) => g.cinemas.map((c) => c.slug));
 
     const results = await Promise.allSettled(
       slugs.map((slug) => getCinemaBySlug(slug))
@@ -80,4 +79,31 @@ export const getCinemasWithCoordinates = async (): Promise<ICinema[]> => {
     console.warn("Failed to fetch cinemas with coordinates:", error);
     return [];
   }
+};
+
+interface CinemaPageFilters {
+  genreId?: string | null;
+  dateFrom?: string | null;
+  dateTo?: string | null;
+  search?: string | null;
+}
+
+export const getCinemaPageData = async (
+  slug: string,
+  filters: CinemaPageFilters = {}
+): Promise<{ cinema: ICinema; screenings: IScreeningGroup[] }> => {
+  return fetchOrNotFound(async () => {
+    const cinema = await getCinemaBySlug(slug);
+
+    if (cinema.slug !== slug) {
+      permanentRedirect(`/kina/${cinema.slug}`);
+    }
+
+    const screenings = await getScreenings({
+      cinemaId: cinema.id.toString(),
+      ...filters,
+    });
+
+    return { cinema, screenings };
+  });
 };
