@@ -1,5 +1,8 @@
+import { permanentRedirect } from "next/navigation";
 import { ICinema, ICinemaGroup, ICinemaSummary } from "@/interfaces/ICinema";
-import { apiFetch } from "./client";
+import { IScreeningGroup } from "@/interfaces/IScreenings";
+import { apiFetch, fetchOrNotFound } from "./client";
+import { getScreenings } from "./screenings";
 
 interface GetCinemasParams {
   cityId?: string | null;
@@ -76,4 +79,29 @@ export const getCinemasWithCoordinates = async (): Promise<ICinema[]> => {
     console.warn("Failed to fetch cinemas with coordinates:", error);
     return [];
   }
+};
+
+export const getCinemaPageData = async (
+  slug: string
+): Promise<{ cinema: ICinema; screenings: IScreeningGroup[] }> => {
+  return fetchOrNotFound(async () => {
+    const cinema = await getCinemaBySlug(slug);
+
+    if (cinema.slug !== slug) {
+      permanentRedirect(`/kina/${cinema.slug}`);
+    }
+
+    const cityScreenings = await getScreenings({
+      cityId: cinema.city.id.toString(),
+    });
+
+    const screenings = cityScreenings
+      .map((group) => ({
+        ...group,
+        screenings: group.screenings.filter((s) => s.cinema.id === cinema.id),
+      }))
+      .filter((group) => group.screenings.length > 0);
+
+    return { cinema, screenings };
+  });
 };

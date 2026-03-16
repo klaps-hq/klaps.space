@@ -1,10 +1,14 @@
+import { permanentRedirect } from "next/navigation";
 import {
   IMovie,
   IMovieSummary,
   IMultiCityMovie,
   PaginatedResponse,
 } from "@/interfaces/IMovies";
-import { apiFetch } from "./client";
+import { IScreening } from "@/interfaces/IScreenings";
+import { apiFetch, fetchOrNotFound } from "./client";
+import { getMovieScreenings } from "./screenings";
+import { getPreferredCityId } from "./get-preferred-city";
 
 interface GetMoviesParams {
   page?: number;
@@ -58,4 +62,24 @@ export const getMovieById = async (id: number): Promise<IMovie> => {
 export const getMovieBySlug = async (slug: string): Promise<IMovie> => {
   const movie = await apiFetch<IMovie>(`/movies/${slug}`);
   return movie;
+};
+
+export const getMoviePageData = async (
+  slug: string
+): Promise<{ movie: IMovie; screenings: IScreening[] }> => {
+  return fetchOrNotFound(async () => {
+    const movie = await getMovieBySlug(slug);
+
+    if (movie.slug !== slug) {
+      permanentRedirect(`/filmy/${movie.slug}`);
+    }
+
+    const cityId = await getPreferredCityId();
+    const screenings = await getMovieScreenings({
+      movieId: movie.id.toString(),
+      cityId,
+    });
+
+    return { movie, screenings };
+  });
 };
