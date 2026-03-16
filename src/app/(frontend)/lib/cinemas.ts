@@ -81,8 +81,16 @@ export const getCinemasWithCoordinates = async (): Promise<ICinema[]> => {
   }
 };
 
+interface CinemaPageFilters {
+  genreId?: string | null;
+  dateFrom?: string | null;
+  dateTo?: string | null;
+  search?: string | null;
+}
+
 export const getCinemaPageData = async (
-  slug: string
+  slug: string,
+  filters: CinemaPageFilters = {}
 ): Promise<{ cinema: ICinema; screenings: IScreeningGroup[] }> => {
   return fetchOrNotFound(async () => {
     const cinema = await getCinemaBySlug(slug);
@@ -91,16 +99,10 @@ export const getCinemaPageData = async (
       permanentRedirect(`/kina/${cinema.slug}`);
     }
 
-    const cityScreenings = await getScreenings({
-      cityId: cinema.city.id.toString(),
+    const screenings = await getScreenings({
+      cinemaId: cinema.id.toString(),
+      ...filters,
     });
-
-    const screenings = cityScreenings
-      .map((group) => ({
-        ...group,
-        screenings: group.screenings.filter((s) => s.cinema.id === cinema.id),
-      }))
-      .filter((group) => group.screenings.length > 0);
 
     return { cinema, screenings };
   });
