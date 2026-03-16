@@ -57,3 +57,27 @@ export const getCinemaBySlug = async (slug: string): Promise<ICinema> => {
   const cinema = await apiFetch<ICinema>(`/cinemas/${slug}`);
   return cinema;
 };
+
+export const getCinemasWithCoordinates = async (): Promise<ICinema[]> => {
+  try {
+    const { data: groups } = await getCinemas({ limit: 1000 });
+
+    const slugs = groups.flatMap((g) =>
+      g.cinemas.map((c) => c.slug)
+    );
+
+    const results = await Promise.allSettled(
+      slugs.map((slug) => getCinemaBySlug(slug))
+    );
+
+    return results
+      .filter(
+        (r): r is PromiseFulfilledResult<ICinema> => r.status === "fulfilled"
+      )
+      .map((r) => r.value)
+      .filter((c) => c.latitude !== null && c.longitude !== null);
+  } catch (error) {
+    console.warn("Failed to fetch cinemas with coordinates:", error);
+    return [];
+  }
+};

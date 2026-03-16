@@ -1,23 +1,15 @@
 "use client";
 
-import React from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { MapPin } from "lucide-react";
+import {
+  Map,
+  MapMarker,
+  MarkerContent,
+  MapControls,
+} from "@/components/ui/map";
 import { ICinema } from "@/interfaces/ICinema";
 
 const DEFAULT_ZOOM = 15;
-
-const markerIcon = new L.Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
 
 interface CinemaMapProps {
   cinema: ICinema;
@@ -28,28 +20,32 @@ const CinemaMap: React.FC<CinemaMapProps> = ({ cinema }) => {
     return null;
   }
 
-  const position: L.LatLngExpression = [cinema.latitude, cinema.longitude];
-
   return (
     <div
       className="relative w-full aspect-video max-h-[500px]"
       data-nosnippet
-      aria-label="Interaktywna mapa kina"
     >
       <div className="absolute -top-3 -left-3 w-16 h-16 border-t-2 border-l-2 border-blood-red z-10 pointer-events-none" />
       <div className="absolute -bottom-3 -right-3 w-16 h-16 border-b-2 border-r-2 border-blood-red z-10 pointer-events-none" />
 
-      <MapContainer
-        center={position}
+      <Map
+        theme="dark"
+        center={[cinema.longitude, cinema.latitude]}
         zoom={DEFAULT_ZOOM}
-        scrollWheelZoom={false}
-        className="w-full h-full z-0"
+        minZoom={10}
+        maxZoom={18}
+        scrollZoom={false}
       >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <Marker position={position} icon={markerIcon}>
-          <Popup>{cinema.name}</Popup>
-        </Marker>
-      </MapContainer>
+        <MapControls position="bottom-right" showZoom />
+
+        <MapMarker longitude={cinema.longitude} latitude={cinema.latitude}>
+          <MarkerContent>
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blood-red border-2 border-white/20 shadow-lg shadow-blood-red/30">
+              <MapPin className="w-4 h-4 text-white" />
+            </div>
+          </MarkerContent>
+        </MapMarker>
+      </Map>
     </div>
   );
 };
