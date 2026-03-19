@@ -19,8 +19,6 @@ const HERO_LABEL_SUB = "POKAZ RETROSPEKTYWNY";
 const CTA_PRIMARY = "ZOBACZ SEANSE";
 const CTA_SECONDARY = "SZCZEGÓŁY FILMU";
 const SCREENINGS_SECTION_ID = "#seanse";
-const TRUST_LINE =
-  "Aktualne seanse z kin w całej Polsce. Dane z publicznych źródeł.";
 
 const contentContainerVariants: Variants = {
   hidden: {},
@@ -108,9 +106,7 @@ const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
             getTitleSizeClasses(screening.movie.title)
           )}
         >
-          <span className="md:bg-black md:pr-4 md:box-decoration-clone md:inline">
-            {screening.movie.title}
-          </span>
+          {screening.movie.title}
         </h1>
       </motion.div>
 
@@ -134,10 +130,6 @@ const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
             <Link href={movieDetailsHref}>{CTA_SECONDARY}</Link>
           </Button>
         </div>
-
-        <p className="text-xs md:text-sm italic text-[#B3B3B3] max-w-[500px] pt-2 md:pt-4 hidden sm:block">
-          {TRUST_LINE}
-        </p>
       </motion.div>
     </motion.div>
   );
