@@ -13,7 +13,7 @@ interface HeroScreeningMetaProps {
 }
 
 const chipClasses =
-  "inline-flex items-center gap-1.5 rounded-sm border border-white/15 bg-white/[0.06] backdrop-blur-md px-3 py-1.5 text-xs md:text-sm uppercase tracking-[0.08em] shadow-[0_1px_3px_rgba(0,0,0,0.3)]";
+  "inline-flex items-center gap-1.5 border border-white/15 bg-white/[0.06] backdrop-blur-md px-3 py-1.5 text-xs md:text-sm uppercase tracking-[0.08em] shadow-[0_1px_3px_rgba(0,0,0,0.3)]";
 
 const HeroScreeningMeta: React.FC<HeroScreeningMetaProps> = ({
   formattedDate,

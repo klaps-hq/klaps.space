@@ -24,19 +24,19 @@ const contentContainerVariants: Variants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.2,
+      staggerChildren: 0.15,
+      delayChildren: 0.4,
     },
   },
 };
 
 const contentItemVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 40 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.7,
+      duration: 0.9,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -82,7 +82,7 @@ const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
 
   return (
     <motion.div
-      className="z-10 absolute bottom-10 left-5 right-5 md:bottom-auto md:top-1/2 md:left-12 lg:left-16 md:right-auto md:-translate-y-1/2 flex flex-col gap-4 md:gap-6"
+      className="z-10 absolute bottom-12 left-6 right-6 md:bottom-auto md:top-1/2 md:left-16 lg:left-20 md:right-auto md:-translate-y-1/2 flex flex-col gap-5 md:gap-7"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.6 }}
@@ -102,13 +102,18 @@ const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
 
         <h1
           className={cn(
-            "font-bold text-white uppercase max-w-[1150px] drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]",
+            "font-bold text-white uppercase max-w-[1150px] [text-shadow:0_2px_20px_rgba(0,0,0,0.5),0_0_80px_rgba(220,19,1,0.08)]",
             getTitleSizeClasses(screening.movie.title)
           )}
         >
           {screening.movie.title}
         </h1>
       </motion.div>
+
+      <motion.div
+        className="w-14 h-[2px] bg-blood-red shadow-[0_0_12px_rgba(220,19,1,0.5)]"
+        variants={itemVariants}
+      />
 
       <motion.div className="flex flex-col gap-4" variants={itemVariants}>
         <MovieMeta
@@ -117,11 +122,11 @@ const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
           genres={screening.movie.genres}
         />
 
-        <p className="text-sm md:text-lg lg:text-xl text-white/80 font-light italic max-w-[600px] line-clamp-3 leading-relaxed">
+        <p className="text-sm md:text-lg lg:text-xl text-white/70 font-light italic max-w-[600px] line-clamp-3 leading-relaxed">
           {screening.movie.description}
         </p>
 
-        <div className="flex flex-col sm:flex-row flex-wrap gap-3 pt-1">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 pt-2">
           <Button asChild variant="primary" size="xl">
             <Link href={SCREENINGS_SECTION_ID}>{CTA_PRIMARY}</Link>
           </Button>
