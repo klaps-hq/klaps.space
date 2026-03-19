@@ -37,7 +37,7 @@ const HeroBackdropMotion: React.FC<HeroBackdropMotionProps> = ({
         priority
       />
       <motion.div
-        className="absolute inset-0 bg-linear-to-t from-black via-black/80 to-transparent md:hidden pointer-events-none"
+        className="absolute inset-0 bg-[linear-gradient(to_top,black_0%,rgba(0,0,0,0.85)_35%,rgba(0,0,0,0.4)_65%,rgba(0,0,0,0.15)_100%)] md:hidden pointer-events-none"
         aria-hidden="true"
         initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0.75 }}
         whileInView={{ opacity: 1 }}
@@ -45,7 +45,7 @@ const HeroBackdropMotion: React.FC<HeroBackdropMotionProps> = ({
         transition={{ duration: prefersReducedMotion ? 0.2 : 0.8, ease: "easeOut" }}
       />
       <motion.div
-        className="absolute inset-0 hidden md:block bg-[linear-gradient(to_right,black_0%,rgba(0,0,0,0.95)_30%,rgba(0,0,0,0.55)_58%,transparent_100%)] pointer-events-none"
+        className="absolute inset-0 hidden md:block bg-[linear-gradient(to_right,black_0%,rgba(0,0,0,0.92)_28%,rgba(0,0,0,0.5)_52%,rgba(0,0,0,0.1)_72%,transparent_100%)] pointer-events-none"
         aria-hidden="true"
         initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0.7 }}
         whileInView={{ opacity: 1 }}
@@ -53,7 +53,7 @@ const HeroBackdropMotion: React.FC<HeroBackdropMotionProps> = ({
         transition={{ duration: prefersReducedMotion ? 0.2 : 0.9, ease: "easeOut" }}
       />
       <motion.div
-        className="absolute inset-0 hidden md:block pointer-events-none bg-[radial-gradient(circle_at_52%_46%,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.07)_16%,rgba(0,0,0,0)_42%)]"
+        className="absolute inset-0 hidden md:block pointer-events-none bg-[radial-gradient(ellipse_70%_60%_at_58%_42%,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_20%,rgba(0,0,0,0)_50%)]"
         aria-hidden="true"
         initial={prefersReducedMotion ? { opacity: 0.2 } : { opacity: 0 }}
         whileInView={prefersReducedMotion ? { opacity: 0.2 } : { opacity: 0.45 }}
@@ -63,6 +63,10 @@ const HeroBackdropMotion: React.FC<HeroBackdropMotionProps> = ({
             ? { duration: 0.2 }
             : { duration: 1.1, delay: 0.25, ease: "easeOut" }
         }
+      />
+      <div
+        className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black to-transparent pointer-events-none"
+        aria-hidden="true"
       />
     </motion.div>
   );

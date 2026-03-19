@@ -82,13 +82,13 @@ const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
 
   return (
     <motion.div
-      className="z-10 absolute bottom-8 left-4 right-4 md:bottom-auto md:top-1/2 md:left-8 md:right-auto md:-translate-y-1/2 flex flex-col gap-2 md:gap-4"
+      className="z-10 absolute bottom-10 left-5 right-5 md:bottom-auto md:top-1/2 md:left-12 lg:left-16 md:right-auto md:-translate-y-1/2 flex flex-col gap-4 md:gap-6"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.6 }}
       variants={containerVariants}
     >
-      <motion.div className="flex flex-col gap-6" variants={itemVariants}>
+      <motion.div className="flex flex-col gap-5 md:gap-6" variants={itemVariants}>
         <Badge variant="label" suffix={HERO_LABEL_SUB}>
           {HERO_LABEL_MAIN}
         </Badge>
@@ -102,7 +102,7 @@ const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
 
         <h1
           className={cn(
-            "font-bold text-white uppercase max-w-[1150px]",
+            "font-bold text-white uppercase max-w-[1150px] drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]",
             getTitleSizeClasses(screening.movie.title)
           )}
         >
@@ -110,18 +110,18 @@ const HeroContent: React.FC<HeroContentProps> = ({ screening }) => {
         </h1>
       </motion.div>
 
-      <motion.div className="flex flex-col gap-3" variants={itemVariants}>
+      <motion.div className="flex flex-col gap-4" variants={itemVariants}>
         <MovieMeta
           duration={screening.movie.duration}
           productionYear={screening.movie.productionYear}
           genres={screening.movie.genres}
         />
 
-        <p className="text-base md:text-xl lg:text-2xl text-white font-light italic max-w-[650px] line-clamp-3">
+        <p className="text-sm md:text-lg lg:text-xl text-white/80 font-light italic max-w-[600px] line-clamp-3 leading-relaxed">
           {screening.movie.description}
         </p>
 
-        <div className="flex flex-col sm:flex-row flex-wrap gap-3 pt-2">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 pt-1">
           <Button asChild variant="primary" size="xl">
             <Link href={SCREENINGS_SECTION_ID}>{CTA_PRIMARY}</Link>
           </Button>
