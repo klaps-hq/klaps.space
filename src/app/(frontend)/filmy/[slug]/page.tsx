@@ -1,10 +1,6 @@
 import { getMoviePageData } from "@/lib/movies";
-import SectionDivider from "@/components/ui/section-divider";
 import MovieHero from "./_components/movie-hero";
-import MovieDetailsSections from "./_components/movie-details-sections";
 import MovieScreenings from "./_components/movie-screenings";
-import MovieTrailer from "./_components/movie-trailer";
-import Breadcrumbs from "@/components/ui/breadcrumbs";
 
 export const dynamic = "force-dynamic";
 
@@ -17,28 +13,14 @@ const MoviePage = async ({ params }: MoviePageProps) => {
   const { movie, screenings } = await getMoviePageData(slug);
 
   return (
-    <main className="bg-black min-h-screen px-8 py-24 md:py-32">
-      <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
-        <Breadcrumbs
-          items={[
-            { name: "Filmy", href: "/filmy" },
-            { name: movie.title },
-          ]}
-        />
-        <MovieHero movie={movie} />
-
-        <SectionDivider />
-        <MovieDetailsSections movie={movie} />
-
-        {movie.videoUrl && (
-          <>
-            <SectionDivider />
-            <MovieTrailer videoUrl={movie.videoUrl} />
-          </>
-        )}
-
-        <SectionDivider />
-        <MovieScreenings screenings={screenings} />
+    <main className="bg-black min-h-screen lg:h-screen lg:overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-2 lg:h-full">
+        <div className="lg:overflow-y-auto lg:h-full scrollbar-styled">
+          <MovieHero movie={movie} />
+        </div>
+        <div className="lg:overflow-y-auto lg:h-full scrollbar-styled bg-neutral-900/40">
+          <MovieScreenings screenings={screenings} />
+        </div>
       </div>
     </main>
   );

@@ -150,3 +150,24 @@ body {
   font-weight: 400;
   font-style: normal;
 }
+
+.scrollbar-styled {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255 255 255 / 0.08) transparent;
+}
+.scrollbar-styled:hover {
+  scrollbar-color: rgba(255 255 255 / 0.15) transparent;
+}
+.scrollbar-styled::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-styled::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-styled::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+.scrollbar-styled:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}

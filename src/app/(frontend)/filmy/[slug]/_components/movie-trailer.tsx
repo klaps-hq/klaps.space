@@ -15,7 +15,7 @@ const MovieTrailer: React.FC<MovieTrailerProps> = ({ videoUrl }) => {
         Zwiastun
       </h2>
 
-      <div className="aspect-video w-full max-w-4xl overflow-hidden border border-white/10 bg-neutral-950">
+      <div className="aspect-video w-full overflow-hidden border border-white/10 bg-neutral-950">
         <iframe
           src={embedUrl}
           title="Zwiastun filmu"
