@@ -1,9 +1,9 @@
 import React from "react";
 
-type AboutDetailItemProps = {
+interface AboutDetailItemProps {
   title: string;
   description: string;
-};
+}
 
 const AboutDetailItem: React.FC<AboutDetailItemProps> = ({
   title,
@@ -11,7 +11,7 @@ const AboutDetailItem: React.FC<AboutDetailItemProps> = ({
 }) => {
   return (
     <>
-      <span className="text-white/80 font-medium">{title}</span>
+      <span className="text-white font-semibold">{title}</span>
       <span className="block text-neutral-500 mt-1">{description}</span>
     </>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import AboutPageHeader from "./about-page-header";
 import AboutSidebar from "./about-sidebar";
 import IntroSection from "./sections/intro-section";
 import ProblemSection from "./sections/problem-section";
@@ -44,21 +45,25 @@ const AboutPageContent: React.FC = () => {
   const activeId = useActiveSection({ sectionIds: SECTION_IDS });
 
   return (
-    <div className="flex gap-16">
-      <AboutSidebar links={SIDEBAR_LINKS} activeId={activeId} />
-      <div className="flex flex-col gap-20 flex-1 min-w-0">
-        <IntroSection />
-        <ProblemSection />
-        <WhyCinemaSection />
-        <ScopeSection />
-        <GoalsSection />
-        <PhilosophySection />
-        <AudienceSection />
-        <CharacterSection />
-        <OpenSourceSection />
-        <SummarySection />
+    <>
+      <AboutPageHeader />
+
+      <div className="flex gap-16">
+        <AboutSidebar links={SIDEBAR_LINKS} activeId={activeId} />
+        <div className="flex flex-col gap-20 flex-1 min-w-0">
+          <IntroSection />
+          <ProblemSection />
+          <WhyCinemaSection />
+          <ScopeSection />
+          <GoalsSection />
+          <PhilosophySection />
+          <AudienceSection />
+          <CharacterSection />
+          <OpenSourceSection />
+          <SummarySection />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

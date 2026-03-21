@@ -1,11 +1,11 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-type AboutBorderedListProps = {
+interface AboutBorderedListProps {
   items: React.ReactNode[];
   className?: string;
   gap?: "tight" | "loose";
-};
+}
 
 const AboutBorderedList: React.FC<AboutBorderedListProps> = ({
   items,
@@ -15,7 +15,7 @@ const AboutBorderedList: React.FC<AboutBorderedListProps> = ({
   return (
     <ul
       className={cn(
-        "list-none flex flex-col pl-4 border-l border-neutral-800",
+        "list-none flex flex-col pl-4 border-l-2 border-blood-red/30",
         gap === "tight" ? "gap-2" : "gap-4",
         className
       )}
