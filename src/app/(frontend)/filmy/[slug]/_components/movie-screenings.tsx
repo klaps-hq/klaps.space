@@ -80,7 +80,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
         </div>
 
         <p className="text-neutral-500 text-xs uppercase tracking-[0.12em]">
-          Wybierz lokalizację i zarezerwuj miejsce
+          Sprawdź gdzie i kiedy obejrzysz ten film
         </p>
       </motion.div>
 
