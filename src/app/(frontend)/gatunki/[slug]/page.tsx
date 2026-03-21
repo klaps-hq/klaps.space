@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getGenrePageData, getGenres } from "@/lib/genres";
 import { getMovies } from "@/lib/movies";
 import { getScreenings } from "@/lib/screenings";
-import SectionHeader from "@/components/common/section-header";
 import GenreMovies from "./_components/genre-movies";
 import PaginatedNav from "@/components/common/paginated-nav";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
@@ -58,38 +57,51 @@ const GenrePage = async ({ params, searchParams }: GenrePageProps) => {
   };
 
   return (
-    <main className="bg-black min-h-screen px-8 py-24 md:py-32">
+    <main className="bg-black min-h-screen px-8 lg:px-12 xl:px-16 pt-28 md:pt-36 pb-16 md:pb-24">
       <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
-        <Breadcrumbs
-          items={[
-            { name: "Gatunki", href: "/gatunki" },
-            { name: genre.name },
-          ]}
-        />
+        <div className="flex flex-col gap-6">
+          <Breadcrumbs
+            items={[
+              { name: "Gatunki", href: "/gatunki" },
+              { name: genre.name },
+            ]}
+          />
 
-        <SectionHeader
-          prefix="Gatunek"
-          title={genre.name}
-          description={genre?.description ?? undefined}
-        />
+          <div className="flex flex-col gap-4">
+            <p className="text-blood-red text-sm font-semibold uppercase tracking-[0.15em]">
+              Gatunek
+            </p>
+            <h1 className="text-white text-4xl md:text-6xl font-black uppercase tracking-tight leading-none">
+              {genre.name}
+            </h1>
+            <div className="h-0.5 w-10 bg-blood-red" />
+            {genre.description && (
+              <p className="text-neutral-400 text-base md:text-lg max-w-2xl leading-relaxed">
+                {genre.description}
+              </p>
+            )}
+          </div>
+        </div>
 
         <GenreMovies movies={movies} />
 
         {cinemas.length > 0 && (
-          <section className="flex flex-col gap-4">
-            <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
-              Gdzie obejrzeć {genre.name.toLowerCase()}
-            </h2>
-            <p className="text-white/80 max-w-4xl">
-              Kina studyjne, które aktualnie pokazują filmy z gatunku{" "}
-              {genre.name.toLowerCase()}.
-            </p>
+          <section className="flex flex-col gap-5">
+            <div className="flex flex-col gap-2">
+              <h2 className="text-white text-2xl md:text-3xl font-bold uppercase tracking-tight">
+                Gdzie obejrzeć
+              </h2>
+              <p className="text-neutral-500 text-sm">
+                Kina z aktualnymi seansami z gatunku{" "}
+                {genre.name.toLowerCase()}
+              </p>
+            </div>
             <div className="flex flex-wrap gap-2">
               {cinemas.map((cinema) => (
                 <Link
                   key={cinema.id}
                   href={`/kina/${cinema.slug}`}
-                  className="inline-flex border border-white/15 px-3 py-1 text-xs uppercase tracking-widest text-white/80 hover:text-blood-red hover:border-blood-red/40 transition-colors"
+                  className="inline-flex border border-white/[0.06] px-4 py-2 text-xs uppercase tracking-widest text-white/60 hover:text-blood-red hover:border-blood-red/30 transition-colors duration-300"
                 >
                   {cinema.name}
                 </Link>
@@ -99,16 +111,16 @@ const GenrePage = async ({ params, searchParams }: GenrePageProps) => {
         )}
 
         {relatedGenres.length > 0 && (
-          <section className="flex flex-col gap-4">
-            <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
-              Zobacz też
+          <section className="flex flex-col gap-5">
+            <h2 className="text-white text-2xl md:text-3xl font-bold uppercase tracking-tight">
+              Inne gatunki
             </h2>
             <div className="flex flex-wrap gap-2">
               {relatedGenres.map((item) => (
                 <Link
                   key={item.id}
                   href={`/gatunki/${item.slug}`}
-                  className="inline-flex border border-white/15 px-3 py-1 text-xs uppercase tracking-widest text-white/80 hover:text-blood-red hover:border-blood-red/40 transition-colors"
+                  className="inline-flex border border-white/[0.06] px-4 py-2 text-xs uppercase tracking-widest text-white/60 hover:text-blood-red hover:border-blood-red/30 transition-colors duration-300"
                 >
                   {item.name}
                 </Link>
