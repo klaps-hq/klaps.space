@@ -47,14 +47,14 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
         transition={t}
       >
         {movie.posterUrl && (
-          <div className="w-[180px] shrink-0 max-w-[180px] mx-auto md:mx-0">
-            <div className="h-full overflow-hidden border border-white/10">
+          <div className="w-[240px] shrink-0 mx-auto md:mx-0">
+            <div className="overflow-hidden border border-white/10">
               <MoviePoster
                 posterUrl={movie.posterUrl}
                 title={movie.title}
-                width={180}
-                height={420}
-                className="w-full h-full object-cover"
+                width={240}
+                height={360}
+                className="w-full h-auto block"
               />
             </div>
           </div>

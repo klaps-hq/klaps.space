@@ -14,10 +14,10 @@ const MoviePage = async ({ params }: MoviePageProps) => {
 
   return (
     <main className="bg-black min-h-screen">
-      <div className="grid grid-cols-1 lg:grid-cols-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 lg:min-h-screen">
         <MovieHero movie={movie} />
 
-        <div className="bg-neutral-900/40">
+        <div className="bg-neutral-900/40 lg:min-h-full">
           <MovieScreenings screenings={screenings} />
         </div>
       </div>
