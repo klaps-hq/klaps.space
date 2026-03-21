@@ -1,8 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { IScreening } from "@/interfaces/IScreenings";
-import { fadeIn, fadeUp, useMotion } from "./motion";
 
 const formatScreeningDate = (dateStr: string) => {
   const d = new Date(dateStr);
@@ -14,23 +12,13 @@ interface ScreeningRowProps {
 }
 
 const ScreeningRow: React.FC<ScreeningRowProps> = ({ screening }) => {
-  const { reduced } = useMotion();
-
   const badges = [
     screening.isDubbing && "Dubbing",
     screening.isSubtitled && "Napisy",
   ].filter(Boolean) as string[];
 
   return (
-    <motion.div
-      className="grid grid-cols-[60px_50px_1fr] md:grid-cols-[70px_60px_1fr] items-center gap-x-4 md:gap-x-6 py-4 md:py-5 border-b border-white/[0.06]"
-      variants={reduced ? fadeIn : fadeUp}
-      transition={
-        reduced
-          ? { duration: 0.15 }
-          : { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
-      }
-    >
+    <div className="grid grid-cols-[60px_50px_1fr] md:grid-cols-[70px_60px_1fr] items-center gap-x-4 md:gap-x-6 py-4 md:py-5 border-b border-white/[0.06]">
       <span className="text-blood-red font-semibold text-sm tabular-nums whitespace-nowrap">
         {formatScreeningDate(screening.date)}
       </span>
@@ -62,7 +50,7 @@ const ScreeningRow: React.FC<ScreeningRowProps> = ({ screening }) => {
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 

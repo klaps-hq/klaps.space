@@ -16,10 +16,6 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.08, delayChildren: 0.15 } },
 };
 
-const rowStagger = {
-  visible: { transition: { staggerChildren: 0.04 } },
-};
-
 const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
   const { reduced, t, variant } = useMotion();
   const sortedScreenings = [...screenings].sort((a, b) =>
@@ -77,11 +73,11 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
             <span>Miasto / Kino</span>
           </div>
 
-          <motion.div variants={rowStagger} initial="hidden" animate="visible">
+          <div>
             {sortedScreenings.map((screening) => (
               <ScreeningRow key={screening.id} screening={screening} />
             ))}
-          </motion.div>
+          </div>
         </motion.div>
       )}
     </motion.div>
