@@ -1,16 +1,17 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { IScreening } from "@/interfaces/IScreenings";
 import EmptyState from "@/components/common/empty-state";
 import HeaderCitySelect from "@/components/layout/header/header-city-select";
 import ScreeningRow from "./screening-row";
+import ScreeningDayFilter from "./screening-day-filter";
 import { fadeIn, useMotion } from "./motion";
 
-type MovieScreeningsProps = {
+interface MovieScreeningsProps {
   screenings: IScreening[];
-};
+}
 
 const stagger = {
   visible: { transition: { staggerChildren: 0.08, delayChildren: 0.15 } },
@@ -18,8 +19,33 @@ const stagger = {
 
 const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
   const { reduced, t, variant } = useMotion();
-  const sortedScreenings = [...screenings].sort((a, b) =>
-    a.dateTime.localeCompare(b.dateTime),
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedDate(null);
+  }, [screenings]);
+
+  const screeningsKey = useMemo(
+    () => screenings.map((s) => s.id).join(","),
+    [screenings],
+  );
+
+  const sortedScreenings = useMemo(
+    () => [...screenings].sort((a, b) => a.dateTime.localeCompare(b.dateTime)),
+    [screenings],
+  );
+
+  const uniqueDates = useMemo(
+    () => [...new Set(sortedScreenings.map((s) => s.date))],
+    [sortedScreenings],
+  );
+
+  const filteredScreenings = useMemo(
+    () =>
+      selectedDate
+        ? sortedScreenings.filter((s) => s.date === selectedDate)
+        : sortedScreenings,
+    [sortedScreenings, selectedDate],
   );
 
   return (
@@ -66,17 +92,35 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
           />
         </motion.div>
       ) : (
-        <motion.div className="w-full" variants={variant} transition={t}>
-          <div className="grid grid-cols-[60px_50px_1fr] md:grid-cols-[70px_60px_1fr] gap-x-4 md:gap-x-6 pb-2 border-b border-white/10 text-[11px] uppercase tracking-[0.12em] text-neutral-500">
-            <span>Data</span>
-            <span>Godz.</span>
-            <span>Miasto / Kino</span>
-          </div>
+        <motion.div className="w-full flex flex-col gap-6" variants={variant} transition={t}>
+          {uniqueDates.length > 1 && (
+            <ScreeningDayFilter
+              dates={uniqueDates}
+              selectedDate={selectedDate}
+              onSelect={setSelectedDate}
+            />
+          )}
 
           <div>
-            {sortedScreenings.map((screening) => (
-              <ScreeningRow key={screening.id} screening={screening} />
-            ))}
+            <div className="grid grid-cols-[60px_50px_1fr] md:grid-cols-[70px_60px_1fr] gap-x-4 md:gap-x-6 pb-2 border-b border-white/10 text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+              <span>Data</span>
+              <span>Godz.</span>
+              <span>Miasto / Kino</span>
+            </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${screeningsKey}-${selectedDate ?? "all"}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {filteredScreenings.map((screening) => (
+                  <ScreeningRow key={screening.id} screening={screening} />
+                ))}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </motion.div>
       )}
