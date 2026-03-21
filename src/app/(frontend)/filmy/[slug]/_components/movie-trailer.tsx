@@ -1,12 +1,13 @@
 import React from "react";
 import { getYouTubeEmbedUrl } from "@/lib/utils";
 
-type MovieTrailerProps = {
+interface MovieTrailerProps {
   videoUrl: string;
-};
+}
 
 const MovieTrailer: React.FC<MovieTrailerProps> = ({ videoUrl }) => {
   const embedUrl = getYouTubeEmbedUrl(videoUrl);
+
   if (!embedUrl) return null;
 
   return (

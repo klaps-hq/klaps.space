@@ -10,5 +10,5 @@ export const getPreferredCityId = async (
 ): Promise<string | undefined> => {
   const cookieStore = await cookies();
   const cookieValue = cookieStore.get(PREFERRED_CITY_COOKIE)?.value;
-  return searchParams?.city ?? cookieValue ?? undefined;
+  return searchParams?.city || cookieValue || undefined;
 };
