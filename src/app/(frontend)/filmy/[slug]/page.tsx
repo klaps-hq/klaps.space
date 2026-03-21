@@ -13,12 +13,10 @@ const MoviePage = async ({ params }: MoviePageProps) => {
   const { movie, screenings } = await getMoviePageData(slug);
 
   return (
-    <main className="bg-black min-h-screen lg:h-screen lg:overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-2 lg:h-full">
-        <div className="lg:overflow-y-auto lg:h-full scrollbar-styled">
-          <MovieHero movie={movie} />
-        </div>
-        <div className="lg:overflow-y-auto lg:h-full scrollbar-styled bg-neutral-900/40">
+    <main className="bg-black min-h-screen">
+      <div className="grid grid-cols-1 lg:grid-cols-2">
+        <MovieHero movie={movie} />
+        <div className="bg-neutral-900/40">
           <MovieScreenings screenings={screenings} />
         </div>
       </div>
