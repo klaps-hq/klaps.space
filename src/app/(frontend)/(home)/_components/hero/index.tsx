@@ -23,39 +23,44 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
   }).format(screeningDate);
 
   return (
-    <section className="h-screen w-full bg-black flex items-center">
-      <div className="w-full flex flex-col md:flex-row items-center gap-8 px-6 md:px-10 py-8">
-        <div className="relative w-full md:w-[55%] h-[40vh] md:h-[65vh] rounded-xl overflow-hidden shrink-0">
-          <Image
-            src={tmdbImageUrl(screening.movie.backdropUrl ?? "", "w1280")}
-            alt={screening.movie.title}
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
+    <section className="h-screen w-full bg-black flex items-center justify-center p-4 md:p-8">
+      <div className="relative w-full h-full rounded-2xl overflow-hidden">
+        <Image
+          src={tmdbImageUrl(screening.movie.backdropUrl ?? "", "original")}
+          alt={screening.movie.title}
+          fill
+          sizes="100vw"
+          className="object-cover"
+          priority
+          quality={95}
+        />
 
-        <div className="flex-1 flex flex-col gap-6 text-white">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase leading-tight">
-            {screening.movie.title}
-          </h1>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30" />
 
-          <p className="text-sm md:text-base text-white/60">
-            {formattedDate} · {screening.screening.time} ·{" "}
-            {screening.screening.cinema.city.name} ·{" "}
-            {screening.screening.cinema.name}
-          </p>
+        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 lg:p-16">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-12">
+            <div className="flex flex-col gap-6 md:flex-1 md:min-w-0">
+              <p className="text-xs md:text-sm uppercase tracking-[0.2em] text-white/70">
+                {formattedDate} &middot; {screening.screening.time} &middot;{" "}
+                {screening.screening.cinema.city.name}
+              </p>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[0.95] break-words">
+                {screening.movie.title}
+              </h1>
+            </div>
 
-          <p className="text-base md:text-lg text-white/80 font-light line-clamp-4 max-w-prose">
-            {screening.movie.description}
-          </p>
-
-          <Link
-            href={SCREENINGS_SECTION_ID}
-            className="self-start text-sm text-white border-b border-white/40 pb-0.5 hover:border-white transition-colors"
-          >
-            {CTA_PRIMARY}
-          </Link>
+            <div className="flex flex-col gap-5 md:w-md md:shrink-0">
+              <p className="text-base md:text-lg text-white/85 font-light line-clamp-4">
+                {screening.movie.description}
+              </p>
+              <Link
+                href={SCREENINGS_SECTION_ID}
+                className="self-start text-base text-white border-b border-white/50 pb-0.5 hover:border-white transition-colors"
+              >
+                {CTA_PRIMARY}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </section>
