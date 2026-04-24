@@ -1,4 +1,5 @@
 import Hero from "./_components/hero";
+import Footer from "./_components/footer";
 import { getRandomScreening } from "@/lib/screenings";
 
 export const revalidate = 300;
@@ -9,7 +10,7 @@ const HomePage = async () => {
   return (
     <>
       <Hero screening={randomScreening} />
-      <section className="h-[200vh] w-full" />
+      <Footer />
     </>
   );
 };

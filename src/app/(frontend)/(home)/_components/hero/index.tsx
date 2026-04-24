@@ -7,7 +7,7 @@ import { IRandomScreening } from "@/interfaces/IScreenings";
 import { tmdbImageUrl } from "@/lib/tmdb";
 import { formatDuration } from "@/lib/utils";
 import HeroParallax from "./hero-parallax";
-import ScrollIndicator from "./scroll-indicator";
+import { CharsReveal, TitleReveal } from "./text-reveal";
 
 interface HeroProps {
   screening: IRandomScreening | null;
@@ -56,8 +56,7 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
   }).format(screeningDate);
 
   return (
-    <section className="h-screen w-full bg-black flex items-center justify-center p-4 md:p-8 relative">
-      <ScrollIndicator />
+    <section className="h-screen w-full bg-black flex items-center justify-center p-4 md:p-8">
       <HeroParallax
         backdropSrc={tmdbImageUrl(screening.movie.backdropUrl ?? "", "original")}
         alt={screening.movie.title}
@@ -105,21 +104,15 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
         >
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-12">
             <div className="flex flex-col gap-6 md:flex-1 md:min-w-0">
-              <motion.p
-                variants={contentItemVariants}
+              <CharsReveal
+                text={`${formattedDate} · ${screening.screening.time} · ${screening.screening.cinema.name} · ${screening.screening.cinema.city.name}`}
                 className="text-xs md:text-sm uppercase tracking-[0.2em] text-white/70"
-              >
-                {formattedDate} &middot; {screening.screening.time} &middot;{" "}
-                {screening.screening.cinema.name} &middot;{" "}
-                {screening.screening.cinema.city.name}
-              </motion.p>
+              />
 
-              <motion.h1
-                variants={contentItemVariants}
-                className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[0.95] break-words"
-              >
-                {screening.movie.title}
-              </motion.h1>
+              <TitleReveal
+                text={screening.movie.title}
+                className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[0.95]"
+              />
 
               <motion.div
                 variants={contentItemVariants}
