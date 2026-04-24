@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import JsonLd from "@/components/common/json-ld";
 import SmoothScroll from "@/components/common/smooth-scroll";
+import CustomCursor from "@/components/common/custom-cursor";
 import { CityProvider } from "@/contexts/city-context";
 import { SOCIAL_PROFILE_URLS } from "@/constants";
 import { getCities } from "@/lib/cities";
@@ -132,6 +133,7 @@ export default async function RootLayout({
           }}
         />
         <SmoothScroll />
+        <CustomCursor />
         <CityProvider cities={cities}>{children}</CityProvider>
       </body>
     </html>

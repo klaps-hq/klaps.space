@@ -104,6 +104,13 @@
     background-color: black;
     @apply text-foreground;
   }
+  @media (pointer: fine) {
+    *,
+    *::before,
+    *::after {
+      cursor: none !important;
+    }
+  }
   [data-slot="button"] {
     @apply outline-none border-0;
   }
