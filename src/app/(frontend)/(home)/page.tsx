@@ -9,7 +9,7 @@ const HomePage = async () => {
   return (
     <>
       <Hero screening={randomScreening} />
-      <section className="h-[30vh] w-full" />
+      <section className="h-[200vh] w-full" />
     </>
   );
 };

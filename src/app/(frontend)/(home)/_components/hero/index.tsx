@@ -1,8 +1,8 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { IRandomScreening } from "@/interfaces/IScreenings";
 import { tmdbImageUrl } from "@/lib/tmdb";
+import HeroParallax from "./hero-parallax";
 
 interface HeroProps {
   screening: IRandomScreening | null;
@@ -24,19 +24,10 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
 
   return (
     <section className="h-screen w-full bg-black flex items-center justify-center p-4 md:p-8">
-      <div className="relative w-full h-full rounded-2xl overflow-hidden">
-        <Image
-          src={tmdbImageUrl(screening.movie.backdropUrl ?? "", "original")}
-          alt={screening.movie.title}
-          fill
-          sizes="100vw"
-          className="object-cover"
-          priority
-          quality={95}
-        />
-
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30" />
-
+      <HeroParallax
+        backdropSrc={tmdbImageUrl(screening.movie.backdropUrl ?? "", "original")}
+        alt={screening.movie.title}
+      >
         <nav className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 md:px-12 lg:px-16 py-6">
           <Link href="/" className="flex items-center gap-2.5 text-white">
             <svg
@@ -92,7 +83,7 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
             </div>
           </div>
         </div>
-      </div>
+      </HeroParallax>
     </section>
   );
 };
