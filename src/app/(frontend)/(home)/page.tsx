@@ -4,6 +4,8 @@ import Footer from "./_components/footer";
 import Screenings from "./_components/screenings";
 import ScreeningsLoader from "./_components/screenings/loader";
 import Cinemas from "./_components/cinemas";
+import About from "./_components/about";
+import HowItWorks from "./_components/how-it-works";
 import { getRandomScreening } from "@/lib/screenings";
 
 export const revalidate = 300;
@@ -30,7 +32,9 @@ const HomePage = async ({ searchParams }: HomePageProps) => {
       <Suspense fallback={<ScreeningsLoader />}>
         <Screenings searchParams={params} />
       </Suspense>
+      <HowItWorks />
       <Cinemas />
+      <About />
       <Footer />
     </>
   );
