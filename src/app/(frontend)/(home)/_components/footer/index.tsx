@@ -80,17 +80,17 @@ const Footer: React.FC = () => {
       <Link
         href="/"
         aria-label="Klaps — strona główna"
-        className="group flex items-end gap-[2vw] px-6 md:px-12 lg:px-24 pb-[1vw] w-full max-w-full"
+        className="group flex items-end gap-[1.5vw] w-full pl-6 md:pl-12 lg:pl-24 pb-[1vw]"
       >
         <svg
           viewBox="0 0 28 20"
-          className="w-[14vw] h-auto text-white block shrink-0"
+          className="w-[16vw] h-auto text-white block shrink-0"
           fill="currentColor"
           aria-hidden="true"
         >
           <polygon points="0,8 28,0 28,20 0,12" />
         </svg>
-        <h2 className="text-[20vw] leading-[0.78] font-bold uppercase text-white -tracking-[0.04em] whitespace-nowrap">
+        <h2 className="text-[24vw] leading-[0.78] font-bold uppercase text-white -tracking-[0.04em] whitespace-nowrap">
           Klaps
         </h2>
       </Link>
