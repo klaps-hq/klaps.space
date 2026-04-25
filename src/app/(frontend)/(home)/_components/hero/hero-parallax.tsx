@@ -2,13 +2,7 @@
 
 import React, { useRef } from "react";
 import Image from "next/image";
-import {
-  motion,
-  useMotionValue,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 interface HeroParallaxProps {
   backdropSrc: string;
@@ -36,26 +30,10 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
     [1, 0, 0]
   );
 
-  const mouseXOffset = useMotionValue(0);
-  const mouseYOffset = useMotionValue(0);
-  const mouseXSpring = useSpring(mouseXOffset, { stiffness: 40, damping: 15 });
-  const mouseYSpring = useSpring(mouseYOffset, { stiffness: 40, damping: 15 });
-
-  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const dx = (event.clientX - centerX) / (rect.width / 2);
-    const dy = (event.clientY - centerY) / (rect.height / 2);
-    mouseXOffset.set(dx * -8);
-    mouseYOffset.set(dy * -8);
-  };
-
   return (
     <div
       ref={ref}
       className="relative w-full h-full rounded-2xl overflow-hidden"
-      onMouseMove={handleMouseMove}
     >
       <motion.div
         className="absolute inset-0"
@@ -67,20 +45,15 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
           className="absolute inset-0"
           style={{ y: imageY, scale: imageScale }}
         >
-          <motion.div
-            className="absolute inset-0"
-            style={{ x: mouseXSpring, y: mouseYSpring, scale: 1.04 }}
-          >
-            <Image
-              src={backdropSrc}
-              alt={alt}
-              fill
-              sizes="100vw"
-              className="object-cover"
-              priority
-              unoptimized
-            />
-          </motion.div>
+          <Image
+            src={backdropSrc}
+            alt={alt}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
+            unoptimized
+          />
         </motion.div>
       </motion.div>
 

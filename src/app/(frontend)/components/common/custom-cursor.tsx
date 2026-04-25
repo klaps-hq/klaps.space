@@ -12,8 +12,8 @@ const CustomCursor = () => {
   const [pressed, setPressed] = useState(false);
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
-  const ringX = useSpring(mouseX, { stiffness: 150, damping: 18, mass: 0.4 });
-  const ringY = useSpring(mouseY, { stiffness: 150, damping: 18, mass: 0.4 });
+  const ringX = useSpring(mouseX, { stiffness: 700, damping: 40, mass: 0.15 });
+  const ringY = useSpring(mouseY, { stiffness: 700, damping: 40, mass: 0.15 });
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -68,7 +68,7 @@ const CustomCursor = () => {
               ? "rgba(255,255,255,1)"
               : "rgba(255,255,255,0)",
           }}
-          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.14, ease: [0.22, 1, 0.36, 1] }}
         />
       </motion.div>
       <motion.div
@@ -78,7 +78,7 @@ const CustomCursor = () => {
         <motion.div
           className="-translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white"
           animate={{ scale: dotScale }}
-          transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.08, ease: [0.22, 1, 0.36, 1] }}
         />
       </motion.div>
     </>

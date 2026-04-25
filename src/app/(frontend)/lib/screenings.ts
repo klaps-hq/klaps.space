@@ -82,6 +82,8 @@ export const getPaginatedScreenings = async (
         dateFrom: params.dateFrom ?? "",
         dateTo: params.dateTo ?? "",
         search: params.search ?? "",
+        limit: params.limit ? params.limit.toString() : "",
+        page: params.page ? params.page.toString() : "",
       },
     });
 
