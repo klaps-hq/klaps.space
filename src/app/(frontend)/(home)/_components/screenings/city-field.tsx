@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { MapPin, ChevronDown, Check } from "lucide-react";
+import { MapPin, ChevronDown, Check, Search, X } from "lucide-react";
 import { usePreferredCity } from "@/contexts/city-context";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +36,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
   }, [open]);
 
   const displayLabel = isHydrated ? cityName : "Wszystkie miasta";
+  const hasSelection = isHydrated && cityId !== null;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -44,40 +45,79 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
   }, [options, query]);
 
   return (
-    <div ref={wrapRef} className={cn("relative shrink-0", className)}>
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
+    <div
+      ref={wrapRef}
+      data-cursor="compact"
+      className={cn("relative shrink-0", className)}
+    >
+      <div
         className={cn(
-          "flex items-center gap-2 h-10 px-3 border text-white transition-colors",
+          "flex items-stretch h-10 border transition-colors",
           open
             ? "border-white bg-white/5"
-            : "border-white/20 hover:border-white/60"
+            : hasSelection
+              ? "border-white/70 bg-white/[0.03] hover:border-white"
+              : "border-white/20 hover:border-white/60"
         )}
       >
-        <MapPin className="size-4 text-white/60" aria-hidden="true" />
-        <span className="uppercase tracking-wider text-[11px] font-medium max-w-[160px] truncate">
-          {displayLabel}
-        </span>
-        <ChevronDown
-          className={cn(
-            "size-3.5 text-white/60 transition-transform",
-            open && "rotate-180"
-          )}
-          aria-hidden="true"
-        />
-      </button>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          className="flex items-center gap-2.5 px-4 text-white"
+        >
+          <MapPin
+            className={cn(
+              "size-4 transition-colors shrink-0",
+              hasSelection ? "text-white" : "text-white/60"
+            )}
+            aria-hidden="true"
+          />
+          <span
+            className={cn(
+              "uppercase tracking-wider text-[11px] min-w-[120px] max-w-[220px] truncate text-left",
+              hasSelection ? "font-semibold text-white" : "font-medium"
+            )}
+          >
+            {displayLabel}
+          </span>
+          <ChevronDown
+            className={cn(
+              "size-3.5 text-white/60 transition-transform shrink-0",
+              open && "rotate-180"
+            )}
+            aria-hidden="true"
+          />
+        </button>
+        {hasSelection && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setCityId(null);
+            }}
+            aria-label="Wyczyść miasto"
+            title="Pokaż wszystkie miasta"
+            className="flex items-center justify-center w-8 border-l border-white/15 text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <X className="size-3.5" aria-hidden="true" />
+          </button>
+        )}
+      </div>
       {open && (
         <div className="absolute top-full right-0 mt-2 w-72 bg-black border border-white/20 z-30 flex flex-col">
           <div className="relative border-b border-white/10">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-white/55 pointer-events-none"
+              aria-hidden="true"
+            />
             <input
               ref={inputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Szukaj miasta..."
-              className="w-full h-9 px-3 bg-transparent text-white text-xs tracking-wide placeholder:text-white/40 focus:placeholder:text-white/20 outline-none"
+              className="w-full h-10 pl-9 pr-3 bg-transparent text-white text-sm tracking-wide placeholder:text-white/65 focus:placeholder:text-white/40 outline-none transition-colors"
             />
           </div>
           <div
