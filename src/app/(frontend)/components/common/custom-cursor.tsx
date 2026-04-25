@@ -5,10 +5,13 @@ import { motion, useMotionValue, useSpring } from "framer-motion";
 
 const INTERACTIVE_SELECTOR =
   'a, button, [role="button"], input, textarea, select, label[for], summary';
+const COMPACT_INTERACTIVE_SELECTOR =
+  '.rdp-day_button, [data-cursor="compact"]';
 
 const CustomCursor = () => {
   const [visible, setVisible] = useState(false);
   const [hovering, setHovering] = useState(false);
+  const [compact, setCompact] = useState(false);
   const [pressed, setPressed] = useState(false);
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
@@ -22,8 +25,11 @@ const CustomCursor = () => {
       setVisible(true);
 
       const target = event.target as Element | null;
-      const isInteractive = !!target?.closest?.(INTERACTIVE_SELECTOR);
+      const isCompact = !!target?.closest?.(COMPACT_INTERACTIVE_SELECTOR);
+      const isInteractive =
+        !isCompact && !!target?.closest?.(INTERACTIVE_SELECTOR);
       setHovering(isInteractive);
+      setCompact(isCompact);
     };
     const handleMouseLeave = () => setVisible(false);
     const handleMouseEnter = () => setVisible(true);
@@ -51,8 +57,14 @@ const CustomCursor = () => {
     };
   }, [mouseX, mouseY]);
 
-  const ringScale = pressed ? 0.75 : hovering ? 1.8 : 1;
-  const dotScale = pressed ? 0.5 : hovering ? 0 : 1;
+  const ringScale = pressed
+    ? 0.75
+    : compact
+      ? 0
+      : hovering
+        ? 1.8
+        : 1;
+  const dotScale = pressed ? 0.5 : compact ? 1 : hovering ? 0 : 1;
 
   return (
     <>

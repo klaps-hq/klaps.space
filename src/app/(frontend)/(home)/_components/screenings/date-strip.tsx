@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { CalendarDays, X } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { useDateRangeParam } from "@/hooks/use-date-range-param";
@@ -67,10 +67,13 @@ const DateStrip: React.FC<DateStripProps> = ({ className }) => {
   return (
     <div
       className={cn(
-        "flex items-center gap-2 overflow-x-auto md:overflow-visible md:flex-wrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        "flex items-center gap-x-6 gap-y-3 overflow-x-auto md:overflow-visible md:flex-wrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         className
       )}
     >
+      <span className="text-[10px] uppercase tracking-[0.25em] text-white/40 shrink-0 mr-1">
+        Data
+      </span>
       {dayOptions.map((opt) => {
         const active = !isRange && selectedDay === opt.value;
         return (
@@ -79,10 +82,10 @@ const DateStrip: React.FC<DateStripProps> = ({ className }) => {
             type="button"
             onClick={() => handleDayClick(opt.value)}
             className={cn(
-              "shrink-0 px-3 h-8 text-[11px] uppercase tracking-wider border transition-colors whitespace-nowrap",
+              "shrink-0 pb-1 text-[11px] uppercase tracking-wider border-b transition-colors whitespace-nowrap",
               active
-                ? "bg-white text-black border-white"
-                : "bg-transparent text-white/80 border-white/20 hover:text-white hover:border-white/60"
+                ? "text-white border-white"
+                : "text-white/60 border-transparent hover:text-white hover:border-white/40"
             )}
           >
             {opt.label}
@@ -95,23 +98,32 @@ const DateStrip: React.FC<DateStripProps> = ({ className }) => {
           type="button"
           onClick={toggleRangePanel}
           className={cn(
-            "flex items-center gap-1.5 px-3 h-8 text-[11px] uppercase tracking-wider border transition-colors whitespace-nowrap",
+            "flex items-center gap-1.5 pb-1 text-[11px] uppercase tracking-wider border-b transition-colors whitespace-nowrap",
             isRange
-              ? "bg-white text-black border-white"
-              : "bg-transparent text-white/80 border-white/20 hover:text-white hover:border-white/60"
+              ? "text-white border-white"
+              : rangeOpen
+                ? "text-white border-white/60"
+                : "text-white/60 border-transparent hover:text-white hover:border-white/40"
           )}
           aria-expanded={rangeOpen}
         >
-          <CalendarDays className="size-3.5" aria-hidden="true" />
           {isRange && dateFrom && dateTo
             ? `${formatDatePL(dateFrom)} – ${formatDatePL(dateTo)}`
             : "Zakres"}
+          <ChevronDown
+            className={cn(
+              "size-3 transition-transform duration-300",
+              rangeOpen && "rotate-180"
+            )}
+            aria-hidden="true"
+          />
         </button>
 
         {rangeOpen && (
           <div
             data-lenis-prevent
-            className="absolute top-full left-0 mt-2 bg-black border border-white/20 z-30 flex flex-col"
+            data-cursor="compact"
+            className="absolute top-full left-0 mt-3 bg-black border border-white/20 z-30 flex flex-col"
           >
             <Calendar
               mode="range"
@@ -156,9 +168,8 @@ const DateStrip: React.FC<DateStripProps> = ({ className }) => {
           type="button"
           onClick={handleClearDate}
           aria-label="Wyczyść datę"
-          className="shrink-0 flex items-center gap-1 text-[10px] uppercase tracking-widest text-white/40 hover:text-white px-2 h-8 transition-colors"
+          className="shrink-0 pb-1 text-[10px] uppercase tracking-widest text-white/40 hover:text-white border-b border-transparent hover:border-white/30 transition-colors"
         >
-          <X className="size-3" aria-hidden="true" />
           Wyczyść
         </button>
       )}
