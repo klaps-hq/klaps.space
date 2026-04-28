@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCinemas } from "@/lib/cinemas";
 
 const PER_ROW = 25;
+const MAX_NAME_LENGTH = 18;
 
 interface MarqueeCinema {
   id: string | number;
@@ -34,10 +35,10 @@ const MarqueeRow: React.FC<MarqueeRowProps> = ({
           href={`/kina/${cinema.slug}`}
           className="group/item inline-flex items-baseline gap-3 md:gap-5"
         >
-          <span className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold uppercase -tracking-[0.02em] text-white/25 group-hover/item:text-white transition-colors duration-300">
+          <span className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold uppercase -tracking-[0.02em] text-white/45 group-hover/item:text-white transition-colors duration-300">
             {cinema.name}
           </span>
-          <span className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-white/35">
+          <span className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-white/45">
             {cinema.city}
           </span>
         </Link>
@@ -57,13 +58,14 @@ const Cinemas = async () => {
     for (const group of groups) {
       const cinema = group.cinemas[cursor];
       if (!cinema) continue;
+      added = true;
+      if (cinema.name.length > MAX_NAME_LENGTH) continue;
       interleaved.push({
         id: cinema.id,
         slug: cinema.slug,
         name: cinema.name,
         city: group.city.name,
       });
-      added = true;
       if (interleaved.length >= PER_ROW * 2) break;
     }
     cursor += 1;
@@ -82,7 +84,7 @@ const Cinemas = async () => {
           <span className="h-px w-12 bg-white/25" aria-hidden="true" />
           <span>Lista kin · {totalCount}</span>
         </div>
-        <h2 className="max-w-4xl text-2xl md:text-3xl lg:text-4xl xl:text-5xl leading-[1.2] -tracking-[0.01em]">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl leading-[1.2] -tracking-[0.01em]">
           <span className="block text-white font-medium">
             Kina studyjne w&nbsp;całej Polsce.
           </span>
