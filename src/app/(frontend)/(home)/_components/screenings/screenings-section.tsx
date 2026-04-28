@@ -64,7 +64,7 @@ const ScreeningsSectionInner: React.FC<ScreeningsSectionProps> = ({
         />
 
         {hasMore && screenings.length > 0 && (
-          <div className="mt-16 md:mt-24 flex justify-center border-t border-white/10 pt-12">
+          <div className="mt-16 md:mt-24 flex justify-center">
             <Link
               href={seeAllHref}
               className="group inline-flex items-center gap-3 text-sm md:text-base uppercase tracking-[0.25em] text-white border-b border-white/30 hover:border-white pb-1 transition-colors"
