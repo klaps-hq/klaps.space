@@ -6,11 +6,11 @@ import Lenis from "lenis";
 const SmoothScroll = () => {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 0.9,
-      easing: (t) => 1 - Math.pow(1 - t, 3),
+      lerp: 0.08,
       smoothWheel: true,
-      wheelMultiplier: 1.15,
-      touchMultiplier: 1.6,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.4,
+      syncTouch: false,
     });
 
     let rafId: number;

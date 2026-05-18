@@ -24,16 +24,11 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
   const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "-15%"]);
-  const scrollIndicatorOpacity = useTransform(
-    scrollYProgress,
-    [0, 0.08, 1],
-    [1, 0, 0]
-  );
 
   return (
     <div
       ref={ref}
-      className="relative w-full h-full rounded-2xl overflow-hidden"
+      className="relative w-full h-full rounded-2xl overflow-hidden isolate [clip-path:inset(0_round_1rem)]"
     >
       <motion.div
         className="absolute inset-0"
@@ -57,9 +52,7 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
         </motion.div>
       </motion.div>
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30" />
-
-      <div className="pointer-events-none absolute inset-0 z-[3] opacity-[0.15] mix-blend-overlay">
+      <div className="pointer-events-none absolute inset-0 opacity-[0.08] mix-blend-soft-light">
         <svg
           className="w-full h-full"
           xmlns="http://www.w3.org/2000/svg"
@@ -78,38 +71,10 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
         </svg>
       </div>
 
+      <div className="absolute inset-0 bg-gradient-to-t from-black from-[6%] via-black/50 via-50% to-black/30" />
+
       <motion.div className="absolute inset-0 z-[4]" style={{ y: contentY }}>
         {children}
-      </motion.div>
-
-      <motion.div
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[5] pointer-events-none"
-        style={{ opacity: scrollIndicatorOpacity }}
-      >
-        <motion.div
-          className="flex flex-col items-center gap-2 text-white/70"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.8, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <span className="text-[10px] uppercase tracking-[0.3em]">Scroll</span>
-          <motion.svg
-            width="12"
-            height="16"
-            viewBox="0 0 12 16"
-            fill="none"
-            animate={{ y: [0, 5, 0] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <path
-              d="M6 1 L6 14 M1 9 L6 14 L11 9"
-              stroke="currentColor"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </motion.svg>
-        </motion.div>
       </motion.div>
     </div>
   );
