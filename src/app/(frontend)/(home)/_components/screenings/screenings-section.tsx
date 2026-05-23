@@ -16,7 +16,6 @@ import SectionHeader from "./section-header";
 interface ScreeningsSectionProps {
   screenings: IScreeningGroup[];
   genres: IGenre[];
-  total: number;
   seeAllHref: string;
   hasMore: boolean;
   selectedGenreIds: number[];
@@ -28,7 +27,6 @@ interface ScreeningsSectionProps {
 const ScreeningsSectionInner: React.FC<ScreeningsSectionProps> = ({
   screenings,
   genres,
-  total,
   seeAllHref,
   hasMore,
   selectedGenreIds,
@@ -40,12 +38,13 @@ const ScreeningsSectionInner: React.FC<ScreeningsSectionProps> = ({
 
   return (
     <section id="seanse" className="relative bg-black text-white">
-      <SectionHeader total={total} />
+      <SectionHeader />
 
-      <div className="sticky top-0 z-20 bg-black/90 backdrop-blur-md border-y border-white/10">
+      <div className="sticky top-0 z-20 bg-black/85 backdrop-blur-md">
         <div className="px-6 md:px-12 lg:px-16 py-4 md:py-5">
           <FilterBar genres={genres} />
         </div>
+        <div className="h-px w-full bg-white/[0.06]" aria-hidden="true" />
       </div>
 
       <div
@@ -67,9 +66,9 @@ const ScreeningsSectionInner: React.FC<ScreeningsSectionProps> = ({
           <div className="mt-16 md:mt-24 flex justify-center">
             <Link
               href={seeAllHref}
-              className="group inline-flex items-center gap-3 text-sm md:text-base uppercase tracking-[0.25em] text-white border-b border-white/30 hover:border-white pb-1 transition-colors"
+              className="group inline-flex items-center gap-4 text-xs md:text-sm uppercase tracking-[0.28em] text-white border border-white/25 hover:border-white hover:bg-white/[0.04] px-8 md:px-10 py-4 md:py-5 transition-colors"
             >
-              Pokaż wszystkie seanse
+              Zobacz wszystkie seanse
               <span
                 aria-hidden="true"
                 className="transition-transform group-hover:translate-x-1"

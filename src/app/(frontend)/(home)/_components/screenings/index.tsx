@@ -6,7 +6,7 @@ import { getGenres } from "@/lib/genres";
 import { getPreferredCityId } from "@/lib/get-preferred-city";
 import ScreeningsSection from "./screenings-section";
 
-const HOMEPAGE_LIMIT = 24;
+const HOMEPAGE_LIMIT = 14;
 
 interface ScreeningsSearchParams {
   city?: string;
@@ -96,7 +96,6 @@ const Screenings = async ({ searchParams }: ScreeningsProps) => {
     <ScreeningsSection
       screenings={screenings}
       genres={genres}
-      total={total}
       seeAllHref={buildSeeAllHref(searchParams)}
       hasMore={hasMore}
       selectedGenreIds={genreIds.map(Number)}
