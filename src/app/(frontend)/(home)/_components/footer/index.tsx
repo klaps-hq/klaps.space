@@ -82,7 +82,7 @@ const Footer: React.FC = () => {
         <WilhelmEgg />
         <Link
           href="/"
-          aria-label="Klaps — strona główna"
+          aria-label="Klaps, strona główna"
           className="block"
         >
           <h2 className="text-[24vw] leading-[0.78] font-bold uppercase text-white -tracking-[0.04em] whitespace-nowrap">

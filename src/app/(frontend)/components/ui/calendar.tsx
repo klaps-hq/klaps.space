@@ -22,25 +22,25 @@ function Calendar({
       weekStartsOn={1}
       className={cn("p-4 text-white", className)}
       classNames={{
-        root: "relative w-fit",
-        months: "flex flex-col sm:flex-row gap-4",
-        month: "flex flex-col gap-3",
+        root: "relative w-full",
+        months: "flex flex-col sm:flex-row gap-4 w-full",
+        month: "flex flex-col gap-3 w-full",
         month_caption:
           "h-8 flex items-center justify-center uppercase tracking-[0.25em] text-[11px] text-white/90",
         caption_label: "",
-        nav: "absolute top-0 inset-x-0 h-8 flex items-center justify-between pointer-events-none",
+        nav: "absolute top-4 inset-x-4 h-8 flex items-center justify-between pointer-events-none",
         button_previous:
           "pointer-events-auto size-8 inline-flex items-center justify-center text-white/50 hover:text-white transition-colors disabled:opacity-30",
         button_next:
           "pointer-events-auto size-8 inline-flex items-center justify-center text-white/50 hover:text-white transition-colors disabled:opacity-30",
         month_grid: "w-full border-collapse",
-        weekdays: "flex",
+        weekdays: "flex w-full",
         weekday:
-          "w-9 h-8 flex items-center justify-center font-normal text-[9px] uppercase tracking-[0.2em] text-white/30",
+          "flex-1 h-8 flex items-center justify-center font-normal text-[9px] uppercase tracking-[0.2em] text-white/30",
         week: "flex w-full",
-        day: "w-9 h-9 p-0 text-center focus-within:relative focus-within:z-20",
+        day: "flex-1 aspect-square flex items-center justify-center p-0 focus-within:relative focus-within:z-20",
         day_button:
-          "inline-flex w-full h-full items-center justify-center text-xs text-white/70 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none",
+          "flex w-full h-full items-center justify-center text-xs text-white/70 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none",
         range_start:
           "bg-white [&>button]:text-black [&>button]:hover:text-black [&>button]:font-semibold",
         range_end:

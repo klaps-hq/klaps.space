@@ -1,60 +1,44 @@
 import React from "react";
-import { getCinemas } from "@/lib/cinemas";
 
-const formatPlural = (
-  n: number,
-  forms: [singular: string, few: string, many: string]
-): string => {
-  if (n === 1) return forms[0];
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return forms[1];
-  return forms[2];
-};
+const TAGS = [
+  "Klasyka",
+  "Retrospektywy",
+  "Pokazy specjalne",
+  "Kino autorskie",
+  "Kuratorowane",
+  "Niezależne",
+];
 
-const About = async () => {
-  const { data: groups } = await getCinemas({ limit: 1000 });
-  const cinemaCount = groups.reduce((acc, g) => acc + g.cinemas.length, 0);
-  const cityCount = groups.length;
-
-  return (
-    <section className="relative bg-black text-white border-y border-white/10">
-      <div className="px-6 md:px-12 lg:px-16 py-24 md:py-40">
-        <div className="flex flex-col gap-8 md:gap-10">
-          <div className="flex items-center gap-4 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/45">
-            <span className="h-px w-12 bg-white/25" aria-hidden="true" />
-            <span>O projekcie · Klaps</span>
-          </div>
-
-          <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl leading-[1.2] -tracking-[0.01em]">
-            <span className="block text-white font-medium">
-              Klaps to ogólnopolski repertuar seansów specjalnych, klasyki
-              i&nbsp;filmów spoza głównego obiegu.
-            </span>
-            <span className="block mt-2 text-white/45">
-              Zbieramy program kin studyjnych oraz wybrane seanse
-              z&nbsp;większych sieci kinowych — wszędzie tam, gdzie stare filmy
-              wracają na duży ekran.
-            </span>
+const About: React.FC = () => (
+  <section className="relative bg-black text-white border-t border-white/10">
+    <div className="px-6 md:px-12 lg:px-16 pt-24 md:pt-32 pb-24 md:pb-32">
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-12 lg:gap-20">
+        <div className="lg:flex-1">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
+            Klaps to spis seansów filmowych w&nbsp;polskich kinach studyjnych.
+            Klasyka, retrospektywy, pokazy specjalne. Wszystko
+            w&nbsp;jednym miejscu, bezpłatnie.
           </h2>
-
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40">
-            <span>
-              <span className="text-white tabular-nums">{cinemaCount}</span>{" "}
-              {formatPlural(cinemaCount, ["kino", "kina", "kin"])}
-            </span>
-            <span aria-hidden="true">·</span>
-            <span>
-              <span className="text-white tabular-nums">{cityCount}</span>{" "}
-              {formatPlural(cityCount, ["miasto", "miasta", "miast"])}
-            </span>
-            <span aria-hidden="true">·</span>
-            <span>Ogólnopolski</span>
-          </div>
         </div>
+
+        <aside className="lg:shrink-0 lg:w-60 flex flex-col lg:items-end">
+          <span className="mb-5 md:mb-6 text-[10px] uppercase tracking-[0.3em] text-white/35">
+            Tematy
+          </span>
+          <ul className="flex flex-col gap-2 lg:text-right">
+            {TAGS.map((tag) => (
+              <li
+                key={tag}
+                className="text-base md:text-lg uppercase tracking-[0.18em] text-white/65"
+              >
+                {tag}
+              </li>
+            ))}
+          </ul>
+        </aside>
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 export default About;

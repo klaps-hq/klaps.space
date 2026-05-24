@@ -81,7 +81,7 @@ const DateField: React.FC<DateFieldProps> = ({ className }) => {
         <button
           type="button"
           className={cn(
-            "inline-flex items-center gap-2.5 h-9 px-3.5 border text-[11px] uppercase tracking-wider transition-colors whitespace-nowrap",
+            "inline-flex items-center justify-between gap-2.5 h-9 min-w-[180px] px-3.5 border text-[11px] uppercase tracking-wider transition-colors whitespace-nowrap",
             hasSelection
               ? "border-white text-white"
               : "border-white/25 text-white/80 hover:border-white/60 hover:text-white",
@@ -102,49 +102,34 @@ const DateField: React.FC<DateFieldProps> = ({ className }) => {
           sideOffset={1}
           className="z-50 w-[320px] bg-black border border-white/15 text-white data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-150"
         >
-          <div className="flex flex-col p-4 gap-1 border-b border-white/10">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-white/40 mb-1">
-              Szybki wybór
-            </span>
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {dayOptions.map((opt) => {
-                const active = !isRange && selectedDay === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => onPickDay(opt.value)}
-                    className={cn(
-                      "pb-1 text-[11px] uppercase tracking-wider border-b transition-colors whitespace-nowrap",
-                      active
-                        ? "text-white border-white"
-                        : "text-white/60 border-transparent hover:text-white hover:border-white/40"
-                    )}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
+          <div className="grid grid-cols-5 gap-1 p-3 border-b border-white/10">
+            {dayOptions.map((opt) => {
+              const active = !isRange && selectedDay === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => onPickDay(opt.value)}
+                  className={cn(
+                    "text-center px-1 py-2 text-[10px] uppercase tracking-wide transition-colors whitespace-nowrap",
+                    active
+                      ? "text-white bg-white/[0.08]"
+                      : "text-white/65 hover:text-white hover:bg-white/[0.03]"
+                  )}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-white/40 px-4 pt-3 pb-1">
-              Zakres dat
-            </span>
-            <Calendar
-              mode="range"
-              selected={draft}
-              onSelect={setDraft}
-              numberOfMonths={1}
-              defaultMonth={draft?.from ?? new Date()}
-            />
-            <div className="px-4 pb-2 text-[11px] uppercase tracking-[0.2em] text-white/70">
-              {draft?.from && draft?.to
-                ? `${formatDatePL(getDateString(draft.from))} – ${formatDatePL(getDateString(draft.to))}`
-                : "Wybierz dwie daty"}
-            </div>
-          </div>
+          <Calendar
+            mode="range"
+            selected={draft}
+            onSelect={setDraft}
+            numberOfMonths={1}
+            defaultMonth={draft?.from ?? new Date()}
+          />
 
           <div className="flex items-center gap-2 px-4 pb-4 pt-2 border-t border-white/10">
             <button

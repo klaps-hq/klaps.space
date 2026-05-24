@@ -7,7 +7,7 @@ import { useScreeningsTransition } from "@/contexts/screenings-transition-contex
 
 const DATE_FROM_KEY = "dateFrom";
 const DATE_TO_KEY = "dateTo";
-const DAYS_TO_RENDER = 7;
+const DAYS_TO_RENDER = 5;
 
 interface DateOption {
   value: string;

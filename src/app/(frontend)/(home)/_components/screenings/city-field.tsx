@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, Search } from "lucide-react";
-import { Dialog as DialogPrimitive } from "radix-ui";
+import { Check, ChevronDown, Search, X } from "lucide-react";
+import { Popover as PopoverPrimitive } from "radix-ui";
 import { usePreferredCity } from "@/contexts/city-context";
 import { cn } from "@/lib/utils";
 
@@ -26,13 +26,18 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
     return options.filter((o) => o.label.toLowerCase().includes(q));
   }, [options, query]);
 
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (!next) setQuery("");
+  };
+
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
-      <DialogPrimitive.Trigger asChild>
+    <PopoverPrimitive.Root open={open} onOpenChange={handleOpenChange}>
+      <PopoverPrimitive.Trigger asChild>
         <button
           type="button"
           className={cn(
-            "inline-flex items-center gap-2.5 h-9 px-3.5 border text-[11px] uppercase tracking-wider transition-colors whitespace-nowrap",
+            "inline-flex items-center justify-between gap-2.5 h-9 min-w-[180px] px-3.5 border text-[11px] uppercase tracking-wider transition-colors whitespace-nowrap",
             hasSelection
               ? "border-white text-white"
               : "border-white/25 text-white/80 hover:border-white/60 hover:text-white",
@@ -46,28 +51,20 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
             aria-hidden="true"
           />
         </button>
-      </DialogPrimitive.Trigger>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200" />
-        <DialogPrimitive.Content
-          className="fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-black border-l border-white/15 flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right duration-300 ease-out"
+      </PopoverPrimitive.Trigger>
+      <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Content
+          align="end"
+          sideOffset={1}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
             inputRef.current?.focus();
           }}
+          className="z-50 w-[300px] bg-black border border-white/15 text-white data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-150"
         >
-          <div className="flex items-center justify-between px-6 pt-8 pb-6">
-            <DialogPrimitive.Title className="text-[10px] uppercase tracking-[0.3em] text-white/45">
-              Wybierz miasto
-            </DialogPrimitive.Title>
-            <DialogPrimitive.Close className="text-[11px] uppercase tracking-wider text-white/60 hover:text-white border-b border-transparent hover:border-white/40 pb-1 transition-colors">
-              Zamknij
-            </DialogPrimitive.Close>
-          </div>
-
-          <div className="relative border-y border-white/10">
+          <div className="relative border-b border-white/10">
             <Search
-              className="absolute left-6 top-1/2 -translate-y-1/2 size-3.5 text-white/45 pointer-events-none"
+              className="absolute left-4 top-1/2 -translate-y-1/2 size-3.5 text-white/45 pointer-events-none"
               aria-hidden="true"
             />
             <input
@@ -76,16 +73,30 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Szukaj miasta..."
-              className="w-full h-14 pl-14 pr-6 bg-transparent text-white text-sm tracking-wide placeholder:text-white/40 outline-none"
+              aria-label="Szukaj miasta"
+              className="w-full h-11 pl-11 pr-9 bg-transparent text-white text-[12px] tracking-wide placeholder:text-white/40 outline-none"
             />
+            {query.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  inputRef.current?.focus();
+                }}
+                aria-label="Wyczyść wyszukiwanie"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+              >
+                <X className="size-3.5" />
+              </button>
+            )}
           </div>
 
           <div
             data-lenis-prevent
-            className="flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.25)_transparent] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb:hover]:bg-white/40"
+            className="max-h-72 overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.25)_transparent] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20"
           >
             {filtered.length === 0 ? (
-              <div className="px-6 py-8 text-center text-[11px] text-white/40 uppercase tracking-wider">
+              <div className="px-4 py-6 text-center text-[11px] text-white/40 uppercase tracking-wider">
                 Brak wyników
               </div>
             ) : (
@@ -103,7 +114,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
                       setQuery("");
                     }}
                     className={cn(
-                      "flex w-full items-center justify-between gap-2 text-left px-6 py-3 text-[12px] uppercase tracking-wider transition-colors border-b border-white/[0.04]",
+                      "flex w-full items-center justify-between gap-2 text-left px-4 py-2 text-[11px] uppercase tracking-wider transition-colors",
                       selected
                         ? "text-white bg-white/[0.06]"
                         : "text-white/65 hover:text-white hover:bg-white/[0.03]"
@@ -118,9 +129,21 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
               })
             )}
           </div>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+
+          {hasSelection && (
+            <div className="px-4 py-3 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setCityId(null)}
+                className="w-full h-8 text-[10px] uppercase tracking-[0.2em] border border-white/20 text-white/70 hover:text-white hover:border-white/50 transition-colors"
+              >
+                Wyczyść
+              </button>
+            </div>
+          )}
+        </PopoverPrimitive.Content>
+      </PopoverPrimitive.Portal>
+    </PopoverPrimitive.Root>
   );
 };
 

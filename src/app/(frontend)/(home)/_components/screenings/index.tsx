@@ -6,7 +6,7 @@ import { getGenres } from "@/lib/genres";
 import { getPreferredCityId } from "@/lib/get-preferred-city";
 import ScreeningsSection from "./screenings-section";
 
-const HOMEPAGE_LIMIT = 14;
+const HOMEPAGE_LIMIT = 30;
 
 interface ScreeningsSearchParams {
   city?: string;
