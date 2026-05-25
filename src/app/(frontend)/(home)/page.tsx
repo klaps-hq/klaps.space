@@ -3,8 +3,9 @@ import Hero from "./_components/hero";
 import Footer from "./_components/footer";
 import Screenings from "./_components/screenings";
 import ScreeningsLoader from "./_components/screenings/loader";
+import Genres from "./_components/genres";
 import Cinemas from "./_components/cinemas";
-import About from "./_components/about";
+import MapTeaser from "./_components/map-teaser";
 import { getRandomScreening } from "@/lib/screenings";
 
 export const revalidate = 300;
@@ -31,8 +32,9 @@ const HomePage = async ({ searchParams }: HomePageProps) => {
       <Suspense fallback={<ScreeningsLoader />}>
         <Screenings searchParams={params} />
       </Suspense>
+      <Genres />
       <Cinemas />
-      <About />
+      <MapTeaser />
       <Footer />
     </>
   );

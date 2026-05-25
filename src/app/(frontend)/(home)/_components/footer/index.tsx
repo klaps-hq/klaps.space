@@ -36,13 +36,8 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative bg-black text-white overflow-hidden">
-      <div className="px-6 md:px-12 lg:px-24 pt-20 md:pt-32 pb-8">
-        <div className="mb-12 md:mb-20 flex items-center gap-4 text-xs uppercase tracking-[0.3em] text-white/50">
-          <span className="h-px w-12 bg-white/30" />
-          <span>Kontakt &amp; mapa</span>
-        </div>
-
+    <footer className="relative bg-black text-white overflow-hidden border-t border-white/10">
+      <div className="px-6 md:px-12 lg:px-24 pt-20 md:pt-28 pb-8">
         <div className="grid grid-cols-3 gap-6 md:gap-12 lg:gap-24 mb-16 md:mb-24">
           {NAV_COLUMNS.map((column) => (
             <div key={column.heading} className="flex flex-col gap-4 md:gap-5">
