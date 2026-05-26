@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { getCinemas } from "@/lib/cinemas";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import SiteHeader from "@/components/common/site-header";
 import Footer from "../(home)/_components/footer";
 
 export const revalidate = 300;
@@ -30,7 +31,9 @@ const CinemasPage = async () => {
 
   return (
     <main className="bg-black text-white min-h-screen">
-      <div className="px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-6">
+      <SiteHeader />
+
+      <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-6">
         <Breadcrumbs items={[{ name: "Kina", href: "/kina" }]} />
       </div>
 

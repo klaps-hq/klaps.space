@@ -27,11 +27,11 @@ const Cinemas = async () => {
           </span>
         </h2>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
-          Mapa polskich kin studyjnych. Niezależne miejsca, w&nbsp;których
-          kino traktuje się jak medium, nie atrakcję. Klasyka i&nbsp;współczesne
-          autorskie, retrospektywy, pokazy specjalne i&nbsp;tematyczne cykle.
-          Sprawdź pełną listę miejsc i&nbsp;ich repertuary w&nbsp;miastach
-          z&nbsp;całej Polski.
+          Niezależne miejsca, w&nbsp;których kino traktuje się jak medium,
+          nie atrakcję. Klasyka i&nbsp;współczesne kino autorskie,
+          retrospektywy, pokazy specjalne i&nbsp;tematyczne cykle. Sprawdź
+          repertuary w&nbsp;miastach z&nbsp;całej Polski, otwórz interaktywną
+          mapę albo przejdź do pełnej listy kin.
         </p>
       </div>
 
@@ -72,12 +72,24 @@ const Cinemas = async () => {
         </div>
       </div>
 
-      <div className="px-6 md:px-12 lg:px-16 pb-12 md:pb-16 flex justify-center">
+      <div className="px-6 md:px-12 lg:px-16 pb-12 md:pb-16 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+        <Link
+          href="/mapa-kin"
+          className="group inline-flex items-center gap-4 text-xs md:text-sm uppercase tracking-[0.28em] text-black bg-white hover:bg-white/90 px-8 md:px-10 py-4 md:py-5 transition-colors"
+        >
+          Otwórz mapę
+          <span
+            aria-hidden="true"
+            className="transition-transform group-hover:translate-x-1"
+          >
+            →
+          </span>
+        </Link>
         <Link
           href="/kina"
           className="group inline-flex items-center gap-4 text-xs md:text-sm uppercase tracking-[0.28em] text-white border border-white/25 hover:border-white hover:bg-white/[0.04] px-8 md:px-10 py-4 md:py-5 transition-colors"
         >
-          Zobacz wszystkie kina
+          Wszystkie kina
           <span
             aria-hidden="true"
             className="transition-transform group-hover:translate-x-1"

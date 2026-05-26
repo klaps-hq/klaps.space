@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCities } from "@/lib/cities";
 import { ICity } from "@/interfaces/ICities";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import SiteHeader from "@/components/common/site-header";
 import Footer from "../(home)/_components/footer";
 
 export const revalidate = 300;
@@ -39,7 +40,9 @@ const CitiesPage = async () => {
 
   return (
     <main className="bg-black text-white min-h-screen">
-      <div className="px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-6">
+      <SiteHeader />
+
+      <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-6">
         <Breadcrumbs items={[{ name: "Miasta", href: "/miasta" }]} />
       </div>
 
