@@ -80,9 +80,15 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
               klaps
             </span>
           </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm text-white/80">
+          <div className="hidden md:flex items-center gap-6 lg:gap-8 text-sm text-white/80">
+            <Link href="/seanse" className="hover:text-white transition-colors">
+              Seanse
+            </Link>
             <Link href="/filmy" className="hover:text-white transition-colors">
               Filmy
+            </Link>
+            <Link href="/gatunki" className="hover:text-white transition-colors">
+              Gatunki
             </Link>
             <Link href="/kina" className="hover:text-white transition-colors">
               Kina
@@ -90,8 +96,8 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
             <Link href="/miasta" className="hover:text-white transition-colors">
               Miasta
             </Link>
-            <Link href="/seanse" className="hover:text-white transition-colors">
-              Seanse
+            <Link href="/mapa-kin" className="hover:text-white transition-colors">
+              Mapa
             </Link>
           </div>
         </motion.nav>

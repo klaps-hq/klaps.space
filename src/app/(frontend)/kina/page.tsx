@@ -66,13 +66,13 @@ const CinemasPage = async () => {
             Brak kin do wyświetlenia.
           </p>
         ) : (
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-x-12 lg:gap-x-16">
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-x-10 lg:gap-x-16">
             {sortedGroups.map((group) => (
               <section
                 key={group.city.id}
-                className="mb-12 md:mb-16 break-inside-avoid"
+                className="mb-14 md:mb-16 break-inside-avoid"
               >
-                <div className="flex items-baseline gap-3 border-b border-white/10 pb-3 mb-5">
+                <div className="border-b border-white/10 pb-3 mb-6">
                   <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold uppercase -tracking-[0.02em]">
                     <Link
                       href={`/miasta/${group.city.slug}`}
@@ -81,25 +81,15 @@ const CinemasPage = async () => {
                       {group.city.name}
                     </Link>
                   </h2>
-                  <span className="text-[10px] uppercase tracking-[0.3em] text-white/35 tabular-nums">
-                    {group.cinemas.length}
-                  </span>
                 </div>
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-3">
                   {group.cinemas.map((cinema) => (
                     <li key={cinema.id}>
                       <Link
                         href={`/kina/${cinema.slug}`}
-                        className="group flex items-baseline justify-between gap-3"
+                        className="text-base md:text-lg text-white/65 hover:text-white transition-colors block truncate"
                       >
-                        <span className="text-base md:text-lg text-white/65 group-hover:text-white transition-colors min-w-0 truncate">
-                          {cinema.name}
-                        </span>
-                        {cinema.street && (
-                          <span className="hidden md:block shrink-0 max-w-[50%] truncate text-[10px] uppercase tracking-[0.25em] text-white/35 text-right">
-                            {cinema.street}
-                          </span>
-                        )}
+                        {cinema.name}
                       </Link>
                     </li>
                   ))}

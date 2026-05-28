@@ -11,8 +11,8 @@ const NAV_LINKS = [
 ];
 
 const SiteHeader: React.FC = () => (
-  <header className="sticky top-0 z-40 border-b border-white/10 bg-black/85 backdrop-blur-md">
-    <div className="flex items-center justify-between gap-6 px-6 md:px-12 lg:px-16 py-4 md:py-5">
+  <header className="sticky top-0 z-40 bg-black/85 backdrop-blur-md border-b border-white/10">
+    <div className="flex items-center justify-between gap-8 px-6 md:px-12 lg:px-16 py-6">
       <Link
         href="/"
         aria-label="Klaps, strona główna"
@@ -32,7 +32,7 @@ const SiteHeader: React.FC = () => (
       </Link>
       <nav
         aria-label="Główna nawigacja"
-        className="hidden md:flex items-center gap-5 lg:gap-8 text-[11px] lg:text-xs uppercase tracking-[0.22em] text-white/65"
+        className="hidden md:flex items-center gap-6 lg:gap-8 text-sm text-white/80"
       >
         {NAV_LINKS.map((link) => (
           <Link

@@ -8,14 +8,6 @@ import Footer from "../(home)/_components/footer";
 
 export const revalidate = 300;
 
-const formatCinemasLabel = (n: number) => {
-  if (n === 1) return "kino";
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "kina";
-  return "kin";
-};
-
 const groupByLetter = (cities: ICity[]): [string, ICity[]][] => {
   const sorted = [...cities].sort((a, b) =>
     a.name.localeCompare(b.name, "pl")
@@ -89,15 +81,9 @@ const CitiesPage = async () => {
                     <li key={city.id}>
                       <Link
                         href={`/miasta/${city.slug}`}
-                        className="group flex items-baseline justify-between gap-3"
+                        className="text-base md:text-lg text-white/65 hover:text-white transition-colors block truncate"
                       >
-                        <span className="text-base md:text-lg text-white/65 group-hover:text-white transition-colors">
-                          {city.name}
-                        </span>
-                        <span className="shrink-0 text-[10px] uppercase tracking-[0.25em] text-white/35 tabular-nums">
-                          {city.numberOfCinemas}{" "}
-                          {formatCinemasLabel(city.numberOfCinemas)}
-                        </span>
+                        {city.name}
                       </Link>
                     </li>
                   ))}

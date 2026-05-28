@@ -64,7 +64,7 @@ const PaginatedNav: React.FC<PaginatedNavProps> = ({
             href={hasPrevious ? buildHref(currentPage - 1) : undefined}
             tabIndex={hasPrevious ? 0 : -1}
             className={
-              !hasPrevious ? "pointer-events-none text-neutral-700" : undefined
+              !hasPrevious ? "pointer-events-none text-white/15" : undefined
             }
           />
         </PaginationItem>
@@ -94,7 +94,7 @@ const PaginatedNav: React.FC<PaginatedNavProps> = ({
             href={hasNext ? buildHref(currentPage + 1) : undefined}
             tabIndex={hasNext ? 0 : -1}
             className={
-              !hasNext ? "pointer-events-none text-neutral-700" : undefined
+              !hasNext ? "pointer-events-none text-white/15" : undefined
             }
           />
         </PaginationItem>

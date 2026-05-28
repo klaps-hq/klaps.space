@@ -37,22 +37,22 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({ group }) => {
         )}
       </div>
 
-      <div className="flex items-baseline gap-2 min-w-0">
-        <h3 className="text-xs md:text-sm font-semibold uppercase leading-tight tracking-tight text-white truncate flex-1 min-w-0 group-hover:text-white/90">
+      <div className="flex flex-col gap-1 min-w-0">
+        <h3 className="text-xs md:text-sm font-semibold uppercase leading-tight tracking-tight text-white line-clamp-2 group-hover:text-white/90">
           {movie.title}
         </h3>
         {(movie.productionYear || movie.genres.length > 0) && (
-          <span className="shrink-0 max-w-[45%] truncate text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-white/45">
+          <div className="text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-white/45 truncate">
             {movie.productionYear && <span>{movie.productionYear}</span>}
             {movie.productionYear && movie.genres.length > 0 && (
               <span aria-hidden="true"> · </span>
             )}
             {movie.genres.length > 0 && <span>{movie.genres[0].name}</span>}
-          </span>
+          </div>
         )}
       </div>
 
-      <div className="mt-1.5 flex flex-col gap-1 border-t border-white/10 pt-2.5">
+      <div className="mt-1 flex flex-col gap-1 border-t border-white/10 pt-2.5">
         {upcoming.map((s) => (
           <div
             key={s.id}

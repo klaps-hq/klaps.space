@@ -22,12 +22,9 @@ const CinemaMap: React.FC<CinemaMapProps> = ({ cinema }) => {
 
   return (
     <div
-      className="relative w-full aspect-video max-h-[500px]"
+      className="relative w-full aspect-video max-h-[560px] border border-white/10"
       data-nosnippet
     >
-      <div className="absolute -top-3 -left-3 w-16 h-16 border-t-2 border-l-2 border-blood-red z-10 pointer-events-none" />
-      <div className="absolute -bottom-3 -right-3 w-16 h-16 border-b-2 border-r-2 border-blood-red z-10 pointer-events-none" />
-
       <Map
         theme="dark"
         center={[cinema.longitude, cinema.latitude]}
@@ -40,8 +37,8 @@ const CinemaMap: React.FC<CinemaMapProps> = ({ cinema }) => {
 
         <MapMarker longitude={cinema.longitude} latitude={cinema.latitude}>
           <MarkerContent>
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blood-red border-2 border-white/20 shadow-lg shadow-blood-red/30">
-              <MapPin className="w-4 h-4 text-white" />
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-black/40 shadow-lg shadow-white/20">
+              <MapPin className="w-4 h-4 text-black" />
             </div>
           </MarkerContent>
         </MapMarker>

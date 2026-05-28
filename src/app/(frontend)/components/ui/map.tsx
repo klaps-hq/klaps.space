@@ -1263,9 +1263,8 @@ function MapClusterLayer<
           clusterThresholds[1],
           40,
         ],
-        "circle-stroke-width": 1,
-        "circle-stroke-color": "#fff",
-        "circle-opacity": 0.85,
+        "circle-stroke-width": 0,
+        "circle-opacity": 1,
       },
     });
 
@@ -1278,10 +1277,10 @@ function MapClusterLayer<
       layout: {
         "text-field": "{point_count_abbreviated}",
         "text-font": ["Open Sans"],
-        "text-size": 12,
+        "text-size": 13,
       },
       paint: {
-        "text-color": "#fff",
+        "text-color": "#000",
       },
     });
 
@@ -1294,8 +1293,7 @@ function MapClusterLayer<
       paint: {
         "circle-color": pointColor,
         "circle-radius": pointRadius,
-        "circle-stroke-width": 2,
-        "circle-stroke-color": "#fff",
+        "circle-stroke-width": 0,
       },
     });
 
