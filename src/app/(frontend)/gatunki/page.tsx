@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getGenres } from "@/lib/genres";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import SiteHeader from "@/components/common/site-header";
+import EmptyState from "@/components/common/empty-state";
 import Footer from "../(home)/_components/footer";
 
 export const revalidate = 300;
@@ -40,9 +41,7 @@ const GenresPage = async () => {
 
       <div className="px-6 md:px-12 lg:px-16 pb-24 md:pb-32">
         {sortedGenres.length === 0 ? (
-          <p className="text-white/40 text-sm uppercase tracking-[0.25em]">
-            Brak gatunków do wyświetlenia.
-          </p>
+          <EmptyState description="Brak gatunków do wyświetlenia." />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 border-t border-l border-white/10">
             {sortedGenres.map((genre) => (

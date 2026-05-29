@@ -93,30 +93,34 @@ const CinemaMapView: React.FC<CinemaMapViewProps> = ({ cinemas }) => {
             longitude={selected.coordinates[0]}
             latitude={selected.coordinates[1]}
             onClose={() => setSelected(null)}
-            className="bg-black border border-white/20 p-0 min-w-[260px] max-w-[320px]"
+            className="!rounded-none !shadow-none bg-black !border-white/20 !p-0 min-w-[260px] max-w-[320px]"
           >
             <Link
               href={`/kina/${selected.slug}`}
-              className="group block p-5 flex flex-col gap-4 hover:bg-white/[0.03] transition-colors"
+              className="group block hover:bg-white/[0.03] transition-colors"
             >
-              <div className="flex flex-col gap-2">
+              <div className="px-5 pt-5 pb-4 border-b border-white/10">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-white/40 mb-2">
+                  Kino
+                </p>
                 <h3 className="text-white text-base md:text-lg font-medium uppercase -tracking-[0.02em] leading-tight">
                   {selected.name}
                 </h3>
-                <p className="text-white/55 text-xs uppercase tracking-[0.18em]">
+                <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/55">
                   {selected.address}
                 </p>
               </div>
-
-              <span className="inline-flex items-baseline gap-2 text-[10px] uppercase tracking-[0.28em] text-white/65 group-hover:text-white transition-colors w-fit">
-                Sprawdź repertuar
+              <div className="px-5 py-3 flex items-baseline justify-between gap-2">
+                <span className="text-[10px] uppercase tracking-[0.28em] text-white/65 group-hover:text-white transition-colors">
+                  Sprawdź repertuar
+                </span>
                 <span
                   aria-hidden="true"
-                  className="transition-transform group-hover:translate-x-1"
+                  className="text-white/65 group-hover:text-white transition-transform group-hover:translate-x-1"
                 >
                   →
                 </span>
-              </span>
+              </div>
             </Link>
           </MapPopup>
         )}

@@ -2,6 +2,7 @@ import React from "react";
 import { getCinemasWithCoordinates } from "@/lib/cinemas";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import SiteHeader from "@/components/common/site-header";
+import EmptyState from "@/components/common/empty-state";
 import Footer from "../(home)/_components/footer";
 import CinemaMapLazy from "./_components/cinema-map-lazy";
 
@@ -37,11 +38,10 @@ const CinemaMapPage = async () => {
       </header>
 
       <section className="px-6 md:px-12 lg:px-16 pt-2 pb-20 md:pb-28">
-        <CinemaMapLazy cinemas={cinemas} />
-        {cinemas.length === 0 && (
-          <p className="mt-6 text-center text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40">
-            Brak kin z&nbsp;danymi lokalizacji do wyświetlenia.
-          </p>
+        {cinemas.length === 0 ? (
+          <EmptyState description="Brak kin z danymi lokalizacji do wyświetlenia na mapie." />
+        ) : (
+          <CinemaMapLazy cinemas={cinemas} />
         )}
       </section>
 

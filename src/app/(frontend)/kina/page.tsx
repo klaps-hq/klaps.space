@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCinemas } from "@/lib/cinemas";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import SiteHeader from "@/components/common/site-header";
+import EmptyState from "@/components/common/empty-state";
 import Footer from "../(home)/_components/footer";
 
 export const revalidate = 300;
@@ -62,9 +63,7 @@ const CinemasPage = async () => {
 
       <div className="px-6 md:px-12 lg:px-16 pb-24 md:pb-32">
         {sortedGroups.length === 0 ? (
-          <p className="text-white/40 text-sm uppercase tracking-[0.25em]">
-            Brak kin do wyświetlenia.
-          </p>
+          <EmptyState description="Brak kin do wyświetlenia." />
         ) : (
           <div className="columns-1 md:columns-2 lg:columns-3 gap-x-10 lg:gap-x-16">
             {sortedGroups.map((group) => (

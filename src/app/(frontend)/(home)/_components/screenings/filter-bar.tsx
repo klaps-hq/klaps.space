@@ -9,15 +9,21 @@ import GenreField from "./genre-field";
 
 interface FilterBarProps {
   genres: IGenre[];
+  hideCity?: boolean;
+  hideGenres?: boolean;
 }
 
-const FilterBar: React.FC<FilterBarProps> = ({ genres }) => (
+const FilterBar: React.FC<FilterBarProps> = ({
+  genres,
+  hideCity = false,
+  hideGenres = false,
+}) => (
   <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
     <SearchField className="md:w-72 lg:w-80" />
     <div className="flex items-center gap-3 md:ml-auto">
       <DateField />
-      <GenreField genres={genres} />
-      <CityField />
+      {!hideGenres && <GenreField genres={genres} />}
+      {!hideCity && <CityField />}
     </div>
   </div>
 );

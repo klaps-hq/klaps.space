@@ -15,7 +15,7 @@ const AboutBorderedList: React.FC<AboutBorderedListProps> = ({
   return (
     <ul
       className={cn(
-        "list-none flex flex-col pl-4 border-l border-neutral-800",
+        "list-none flex flex-col pl-4 border-l border-white/10",
         gap === "tight" ? "gap-2" : "gap-4",
         className
       )}

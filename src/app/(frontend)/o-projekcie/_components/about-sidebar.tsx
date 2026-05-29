@@ -35,10 +35,10 @@ const AboutSidebar: React.FC<AboutSidebarProps> = ({ links, activeId }) => {
               href={`#${link.id}`}
               onClick={(e) => handleClick(e, link.id)}
               className={cn(
-                "text-sm uppercase tracking-widest py-2 pl-4 border-l transition-all duration-300",
+                "text-[11px] uppercase tracking-[0.22em] py-2 pl-4 border-l transition-colors duration-300",
                 isActive
-                  ? "text-blood-red border-blood-red"
-                  : "text-neutral-600 border-neutral-800 hover:text-neutral-400 hover:border-neutral-600"
+                  ? "text-white border-white"
+                  : "text-white/40 border-white/15 hover:text-white/80 hover:border-white/45"
               )}
             >
               {link.label}

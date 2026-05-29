@@ -1,17 +1,20 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
 import { getCinemaPageData } from "@/lib/cinemas";
+import { getGenres } from "@/lib/genres";
+import { getScreenings } from "@/lib/screenings";
+import { IScreeningGroup } from "@/interfaces/IScreenings";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import SiteHeader from "@/components/common/site-header";
 import SectionLoader from "@/components/ui/section-loader";
 import Footer from "../../(home)/_components/footer";
-import ScreeningCard from "../../(home)/_components/screenings/screening-card";
 import CinemaMapLazy from "./_components/cinema-map-lazy";
+import CinemaRepertoire from "./_components/cinema-repertoire";
 
 export const dynamic = "force-dynamic";
 
 type SearchParams = {
-  genre?: string;
+  genres?: string;
   dateFrom?: string;
   dateTo?: string;
   search?: string;
@@ -22,6 +25,28 @@ type CinemaPageProps = {
   searchParams: Promise<SearchParams>;
 };
 
+const parseGenreIds = (raw: string | undefined): string[] => {
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((v) => v.trim())
+    .filter((v) => v.length > 0 && !Number.isNaN(Number(v)));
+};
+
+const mergeScreeningGroups = (
+  groupArrays: IScreeningGroup[][]
+): IScreeningGroup[] => {
+  const map = new Map<number, IScreeningGroup>();
+  for (const groups of groupArrays) {
+    for (const group of groups) {
+      if (!map.has(group.movie.id)) {
+        map.set(group.movie.id, group);
+      }
+    }
+  }
+  return Array.from(map.values());
+};
+
 const CinemaPageContent = async ({
   slug,
   searchParams,
@@ -29,12 +54,36 @@ const CinemaPageContent = async ({
   slug: string;
   searchParams: SearchParams;
 }) => {
-  const { cinema, screenings } = await getCinemaPageData(slug, {
-    genreId: searchParams.genre,
+  const genreIds = parseGenreIds(searchParams.genres);
+  const sharedFilters = {
     dateFrom: searchParams.dateFrom,
     dateTo: searchParams.dateTo,
     search: searchParams.search,
-  });
+  };
+
+  const [{ cinema }, allGenres] = await Promise.all([
+    getCinemaPageData(slug),
+    getGenres(),
+  ]);
+
+  const screenings =
+    genreIds.length > 1
+      ? mergeScreeningGroups(
+          await Promise.all(
+            genreIds.map((id) =>
+              getScreenings({
+                cinemaId: cinema.id.toString(),
+                genreId: id,
+                ...sharedFilters,
+              })
+            )
+          )
+        )
+      : await getScreenings({
+          cinemaId: cinema.id.toString(),
+          genreId: genreIds[0] ?? null,
+          ...sharedFilters,
+        });
 
   const hasCoordinates = cinema.latitude !== null && cinema.longitude !== null;
   const cityForCopy = cinema.city.nameDeclinated ?? cinema.city.name;
@@ -95,48 +144,14 @@ const CinemaPageContent = async ({
         </div>
       </header>
 
-      <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
-        <div className="mb-8 md:mb-10 flex items-end justify-between gap-6 flex-wrap">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch]">
-            <span className="block text-white font-medium">
-              Co gra w&nbsp;{cinema.name}
-            </span>
-          </h2>
-          {screenings.length > 0 && (
-            <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40 tabular-nums">
-              {screenings.length}{" "}
-              {screenings.length === 1 ? "film" : "filmów"}
-            </span>
-          )}
-        </div>
-
-        {screenings.length === 0 ? (
-          <div className="flex flex-col items-start gap-6 py-4">
-            <p className="text-base md:text-lg text-white/55 max-w-[48ch]">
-              Brak aktualnych seansów w&nbsp;tym kinie. Sprawdź repertuar
-              w&nbsp;innych miejscach w&nbsp;{cityForCopy}.
-            </p>
-            <Link
-              href={`/miasta/${cinema.city.slug}`}
-              className="group inline-flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.28em] text-white border border-white/25 hover:border-white hover:bg-white/[0.04] px-7 md:px-9 py-4 md:py-5 transition-colors"
-            >
-              Inne kina w&nbsp;{cinema.city.name}
-              <span
-                aria-hidden="true"
-                className="transition-transform group-hover:translate-x-1"
-              >
-                →
-              </span>
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-12">
-            {screenings.map((group) => (
-              <ScreeningCard key={group.movie.id} group={group} />
-            ))}
-          </div>
-        )}
-      </section>
+      <CinemaRepertoire
+        cinemaName={cinema.name}
+        citySlug={cinema.city.slug}
+        cityName={cinema.city.name}
+        cityForCopy={cityForCopy}
+        screenings={screenings}
+        genres={allGenres}
+      />
     </>
   );
 };
