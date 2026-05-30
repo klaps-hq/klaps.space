@@ -1,32 +1,54 @@
 import React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+interface EmptyStateCta {
+  label: string;
+  href?: string;
+  onClick?: () => void;
+}
+
 interface EmptyStateProps {
-  headline?: string;
-  description?: string;
+  description: React.ReactNode;
+  cta?: EmptyStateCta;
   className?: string;
 }
 
-const DEFAULT_HEADLINE = "Nie znaleziono seansów";
-const DEFAULT_DESCRIPTION =
-  "Zmień kryteria wyszukiwania lub sprawdź ponownie później.";
+const ctaClassName =
+  "group inline-flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.28em] text-white border border-white/25 hover:border-white hover:bg-white/[0.04] px-7 md:px-9 py-4 md:py-5 transition-colors";
 
 const EmptyState: React.FC<EmptyStateProps> = ({
-  headline = DEFAULT_HEADLINE,
-  description = DEFAULT_DESCRIPTION,
+  description,
+  cta,
   className,
 }) => {
+  const ctaContent = cta && (
+    <>
+      {cta.label}
+      <span
+        aria-hidden="true"
+        className="transition-transform group-hover:translate-x-1"
+      >
+        →
+      </span>
+    </>
+  );
+
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center py-16 pb-20",
-        className
+    <div className={cn("flex flex-col items-start gap-6 py-4", className)}>
+      <p className="max-w-[48ch] text-base md:text-lg text-white/55 leading-relaxed">
+        {description}
+      </p>
+      {cta && cta.href && (
+        <Link href={cta.href} className={ctaClassName}>
+          {ctaContent}
+        </Link>
       )}
-    >
-      <h3 className="text-white text-lg tracking-widest uppercase text-center font-medium">
-        {headline}
-      </h3>
-      <p className="text-white/50 text-center mt-2 max-w-md">{description}</p>
+      {cta && !cta.href && cta.onClick && (
+        <button type="button" onClick={cta.onClick} className={ctaClassName}>
+          {ctaContent}
+        </button>
+      )}
     </div>
   );
 };

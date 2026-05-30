@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -f \"src/app/\\(frontend\\)/\\(home\\)/_components/hero/hero-content.tsx\" \"src/app/\\(frontend\\)/\\(home\\)/_components/hero/hero-backdrop-motion.tsx\" \"src/app/\\(frontend\\)/\\(home\\)/_components/hero/hero-screening-meta.tsx\" \"src/app/\\(frontend\\)/\\(home\\)/_components/hero/movie-meta.tsx\")",
+      "Read(//c/c/Users/Robert/Documents/code/klaps/klaps.space/src/app/\\(frontend\\)/\\(home\\)/_components/**)"
+    ]
+  }
+}

@@ -1,128 +1,132 @@
+import React from "react";
 import Link from "next/link";
 import { getGenrePageData, getGenres } from "@/lib/genres";
-import { getMovies } from "@/lib/movies";
 import { getScreenings } from "@/lib/screenings";
-import SectionHeader from "@/components/common/section-header";
-import GenreMovies from "./_components/genre-movies";
-import PaginatedNav from "@/components/common/paginated-nav";
+import { getPreferredCityId } from "@/lib/get-preferred-city";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import SiteHeader from "@/components/common/site-header";
+import Footer from "../../(home)/_components/footer";
+import GenreRepertoire from "./_components/genre-repertoire";
 
 export const revalidate = 300;
 
+type SearchParams = {
+  city?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+};
+
 type GenrePageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<Record<string, string | undefined>>;
+  searchParams: Promise<SearchParams>;
 };
 
 const GenrePage = async ({ params, searchParams }: GenrePageProps) => {
   const { slug } = await params;
-  const queryParams = await searchParams;
-  const page = queryParams.page;
+  const sp = await searchParams;
 
   const genre = await getGenrePageData(slug);
 
-  const [{ data: movies, meta }, screeningGroups, allGenres] =
-    await Promise.all([
-      getMovies({
-        genreId: genre.id.toString(),
-        page: page ? Number(page) : 1,
-        limit: 24,
-      }),
-      getScreenings({
-        genreId: genre.id.toString(),
-      }),
-      getGenres(),
-    ]);
+  const cityId = await getPreferredCityId({ city: sp.city });
 
-  const cinemas = Array.from(
-    new Map(
-      screeningGroups
-        .flatMap((group) =>
-          group.screenings.map((screening) => screening.cinema)
-        )
-        .map((cinema) => [cinema.slug, cinema])
-    ).values()
-  )
-    .sort((a, b) => a.name.localeCompare(b.name, "pl"))
-    .slice(0, 12);
+  const [allGenres, screenings] = await Promise.all([
+    getGenres(),
+    getScreenings({
+      genreId: genre.id.toString(),
+      cityId: cityId ?? null,
+      dateFrom: sp.dateFrom,
+      dateTo: sp.dateTo,
+      search: sp.search,
+    }),
+  ]);
 
   const relatedGenres = allGenres
     .filter((item) => item.slug !== genre.slug)
     .sort((a, b) => a.name.localeCompare(b.name, "pl"))
     .slice(0, 10);
 
-  const buildPaginationHref = (targetPage: number) => {
-    const urlParams = new URLSearchParams();
-    urlParams.set("page", targetPage.toString());
-    return `/gatunki/${slug}?${urlParams.toString()}`;
-  };
+  const genreNameLower = genre.name.toLowerCase();
 
   return (
-    <main className="bg-black min-h-screen px-8 py-24 md:py-32">
-      <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
+    <main className="bg-black text-white min-h-screen">
+      <SiteHeader />
+
+      <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-4">
         <Breadcrumbs
           items={[
             { name: "Gatunki", href: "/gatunki" },
             { name: genre.name },
           ]}
         />
-
-        <SectionHeader
-          prefix="Gatunek"
-          title={genre.name}
-          description={genre?.description ?? undefined}
-        />
-
-        <GenreMovies movies={movies} />
-
-        {cinemas.length > 0 && (
-          <section className="flex flex-col gap-4">
-            <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
-              Gdzie obejrzeć {genre.name.toLowerCase()}
-            </h2>
-            <p className="text-white/80 max-w-4xl">
-              Kina studyjne, które aktualnie pokazują filmy z gatunku{" "}
-              {genre.name.toLowerCase()}.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {cinemas.map((cinema) => (
-                <Link
-                  key={cinema.id}
-                  href={`/kina/${cinema.slug}`}
-                  className="inline-flex border border-white/15 px-3 py-1 text-xs uppercase tracking-widest text-white/80 hover:text-blood-red hover:border-blood-red/40 transition-colors"
-                >
-                  {cinema.name}
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {relatedGenres.length > 0 && (
-          <section className="flex flex-col gap-4">
-            <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
-              Zobacz też
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {relatedGenres.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/gatunki/${item.slug}`}
-                  className="inline-flex border border-white/15 px-3 py-1 text-xs uppercase tracking-widest text-white/80 hover:text-blood-red hover:border-blood-red/40 transition-colors"
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <PaginatedNav
-          currentPage={meta.page}
-          totalPages={meta.totalPages}
-          buildHref={buildPaginationHref}
-        />
       </div>
+
+      <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-12 md:pb-16">
+        <Link
+          href="/gatunki"
+          className="inline-block w-fit text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40 hover:text-white/80 transition-colors mb-3 md:mb-4"
+        >
+          Gatunek
+        </Link>
+        <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-medium uppercase -tracking-[0.03em] leading-[0.95] text-white max-w-[20ch]">
+          {genre.name}
+        </h1>
+        {genre.description ? (
+          <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
+            {genre.description}
+          </p>
+        ) : (
+          <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
+            Filmy z&nbsp;gatunku {genreNameLower} pokazywane aktualnie
+            w&nbsp;polskich kinach studyjnych. Filtruj po mieście, dacie
+            lub frazie poniżej.
+          </p>
+        )}
+      </header>
+
+      <GenreRepertoire
+        genreName={genre.name}
+        genreNameLower={genreNameLower}
+        screenings={screenings}
+        genres={allGenres}
+      />
+
+      {relatedGenres.length > 0 && (
+        <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
+          <div className="mb-8 md:mb-10 flex items-end justify-between gap-6 flex-wrap">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
+              Inne gatunki
+            </h2>
+            <Link
+              href="/gatunki"
+              className="group inline-flex items-baseline gap-2 text-[10px] md:text-xs uppercase tracking-[0.28em] text-white/55 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
+            >
+              Wszystkie gatunki
+              <span
+                aria-hidden="true"
+                className="transition-transform group-hover:translate-x-1"
+              >
+                →
+              </span>
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 border-t border-l border-white/10">
+            {relatedGenres.map((item) => (
+              <Link
+                key={item.id}
+                href={`/gatunki/${item.slug}`}
+                className="group bg-black hover:bg-white/[0.04] transition-colors border-r border-b border-white/10 px-4 md:px-5 py-5 md:py-6 flex items-center"
+              >
+                <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
+                  {item.name}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <Footer />
     </main>
   );
 };

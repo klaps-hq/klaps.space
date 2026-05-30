@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Map, MapClusterLayer, MapPopup, MapControls } from "@/components/ui/map";
+import {
+  Map,
+  MapClusterLayer,
+  MapPopup,
+  MapControls,
+} from "@/components/ui/map";
 import { ICinema } from "@/interfaces/ICinema";
 
 const POLAND_CENTER: [number, number] = [19.4, 52.0];
@@ -33,9 +38,7 @@ function cinemasToGeoJSON(
       properties: {
         name: c.name,
         slug: c.slug,
-        address: c.street
-          ? `${c.street}, ${c.city.name}`
-          : c.city.name,
+        address: c.street ? `${c.street}, ${c.city.name}` : c.city.name,
       },
     })),
   };
@@ -47,80 +50,82 @@ const CinemaMapView: React.FC<CinemaMapViewProps> = ({ cinemas }) => {
   const geojson = cinemasToGeoJSON(cinemas);
 
   return (
-    <section data-nosnippet>
-      <div className="relative">
-        <div className="absolute -top-3 -left-3 w-16 h-16 border-t-2 border-l-2 border-blood-red z-10 pointer-events-none" />
-        <div className="absolute -bottom-3 -right-3 w-16 h-16 border-b-2 border-r-2 border-blood-red z-10 pointer-events-none" />
+    <div
+      className="relative w-full h-[70vh] min-h-[480px] max-h-[820px] border border-white/10"
+      data-nosnippet
+      data-lenis-prevent
+    >
+      <Map
+        theme="dark"
+        center={POLAND_CENTER}
+        zoom={POLAND_ZOOM}
+        minZoom={5}
+        maxZoom={18}
+        scrollZoom
+      >
+        <MapControls
+          position="bottom-right"
+          showZoom
+          showLocate
+          showFullscreen
+        />
 
-        <div className="h-[70vh] max-h-[800px] w-full">
-          <Map
-            theme="dark"
-            center={POLAND_CENTER}
-            zoom={POLAND_ZOOM}
-            minZoom={5}
-            maxZoom={18}
+        <MapClusterLayer
+          data={geojson}
+          clusterMaxZoom={14}
+          clusterRadius={50}
+          clusterColors={["#ffffff", "#ffffff", "#ffffff"]}
+          clusterThresholds={[10, 30]}
+          pointColor="#ffffff"
+          pointRadius={8}
+          onPointClick={(feature, coordinates) => {
+            setSelected({
+              name: feature.properties?.name ?? "",
+              slug: feature.properties?.slug ?? "",
+              address: feature.properties?.address ?? "",
+              coordinates,
+            });
+          }}
+        />
+
+        {selected && (
+          <MapPopup
+            longitude={selected.coordinates[0]}
+            latitude={selected.coordinates[1]}
+            onClose={() => setSelected(null)}
+            className="!rounded-none !shadow-none bg-black !border-white/20 !p-0 min-w-[260px] max-w-[320px]"
           >
-            <MapControls
-              position="bottom-right"
-              showZoom
-              showLocate
-              showFullscreen
-            />
-
-            <MapClusterLayer
-              data={geojson}
-              clusterMaxZoom={14}
-              clusterRadius={50}
-              clusterColors={["#dc1301", "#b01001", "#8a0d01"]}
-              clusterThresholds={[10, 30]}
-              pointColor="#dc1301"
-              pointRadius={10}
-              onPointClick={(feature, coordinates) => {
-                setSelected({
-                  name: feature.properties?.name ?? "",
-                  slug: feature.properties?.slug ?? "",
-                  address: feature.properties?.address ?? "",
-                  coordinates,
-                });
-              }}
-            />
-
-            {selected && (
-              <MapPopup
-                longitude={selected.coordinates[0]}
-                latitude={selected.coordinates[1]}
-                onClose={() => setSelected(null)}
-                className="bg-dark-ink border border-white/10 p-0 min-w-[220px] max-w-[280px]"
-              >
-                <div className="p-4 flex flex-col gap-3">
-                  <div className="flex flex-col gap-1">
-                    <h3 className="text-white text-sm font-bold uppercase tracking-wide leading-tight">
-                      {selected.name}
-                    </h3>
-                    <p className="text-white/50 text-xs uppercase tracking-wider">
-                      {selected.address}
-                    </p>
-                  </div>
-
-                  <Link
-                    href={`/kina/${selected.slug}`}
-                    className="inline-flex items-center gap-1.5 text-blood-red text-xs uppercase tracking-widest font-semibold transition-colors duration-200 hover:text-white"
-                  >
-                    Sprawdz repertuar
-                  </Link>
-                </div>
-              </MapPopup>
-            )}
-          </Map>
-        </div>
-      </div>
-
-      {cinemas.length === 0 && (
-        <p className="text-neutral-500 text-sm mt-6 text-center">
-          Brak kin z danymi lokalizacji do wyswietlenia na mapie.
-        </p>
-      )}
-    </section>
+            <Link
+              href={`/kina/${selected.slug}`}
+              className="group block hover:bg-white/[0.03] transition-colors"
+            >
+              <div className="px-5 pt-5 pb-4 border-b border-white/10">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-white/40 mb-2">
+                  Kino
+                </p>
+                <h3 className="text-white text-base md:text-lg font-medium uppercase -tracking-[0.02em] leading-tight">
+                  {selected.name}
+                </h3>
+                <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/55">
+                  {selected.address}
+                </p>
+              </div>
+              <div className="px-5 py-3 flex items-baseline justify-between gap-2">
+                <span className="text-[10px] uppercase tracking-[0.28em] text-white/65 group-hover:text-white transition-colors">
+                  Sprawdź repertuar
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="text-white/65 group-hover:text-white transition-transform group-hover:translate-x-1"
+                >
+                  →
+                </span>
+              </div>
+            </Link>
+          </MapPopup>
+        )}
+      </Map>
+    </div>
   );
 };
 

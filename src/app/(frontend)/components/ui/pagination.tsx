@@ -24,7 +24,7 @@ function PaginationContent({
   return (
     <ul
       data-slot="pagination-content"
-      className={cn("flex flex-row items-center gap-1", className)}
+      className={cn("flex flex-row items-center gap-5 md:gap-6", className)}
       {...props}
     />
   );
@@ -48,10 +48,10 @@ function PaginationLink({
       data-slot="pagination-link"
       data-active={isActive}
       className={cn(
-        "inline-flex items-center justify-center size-10 text-sm font-semibold uppercase tracking-wider transition-colors duration-200 cursor-pointer",
+        "inline-flex items-baseline justify-center text-sm md:text-base tabular-nums tracking-tight transition-colors duration-200 cursor-pointer pb-1 border-b",
         isActive
-          ? "bg-blood-red text-white"
-          : "text-neutral-400 hover:text-white hover:bg-white/5",
+          ? "text-white border-white"
+          : "text-white/40 border-transparent hover:text-white hover:border-white/40",
         className,
       )}
       {...props}
@@ -64,9 +64,17 @@ function PaginationPrevious({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) {
   return (
-    <PaginationLink className={cn("size-10", className)} {...props}>
+    <a
+      data-slot="pagination-link"
+      aria-label="Poprzednia strona"
+      className={cn(
+        "inline-flex items-center justify-center text-white/40 hover:text-white transition-colors duration-200 cursor-pointer",
+        className,
+      )}
+      {...props}
+    >
       <ChevronLeftIcon className="size-5" />
-    </PaginationLink>
+    </a>
   );
 }
 
@@ -75,9 +83,17 @@ function PaginationNext({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) {
   return (
-    <PaginationLink className={cn("size-10", className)} {...props}>
+    <a
+      data-slot="pagination-link"
+      aria-label="Następna strona"
+      className={cn(
+        "inline-flex items-center justify-center text-white/40 hover:text-white transition-colors duration-200 cursor-pointer",
+        className,
+      )}
+      {...props}
+    >
       <ChevronRightIcon className="size-5" />
-    </PaginationLink>
+    </a>
   );
 }
 
@@ -89,12 +105,12 @@ function PaginationEllipsis({
     <span
       data-slot="pagination-ellipsis"
       className={cn(
-        "flex size-10 items-center justify-center text-neutral-600",
+        "inline-flex items-baseline justify-center text-white/25 text-sm",
         className,
       )}
       {...props}
     >
-      <MoreHorizontalIcon className="size-4" />
+      ···
       <span className="sr-only">Więcej stron</span>
     </span>
   );

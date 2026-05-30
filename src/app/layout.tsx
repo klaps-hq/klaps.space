@@ -1,24 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
-import ScrollToTop from "@/components/common/scroll-to-top";
 import JsonLd from "@/components/common/json-ld";
+import SmoothScroll from "@/components/common/smooth-scroll";
+import CustomCursor from "@/components/common/custom-cursor";
 import { CityProvider } from "@/contexts/city-context";
 import { SOCIAL_PROFILE_URLS } from "@/constants";
 import { getCities } from "@/lib/cities";
 import { SITE_URL } from "@/lib/site-config";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin", "latin-ext"],
 });
 
 export const metadata: Metadata = {
@@ -122,9 +116,7 @@ export default async function RootLayout({
           </>
         )}
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${inter.variable} font-sans antialiased`}>
         <JsonLd
           data={{
             "@context": "https://schema.org",
@@ -140,14 +132,9 @@ export default async function RootLayout({
             ],
           }}
         />
-        <CityProvider cities={cities}>
-          <Header cities={cities} />
-
-          {children}
-
-          <Footer />
-          <ScrollToTop />
-        </CityProvider>
+        <SmoothScroll />
+        <CustomCursor />
+        <CityProvider cities={cities}>{children}</CityProvider>
       </body>
     </html>
   );
