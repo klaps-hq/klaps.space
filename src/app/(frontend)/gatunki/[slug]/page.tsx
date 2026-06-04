@@ -1,8 +1,16 @@
 import React from "react";
 import Link from "next/link";
+import { Metadata } from "next";
 import { getGenrePageData, getGenres } from "@/lib/genres";
 import { getScreenings } from "@/lib/screenings";
 import { getPreferredCityId } from "@/lib/get-preferred-city";
+import { SITE_URL } from "@/lib/site-config";
+import {
+  BASE_OPEN_GRAPH,
+  DEFAULT_OG_IMAGE,
+  NOINDEX_FOLLOW,
+  hasQueryParams,
+} from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import SiteHeader from "@/components/common/site-header";
 import Footer from "../../(home)/_components/footer";
@@ -20,6 +28,53 @@ type SearchParams = {
 type GenrePageProps = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<SearchParams>;
+};
+
+export const generateMetadata = async ({
+  params,
+  searchParams,
+}: GenrePageProps): Promise<Metadata> => {
+  const [{ slug }, queryParams] = await Promise.all([params, searchParams]);
+  const genre = await getGenrePageData(slug);
+
+  const genreLower = genre.name.toLowerCase();
+  const title = `${genre.name} - filmy w kinach studyjnych`;
+  const description = `Filmy z gatunku ${genreLower} dostępne w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy - ${genreLower} na dużym ekranie.`;
+  const url = `${SITE_URL}/gatunki/${genre.slug}`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      `${genreLower} kino studyjne`,
+      `filmy ${genreLower}`,
+      `${genreLower} seanse specjalne`,
+      `${genreLower} klasyka filmowa`,
+    ],
+    alternates: {
+      canonical: url,
+    },
+    ...(hasQueryParams(queryParams) && NOINDEX_FOLLOW),
+    openGraph: {
+      ...BASE_OPEN_GRAPH,
+      type: "website",
+      title,
+      description,
+      url,
+      images: [
+        {
+          ...DEFAULT_OG_IMAGE,
+          alt: `${genre.name} - filmy w kinach studyjnych`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [DEFAULT_OG_IMAGE.url],
+    },
+  };
 };
 
 const GenrePage = async ({ params, searchParams }: GenrePageProps) => {

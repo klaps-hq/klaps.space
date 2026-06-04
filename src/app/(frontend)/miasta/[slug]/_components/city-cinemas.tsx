@@ -16,10 +16,7 @@ const CityCinemas: React.FC<CityCinemasProps> = ({ cinemaGroups }) => {
       <SectionHeader prefix="Kina w mieście" title="Kina" />
 
       {cinemas.length === 0 && (
-        <EmptyState
-          headline="Brak kin"
-          description="Nie znaleziono kin w tym mieście."
-        />
+        <EmptyState description="Nie znaleziono kin w tym mieście." />
       )}
 
       {cinemas.length > 0 && (

@@ -1,4 +1,8 @@
-import { getScreeningPageData } from "@/lib/screenings";
+import { Metadata } from "next";
+import { getScreeningPageData, getScreeningById } from "@/lib/screenings";
+import { tmdbImageUrl } from "@/lib/tmdb";
+import { SITE_URL } from "@/lib/site-config";
+import { BASE_OPEN_GRAPH } from "@/lib/seo";
 import SectionDivider from "@/components/ui/section-divider";
 import ScreeningHero from "./_components/screening-hero";
 import ScreeningInfo from "./_components/screening-info";
@@ -10,6 +14,58 @@ export const revalidate = 300;
 
 type ScreeningPageProps = {
   params: Promise<{ id: string }>;
+};
+
+export const generateMetadata = async ({
+  params,
+}: ScreeningPageProps): Promise<Metadata> => {
+  const { id } = await params;
+  const { movie, screening } = await getScreeningById(Number(id));
+
+  const dateFormatted = new Date(screening.dateTime).toLocaleDateString(
+    "pl-PL",
+    { day: "numeric", month: "long", year: "numeric" }
+  );
+
+  const title = `${movie.title} - seans w ${screening.cinema.name}, ${screening.cinema.city.name}`;
+  const description = movie.description
+    ? `${movie.description.slice(0, 100)} Seans ${dateFormatted} w ${screening.cinema.name}, ${screening.cinema.city.name}.`
+    : `${movie.title} (${movie.productionYear}) - seans specjalny ${dateFormatted} w ${screening.cinema.name}, ${screening.cinema.city.name}.`;
+  const url = `${SITE_URL}/seanse/${screening.id}`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      movie.title,
+      `${movie.title} seans`,
+      screening.cinema.name,
+      `seans specjalny ${screening.cinema.city.name}`,
+    ],
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      ...BASE_OPEN_GRAPH,
+      type: "website",
+      url,
+      title,
+      description,
+      ...(movie.posterUrl && {
+        images: [
+          { url: tmdbImageUrl(movie.posterUrl, "w780"), alt: movie.title },
+        ],
+      }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(movie.posterUrl && {
+        images: [tmdbImageUrl(movie.posterUrl, "w780")],
+      }),
+    },
+  };
 };
 
 const ScreeningPage = async ({ params }: ScreeningPageProps) => {

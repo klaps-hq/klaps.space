@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Metadata } from "next";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import SiteHeader from "@/components/common/site-header";
 import Footer from "../(home)/_components/footer";
@@ -7,6 +8,13 @@ import { getGenres } from "@/lib/genres";
 import { getPreferredCityId } from "@/lib/get-preferred-city";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { PaginatedResponse } from "@/interfaces/IMovies";
+import { SITE_URL } from "@/lib/site-config";
+import {
+  BASE_OPEN_GRAPH,
+  DEFAULT_OG_IMAGE,
+  NOINDEX_FOLLOW,
+  hasQueryParams,
+} from "@/lib/seo";
 import ScreeningsPageSection from "./_components/screenings-page-section";
 import ScreeningsPageLoader from "./_components/screenings-page-loader";
 
@@ -26,6 +34,51 @@ interface SearchParams {
 interface ScreeningsPageProps {
   searchParams: Promise<SearchParams>;
 }
+
+export const generateMetadata = async ({
+  searchParams,
+}: ScreeningsPageProps): Promise<Metadata> => {
+  const queryParams = await searchParams;
+  const title = "Seanse specjalne w kinach studyjnych - repertuar";
+  const description =
+    "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce. Filtruj po mieście, dacie i gatunku.";
+  const url = `${SITE_URL}/seanse`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      "seanse specjalne",
+      "repertuar kin studyjnych",
+      "klasyka filmowa w kinie",
+      "retrospektywy filmowe",
+      "pokazy specjalne kino",
+    ],
+    alternates: {
+      canonical: url,
+    },
+    ...(hasQueryParams(queryParams) && NOINDEX_FOLLOW),
+    openGraph: {
+      ...BASE_OPEN_GRAPH,
+      type: "website",
+      title,
+      description,
+      url,
+      images: [
+        {
+          ...DEFAULT_OG_IMAGE,
+          alt: "Seanse specjalne w kinach studyjnych",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [DEFAULT_OG_IMAGE.url],
+    },
+  };
+};
 
 const parseGenreIds = (raw: string | undefined): string[] => {
   if (!raw) return [];

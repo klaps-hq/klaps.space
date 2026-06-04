@@ -1,10 +1,18 @@
 import React from "react";
 import Link from "next/link";
+import { Metadata } from "next";
 import { getCityBySlug } from "@/lib/cities";
 import { getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
 import { getScreenings } from "@/lib/screenings";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
+import { SITE_URL } from "@/lib/site-config";
+import {
+  BASE_OPEN_GRAPH,
+  DEFAULT_OG_IMAGE,
+  NOINDEX_FOLLOW,
+  hasQueryParams,
+} from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import SiteHeader from "@/components/common/site-header";
 import Footer from "../../(home)/_components/footer";
@@ -22,6 +30,53 @@ type SearchParams = {
 type CityPageProps = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<SearchParams>;
+};
+
+export const generateMetadata = async ({
+  params,
+  searchParams,
+}: CityPageProps): Promise<Metadata> => {
+  const [{ slug }, queryParams] = await Promise.all([params, searchParams]);
+  const { city } = await getCityBySlug(slug);
+
+  const title = `Kina studyjne ${city.name} - repertuar seansów specjalnych`;
+  const description = `Kina studyjne i niezależne w ${city.nameDeclinated}. Aktualne seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź repertuar kin w ${city.nameDeclinated}.`;
+  const url = `${SITE_URL}/miasta/${city.slug}`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      `kino studyjne ${city.name}`,
+      `kina ${city.name}`,
+      `seanse specjalne ${city.name}`,
+      `repertuar kin ${city.name}`,
+      `kino niezależne ${city.name}`,
+    ],
+    alternates: {
+      canonical: url,
+    },
+    ...(hasQueryParams(queryParams) && NOINDEX_FOLLOW),
+    openGraph: {
+      ...BASE_OPEN_GRAPH,
+      type: "website",
+      title,
+      description,
+      url,
+      images: [
+        {
+          ...DEFAULT_OG_IMAGE,
+          alt: `${city.name} - kina studyjne i repertuar`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [DEFAULT_OG_IMAGE.url],
+    },
+  };
 };
 
 const parseGenreIds = (raw: string | undefined): string[] => {

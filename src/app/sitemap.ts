@@ -18,8 +18,6 @@ const sanitizeNumericId = (value: unknown) => {
 const isValidDate = (value: string) => !Number.isNaN(new Date(value).getTime());
 
 const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
-  const now = new Date().toISOString();
-
   const [moviesResult, cinemasResult, citiesResult, genresResult, screeningsResult] =
     await Promise.allSettled([
       getMovies({ page: 1, limit: 1000 }),
@@ -38,11 +36,12 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
     screeningsResult.status === "fulfilled" ? screeningsResult.value : [];
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: SITE_URL, lastModified: now, changeFrequency: "daily", priority: 1 },
-    { url: `${SITE_URL}/seanse`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: `${SITE_URL}/kina`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${SITE_URL}/miasta`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${SITE_URL}/gatunki`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: SITE_URL, changeFrequency: "daily", priority: 1 },
+    { url: `${SITE_URL}/seanse`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${SITE_URL}/kina`, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/mapa-kin`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/miasta`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/gatunki`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/o-projekcie`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/kontakt`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/faq`, changeFrequency: "monthly", priority: 0.3 },
@@ -55,7 +54,6 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
     .filter(isValidSlug)
     .map((slug) => ({
       url: `${SITE_URL}/filmy/${encodeURIComponent(slug)}`,
-      lastModified: now,
       changeFrequency: "daily" as const,
       priority: 0.7,
     }));
@@ -67,7 +65,6 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
         .filter(isValidSlug)
         .map((cinema) => ({
           url: `${SITE_URL}/kina/${encodeURIComponent(cinema)}`,
-          lastModified: now,
           changeFrequency: "daily" as const,
           priority: 0.6,
         }))
@@ -78,7 +75,6 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
     .filter(isValidSlug)
     .map((city) => ({
       url: `${SITE_URL}/miasta/${encodeURIComponent(city)}`,
-      lastModified: now,
       changeFrequency: "daily" as const,
       priority: 0.6,
     }));
@@ -88,7 +84,6 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
     .filter(isValidSlug)
     .map((genre) => ({
       url: `${SITE_URL}/gatunki/${encodeURIComponent(genre)}`,
-      lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.5,
     }));

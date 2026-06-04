@@ -16,10 +16,7 @@ const CityScreenings: React.FC<CityScreeningsProps> = ({ screenings }) => {
       <SectionHeader prefix="Seanse w mieście" title="Aktualne seanse" />
 
       {screenings?.length === 0 && (
-        <EmptyState
-          headline="Brak seansów"
-          description="Aktualnie nie ma zaplanowanych seansów w tym mieście."
-        />
+        <EmptyState description="Aktualnie nie ma zaplanowanych seansów w tym mieście." />
       )}
 
       {screenings?.length > 0 && (

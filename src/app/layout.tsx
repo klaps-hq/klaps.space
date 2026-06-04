@@ -123,7 +123,7 @@ export default async function RootLayout({
             "@type": "Organization",
             name: "Klaps",
             url: SITE_URL,
-            logo: `${SITE_URL}/favicon.svg`,
+            logo: `${SITE_URL}/web-app-manifest-512x512.png`,
             description:
               "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych w Polsce.",
             sameAs: [

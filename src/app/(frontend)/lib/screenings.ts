@@ -105,8 +105,9 @@ export const getPaginatedScreenings = async (
 export const getScreeningById = async (
   id: number
 ): Promise<IScreeningDetail> => {
-  const screening = await apiFetch<IScreeningDetail>(`/screenings/${id}`);
-  return screening;
+  return fetchOrNotFound(() =>
+    apiFetch<IScreeningDetail>(`/screenings/${id}`)
+  );
 };
 
 export const getRandomScreening = async (): Promise<IRandomScreening> => {

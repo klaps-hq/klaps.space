@@ -4,11 +4,11 @@ import { SITE_URL } from "@/lib/site-config";
 export const metadata: Metadata = {
   title: "Mapa kin studyjnych w Polsce",
   description:
-    "Interaktywna mapa kin studyjnych i niezaleznych w Polsce. Znajdz kino artystyczne blisko siebie i sprawdz repertuar seansow specjalnych.",
+    "Interaktywna mapa kin studyjnych i niezależnych w Polsce. Znajdź kino artystyczne blisko siebie i sprawdź repertuar seansów specjalnych.",
   keywords: [
     "mapa kin studyjnych",
     "kina studyjne na mapie",
-    "kina niezalezne mapa",
+    "kina niezależne mapa",
     "kino artystyczne blisko mnie",
   ],
   alternates: {
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Mapa kin studyjnych w Polsce",
     description:
-      "Interaktywna mapa kin studyjnych i niezaleznych w Polsce. Znajdz kino artystyczne blisko siebie.",
+      "Interaktywna mapa kin studyjnych i niezależnych w Polsce. Znajdź kino artystyczne blisko siebie.",
     url: `${SITE_URL}/mapa-kin`,
     images: [
       {
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Mapa kin studyjnych w Polsce",
     description:
-      "Interaktywna mapa kin studyjnych i niezaleznych w Polsce. Znajdz kino artystyczne blisko siebie.",
+      "Interaktywna mapa kin studyjnych i niezależnych w Polsce. Znajdź kino artystyczne blisko siebie.",
     images: [`${SITE_URL}/klaps-og.png`],
   },
 };
