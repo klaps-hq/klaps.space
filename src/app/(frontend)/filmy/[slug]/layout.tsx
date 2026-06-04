@@ -1,8 +1,13 @@
 import { getMovieBySlug } from "@/lib/movies";
+import { getMovieScreenings } from "@/lib/screenings";
 import { tmdbImageUrl } from "@/lib/tmdb";
 import { SITE_URL } from "@/lib/site-config";
 import { IMovie } from "@/interfaces/IMovies";
+import { IScreening } from "@/interfaces/IScreenings";
 import JsonLd from "@/components/common/json-ld";
+
+// Keep the events payload reasonable — soonest screenings first.
+const MAX_JSONLD_EVENTS = 50;
 
 type MovieLayoutProps = {
   children: React.ReactNode;
@@ -48,6 +53,23 @@ const buildMovieJsonLd = (movie: IMovie) => {
     }));
   }
 
+  // Audience rating — also rendered visibly in MovieAbout, as Google
+  // requires structured data to reflect on-page content.
+  const userRating = movie.ratings?.users;
+  if (userRating && userRating.votes > 0) {
+    jsonLd.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: Number(userRating.score.toFixed(1)),
+      ratingCount: userRating.votes,
+      bestRating: 10,
+      worstRating: 1,
+    };
+  }
+
+  if (movie.filmwebUrl) {
+    jsonLd.sameAs = [movie.filmwebUrl];
+  }
+
   return jsonLd;
 };
 
@@ -75,17 +97,79 @@ const buildMovieBreadcrumbJsonLd = (movie: IMovie) => ({
   ],
 });
 
+const buildScreeningEventsJsonLd = (movie: IMovie, screenings: IScreening[]) => {
+  const movieUrl = `${SITE_URL}/filmy/${movie.slug}`;
+  const now = Date.now();
+
+  const upcoming = screenings
+    .filter((s) => {
+      const start = new Date(s.dateTime).getTime();
+      return !Number.isNaN(start) && start >= now;
+    })
+    .sort((a, b) => a.dateTime.localeCompare(b.dateTime))
+    .slice(0, MAX_JSONLD_EVENTS);
+
+  return upcoming.map((screening) => {
+    const event: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": "ScreeningEvent",
+      name: `${movie.title} - seans w ${screening.cinema.name}, ${screening.cinema.city.name}`,
+      startDate: screening.dateTime,
+      eventStatus: "https://schema.org/EventScheduled",
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      url: movieUrl,
+      location: {
+        "@type": "MovieTheater",
+        name: screening.cinema.name,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: screening.cinema.street ?? undefined,
+          addressLocality: screening.cinema.city.name,
+          addressCountry: "PL",
+        },
+      },
+      workPresented: {
+        "@type": "Movie",
+        name: movie.title,
+        url: movieUrl,
+      },
+    };
+
+    if (movie.duration) {
+      event.endDate = new Date(
+        new Date(screening.dateTime).getTime() + movie.duration * 60 * 1000
+      ).toISOString();
+    }
+
+    if (screening.ticketUrl) {
+      event.offers = {
+        "@type": "Offer",
+        url: screening.ticketUrl,
+        availability: "https://schema.org/InStock",
+      };
+    }
+
+    return event;
+  });
+};
+
 export default async function MovieLayout({
   children,
   params,
 }: Readonly<MovieLayoutProps>) {
   const { slug } = await params;
   const movie = await getMovieBySlug(slug);
+  const screenings = await getMovieScreenings({
+    movieId: movie.id.toString(),
+  }).catch(() => []);
+
+  const events = buildScreeningEventsJsonLd(movie, screenings);
 
   return (
     <>
       <JsonLd data={buildMovieJsonLd(movie)} />
       <JsonLd data={buildMovieBreadcrumbJsonLd(movie)} />
+      {events.length > 0 && <JsonLd data={events} />}
       {children}
     </>
   );

@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { IMovie } from "@/interfaces/IMovies";
 import { formatDatePL, formatDuration, formatNames } from "@/lib/utils";
+import { pluralPl } from "@/lib/seo";
 
 interface CreditItem {
   label: string;
@@ -34,9 +35,11 @@ const MovieAbout: React.FC<MovieAboutProps> = ({ movie }) => {
 
   if (credits.length === 0 && !actors && metaParts.length === 0) return null;
 
+  const userRating = movie.ratings?.users;
+
   return (
     <div className="flex flex-col gap-10 md:gap-12">
-      {(credits.length > 0 || actors) && (
+      {(credits.length > 0 || actors || userRating) && (
         <div className="flex flex-col gap-8 md:gap-10">
           <div className="flex flex-col md:flex-row md:flex-wrap gap-8 md:gap-x-20 lg:gap-x-28">
             {credits.map((item) => (
@@ -49,6 +52,24 @@ const MovieAbout: React.FC<MovieAboutProps> = ({ movie }) => {
                 </span>
               </div>
             ))}
+            {userRating && userRating.votes > 0 && (
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] uppercase tracking-[0.25em] text-white/40">
+                  Ocena widzów
+                </span>
+                <span className="text-xl md:text-2xl text-white -tracking-[0.01em] leading-snug">
+                  {userRating.score.toLocaleString("pl-PL", {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  })}
+                  <span className="text-white/40"> / 10</span>
+                  <span className="ml-3 text-xs md:text-sm text-white/45 tracking-normal">
+                    {userRating.votes.toLocaleString("pl-PL")}{" "}
+                    {pluralPl(userRating.votes, "głos", "głosy", "głosów")}
+                  </span>
+                </span>
+              </div>
+            )}
           </div>
           {actors && (
             <div className="flex flex-col gap-2">

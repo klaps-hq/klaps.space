@@ -20,7 +20,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 }) => (
   <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
     <SearchField className="md:w-72 lg:w-80" />
-    <div className="flex items-center gap-3 md:ml-auto">
+    <div className="flex flex-wrap items-center gap-3 md:ml-auto">
       <DateField />
       {!hideGenres && <GenreField genres={genres} />}
       {!hideCity && <CityField />}
