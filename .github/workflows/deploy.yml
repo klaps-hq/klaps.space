@@ -103,8 +103,14 @@ jobs:
 
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            docker pull ${{ secrets.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
+            export DOCKER_IMAGE=${{ secrets.DOCKER_IMAGE }}
+            export DOMAIN=${{ env.DOMAIN }}
+            export ENV_SUFFIX=${{ env.ENV_SUFFIX }}
+            export IMAGE_TAG=${{ env.IMAGE_TAG }}
 
-            DOMAIN=${{ env.DOMAIN }} ENV_SUFFIX=${{ env.ENV_SUFFIX }} IMAGE_TAG=${{ env.IMAGE_TAG }} docker compose -p klaps-frontend-${{ env.ENV_SUFFIX }} up -d --force-recreate
+            # compose pull guarantees we pull exactly the image compose
+            # is about to run (single source of truth for the image name).
+            docker compose -p klaps-frontend-${{ env.ENV_SUFFIX }} pull
+            docker compose -p klaps-frontend-${{ env.ENV_SUFFIX }} up -d --force-recreate
 
             docker image prune -f || true
