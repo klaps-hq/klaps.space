@@ -5,12 +5,6 @@ export const metadata: Metadata = {
   title: "Mapa kin studyjnych w Polsce",
   description:
     "Interaktywna mapa kin studyjnych i niezależnych w Polsce. Znajdź kino artystyczne blisko siebie i sprawdź repertuar seansów specjalnych.",
-  keywords: [
-    "mapa kin studyjnych",
-    "kina studyjne na mapie",
-    "kina niezależne mapa",
-    "kino artystyczne blisko mnie",
-  ],
   alternates: {
     canonical: `${SITE_URL}/mapa-kin`,
   },

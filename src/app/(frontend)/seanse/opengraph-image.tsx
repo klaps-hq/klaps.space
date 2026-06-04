@@ -6,7 +6,8 @@ export const alt = "Klaps - Repertuar kin studyjnych";
 
 export default function OgImage() {
   return buildOgImage({
-    title: "Repertuar",
+    eyebrow: "Repertuar",
+    title: "Seanse",
     subtitle: "Seanse specjalne i klasyka filmowa w kinach studyjnych",
   });
 }

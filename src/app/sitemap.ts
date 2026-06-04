@@ -2,38 +2,25 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site-config";
 import { getMovies } from "@/lib/movies";
 import { getCinemas } from "@/lib/cinemas";
-import { getCities } from "@/lib/cities";
 import { getGenres } from "@/lib/genres";
-import { getScreenings } from "@/lib/screenings";
 
 export const revalidate = 3600;
 
 const sanitizeSlug = (slug: string | null | undefined) => slug?.trim() ?? "";
 const isValidSlug = (slug: string) =>
   slug.length > 0 && !slug.includes("/") && !slug.includes("?") && !slug.includes("#");
-const sanitizeNumericId = (value: unknown) => {
-  const id = Number(value);
-  return Number.isInteger(id) && id > 0 ? id : null;
-};
-const isValidDate = (value: string) => !Number.isNaN(new Date(value).getTime());
 
 const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
-  const [moviesResult, cinemasResult, citiesResult, genresResult, screeningsResult] =
-    await Promise.allSettled([
-      getMovies({ page: 1, limit: 1000 }),
-      getCinemas(),
-      getCities(),
-      getGenres(),
-      getScreenings(),
-    ]);
+  const [moviesResult, cinemasResult, genresResult] = await Promise.allSettled([
+    getMovies({ page: 1, limit: 1000 }),
+    getCinemas(),
+    getGenres(),
+  ]);
 
   const movies = moviesResult.status === "fulfilled" ? moviesResult.value.data : [];
   const cinemaGroups =
     cinemasResult.status === "fulfilled" ? cinemasResult.value.data : [];
-  const cities = citiesResult.status === "fulfilled" ? citiesResult.value : [];
   const genres = genresResult.status === "fulfilled" ? genresResult.value : [];
-  const screeningGroups =
-    screeningsResult.status === "fulfilled" ? screeningsResult.value : [];
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: SITE_URL, changeFrequency: "daily", priority: 1 },
@@ -70,8 +57,11 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
         }))
   );
 
-  const cityPages: MetadataRoute.Sitemap = cities
-    .map((city) => sanitizeSlug(city.slug))
+  // Only cities that actually have cinemas — empty city pages are
+  // thin content we don't want to submit to Google.
+  const cityPages: MetadataRoute.Sitemap = cinemaGroups
+    .filter((group) => group.cinemas.length > 0)
+    .map((group) => sanitizeSlug(group.city.slug))
     .filter(isValidSlug)
     .map((city) => ({
       url: `${SITE_URL}/miasta/${encodeURIComponent(city)}`,
@@ -88,30 +78,12 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
       priority: 0.5,
     }));
 
-  const nowDate = new Date();
-  const screeningPages: MetadataRoute.Sitemap = screeningGroups.flatMap(
-    (group) =>
-      group.screenings
-        .filter(
-          (screening) =>
-            isValidDate(screening.dateTime) && new Date(screening.dateTime) >= nowDate
-        )
-        .map((screening) => ({
-          url: `${SITE_URL}/seanse/${sanitizeNumericId(screening.id)}`,
-          lastModified: screening.dateTime,
-          changeFrequency: "daily" as const,
-          priority: 0.6,
-        }))
-        .filter((item) => !item.url.endsWith("/null"))
-  );
-
   const allPages = [
     ...staticPages,
     ...moviePages,
     ...cinemaPages,
     ...cityPages,
     ...genrePages,
-    ...screeningPages,
   ];
 
   return Array.from(new Map(allPages.map((item) => [item.url, item])).values());

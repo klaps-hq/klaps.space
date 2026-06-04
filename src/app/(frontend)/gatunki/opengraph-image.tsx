@@ -6,6 +6,7 @@ export const alt = "Klaps - Gatunki filmowe";
 
 export default function OgImage() {
   return buildOgImage({
+    eyebrow: "Przeglądaj",
     title: "Gatunki",
     subtitle: "Filtruj seanse po nastroju wieczoru",
   });

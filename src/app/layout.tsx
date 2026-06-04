@@ -5,6 +5,7 @@ import "./globals.css";
 import JsonLd from "@/components/common/json-ld";
 import SmoothScroll from "@/components/common/smooth-scroll";
 import CustomCursor from "@/components/common/custom-cursor";
+import ConsentBanner from "@/components/common/consent-banner";
 import { CityProvider } from "@/contexts/city-context";
 import { SOCIAL_PROFILE_URLS } from "@/constants";
 import { getCities } from "@/lib/cities";
@@ -24,18 +25,6 @@ export const metadata: Metadata = {
   },
   description:
     "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych w Polsce. Repertuar, filmy i kina w jednym miejscu.",
-  keywords: [
-    "kina studyjne",
-    "seanse specjalne",
-    "klasyka filmowa",
-    "retrospektywy filmowe",
-    "kino niezależne",
-    "repertuar kin studyjnych",
-    "filmy klasyczne w kinie",
-    "pokazy specjalne",
-    "kino artystyczne",
-    "wznowienia filmowe",
-  ],
   openGraph: {
     type: "website",
     locale: "pl_PL",
@@ -109,6 +98,12 @@ export default async function RootLayout({
               {`
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
+                gtag('consent', 'default', {
+                  ad_storage: 'denied',
+                  ad_user_data: 'denied',
+                  ad_personalization: 'denied',
+                  analytics_storage: 'denied'
+                });
                 gtag('js', new Date());
                 gtag('config', '${process.env.GA_MEASUREMENT_ID}');
               `}
@@ -134,6 +129,7 @@ export default async function RootLayout({
         />
         <SmoothScroll />
         <CustomCursor />
+        {process.env.GA_MEASUREMENT_ID && <ConsentBanner />}
         <CityProvider cities={cities}>{children}</CityProvider>
       </body>
     </html>

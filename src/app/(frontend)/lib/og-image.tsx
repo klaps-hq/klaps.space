@@ -4,18 +4,35 @@ import path from "node:path";
 
 export const OG_SIZE = { width: 1200, height: 630 };
 
+const HAIRLINE = "1px solid rgba(255,255,255,0.12)";
+
 interface OgImageOptions {
   title: string;
   subtitle?: string;
+  eyebrow?: string;
+  posterUrl?: string | null;
 }
 
-export async function buildOgImage({ title, subtitle }: OgImageOptions) {
+const getTitleSize = (title: string, hasPoster: boolean): number => {
+  const base = hasPoster ? 0.82 : 1;
+  if (title.length > 24) return Math.round(58 * base);
+  if (title.length > 14) return Math.round(76 * base);
+  return Math.round(104 * base);
+};
+
+export async function buildOgImage({
+  title,
+  subtitle,
+  eyebrow,
+  posterUrl,
+}: OgImageOptions) {
   const [regular, bold] = await Promise.all([
     readFile(path.join(process.cwd(), "src/assets/fonts/Inter-Regular.ttf")),
     readFile(path.join(process.cwd(), "src/assets/fonts/Inter-Bold.ttf")),
   ]);
 
-  const titleSize = title.length > 14 ? 76 : 104;
+  const titleSize = getTitleSize(title, Boolean(posterUrl));
+  const padX = posterUrl ? 56 : 64;
 
   return new ImageResponse(
     (
@@ -24,67 +41,134 @@ export async function buildOgImage({ title, subtitle }: OgImageOptions) {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
           backgroundColor: "#000000",
           color: "#ffffff",
-          padding: "72px 80px",
           fontFamily: "Inter",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <svg width="38" height="27" viewBox="0 0 28 20">
-            <polygon points="0,8 28,0 28,20 0,12" fill="#ffffff" />
-          </svg>
-          <span
+        <div
+          style={{
+            display: "flex",
+            flex: 1,
+            minWidth: 0,
+            flexDirection: "column",
+          }}
+        >
+          <div
             style={{
-              fontSize: 40,
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              height: 92,
+              padding: `0 ${padX}px`,
+              borderBottom: HAIRLINE,
             }}
           >
-            klaps
-          </span>
-        </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <svg width="30" height="21" viewBox="0 0 28 20">
+                <polygon points="0,8 28,0 28,20 0,12" fill="#ffffff" />
+              </svg>
+              <span
+                style={{
+                  fontSize: 32,
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                klaps
+              </span>
+            </div>
+            {eyebrow && (
+              <span
+                style={{
+                  fontSize: 17,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.3em",
+                  color: "rgba(255,255,255,0.4)",
+                }}
+              >
+                {eyebrow}
+              </span>
+            )}
+          </div>
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <span
+          <div
             style={{
-              fontSize: titleSize,
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "-0.03em",
-              lineHeight: 1,
-              maxWidth: 1040,
+              display: "flex",
+              flex: 1,
+              minHeight: 0,
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              padding: `48px ${padX}px`,
             }}
           >
-            {title}
-          </span>
-          {subtitle && (
             <span
               style={{
-                marginTop: 26,
-                fontSize: 30,
-                color: "rgba(255,255,255,0.6)",
-                maxWidth: 960,
-                lineHeight: 1.35,
+                fontSize: titleSize,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "-0.03em",
+                lineHeight: 0.95,
               }}
             >
-              {subtitle}
+              {title}
             </span>
-          )}
-          <span
+            {subtitle && (
+              <span
+                style={{
+                  marginTop: 24,
+                  fontSize: 26,
+                  color: "rgba(255,255,255,0.55)",
+                  lineHeight: 1.4,
+                  maxWidth: 920,
+                }}
+              >
+                {subtitle}
+              </span>
+            )}
+          </div>
+
+          <div
             style={{
-              marginTop: 44,
-              fontSize: 20,
-              textTransform: "uppercase",
-              letterSpacing: "0.3em",
-              color: "rgba(255,255,255,0.4)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              height: 72,
+              padding: `0 ${padX}px`,
+              borderTop: HAIRLINE,
             }}
           >
-            klaps.space
-          </span>
+            <span
+              style={{
+                fontSize: 16,
+                textTransform: "uppercase",
+                letterSpacing: "0.3em",
+                color: "rgba(255,255,255,0.4)",
+              }}
+            >
+              klaps.space
+            </span>
+            <span style={{ fontSize: 24, color: "rgba(255,255,255,0.4)" }}>
+              →
+            </span>
+          </div>
         </div>
+
+        {posterUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={posterUrl}
+            alt=""
+            width={420}
+            height={630}
+            style={{
+              width: 420,
+              height: 630,
+              objectFit: "cover",
+              borderLeft: HAIRLINE,
+            }}
+          />
+        )}
       </div>
     ),
     {

@@ -1,13 +1,20 @@
 import { Metadata } from "next";
-import { getMoviePageData, getMovieBySlug } from "@/lib/movies";
-import { tmdbImageUrl } from "@/lib/tmdb";
+import { getMoviePageData, getMovieBySlug, getMovies } from "@/lib/movies";
+import { getMovieScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, hasQueryParams } from "@/lib/seo";
+import {
+  BASE_OPEN_GRAPH,
+  NOINDEX_FOLLOW,
+  hasQueryParams,
+  pluralPl,
+} from "@/lib/seo";
 import Footer from "@/app/(home)/_components/footer";
-import MoviePoster from "@/components/common/movie-poster";
+import SiteHeader from "@/components/common/site-header";
+import Breadcrumbs from "@/components/ui/breadcrumbs";
 import MovieHero from "./_components/movie-hero";
 import MovieAbout from "./_components/movie-about";
 import MovieScreenings from "./_components/movie-screenings";
+import RelatedMovies from "./_components/related-movies";
 
 export const dynamic = "force-dynamic";
 
@@ -23,56 +30,53 @@ export const generateMetadata = async ({
   const [{ slug }, queryParams] = await Promise.all([params, searchParams]);
   const movie = await getMovieBySlug(slug);
 
+  const screenings = await getMovieScreenings({
+    movieId: movie.id.toString(),
+  }).catch(() => []);
+  const screeningsCount = screenings.length;
+
   const genreNames = movie.genres.map((g) => g.name).join(", ");
   const directorNames = movie.directors?.map((d) => d.name).join(", ");
+
+  // Real screening counts in the description improve SERP CTR and uniqueness.
+  const screeningsSuffix =
+    screeningsCount > 0
+      ? `Sprawdź ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")} w kinach studyjnych.`
+      : "Sprawdź seanse w kinach studyjnych.";
 
   const descriptionParts = [
     `${movie.title} (${movie.productionYear})`,
     genreNames && `- ${genreNames}`,
     directorNames && `reż. ${directorNames}`,
-    "- seanse specjalne w kinach studyjnych w Polsce.",
+    `- ${screeningsSuffix}`,
   ].filter(Boolean);
 
   const description = movie.description
-    ? `${movie.description.slice(0, 130)} Sprawdź seanse w kinach studyjnych.`
+    ? `${movie.description.slice(0, 120)} ${screeningsSuffix}`
     : descriptionParts.join(" ");
 
-  const title = `${movie.title} - seanse w kinach (${movie.productionYear})`;
+  const title = `${movie.title} (${movie.productionYear}) - seanse w kinach`;
   const url = `${SITE_URL}/filmy/${movie.slug}`;
-  const ogImages = movie.posterUrl
-    ? [{ url: tmdbImageUrl(movie.posterUrl, "w780"), alt: movie.title }]
-    : undefined;
+
+  // Movies without upcoming screenings are thin TMDB duplicates — keep
+  // them out of the index until they have showtimes again.
+  const noindex = screeningsCount === 0 || hasQueryParams(queryParams);
 
   return {
     title,
     description,
-    keywords: [
-      movie.title,
-      movie.titleOriginal,
-      `${movie.title} seanse w kinach`,
-      `${movie.title} kino`,
-      `${movie.title} seans specjalny`,
-      ...movie.genres.map((g) => g.name.toLowerCase()),
-    ].filter(Boolean) as string[],
-    alternates: {
-      canonical: url,
-    },
-    ...(hasQueryParams(queryParams) && NOINDEX_FOLLOW),
+    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "video.movie",
       url,
       title: `${movie.title} - seanse w kinach`,
       description,
-      ...(ogImages && { images: ogImages }),
     },
     twitter: {
       card: "summary_large_image",
       title: `${movie.title} - seanse w kinach`,
       description,
-      ...(movie.posterUrl && {
-        images: [tmdbImageUrl(movie.posterUrl, "w780")],
-      }),
     },
   };
 };
@@ -81,21 +85,48 @@ const MoviePage = async ({ params }: MoviePageProps) => {
   const { slug } = await params;
   const { movie, screenings } = await getMoviePageData(slug);
 
+  // Internal linking: up to 6 movies sharing the primary genre.
+  const primaryGenre = movie.genres[0];
+  const relatedMovies = primaryGenre
+    ? (
+        await getMovies({ genreId: primaryGenre.id.toString(), limit: 7 })
+      ).data
+        .filter((related) => related.id !== movie.id)
+        .slice(0, 6)
+    : [];
+
   return (
     <main className="bg-black min-h-screen text-white">
-      <MovieHero movie={movie} />
+      <SiteHeader />
+
+      <div className="-mt-20">
+        <MovieHero movie={movie} />
+      </div>
+
+      <div className="px-6 md:px-12 lg:px-16 py-5 md:py-6">
+        <Breadcrumbs
+          items={[
+            { name: "Seanse", href: "/seanse" },
+            { name: movie.title },
+          ]}
+        />
+      </div>
 
       <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-14 md:pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
-          <div className="lg:col-span-4">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white">
-              Seanse
-            </h2>
+        {screenings.length === 0 ? (
+          <MovieScreenings screenings={screenings} />
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
+            <div className="lg:col-span-4">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white">
+                Seanse
+              </h2>
+            </div>
+            <div className="lg:col-span-8">
+              <MovieScreenings screenings={screenings} />
+            </div>
           </div>
-          <div className="lg:col-span-8">
-            <MovieScreenings screenings={screenings} />
-          </div>
-        </div>
+        )}
       </section>
 
       <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-16 md:pb-24">
@@ -104,23 +135,32 @@ const MoviePage = async ({ params }: MoviePageProps) => {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white">
               O filmie
             </h2>
-            {movie.posterUrl && (
-              <div className="mt-8 md:mt-10 aspect-[2/3] w-full max-w-[200px] overflow-hidden bg-white/5">
-                <MoviePoster
-                  posterUrl={movie.posterUrl}
-                  title={movie.title}
-                  width={320}
-                  height={480}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
           </div>
           <div className="lg:col-span-8">
             <MovieAbout movie={movie} />
           </div>
         </div>
       </section>
+
+      {relatedMovies.length > 0 && (
+        <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-16 md:pb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
+            <div className="lg:col-span-4">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white">
+                Podobne filmy
+              </h2>
+              {primaryGenre && (
+                <p className="mt-4 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/40">
+                  Gatunek: {primaryGenre.name}
+                </p>
+              )}
+            </div>
+            <div className="lg:col-span-8">
+              <RelatedMovies movies={relatedMovies} />
+            </div>
+          </div>
+        </section>
+      )}
 
       <Footer />
     </main>

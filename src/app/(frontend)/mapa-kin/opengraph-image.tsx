@@ -6,6 +6,7 @@ export const alt = "Klaps - Mapa kin studyjnych";
 
 export default function OgImage() {
   return buildOgImage({
+    eyebrow: "Przeglądaj",
     title: "Mapa kin",
     subtitle: "Wszystkie kina studyjne na mapie Polski",
   });

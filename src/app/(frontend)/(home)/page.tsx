@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Metadata } from "next";
 import Hero from "./_components/hero";
 import Footer from "./_components/footer";
 import Screenings from "./_components/screenings";
@@ -6,6 +7,7 @@ import ScreeningsLoader from "./_components/screenings/loader";
 import Genres from "./_components/genres";
 import Cinemas from "./_components/cinemas";
 import { getRandomScreening } from "@/lib/screenings";
+import { NOINDEX_FOLLOW, hasQueryParams } from "@/lib/seo";
 
 export const revalidate = 300;
 
@@ -20,6 +22,16 @@ interface HomePageSearchParams {
 interface HomePageProps {
   searchParams: Promise<HomePageSearchParams>;
 }
+
+export const generateMetadata = async ({
+  searchParams,
+}: HomePageProps): Promise<Metadata> => {
+  const params = await searchParams;
+  if (!hasQueryParams(params)) return {};
+  // Filtered home: noindex and drop the layout-level canonical
+  // to avoid sending mixed signals.
+  return { ...NOINDEX_FOLLOW, alternates: { canonical: null } };
+};
 
 const HomePage = async ({ searchParams }: HomePageProps) => {
   const params = await searchParams;

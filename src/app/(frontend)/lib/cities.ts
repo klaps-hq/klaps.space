@@ -7,7 +7,11 @@ import { getCinemas } from "./cinemas";
 
 export const getCities = async (): Promise<ICity[]> => {
   try {
-    const cities = await apiFetch<ICity[]>("/cities");
+    // Awaited in the root layout on every page — cache aggressively
+    // so it never becomes a TTFB bottleneck.
+    const cities = await apiFetch<ICity[]>("/cities", {
+      next: { revalidate: 3600 },
+    });
     return cities;
   } catch (error) {
     console.warn("Falling back to empty cities list:", error);
@@ -21,8 +25,9 @@ export const getCityById = async (id: number): Promise<ICityDetails> => {
 };
 
 export const getCityBySlug = async (slug: string): Promise<ICityDetails> => {
-  const city = await apiFetch<ICityDetails>(`/cities/${slug}`);
-  return city;
+  // fetchOrNotFound: an unknown slug must yield a 404, not a 500
+  // (this is called directly from generateMetadata).
+  return fetchOrNotFound(() => apiFetch<ICityDetails>(`/cities/${slug}`));
 };
 
 export const getCityPageData = async (

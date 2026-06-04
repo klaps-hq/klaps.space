@@ -155,7 +155,7 @@ const ContactPage = () => {
                 <a
                   href={social.href}
                   target="_blank"
-                  rel="noreferrer noopener"
+                  rel="noreferrer noopener nofollow"
                   className="group flex h-full flex-col justify-between gap-8 p-5 md:p-6 bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
                 >
                   <div className="flex items-start justify-between gap-3">

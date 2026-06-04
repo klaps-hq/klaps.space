@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IMovie } from "@/interfaces/IMovies";
 import { formatDatePL, formatDuration, formatNames } from "@/lib/utils";
 
-interface SpecItem {
+interface CreditItem {
   label: string;
   value: string;
 }
@@ -17,60 +17,72 @@ const MovieAbout: React.FC<MovieAboutProps> = ({ movie }) => {
   const scriptwriters = formatNames(movie.scriptwriters ?? movie.screenwriters);
   const actors = formatNames(movie.actors);
   const countries = formatNames(movie.countries ?? movie.countryOfOrigin);
+  const premierePL = formatDatePL(movie.polishPremiereDate);
 
-  const specs: SpecItem[] = [
+  const credits: CreditItem[] = [
     { label: "Reżyseria", value: directors ?? "" },
     { label: "Scenariusz", value: scriptwriters ?? "" },
-    { label: "Obsada", value: actors ?? "" },
-    { label: "Rok produkcji", value: movie.productionYear?.toString() ?? "" },
-    {
-      label: "Czas trwania",
-      value: movie.duration ? formatDuration(movie.duration) : "",
-    },
-    { label: "Kraj produkcji", value: countries ?? "" },
-    {
-      label: "Premiera w Polsce",
-      value: formatDatePL(movie.polishPremiereDate) ?? "",
-    },
   ].filter((i) => i.value.trim() !== "");
 
-  if (specs.length === 0 && movie.genres.length === 0) return null;
+  const metaParts = [
+    movie.productionYear?.toString(),
+    movie.duration ? formatDuration(movie.duration) : null,
+    countries,
+    movie.language?.toUpperCase(),
+    premierePL ? `Premiera w Polsce ${premierePL}` : null,
+  ].filter(Boolean) as string[];
+
+  if (credits.length === 0 && !actors && metaParts.length === 0) return null;
 
   return (
-    <dl className="flex flex-col border-b border-white/10">
-      {specs.map((item) => (
-        <div
-          key={item.label}
-          className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-1 sm:gap-8 border-t border-white/10 py-4 md:py-5"
-        >
-          <dt className="text-[10px] uppercase tracking-[0.25em] text-white/40 sm:pt-1">
-            {item.label}
-          </dt>
-          <dd className="text-base md:text-lg text-white/85 leading-relaxed max-w-[70ch]">
-            {item.value}
-          </dd>
-        </div>
-      ))}
-
-      {movie.genres.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-2 sm:gap-8 border-t border-white/10 py-4 md:py-5">
-          <dt className="text-[10px] uppercase tracking-[0.25em] text-white/40 sm:pt-2">
-            Gatunki
-          </dt>
-          <dd className="flex flex-wrap items-center gap-2">
-            {movie.genres.map((genre) => (
-              <Link
-                key={genre.id}
-                href={`/gatunki/${genre.slug}`}
-                className="inline-flex items-center px-3.5 h-8 text-[10px] uppercase tracking-wider border text-white/75 border-white/20 hover:text-white hover:border-white/60 transition-colors whitespace-nowrap"
-              >
-                {genre.name}
-              </Link>
+    <div className="flex flex-col gap-10 md:gap-12">
+      {(credits.length > 0 || actors) && (
+        <div className="flex flex-col gap-8 md:gap-10">
+          <div className="flex flex-col md:flex-row md:flex-wrap gap-8 md:gap-x-20 lg:gap-x-28">
+            {credits.map((item) => (
+              <div key={item.label} className="flex flex-col gap-2">
+                <span className="text-[10px] uppercase tracking-[0.25em] text-white/40">
+                  {item.label}
+                </span>
+                <span className="text-xl md:text-2xl text-white -tracking-[0.01em] leading-snug">
+                  {item.value}
+                </span>
+              </div>
             ))}
-          </dd>
+          </div>
+          {actors && (
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-white/40">
+                Obsada
+              </span>
+              <span className="text-lg md:text-xl text-white/85 leading-relaxed max-w-[75ch]">
+                {actors}
+              </span>
+            </div>
+          )}
         </div>
       )}
-    </dl>
+
+      {metaParts.length > 0 && (
+        <p className="text-xs md:text-sm uppercase tracking-[0.22em] text-white/50 leading-loose">
+          {metaParts.join("  ·  ")}
+        </p>
+      )}
+
+      {movie.genres.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {movie.genres.map((genre) => (
+            <Link
+              key={genre.id}
+              href={`/gatunki/${genre.slug}`}
+              className="inline-flex items-center px-4 h-9 text-[11px] uppercase tracking-wider border text-white/75 border-white/20 hover:text-white hover:border-white/60 transition-colors whitespace-nowrap"
+            >
+              {genre.name}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 

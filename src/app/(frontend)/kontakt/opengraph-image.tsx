@@ -6,6 +6,7 @@ export const alt = "Klaps - Kontakt";
 
 export default function OgImage() {
   return buildOgImage({
+    eyebrow: "Informacje",
     title: "Kontakt",
     subtitle: "Napisz do nas. Odpowiadamy w ciągu kilku dni roboczych",
   });

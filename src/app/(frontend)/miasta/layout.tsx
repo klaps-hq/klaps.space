@@ -5,13 +5,6 @@ export const metadata: Metadata = {
   title: "Kina studyjne w miastach Polski",
   description:
     "Wybierz miasto i sprawdź kina studyjne w swoim regionie. Repertuar seansów specjalnych, klasyki filmowej i retrospektyw w miastach w całej Polsce.",
-  keywords: [
-    "kina studyjne w miastach",
-    "kino studyjne Warszawa",
-    "kino studyjne Kraków",
-    "kino studyjne Wrocław",
-    "kina niezależne miasta",
-  ],
   alternates: {
     canonical: `${SITE_URL}/miasta`,
   },

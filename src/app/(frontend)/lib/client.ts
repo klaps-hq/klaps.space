@@ -29,7 +29,10 @@ export async function fetchOrNotFound<T>(fn: () => Promise<T>): Promise<T> {
 
 export async function apiFetch<T>(
   path: string,
-  options: RequestInit & { params?: Record<string, string> } = {}
+  options: RequestInit & {
+    params?: Record<string, string>;
+    next?: { revalidate?: number };
+  } = {}
 ): Promise<T> {
   try {
     const baseUrl = getApiBaseUrl();
@@ -51,7 +54,8 @@ export async function apiFetch<T>(
         ...options.headers,
         ...(INTERNAL_API_KEY && { "x-internal-api-key": INTERNAL_API_KEY }),
       },
-      next: { revalidate: 300 },
+      // Default 5-minute cache; callers can override via options.next.
+      next: { revalidate: 300, ...options.next },
     });
 
     if (!res.ok) {

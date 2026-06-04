@@ -6,6 +6,7 @@ export const alt = "Klaps - Kina studyjne";
 
 export default function OgImage() {
   return buildOgImage({
+    eyebrow: "Przeglądaj",
     title: "Kina",
     subtitle: "Kina studyjne w całej Polsce",
   });

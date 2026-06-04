@@ -2,14 +2,15 @@ import React from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { getGenrePageData, getGenres } from "@/lib/genres";
+import { getMovies } from "@/lib/movies";
 import { getScreenings } from "@/lib/screenings";
 import { getPreferredCityId } from "@/lib/get-preferred-city";
 import { SITE_URL } from "@/lib/site-config";
 import {
   BASE_OPEN_GRAPH,
-  DEFAULT_OG_IMAGE,
   NOINDEX_FOLLOW,
   hasQueryParams,
+  pluralPl,
 } from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import SiteHeader from "@/components/common/site-header";
@@ -37,42 +38,38 @@ export const generateMetadata = async ({
   const [{ slug }, queryParams] = await Promise.all([params, searchParams]);
   const genre = await getGenrePageData(slug);
 
+  const { meta } = await getMovies({
+    genreId: genre.id.toString(),
+    limit: 1,
+  });
+  const moviesCount = meta.total;
+
   const genreLower = genre.name.toLowerCase();
   const title = `${genre.name} - filmy w kinach studyjnych`;
-  const description = `Filmy z gatunku ${genreLower} dostępne w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy - ${genreLower} na dużym ekranie.`;
+  const description =
+    moviesCount > 0
+      ? `${moviesCount} ${pluralPl(moviesCount, "film", "filmy", "filmów")} z gatunku ${genreLower} w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy - ${genreLower} na dużym ekranie.`
+      : `Filmy z gatunku ${genreLower} dostępne w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy.`;
   const url = `${SITE_URL}/gatunki/${genre.slug}`;
+
+  // A genre with no movies is thin content; keep it out of the index.
+  const noindex = moviesCount === 0 || hasQueryParams(queryParams);
 
   return {
     title,
     description,
-    keywords: [
-      `${genreLower} kino studyjne`,
-      `filmy ${genreLower}`,
-      `${genreLower} seanse specjalne`,
-      `${genreLower} klasyka filmowa`,
-    ],
-    alternates: {
-      canonical: url,
-    },
-    ...(hasQueryParams(queryParams) && NOINDEX_FOLLOW),
+    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
       title,
       description,
       url,
-      images: [
-        {
-          ...DEFAULT_OG_IMAGE,
-          alt: `${genre.name} - filmy w kinach studyjnych`,
-        },
-      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [DEFAULT_OG_IMAGE.url],
     },
   };
 };

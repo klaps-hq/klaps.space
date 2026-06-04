@@ -6,6 +6,7 @@ export const alt = "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjny
 
 export default function OgImage() {
   return buildOgImage({
+    eyebrow: "Kina studyjne w Polsce",
     title: "Klaps",
     subtitle: "Seanse specjalne i klasyka filmowa w kinach studyjnych w Polsce",
   });

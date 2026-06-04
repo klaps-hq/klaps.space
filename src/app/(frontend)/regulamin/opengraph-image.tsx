@@ -6,6 +6,7 @@ export const alt = "Klaps - Regulamin";
 
 export default function OgImage() {
   return buildOgImage({
+    eyebrow: "Prawne",
     title: "Regulamin",
     subtitle: "Zasady korzystania z serwisu",
   });

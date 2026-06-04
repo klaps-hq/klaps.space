@@ -8,7 +8,6 @@ import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { SITE_URL } from "@/lib/site-config";
 import {
   BASE_OPEN_GRAPH,
-  DEFAULT_OG_IMAGE,
   NOINDEX_FOLLOW,
   hasQueryParams,
 } from "@/lib/seo";
@@ -44,37 +43,23 @@ export const generateMetadata = async ({
   const description = `${cinema.name} - kino studyjne w ${cinema.city.name}. Repertuar seansów specjalnych, klasyki filmowej i retrospektyw. Sprawdź co grają.`;
   const url = `${SITE_URL}/kina/${cinema.slug}`;
 
+  const noindex = hasQueryParams(queryParams);
+
   return {
     title,
     description,
-    keywords: [
-      cinema.name,
-      `kino studyjne ${cinema.city.name}`,
-      `repertuar ${cinema.name}`,
-      `seanse specjalne ${cinema.city.name}`,
-    ],
-    alternates: {
-      canonical: url,
-    },
-    ...(hasQueryParams(queryParams) && NOINDEX_FOLLOW),
+    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
       title,
       description,
       url,
-      images: [
-        {
-          ...DEFAULT_OG_IMAGE,
-          alt: `${cinema.name} - kino studyjne w ${cinema.city.name}`,
-        },
-      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [DEFAULT_OG_IMAGE.url],
     },
   };
 };
@@ -175,7 +160,7 @@ const CinemaPageContent = async ({
                   <Link
                     href={cinema.sourceUrl}
                     target="_blank"
-                    rel="noreferrer noopener"
+                    rel="noreferrer noopener nofollow"
                     className="text-white/70 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
                   >
                     Strona kina ↗

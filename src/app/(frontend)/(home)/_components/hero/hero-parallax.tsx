@@ -47,7 +47,6 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
             sizes="100vw"
             className="object-cover"
             priority
-            unoptimized
           />
         </motion.div>
       </motion.div>

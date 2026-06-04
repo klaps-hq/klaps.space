@@ -64,7 +64,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
           key={id}
           href={href}
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener noreferrer nofollow"
           aria-label={`Klaps na ${label}`}
           className={cn(
             "inline-flex h-8 items-center border border-white/15 bg-white/2 text-[10px] uppercase tracking-[0.16em] text-white/65 transition-all hover:border-blood-red/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blood-red focus-visible:ring-offset-2",

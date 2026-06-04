@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import { X } from "lucide-react";
 import { IMovie } from "@/interfaces/IMovies";
@@ -58,7 +57,6 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
               sizes="100vw"
               className="object-cover"
               priority
-              unoptimized
             />
           </motion.div>
         )}
@@ -82,38 +80,6 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
             <rect width="100%" height="100%" filter="url(#movie-hero-grain)" />
           </svg>
         </div>
-
-        <motion.nav
-          className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between gap-4 px-6 md:px-12 lg:px-16 py-6"
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <Link href="/" className="flex items-center gap-2.5 text-white">
-            <svg
-              viewBox="0 0 28 20"
-              className="w-5 h-5"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <polygon points="0,8 28,0 28,20 0,12" />
-            </svg>
-            <span className="text-xl font-medium lowercase tracking-tight">
-              klaps
-            </span>
-          </Link>
-          <div className="flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/60">
-            <Link href="/seanse" className="hover:text-white transition-colors">
-              Seanse
-            </Link>
-            <span aria-hidden="true" className="text-white/30">
-              ›
-            </span>
-            <span className="text-white/85 truncate max-w-[180px] md:max-w-[320px]">
-              {movie.title}
-            </span>
-          </div>
-        </motion.nav>
 
         <motion.div
           className="absolute inset-0 z-[4] flex flex-col justify-end px-6 md:px-12 lg:px-16 pb-12 md:pb-16"

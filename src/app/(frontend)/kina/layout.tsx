@@ -5,13 +5,6 @@ export const metadata: Metadata = {
   title: "Kina studyjne w Polsce",
   description:
     "Pełna lista kin studyjnych i niezależnych w Polsce. Znajdź kino artystyczne w swoim mieście i sprawdź aktualny repertuar seansów specjalnych.",
-  keywords: [
-    "kina studyjne w Polsce",
-    "kina niezależne",
-    "kino artystyczne",
-    "lista kin studyjnych",
-    "kino studyjne w moim mieście",
-  ],
   alternates: {
     canonical: `${SITE_URL}/kina`,
   },

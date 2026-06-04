@@ -6,6 +6,7 @@ export const alt = "Klaps - FAQ";
 
 export default function OgImage() {
   return buildOgImage({
+    eyebrow: "Pomoc",
     title: "FAQ",
     subtitle: "Najczęściej zadawane pytania o seanse, kina i bilety",
   });

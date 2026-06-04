@@ -20,12 +20,6 @@ export const metadata: Metadata = {
   title: "Najczęściej zadawane pytania o kinach studyjnych",
   description:
     "Odpowiedzi na pytania o seansach specjalnych, repertuarze kin studyjnych, biletach i funkcjach serwisu Klaps. Dowiedz się jak znaleźć klasykę filmową w kinie.",
-  keywords: [
-    "kina studyjne pytania",
-    "seanse specjalne FAQ",
-    "jak działa Klaps",
-    "FAQ o kinach studyjnych",
-  ],
   alternates: {
     canonical: `${SITE_URL}/faq`,
   },

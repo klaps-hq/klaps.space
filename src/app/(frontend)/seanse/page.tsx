@@ -11,7 +11,6 @@ import { PaginatedResponse } from "@/interfaces/IMovies";
 import { SITE_URL } from "@/lib/site-config";
 import {
   BASE_OPEN_GRAPH,
-  DEFAULT_OG_IMAGE,
   NOINDEX_FOLLOW,
   hasQueryParams,
 } from "@/lib/seo";
@@ -44,38 +43,23 @@ export const generateMetadata = async ({
     "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce. Filtruj po mieście, dacie i gatunku.";
   const url = `${SITE_URL}/seanse`;
 
+  const noindex = hasQueryParams(queryParams);
+
   return {
     title,
     description,
-    keywords: [
-      "seanse specjalne",
-      "repertuar kin studyjnych",
-      "klasyka filmowa w kinie",
-      "retrospektywy filmowe",
-      "pokazy specjalne kino",
-    ],
-    alternates: {
-      canonical: url,
-    },
-    ...(hasQueryParams(queryParams) && NOINDEX_FOLLOW),
+    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
       title,
       description,
       url,
-      images: [
-        {
-          ...DEFAULT_OG_IMAGE,
-          alt: "Seanse specjalne w kinach studyjnych",
-        },
-      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [DEFAULT_OG_IMAGE.url],
     },
   };
 };

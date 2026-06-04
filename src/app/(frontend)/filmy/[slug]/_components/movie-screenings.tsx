@@ -15,22 +15,50 @@ interface ScreeningTimeProps {
   screening: IScreening;
 }
 
+const formatFullDateLabel = (dateStr: string): string => {
+  const base = formatDateLabel(dateStr);
+  if (base === "Dziś" || base === "Jutro") {
+    const date = new Date(dateStr).toLocaleDateString("pl-PL", {
+      day: "2-digit",
+      month: "2-digit",
+    });
+    return `${base} · ${date}`;
+  }
+  return base;
+};
+
+const formatShortDate = (dateStr: string): string =>
+  new Date(dateStr).toLocaleDateString("pl-PL", {
+    day: "2-digit",
+    month: "2-digit",
+  });
+
 const ScreeningTime: React.FC<ScreeningTimeProps> = ({ screening }) => {
   if (screening.ticketUrl) {
     return (
       <a
         href={screening.ticketUrl}
         target="_blank"
-        rel="noreferrer noopener"
-        className="inline-flex items-center justify-center h-9 px-4 text-xs font-medium tracking-[0.15em] tabular-nums border border-white/25 text-white hover:bg-white hover:text-black hover:border-white transition-colors"
+        rel="noreferrer noopener nofollow"
+        className="group/time flex flex-col items-center gap-1.5"
       >
-        {screening.time}
+        <span className="text-2xl md:text-3xl font-semibold tabular-nums -tracking-[0.01em] text-white underline underline-offset-8 decoration-2 decoration-white/30 group-hover/time:decoration-white transition-colors">
+          {screening.time}
+        </span>
+        <span className="text-[10px] uppercase tracking-[0.2em] tabular-nums text-white/45">
+          {formatShortDate(screening.date)}
+        </span>
       </a>
     );
   }
   return (
-    <span className="inline-flex items-center justify-center h-9 px-4 text-xs font-medium tracking-[0.15em] tabular-nums border border-white/10 text-white/50 cursor-default">
-      {screening.time}
+    <span className="flex flex-col items-center gap-1.5 cursor-default">
+      <span className="text-2xl md:text-3xl font-semibold tabular-nums -tracking-[0.01em] text-white/80">
+        {screening.time}
+      </span>
+      <span className="text-[10px] uppercase tracking-[0.2em] tabular-nums text-white/35">
+        {formatShortDate(screening.date)}
+      </span>
     </span>
   );
 };
@@ -48,7 +76,7 @@ const CinemaRow: React.FC<CinemaRowProps> = ({ screenings }) => {
   );
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-8 py-5 md:py-6">
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-8 py-5 md:py-6">
       <div className="flex flex-col gap-1 min-w-0">
         <Link
           href={`/kina/${first.cinema.slug}`}
@@ -57,11 +85,16 @@ const CinemaRow: React.FC<CinemaRowProps> = ({ screenings }) => {
           {first.cinema.name}
         </Link>
         <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/45">
-          {first.cinema.city.name}
+          <Link
+            href={`/miasta/${first.cinema.city.slug}`}
+            className="hover:text-white underline-offset-4 hover:underline transition-colors"
+          >
+            {first.cinema.city.name}
+          </Link>
           {first.cinema.street ? ` · ${first.cinema.street}` : ""}
         </span>
       </div>
-      <div className="flex flex-wrap gap-2 md:justify-end shrink-0">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 md:justify-end shrink-0">
         {sorted.map((screening) => (
           <ScreeningTime key={screening.id} screening={screening} />
         ))}
@@ -78,29 +111,71 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
 
   if (screenings.length === 0) {
     return (
-      <div className="border-y border-white/10 py-20 md:py-28 flex flex-col items-center text-center gap-3">
-        <p className="text-sm md:text-base text-white/55">
-          Brak nadchodzących seansów.
-        </p>
-        <p className="text-[11px] uppercase tracking-[0.25em] text-white/35">
-          Sprawdź ponownie później
-        </p>
+      <div className="flex flex-col items-center text-center gap-8 py-8 md:py-12">
+        <div className="flex flex-col items-center gap-3 md:gap-4">
+          <p className="text-2xl md:text-3xl lg:text-4xl font-medium -tracking-[0.02em] leading-tight text-white max-w-[24ch]">
+            Brak nadchodzących seansów tego filmu.
+          </p>
+          <p className="text-sm md:text-base text-white/50 leading-relaxed max-w-[52ch]">
+            Repertuar aktualizujemy regularnie, zajrzyj ponownie za kilka dni
+            albo sprawdź, co innego grają kina studyjne.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+          <Link
+            href="/seanse"
+            className="group inline-flex items-baseline gap-2.5 text-[11px] md:text-xs uppercase tracking-[0.25em] text-white"
+          >
+            <span className="underline underline-offset-4 decoration-white/30 group-hover:decoration-white transition-colors">
+              Pełny repertuar
+            </span>
+            <span
+              aria-hidden="true"
+              className="transition-transform group-hover:translate-x-1"
+            >
+              →
+            </span>
+          </Link>
+          <Link
+            href="/kina"
+            className="group inline-flex items-baseline gap-2.5 text-[11px] md:text-xs uppercase tracking-[0.25em] text-white/70 hover:text-white transition-colors"
+          >
+            <span className="underline underline-offset-4 decoration-white/20 group-hover:decoration-white transition-colors">
+              Kina studyjne
+            </span>
+            <span
+              aria-hidden="true"
+              className="transition-transform group-hover:translate-x-1"
+            >
+              →
+            </span>
+          </Link>
+        </div>
       </div>
     );
   }
 
-  const visibleDates = selectedDate ? [selectedDate] : availableDates;
+  // Always exactly one selected date; if the selected one disappeared
+  // (e.g. after a city change), fall back to the earliest available.
+  const activeDate =
+    selectedDate && availableDates.includes(selectedDate)
+      ? selectedDate
+      : availableDates[0];
+
+  const groups = groupScreeningsByCinema(
+    screenings.filter((s) => s.date === activeDate)
+  );
 
   return (
     <div className="flex flex-col">
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pb-5 border-b border-white/10">
         {availableDates.map((date) => {
-          const active = selectedDate === date;
+          const active = activeDate === date;
           return (
             <button
               key={date}
               type="button"
-              onClick={() => setSelectedDate(active ? null : date)}
+              onClick={() => setSelectedDate(date)}
               className={cn(
                 "shrink-0 pb-1 text-[11px] uppercase tracking-wider border-b transition-colors whitespace-nowrap",
                 active
@@ -108,7 +183,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
                   : "text-white/55 border-transparent hover:text-white hover:border-white/40"
               )}
             >
-              {formatDateLabel(date)}
+              {formatFullDateLabel(date)}
             </button>
           );
         })}
@@ -117,48 +192,13 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
         </div>
       </div>
 
-      {visibleDates.map((date) => {
-        const groups = groupScreeningsByCinema(
-          screenings.filter((s) => s.date === date)
-        );
-
-        if (groups.length === 0) {
-          return (
-            <div
-              key={date}
-              className="py-20 md:py-28 flex flex-col items-center text-center gap-3 border-b border-white/10"
-            >
-              <p className="text-sm md:text-base text-white/55">
-                Brak seansów w&nbsp;tym dniu.
-              </p>
-              <button
-                type="button"
-                onClick={() => setSelectedDate(null)}
-                className="text-[11px] uppercase tracking-[0.25em] text-white/50 hover:text-white border-b border-white/20 hover:border-white pb-0.5 transition-colors"
-              >
-                Pokaż wszystkie daty
-              </button>
-            </div>
-          );
-        }
-
-        return (
-          <div key={date}>
-            {!selectedDate && (
-              <p className="pt-7 pb-1 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40 tabular-nums">
-                {formatDateLabel(date)}
-              </p>
-            )}
-            <ul className="divide-y divide-white/10 border-b border-white/10">
-              {groups.map((cinemaScreenings) => (
-                <li key={cinemaScreenings[0].cinema.id}>
-                  <CinemaRow screenings={cinemaScreenings} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      })}
+      <ul className="divide-y divide-white/10">
+        {groups.map((cinemaScreenings) => (
+          <li key={cinemaScreenings[0].cinema.id}>
+            <CinemaRow screenings={cinemaScreenings} />
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

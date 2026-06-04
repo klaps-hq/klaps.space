@@ -6,6 +6,7 @@ export const alt = "Klaps - Miasta";
 
 export default function OgImage() {
   return buildOgImage({
+    eyebrow: "Przeglądaj",
     title: "Miasta",
     subtitle: "Kina studyjne i seanse w Twoim mieście",
   });

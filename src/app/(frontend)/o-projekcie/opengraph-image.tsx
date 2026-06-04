@@ -6,6 +6,7 @@ export const alt = "Klaps - O projekcie";
 
 export default function OgImage() {
   return buildOgImage({
+    eyebrow: "Informacje",
     title: "O projekcie",
     subtitle: "Niezależny przewodnik po repertuarze kin studyjnych w Polsce",
   });

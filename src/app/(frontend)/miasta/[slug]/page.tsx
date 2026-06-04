@@ -9,9 +9,9 @@ import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { SITE_URL } from "@/lib/site-config";
 import {
   BASE_OPEN_GRAPH,
-  DEFAULT_OG_IMAGE,
   NOINDEX_FOLLOW,
   hasQueryParams,
+  pluralPl,
 } from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import SiteHeader from "@/components/common/site-header";
@@ -37,44 +37,47 @@ export const generateMetadata = async ({
   searchParams,
 }: CityPageProps): Promise<Metadata> => {
   const [{ slug }, queryParams] = await Promise.all([params, searchParams]);
-  const { city } = await getCityBySlug(slug);
+  const { city, screenings: rawScreenings } = await getCityBySlug(slug);
+
+  const cinemasResponse = await getCinemas({ cityId: city.id.toString() });
+  const cinemasCount = cinemasResponse.data.flatMap((g) => g.cinemas).length;
+  const screeningGroups = Array.isArray(rawScreenings)
+    ? rawScreenings
+    : [...(rawScreenings?.data ?? [])];
+  const screeningsCount = screeningGroups.reduce(
+    (sum, group) => sum + group.screenings.length,
+    0
+  );
 
   const title = `Kina studyjne ${city.name} - repertuar seansów specjalnych`;
-  const description = `Kina studyjne i niezależne w ${city.nameDeclinated}. Aktualne seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź repertuar kin w ${city.nameDeclinated}.`;
+  const counts =
+    screeningsCount > 0
+      ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}`
+      : `${cinemasCount} ${pluralPl(cinemasCount, "kino studyjne", "kina studyjne", "kin studyjnych")}`;
+  const description =
+    cinemasCount > 0
+      ? `${counts} w ${city.nameDeclinated}. Seanse specjalne, klasyka filmowa i retrospektywy - sprawdź repertuar kin w ${city.nameDeclinated}.`
+      : `Kina studyjne i niezależne w ${city.nameDeclinated}. Aktualne seanse specjalne, klasyka filmowa i retrospektywy.`;
   const url = `${SITE_URL}/miasta/${city.slug}`;
+
+  // A city without cinemas is thin content; keep it out of the index.
+  const noindex = cinemasCount === 0 || hasQueryParams(queryParams);
 
   return {
     title,
     description,
-    keywords: [
-      `kino studyjne ${city.name}`,
-      `kina ${city.name}`,
-      `seanse specjalne ${city.name}`,
-      `repertuar kin ${city.name}`,
-      `kino niezależne ${city.name}`,
-    ],
-    alternates: {
-      canonical: url,
-    },
-    ...(hasQueryParams(queryParams) && NOINDEX_FOLLOW),
+    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
       title,
       description,
       url,
-      images: [
-        {
-          ...DEFAULT_OG_IMAGE,
-          alt: `${city.name} - kina studyjne i repertuar`,
-        },
-      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [DEFAULT_OG_IMAGE.url],
     },
   };
 };

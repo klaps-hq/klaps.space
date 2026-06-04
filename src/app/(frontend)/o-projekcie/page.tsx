@@ -61,7 +61,7 @@ const SCOPE_INCLUDED = [
 const SCOPE_EXCLUDED = [
   "Codzienny repertuar premierowy",
   "Promocja masowych hitów kinowych",
-  "Recenzje i oceny filmów",
+  "Recenzje redakcyjne",
   "Rankingi popularności",
   "Algorytmiczne rekomendacje",
 ];
@@ -127,9 +127,10 @@ const AboutPage = () => {
           </p>
           <p>
             Projekt nie konkuruje z&nbsp;dużymi portalami filmowymi ani nie
-            tworzy kolejnej bazy danych filmów. Nie ma recenzji, rankingów ani
-            rekomendacji algorytmicznych. Klaps pełni rolę jednego, spójnego
-            miejsca: sprawdzasz co gra, planujesz wyjście, idziesz do kina.
+            tworzy kolejnej bazy danych filmów. Nie ma recenzji redakcyjnych
+            ani rekomendacji algorytmicznych. Klaps pełni rolę jednego,
+            spójnego miejsca: sprawdzasz co gra, planujesz wyjście, idziesz
+            do kina.
           </p>
           <p>
             Koncentrujemy się na seansach, które łatwo przegapić: pojedyncze
@@ -292,7 +293,7 @@ const AboutPage = () => {
                 <a
                   href={repo.href}
                   target="_blank"
-                  rel="noreferrer noopener"
+                  rel="noreferrer noopener nofollow"
                   className="group flex h-full flex-col justify-between gap-8 p-6 md:p-7 bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
                 >
                   <div className="flex items-start justify-between gap-3">

@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import WilhelmEgg from "./wilhelm-egg";
 
@@ -63,7 +64,7 @@ const Footer: React.FC = () => {
           <a
             href="https://github.com/klaps-hq"
             target="_blank"
-            rel="noreferrer noopener"
+            rel="noreferrer noopener nofollow"
             className="group inline-flex items-baseline gap-2 hover:text-white transition-colors"
           >
             <span className="underline underline-offset-4 decoration-white/25 group-hover:decoration-white transition-colors">
@@ -90,6 +91,21 @@ const Footer: React.FC = () => {
             Klaps
           </h2>
         </Link>
+      </div>
+
+      <div className="flex items-center gap-3 px-6 md:px-12 lg:px-16 pb-6 text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/40">
+        <a
+          href="https://www.themoviedb.org/"
+          target="_blank"
+          rel="noreferrer noopener nofollow"
+          className="shrink-0 opacity-50 hover:opacity-80 transition-opacity"
+        >
+          <Image src="/tmdb-logo.svg" alt="TMDB" width={90} height={12} />
+        </a>
+        <p>
+          Dane filmowe dostarcza TMDB. Serwis nie jest powiązany
+          z&nbsp;TMDB.
+        </p>
       </div>
     </footer>
   );
