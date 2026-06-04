@@ -1,6 +1,5 @@
 "use client";
 
-import { MapPin } from "lucide-react";
 import {
   Map,
   MapMarker,
@@ -37,8 +36,13 @@ const CinemaMap: React.FC<CinemaMapProps> = ({ cinema }) => {
 
         <MapMarker longitude={cinema.longitude} latitude={cinema.latitude}>
           <MarkerContent>
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-black/40 shadow-lg shadow-white/20">
-              <MapPin className="w-4 h-4 text-black" />
+            <div className="relative flex items-center justify-center size-10">
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 rounded-full bg-white/15 animate-ping [animation-duration:2.5s]"
+              />
+              <span className="absolute inset-1.5 rounded-full border border-white/40" />
+              <span className="size-2.5 rounded-full bg-white" />
             </div>
           </MarkerContent>
         </MapMarker>

@@ -40,18 +40,14 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   const staticPages: MetadataRoute.Sitemap = [
     { url: SITE_URL, lastModified: now, changeFrequency: "daily", priority: 1 },
     { url: `${SITE_URL}/seanse`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: `${SITE_URL}/filmy`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
     { url: `${SITE_URL}/kina`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/miasta`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/gatunki`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/o-projekcie`, changeFrequency: "monthly", priority: 0.3 },
-    { url: `${SITE_URL}/jak-to-dziala`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/kontakt`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/faq`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/regulamin`, changeFrequency: "monthly", priority: 0.2 },
     { url: `${SITE_URL}/polityka-prywatnosci`, changeFrequency: "monthly", priority: 0.2 },
-    { url: `${SITE_URL}/dostepnosc`, changeFrequency: "monthly", priority: 0.2 },
-    { url: `${SITE_URL}/mapa-witryny`, lastModified: now, changeFrequency: "weekly", priority: 0.2 },
   ];
 
   const moviePages: MetadataRoute.Sitemap = movies

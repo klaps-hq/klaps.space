@@ -74,10 +74,16 @@ const CinemaMapView: React.FC<CinemaMapViewProps> = ({ cinemas }) => {
           data={geojson}
           clusterMaxZoom={14}
           clusterRadius={50}
-          clusterColors={["#ffffff", "#ffffff", "#ffffff"]}
+          clusterColors={["#0a0a0a", "#0a0a0a", "#0a0a0a"]}
           clusterThresholds={[10, 30]}
+          clusterRadii={[14, 18, 24]}
+          clusterTextColor="#ffffff"
+          clusterStrokeColor="rgba(255,255,255,0.4)"
+          clusterStrokeWidth={1}
           pointColor="#ffffff"
-          pointRadius={8}
+          pointRadius={5}
+          pointStrokeColor="rgba(255,255,255,0.25)"
+          pointStrokeWidth={4}
           onPointClick={(feature, coordinates) => {
             setSelected({
               name: feature.properties?.name ?? "",

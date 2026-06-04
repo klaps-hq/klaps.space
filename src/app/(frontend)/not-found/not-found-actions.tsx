@@ -9,7 +9,7 @@ const NotFoundActions: React.FC = () => {
         <Link href="/">Wróć do repertuaru</Link>
       </Button>
       <Button variant="secondary" size="lg" asChild>
-        <Link href="/filmy">Przeglądaj filmy</Link>
+        <Link href="/seanse">Przeglądaj seanse</Link>
       </Button>
     </div>
   );

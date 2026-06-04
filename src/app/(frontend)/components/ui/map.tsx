@@ -735,7 +735,7 @@ const positionClasses = {
 
 function ControlGroup({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col rounded-md border border-border bg-background shadow-sm overflow-hidden [&>button:not(:last-child)]:border-b [&>button:not(:last-child)]:border-border">
+    <div className="flex flex-col border border-white/15 bg-black/85 backdrop-blur-md overflow-hidden [&>button:not(:last-child)]:border-b [&>button:not(:last-child)]:border-white/15">
       {children}
     </div>
   );
@@ -758,7 +758,7 @@ function ControlButton({
       aria-label={label}
       type="button"
       className={cn(
-        "flex items-center justify-center size-8 hover:bg-accent dark:hover:bg-accent/40 transition-colors",
+        "flex items-center justify-center size-9 text-white/70 hover:text-white hover:bg-white/10 transition-colors",
         disabled && "opacity-50 pointer-events-none cursor-not-allowed"
       )}
       disabled={disabled}
@@ -1181,10 +1181,22 @@ type MapClusterLayerProps<
   clusterColors?: [string, string, string];
   /** Point count thresholds for color/size steps: [medium, large] (default: [100, 750]) */
   clusterThresholds?: [number, number];
+  /** Radii for cluster circles in pixels: [small, medium, large] (default: [20, 30, 40]) */
+  clusterRadii?: [number, number, number];
+  /** Color for the cluster count text (default: "#000") */
+  clusterTextColor?: string;
+  /** Stroke color for cluster circles (default: none) */
+  clusterStrokeColor?: string;
+  /** Stroke width for cluster circles in pixels (default: 0) */
+  clusterStrokeWidth?: number;
   /** Color for unclustered individual points (default: "#3b82f6") */
   pointColor?: string;
   /** Radius for unclustered individual points in pixels (default: 5) */
   pointRadius?: number;
+  /** Stroke color for unclustered points (default: none) */
+  pointStrokeColor?: string;
+  /** Stroke width for unclustered points in pixels (default: 0) */
+  pointStrokeWidth?: number;
   /** Callback when an unclustered point is clicked */
   onPointClick?: (
     feature: GeoJSON.Feature<GeoJSON.Point, P>,
@@ -1206,8 +1218,14 @@ function MapClusterLayer<
   clusterRadius = 50,
   clusterColors = ["#22c55e", "#eab308", "#ef4444"],
   clusterThresholds = [100, 750],
+  clusterRadii = [20, 30, 40],
+  clusterTextColor = "#000",
+  clusterStrokeColor = "transparent",
+  clusterStrokeWidth = 0,
   pointColor = "#3b82f6",
   pointRadius = 5,
+  pointStrokeColor = "transparent",
+  pointStrokeWidth = 0,
   onPointClick,
   onClusterClick,
 }: MapClusterLayerProps<P>) {
@@ -1257,13 +1275,14 @@ function MapClusterLayer<
         "circle-radius": [
           "step",
           ["get", "point_count"],
-          20,
+          clusterRadii[0],
           clusterThresholds[0],
-          30,
+          clusterRadii[1],
           clusterThresholds[1],
-          40,
+          clusterRadii[2],
         ],
-        "circle-stroke-width": 0,
+        "circle-stroke-width": clusterStrokeWidth,
+        "circle-stroke-color": clusterStrokeColor,
         "circle-opacity": 1,
       },
     });
@@ -1280,7 +1299,7 @@ function MapClusterLayer<
         "text-size": 13,
       },
       paint: {
-        "text-color": "#000",
+        "text-color": clusterTextColor,
       },
     });
 
@@ -1293,7 +1312,8 @@ function MapClusterLayer<
       paint: {
         "circle-color": pointColor,
         "circle-radius": pointRadius,
-        "circle-stroke-width": 0,
+        "circle-stroke-width": pointStrokeWidth,
+        "circle-stroke-color": pointStrokeColor,
       },
     });
 

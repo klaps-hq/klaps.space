@@ -51,8 +51,8 @@ const ScreeningsEmptyState: React.FC<ScreeningsEmptyStateProps> = ({
     <EmptyState
       description={
         hasAnyFilter
-          ? "Brak seansów pasujących do wybranych filtrów. Spróbuj zmienić zakres dat, gatunek, miasto lub frazę."
-          : "Brak aktualnych seansów. Sprawdź ponownie później."
+          ? "Brak seansów pasujących do wybranych filtrów. Zmień zakres dat, miasto, gatunek lub frazę."
+          : "Repertuar jest właśnie aktualizowany. Wróć za chwilę — niezależne kina dodają seanse na bieżąco."
       }
       cta={
         hasAnyFilter

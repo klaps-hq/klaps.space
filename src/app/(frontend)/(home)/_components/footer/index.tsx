@@ -6,17 +6,17 @@ const NAV_COLUMNS = [
   {
     heading: "Przeglądaj",
     links: [
-      { label: "Filmy", href: "/filmy" },
+      { label: "Seanse", href: "/seanse" },
       { label: "Kina", href: "/kina" },
       { label: "Miasta", href: "/miasta" },
-      { label: "Seanse", href: "/seanse" },
+      { label: "Gatunki", href: "/gatunki" },
+      { label: "Mapa kin", href: "/mapa-kin" },
     ],
   },
   {
     heading: "Informacje",
     links: [
       { label: "O projekcie", href: "/o-projekcie" },
-      { label: "Jak to działa", href: "/jak-to-dziala" },
       { label: "FAQ", href: "/faq" },
       { label: "Kontakt", href: "/kontakt" },
     ],
@@ -26,8 +26,6 @@ const NAV_COLUMNS = [
     links: [
       { label: "Regulamin", href: "/regulamin" },
       { label: "Polityka prywatności", href: "/polityka-prywatnosci" },
-      { label: "Dostępność", href: "/dostepnosc" },
-      { label: "Mapa witryny", href: "/mapa-witryny" },
     ],
   },
 ];
@@ -37,7 +35,7 @@ const Footer: React.FC = () => {
 
   return (
     <footer className="relative bg-black text-white overflow-hidden border-t border-white/10">
-      <div className="px-6 md:px-12 lg:px-24 pt-20 md:pt-28 pb-8">
+      <div className="relative z-10 px-6 md:px-12 lg:px-16 pt-20 md:pt-28 pb-8">
         <div className="grid grid-cols-3 gap-6 md:gap-12 lg:gap-24 mb-16 md:mb-24">
           {NAV_COLUMNS.map((column) => (
             <div key={column.heading} className="flex flex-col gap-4 md:gap-5">
@@ -63,17 +61,25 @@ const Footer: React.FC = () => {
         <div className="flex items-center justify-between gap-4 pt-8 border-t border-white/10 text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/50">
           <span>&copy; {currentYear} Klaps</span>
           <a
-            href="https://github.com/klaps-hq/klaps.space"
+            href="https://github.com/klaps-hq"
             target="_blank"
             rel="noreferrer noopener"
-            className="hover:text-white transition-colors"
+            className="group inline-flex items-baseline gap-2 hover:text-white transition-colors"
           >
-            github.com/klaps-hq
+            <span className="underline underline-offset-4 decoration-white/25 group-hover:decoration-white transition-colors">
+              github.com/klaps-hq
+            </span>
+            <span
+              aria-hidden="true"
+              className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            >
+              ↗
+            </span>
           </a>
         </div>
       </div>
 
-      <div className="flex items-end gap-[1.5vw] w-full pl-6 md:pl-12 lg:pl-24 pb-[1vw]">
+      <div className="flex items-end gap-[1.5vw] w-full pl-6 md:pl-12 lg:pl-16 pb-[1vw]">
         <WilhelmEgg />
         <Link
           href="/"

@@ -84,9 +84,6 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
             <Link href="/seanse" className="hover:text-white transition-colors">
               Seanse
             </Link>
-            <Link href="/filmy" className="hover:text-white transition-colors">
-              Filmy
-            </Link>
             <Link href="/gatunki" className="hover:text-white transition-colors">
               Gatunki
             </Link>

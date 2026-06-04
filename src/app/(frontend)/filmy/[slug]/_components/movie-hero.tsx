@@ -91,8 +91,8 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
             </span>
           </Link>
           <div className="flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/60">
-            <Link href="/filmy" className="hover:text-white transition-colors">
-              Filmy
+            <Link href="/seanse" className="hover:text-white transition-colors">
+              Seanse
             </Link>
             <span aria-hidden="true" className="text-white/30">
               ›
