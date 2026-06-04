@@ -210,7 +210,7 @@ const TermsPage = () => {
       </div>
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-10 pb-14 md:pb-20">
-        <h1 className="text-5xl md:text-8xl lg:text-9xl xl:text-[10rem] font-medium uppercase -tracking-[0.04em] leading-[0.9] text-white">
+        <h1 className="text-5xl md:text-8xl lg:text-9xl font-medium uppercase -tracking-[0.04em] leading-[0.9] text-white">
           Regulamin
         </h1>
         <p className="mt-10 md:mt-14 max-w-[58ch] text-lg md:text-2xl lg:text-3xl text-white/75 leading-[1.4] -tracking-[0.005em]">

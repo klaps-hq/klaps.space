@@ -90,25 +90,3 @@ export function getYouTubeEmbedUrl(url: string): string | null {
   );
   return match?.[1] ? `https://www.youtube.com/embed/${match[1]}` : null;
 }
-
-export const getTitleSizeClasses = (title: string): string => {
-  const length = title.length;
-
-  if (length < 15) {
-    return "text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[128px] leading-tight md:leading-[1.15]";
-  }
-
-  if (length < 25) {
-    return "text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[108px] leading-tight md:leading-[1.15]";
-  }
-
-  if (length < 35) {
-    return "text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[90px] leading-tight md:leading-[1.2]";
-  }
-
-  if (length < 50) {
-    return "text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-[72px] leading-tight md:leading-[1.25]";
-  }
-
-  return "text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-[56px] leading-tight md:leading-[1.3]";
-};

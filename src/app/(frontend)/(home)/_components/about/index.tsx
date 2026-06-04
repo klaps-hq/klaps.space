@@ -14,7 +14,7 @@ const About: React.FC = () => (
     <div className="px-6 md:px-12 lg:px-16 pt-24 md:pt-32 pb-24 md:pb-32">
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-12 lg:gap-20">
         <div className="lg:flex-1">
-          <h2 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
             Klaps to spis seansów filmowych w&nbsp;polskich kinach studyjnych.
             Klasyka, retrospektywy, pokazy specjalne. Wszystko
             w&nbsp;jednym miejscu, bezpłatnie.

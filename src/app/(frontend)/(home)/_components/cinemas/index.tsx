@@ -18,7 +18,7 @@ const Cinemas = async () => {
   return (
     <section className="relative bg-black text-white border-t border-white/10">
       <div className="px-6 md:px-12 lg:px-16 pt-24 md:pt-32 pb-10 md:pb-14">
-        <h2 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.05] -tracking-[0.02em] max-w-[26ch]">
+        <h2 className="text-3xl md:text-5xl lg:text-6xl leading-[1.05] -tracking-[0.02em] max-w-[26ch]">
           <span className="block text-white font-medium">
             Kina studyjne w&nbsp;Polsce.
           </span>

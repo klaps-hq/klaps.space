@@ -14,14 +14,15 @@ interface HeroProps {
 }
 
 const CTA_PRIMARY = "ZOBACZ SEANSE";
-const SCREENINGS_SECTION_ID = "#seanse";
 
+// Short entrance animations — the hero title is the LCP element,
+// so long delays directly hurt Core Web Vitals.
 const navVariants: Variants = {
   hidden: { opacity: 0, y: -16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -29,8 +30,8 @@ const contentContainerVariants: Variants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.6,
+      staggerChildren: 0.06,
+      delayChildren: 0.15,
     },
   },
 };
@@ -40,7 +41,7 @@ const contentItemVariants: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -129,7 +130,7 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
   return (
     <section className="h-screen w-full bg-black flex items-center justify-center p-4 md:p-8">
       <HeroParallax
-        backdropSrc={tmdbImageUrl(screening.movie.backdropUrl ?? "", "w1280")}
+        backdropSrc={tmdbImageUrl(screening.movie.backdropUrl ?? "", "original")}
         alt={screening.movie.title}
       >
         <HeroNav />
@@ -186,13 +187,19 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
               </motion.p>
               <motion.div
                 variants={contentItemVariants}
-                className="self-start"
+                className="flex flex-wrap items-center gap-x-8 gap-y-3 self-start"
               >
                 <Link
-                  href={SCREENINGS_SECTION_ID}
+                  href={`/filmy/${screening.movie.slug}`}
                   className="text-base text-white border-b border-white/50 pb-0.5 hover:border-white transition-colors"
                 >
                   {CTA_PRIMARY}
+                </Link>
+                <Link
+                  href="/seanse"
+                  className="text-base text-white/70 border-b border-white/30 pb-0.5 hover:text-white hover:border-white transition-colors"
+                >
+                  Pełny repertuar
                 </Link>
               </motion.div>
             </div>

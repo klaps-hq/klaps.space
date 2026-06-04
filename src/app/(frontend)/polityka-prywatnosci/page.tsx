@@ -232,7 +232,7 @@ const PrivacyPolicyPage = () => {
       </div>
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-10 pb-14 md:pb-20">
-        <h1 className="text-4xl md:text-7xl lg:text-8xl xl:text-9xl font-medium uppercase -tracking-[0.04em] leading-[0.9] text-white">
+        <h1 className="text-4xl md:text-7xl lg:text-8xl font-medium uppercase -tracking-[0.04em] leading-[0.9] text-white">
           Polityka
           <br />
           prywatności

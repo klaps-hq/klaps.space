@@ -9,6 +9,13 @@ const SmoothScroll = () => {
   const pathname = usePathname();
 
   useEffect(() => {
+    // Touch devices use native scrolling — skip Lenis and its RAF loop
+    // entirely to save main-thread work on mobile.
+    const isFinePointer = window.matchMedia(
+      "(hover: hover) and (pointer: fine)"
+    ).matches;
+    if (!isFinePointer) return;
+
     const lenis = new Lenis({
       lerp: 0.08,
       smoothWheel: true,

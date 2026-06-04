@@ -46,12 +46,12 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
           <motion.div
             className="absolute inset-0"
             style={{ y: imageY, scale: imageScale }}
-            initial={{ opacity: 0, scale: 1.12 }}
+            initial={{ opacity: 0, scale: 1.06 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
             <Image
-              src={tmdbImageUrl(movie.backdropUrl, "w1280")}
+              src={tmdbImageUrl(movie.backdropUrl, "original")}
               alt={movie.title}
               fill
               sizes="100vw"
@@ -91,7 +91,8 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
             animate="visible"
             variants={{
               hidden: {},
-              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.5 } },
+              // Short delays — the h1 below is the LCP element.
+              visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } },
             }}
           >
             {metaParts.length > 0 && (
@@ -101,7 +102,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
                   visible: {
                     opacity: 1,
                     y: 0,
-                    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
+                    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
                   },
                 }}
                 className="text-xs md:text-sm uppercase tracking-[0.3em] text-white/65"
@@ -115,10 +116,10 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
                 visible: {
                   opacity: 1,
                   y: 0,
-                  transition: { duration: 1, ease: [0.22, 1, 0.36, 1] },
+                  transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
                 },
               }}
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[120px] font-bold uppercase leading-[0.9] -tracking-[0.02em] text-white"
+              className="text-5xl md:text-7xl lg:text-8xl font-bold uppercase leading-[0.9] -tracking-[0.02em] text-white"
             >
               {movie.title}
             </motion.h1>
@@ -129,7 +130,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
                   visible: {
                     opacity: 1,
                     y: 0,
-                    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
+                    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
                   },
                 }}
                 className="text-base md:text-xl text-white/55 italic font-light"
@@ -144,7 +145,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
                   visible: {
                     opacity: 1,
                     y: 0,
-                    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
+                    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
                   },
                 }}
                 className="text-base md:text-lg text-white/85 leading-relaxed font-light max-w-2xl mt-2 line-clamp-4 md:line-clamp-none"
@@ -161,7 +162,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
                   visible: {
                     opacity: 1,
                     y: 0,
-                    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
+                    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
                   },
                 }}
                 className="group mt-4 inline-flex w-fit items-center gap-3 border border-white/30 hover:border-white hover:bg-white/[0.06] px-6 md:px-8 py-3 md:py-3.5 text-[11px] md:text-xs uppercase tracking-[0.28em] text-white transition-colors"

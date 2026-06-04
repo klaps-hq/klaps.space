@@ -32,9 +32,9 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
     >
       <motion.div
         className="absolute inset-0"
-        initial={{ opacity: 0, scale: 1.15 }}
+        initial={{ opacity: 0, scale: 1.08 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.div
           className="absolute inset-0"

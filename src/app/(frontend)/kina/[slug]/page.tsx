@@ -141,7 +141,7 @@ const CinemaPageContent = async ({
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-12 md:pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           <div className="lg:col-span-5">
-            <h1 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white max-w-[20ch]">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white max-w-[20ch]">
               {cinema.name}
             </h1>
             <div className="mt-4 md:mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/45">

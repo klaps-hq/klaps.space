@@ -158,7 +158,7 @@ const CityPage = async ({ params, searchParams }: CityPageProps) => {
         >
           Miasto
         </Link>
-        <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-medium uppercase -tracking-[0.03em] leading-[0.95] text-white max-w-[18ch]">
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-medium uppercase -tracking-[0.03em] leading-[0.95] text-white max-w-[18ch]">
           {city.name}
         </h1>
         {city.description && (

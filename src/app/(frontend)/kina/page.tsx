@@ -39,7 +39,7 @@ const CinemasPage = async () => {
       </div>
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-12 pb-10 md:pb-14">
-        <h1 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.05] -tracking-[0.02em] max-w-[26ch]">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl leading-[1.05] -tracking-[0.02em] max-w-[26ch]">
           <span className="block text-white font-medium">
             Kina studyjne w&nbsp;Polsce.
           </span>

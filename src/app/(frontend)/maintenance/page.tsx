@@ -25,7 +25,7 @@ export default function MaintenancePage() {
           <p className="mb-6 md:mb-8 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40">
             Przerwa techniczna
           </p>
-          <h1 className="text-5xl md:text-8xl lg:text-9xl xl:text-[10rem] font-medium uppercase -tracking-[0.04em] leading-[0.9] text-white">
+          <h1 className="text-5xl md:text-8xl lg:text-9xl font-medium uppercase -tracking-[0.04em] leading-[0.9] text-white">
             Zaraz
             <br />
             wracamy

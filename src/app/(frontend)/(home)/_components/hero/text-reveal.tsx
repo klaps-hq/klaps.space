@@ -6,7 +6,7 @@ import { motion, type Variants } from "framer-motion";
 const wordRevealContainer: Variants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.08 },
+    transition: { staggerChildren: 0.05 },
   },
 };
 
@@ -14,20 +14,20 @@ const wordRevealItem: Variants = {
   hidden: { y: "110%" },
   visible: {
     y: "0%",
-    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
 const charRevealContainer: Variants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.015 },
+    transition: { staggerChildren: 0.008 },
   },
 };
 
 const charRevealItem: Variants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.3 } },
+  visible: { opacity: 1, transition: { duration: 0.2 } },
 };
 
 interface TitleRevealProps {
