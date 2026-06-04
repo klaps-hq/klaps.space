@@ -28,6 +28,7 @@ const NOINDEX_QUERY_PREFIXES = new Set([
 ]);
 
 const shouldNoindexForQueryPath = (pathname: string) => {
+  if (pathname === "/") return true;
   const [firstSegment] = pathname.split("/").filter(Boolean);
   return Boolean(firstSegment && NOINDEX_QUERY_PREFIXES.has(firstSegment));
 };
@@ -53,7 +54,11 @@ const fetchSlugById = async (
 
 export async function proxy(request: NextRequest) {
   if (process.env.MAINTENANCE_MODE === "true" && !request.nextUrl.pathname.startsWith("/maintenance")) {
-    return NextResponse.rewrite(new URL("/maintenance", request.url));
+    // 503 + Retry-After: Google pauses crawling instead of deindexing pages.
+    return NextResponse.rewrite(new URL("/maintenance", request.url), {
+      status: 503,
+      headers: { "Retry-After": "3600" },
+    });
   }
 
   const { hostname, pathname, search } = request.nextUrl;
@@ -72,6 +77,13 @@ export async function proxy(request: NextRequest) {
 
   if (segments.length === 2) {
     const [routePrefix, segment] = segments;
+
+    // Single-screening pages were removed — old URLs (previously in the
+    // sitemap and Google's index) get a 301 to the screenings list.
+    if (routePrefix === "seanse" && IS_NUMERIC.test(segment)) {
+      return NextResponse.redirect(new URL("/seanse", request.url), 301);
+    }
+
     const apiEntity = SLUG_ROUTES[routePrefix];
 
     if (apiEntity && IS_NUMERIC.test(segment)) {

@@ -1,51 +1,207 @@
-import { getCityPageData } from "@/lib/cities";
-import SectionDivider from "@/components/ui/section-divider";
-import CityStats from "./_components/city-stats";
-import CityCinemas from "./_components/city-cinemas";
-import CityScreenings from "./_components/city-screenings";
-import SectionHeader from "@/components/common/section-header";
+import React from "react";
+import Link from "next/link";
+import { Metadata } from "next";
+import { getCityBySlug } from "@/lib/cities";
+import { getCinemas } from "@/lib/cinemas";
+import { getGenres } from "@/lib/genres";
+import { getScreenings } from "@/lib/screenings";
+import { IScreeningGroup } from "@/interfaces/IScreenings";
+import { SITE_URL } from "@/lib/site-config";
+import {
+  BASE_OPEN_GRAPH,
+  NOINDEX_FOLLOW,
+  hasQueryParams,
+  pluralPl,
+} from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import SiteHeader from "@/components/common/site-header";
+import Footer from "../../(home)/_components/footer";
+import CityRepertoire from "./_components/city-repertoire";
 
 export const revalidate = 300;
 
-type CityPageProps = {
-  params: Promise<{ slug: string }>;
+type SearchParams = {
+  genres?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
 };
 
-const CityPage = async ({ params }: CityPageProps) => {
-  const { slug } = await params;
-  const { city, cinemaGroups, screenings } = await getCityPageData(slug);
+type CityPageProps = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<SearchParams>;
+};
 
-  const cinemasCount = cinemaGroups.flatMap((g) => g.cinemas).length;
-  const moviesCount = screenings.length;
-  const screeningsCount = screenings.reduce(
+export const generateMetadata = async ({
+  params,
+  searchParams,
+}: CityPageProps): Promise<Metadata> => {
+  const [{ slug }, queryParams] = await Promise.all([params, searchParams]);
+  const { city, screenings: rawScreenings } = await getCityBySlug(slug);
+
+  const cinemasResponse = await getCinemas({ cityId: city.id.toString() });
+  const cinemasCount = cinemasResponse.data.flatMap((g) => g.cinemas).length;
+  const screeningGroups = Array.isArray(rawScreenings)
+    ? rawScreenings
+    : [...(rawScreenings?.data ?? [])];
+  const screeningsCount = screeningGroups.reduce(
     (sum, group) => sum + group.screenings.length,
     0
   );
 
+  const title = `Kina studyjne ${city.name} - repertuar seansów specjalnych`;
+  const counts =
+    screeningsCount > 0
+      ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}`
+      : `${cinemasCount} ${pluralPl(cinemasCount, "kino studyjne", "kina studyjne", "kin studyjnych")}`;
+  const description =
+    cinemasCount > 0
+      ? `${counts} w ${city.nameDeclinated}. Seanse specjalne, klasyka filmowa i retrospektywy - sprawdź repertuar kin w ${city.nameDeclinated}.`
+      : `Kina studyjne i niezależne w ${city.nameDeclinated}. Aktualne seanse specjalne, klasyka filmowa i retrospektywy.`;
+  const url = `${SITE_URL}/miasta/${city.slug}`;
+
+  // A city without cinemas is thin content; keep it out of the index.
+  const noindex = cinemasCount === 0 || hasQueryParams(queryParams);
+
+  return {
+    title,
+    description,
+    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
+    openGraph: {
+      ...BASE_OPEN_GRAPH,
+      type: "website",
+      title,
+      description,
+      url,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+};
+
+const parseGenreIds = (raw: string | undefined): string[] => {
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((v) => v.trim())
+    .filter((v) => v.length > 0 && !Number.isNaN(Number(v)));
+};
+
+const mergeScreeningGroups = (
+  groupArrays: IScreeningGroup[][]
+): IScreeningGroup[] => {
+  const map = new Map<number, IScreeningGroup>();
+  for (const groups of groupArrays) {
+    for (const group of groups) {
+      if (!map.has(group.movie.id)) map.set(group.movie.id, group);
+    }
+  }
+  return Array.from(map.values());
+};
+
+const CityPage = async ({ params, searchParams }: CityPageProps) => {
+  const { slug } = await params;
+  const sp = await searchParams;
+
+  const cityData = await getCityBySlug(slug);
+  const city = cityData.city;
+
+  const genreIds = parseGenreIds(sp.genres);
+  const sharedFilters = {
+    cityId: city.id.toString(),
+    dateFrom: sp.dateFrom,
+    dateTo: sp.dateTo,
+    search: sp.search,
+  };
+
+  const [{ data: cinemaGroups }, allGenres, screenings] = await Promise.all([
+    getCinemas({ cityId: city.id.toString() }),
+    getGenres(),
+    genreIds.length > 1
+      ? Promise.all(
+          genreIds.map((id) =>
+            getScreenings({ ...sharedFilters, genreId: id })
+          )
+        ).then(mergeScreeningGroups)
+      : getScreenings({
+          ...sharedFilters,
+          genreId: genreIds[0] ?? null,
+        }),
+  ]);
+
+  const cinemas = cinemaGroups
+    .flatMap((g) => g.cinemas)
+    .sort((a, b) => a.name.localeCompare(b.name, "pl"));
+  const cinemasCount = cinemas.length;
+  const cityForCopy = city.nameDeclinated ?? city.name;
+
   return (
-    <main className="bg-black min-h-screen px-8 py-24 md:py-32">
-      <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
+    <main className="bg-black text-white min-h-screen">
+      <SiteHeader />
+
+      <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-4">
         <Breadcrumbs
-          items={[{ name: "Miasta", href: "/miasta" }, { name: city.name }]}
+          items={[
+            { name: "Miasta", href: "/miasta" },
+            { name: city.name },
+          ]}
         />
-        <SectionHeader
-          prefix="Miasto"
-          title={city.name}
-          description={city?.description ?? undefined}
-        />
-
-        <CityStats
-          cinemasCount={cinemasCount}
-          moviesCount={moviesCount}
-          screeningsCount={screeningsCount}
-        />
-
-        <SectionDivider />
-        <CityCinemas cinemaGroups={cinemaGroups} />
-        <SectionDivider />
-        <CityScreenings screenings={screenings} />
       </div>
+
+      <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-12 md:pb-16">
+        <Link
+          href="/miasta"
+          className="inline-block w-fit text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40 hover:text-white/80 transition-colors mb-3 md:mb-4"
+        >
+          Miasto
+        </Link>
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-medium uppercase -tracking-[0.03em] leading-[0.95] text-white max-w-[18ch]">
+          {city.name}
+        </h1>
+        {city.description && (
+          <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
+            {city.description}
+          </p>
+        )}
+      </header>
+
+      {cinemas.length > 0 && (
+        <section className="px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-12 md:pb-16">
+          <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
+            Kina w&nbsp;{cityForCopy}
+          </h2>
+          <div className="flex flex-wrap">
+            {cinemas.map((cinema) => (
+              <Link
+                key={cinema.id}
+                href={`/kina/${cinema.slug}`}
+                className="group bg-black hover:bg-white/[0.04] transition-colors border border-white/10 -mr-px -mb-px px-5 md:px-6 py-8 md:py-12 flex flex-col items-center justify-center gap-2 min-h-[120px] md:min-h-[160px] basis-1/2 sm:basis-1/3 lg:basis-1/4"
+              >
+                <span className="text-base md:text-xl lg:text-2xl font-medium uppercase -tracking-[0.01em] text-white/70 group-hover:text-white transition-colors text-center">
+                  {cinema.name}
+                </span>
+                {cinema.street && (
+                  <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/40 text-center">
+                    {cinema.street}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <CityRepertoire
+        cityName={city.name}
+        cityForCopy={cityForCopy}
+        screenings={screenings}
+        genres={allGenres}
+      />
+
+      <Footer />
     </main>
   );
 };

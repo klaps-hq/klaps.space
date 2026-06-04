@@ -1,7 +1,7 @@
 import React from "react";
 
 type JsonLdProps = {
-  data: Record<string, unknown>;
+  data: Record<string, unknown> | Record<string, unknown>[];
 };
 
 const JsonLd: React.FC<JsonLdProps> = ({ data }) => {

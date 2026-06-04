@@ -1,17 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><style>
-    #light-icon {
-      display: inline;
-    }
-    #dark-icon {
-      display: none;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      #light-icon {
-        display: none;
-      }
-      #dark-icon {
-        display: inline;
-      }
-    }
-  </style><g id="light-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><g clip-path="url(#SvgjsClipPath1392)"><rect width="1000" height="1000" fill="#ffffff"></rect><g transform="matrix(15.384615384615385,0,0,15.384615384615385,130.76923076923077,100)"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="52" viewBox="0 0 48 52"><image width="48" height="52" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAA0CAYAAADMk7uRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAL4SURBVHgBxZpBbtswEEU/2awDwc6iSwdtCnTZE9RH6A2ansDuCeKcoMkJkp6k6QmavWvY3TeB0GVla8IRJSMwKIsMqfEAhugPQ8p/nxoxkvB7qIg/ywwfYWoxwIXV8AN1+fwmtBZDtaz2McBNjKZxgDLGzwkY8bgocRmjiRtYvsZIQV3wWBHN3udYVeNaA9FtiCZuYL3WliBh9b/Ed9ZiEhE1wPQ10WceK4SRbtNEDbjoLwZ6WlPNQ+mLGnDRZ82cCJNKI7oKpS9qwEU/5nwQNVB1HiJLUNnO05aIb4cSNVAWuv4DsHr70E7fNxFRA0yVQOfVF0O/0Vz0fTuUqIEY+vMTPWs0F/3eDbTR9z0fXImIGnDRj0lE1EAb/ZjzQdSAL33WGtJvHu0896Xfm4EQ+j6J7DtWLwZC6O9qm6JeGxntX4nrrmMlNxBL37iZNNqHHHnX8ZIbiKHv0roqqYFY+ruaTyU1IE2fK5mBQ9DnSmagLNQ33hLRvRR9pDIwP8HYtL5PPD4qMeWtBH2uJAYU1Ute0N1pjp88kqDPlWYKEa14Y9buo62mypXdIvuVIQvSAiqJgWatzlfQ5RDVMkCvca1QXYiyY41JiCZugNcrfFeBxyXUjEme8lVUWY2UmoZoAYdO14W0SYFJcgqhxGNSSGYghnhMCkmvxDHEX5pCUgOHSCH5alQ6heQGYlMoiS4bzf5/IGyg2mkE8bNHXPFVmbXtVVraQOy8L1WdglkjdaXQ212JkBQa4sdHlvi7B9zWGrpS6M1A0LxviBNt571vCr3emfNNwUXcN4VeDYR0Ghdx0vSl0eYZxpA2UB3As9O4iJ/9xZ3Z8AfqlXKm0LuBkE7jTKHWTI1dKYg8oQma9zXxTaFueNuVgogBTmED+spjk8IslPi+FMSeUvp2GhfxfSmIPuj27TQhKYgaiCHeloL4yx4x896liRvw7TS+2kFeeIohvqtpvpvGH7J9GhuFP9V3wv2zQ3r8xr+YJD8+4n1obV9je6n2BBLmfS9SCNb7AAAAAElFTkSuQmCC"></image></svg></g></g><defs><clipPath id="SvgjsClipPath1392"><rect width="1000" height="1000" x="0" y="0" rx="0" ry="0"></rect></clipPath></defs></svg></g><g id="dark-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><g clip-path="url(#SvgjsClipPath1393)"><rect width="1000" height="1000" fill="#000000"></rect><g transform="matrix(9.615384615384615,0,0,9.615384615384615,269.2307692307692,250)"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="52" viewBox="0 0 48 52"><image width="48" height="52" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAA0CAYAAADMk7uRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAL4SURBVHgBxZpBbtswEEU/2awDwc6iSwdtCnTZE9RH6A2ansDuCeKcoMkJkp6k6QmavWvY3TeB0GVla8IRJSMwKIsMqfEAhugPQ8p/nxoxkvB7qIg/ywwfYWoxwIXV8AN1+fwmtBZDtaz2McBNjKZxgDLGzwkY8bgocRmjiRtYvsZIQV3wWBHN3udYVeNaA9FtiCZuYL3WliBh9b/Ed9ZiEhE1wPQ10WceK4SRbtNEDbjoLwZ6WlPNQ+mLGnDRZ82cCJNKI7oKpS9qwEU/5nwQNVB1HiJLUNnO05aIb4cSNVAWuv4DsHr70E7fNxFRA0yVQOfVF0O/0Vz0fTuUqIEY+vMTPWs0F/3eDbTR9z0fXImIGnDRj0lE1EAb/ZjzQdSAL33WGtJvHu0896Xfm4EQ+j6J7DtWLwZC6O9qm6JeGxntX4nrrmMlNxBL37iZNNqHHHnX8ZIbiKHv0roqqYFY+ruaTyU1IE2fK5mBQ9DnSmagLNQ33hLRvRR9pDIwP8HYtL5PPD4qMeWtBH2uJAYU1Ute0N1pjp88kqDPlWYKEa14Y9buo62mypXdIvuVIQvSAiqJgWatzlfQ5RDVMkCvca1QXYiyY41JiCZugNcrfFeBxyXUjEme8lVUWY2UmoZoAYdO14W0SYFJcgqhxGNSSGYghnhMCkmvxDHEX5pCUgOHSCH5alQ6heQGYlMoiS4bzf5/IGyg2mkE8bNHXPFVmbXtVVraQOy8L1WdglkjdaXQ212JkBQa4sdHlvi7B9zWGrpS6M1A0LxviBNt571vCr3emfNNwUXcN4VeDYR0Ghdx0vSl0eYZxpA2UB3As9O4iJ/9xZ3Z8AfqlXKm0LuBkE7jTKHWTI1dKYg8oQma9zXxTaFueNuVgogBTmED+spjk8IslPi+FMSeUvp2GhfxfSmIPuj27TQhKYgaiCHeloL4yx4x896liRvw7TS+2kFeeIohvqtpvpvGH7J9GhuFP9V3wv2zQ3r8xr+YJD8+4n1obV9je6n2BBLmfS9SCNb7AAAAAElFTkSuQmCC"></image></svg></g></g><defs><clipPath id="SvgjsClipPath1393"><rect width="1000" height="1000" x="0" y="0" rx="0" ry="0"></rect></clipPath></defs></svg></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#000000"/>
+  <polygon points="16,29.71 48,20.57 48,43.43 16,34.29" fill="#ffffff"/>
+</svg>

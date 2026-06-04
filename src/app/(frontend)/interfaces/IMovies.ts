@@ -34,6 +34,16 @@ export interface IMovieHero extends IMovieSummary {
   backdropUrl: string | null;
 }
 
+export interface IMovieRatingScore {
+  score: number;
+  votes: number;
+}
+
+export interface IMovieRatings {
+  users: IMovieRatingScore | null;
+  critics: IMovieRatingScore | null;
+}
+
 export interface IMovie {
   id: number;
   slug: string;
@@ -55,7 +65,9 @@ export interface IMovie {
   countryOfOrigin?: IMovieCountry[] | null;
   screenwriters?: IMoviePerson[] | null;
   genres: IGenre[];
-  sourceUrl: string;
+  sourceUrl?: string | null;
+  ratings?: IMovieRatings | null;
+  filmwebUrl?: string | null;
 }
 
 export interface IMultiCityMovie {

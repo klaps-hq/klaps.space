@@ -60,8 +60,7 @@ export const getMovieById = async (id: number): Promise<IMovie> => {
 };
 
 export const getMovieBySlug = async (slug: string): Promise<IMovie> => {
-  const movie = await apiFetch<IMovie>(`/movies/${slug}`);
-  return movie;
+  return fetchOrNotFound(() => apiFetch<IMovie>(`/movies/${slug}`));
 };
 
 export const getMoviePageData = async (
