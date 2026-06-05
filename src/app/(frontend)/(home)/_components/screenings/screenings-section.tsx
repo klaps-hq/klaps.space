@@ -44,7 +44,7 @@ const ScreeningsSectionInner: React.FC<ScreeningsSectionProps> = ({
         <div className="px-6 md:px-12 lg:px-16 py-4 md:py-5">
           <FilterBar genres={genres} />
         </div>
-        <div className="h-px w-full bg-white/[0.06]" aria-hidden="true" />
+        <div className="h-px w-full bg-white/10" aria-hidden="true" />
       </div>
 
       <div

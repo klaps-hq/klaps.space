@@ -116,8 +116,17 @@ const HeroFallback: React.FC = () => (
   </section>
 );
 
+// The hero is a showcase — render it only when the movie has complete data,
+// otherwise fall back to the generic hero instead of showing empty gaps.
+const hasCompleteHeroData = (screening: IRandomScreening): boolean =>
+  Boolean(
+    screening.movie.title?.trim() &&
+      screening.movie.description?.trim() &&
+      screening.movie.backdropUrl
+  );
+
 const Hero: React.FC<HeroProps> = ({ screening }) => {
-  if (!screening) {
+  if (!screening || !hasCompleteHeroData(screening)) {
     return <HeroFallback />;
   }
 

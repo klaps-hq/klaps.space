@@ -36,6 +36,15 @@ export default function HomeLayout({
           name: SITE_NAME,
           url: SITE_URL,
           description: SITE_DESCRIPTION,
+          inLanguage: "pl-PL",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: `${SITE_URL}/seanse?search={search_term_string}`,
+            },
+            "query-input": "required name=search_term_string",
+          },
         }}
       />
       {children}

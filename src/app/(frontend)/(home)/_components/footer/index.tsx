@@ -93,14 +93,14 @@ const Footer: React.FC = () => {
         </Link>
       </div>
 
-      <div className="flex items-center gap-3 px-6 md:px-12 lg:px-16 pb-6 text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/40">
+      <div className="flex items-center gap-2 px-6 md:px-12 lg:px-16 pb-6 text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-white/40">
         <a
           href="https://www.themoviedb.org/"
           target="_blank"
           rel="noreferrer noopener nofollow"
           className="shrink-0 opacity-50 hover:opacity-80 transition-opacity"
         >
-          <Image src="/tmdb-logo.svg" alt="TMDB" width={90} height={12} />
+          <Image src="/tmdb-logo.svg" alt="TMDB" width={60} height={8} />
         </a>
         <p>
           Dane filmowe dostarcza TMDB. Serwis nie jest powiązany

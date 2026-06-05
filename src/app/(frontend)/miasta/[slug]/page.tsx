@@ -173,18 +173,18 @@ const CityPage = async ({ params, searchParams }: CityPageProps) => {
           <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
             Kina w&nbsp;{cityForCopy}
           </h2>
-          <div className="flex flex-wrap">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 border-t border-l border-white/10">
             {cinemas.map((cinema) => (
               <Link
                 key={cinema.id}
                 href={`/kina/${cinema.slug}`}
-                className="group bg-black hover:bg-white/[0.04] transition-colors border border-white/10 -mr-px -mb-px px-5 md:px-6 py-8 md:py-12 flex flex-col items-center justify-center gap-2 min-h-[120px] md:min-h-[160px] basis-1/2 sm:basis-1/3 lg:basis-1/4"
+                className="group bg-black hover:bg-white/[0.04] transition-colors border-r border-b border-white/10 px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1"
               >
-                <span className="text-base md:text-xl lg:text-2xl font-medium uppercase -tracking-[0.01em] text-white/70 group-hover:text-white transition-colors text-center">
+                <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
                   {cinema.name}
                 </span>
                 {cinema.street && (
-                  <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/40 text-center">
+                  <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/35">
                     {cinema.street}
                   </span>
                 )}

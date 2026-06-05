@@ -114,14 +114,8 @@ const GenrePage = async ({ params, searchParams }: GenrePageProps) => {
       </div>
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-12 md:pb-16">
-        <Link
-          href="/gatunki"
-          className="inline-block w-fit text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40 hover:text-white/80 transition-colors mb-3 md:mb-4"
-        >
-          Gatunek
-        </Link>
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-medium uppercase -tracking-[0.03em] leading-[0.95] text-white max-w-[20ch]">
-          {genre.name}
+          Filmy z&nbsp;gatunku {genreNameLower}
         </h1>
         {genre.description ? (
           <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
@@ -137,7 +131,6 @@ const GenrePage = async ({ params, searchParams }: GenrePageProps) => {
       </header>
 
       <GenreRepertoire
-        genreName={genre.name}
         genreNameLower={genreNameLower}
         screenings={screenings}
         genres={allGenres}

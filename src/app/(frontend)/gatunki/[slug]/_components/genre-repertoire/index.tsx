@@ -13,14 +13,12 @@ import FilterBar from "../../../../(home)/_components/screenings/filter-bar";
 import ScreeningCard from "../../../../(home)/_components/screenings/screening-card";
 
 interface GenreRepertoireProps {
-  genreName: string;
   genreNameLower: string;
   screenings: IScreeningGroup[];
   genres: IGenre[];
 }
 
 const GenreRepertoireInner: React.FC<GenreRepertoireProps> = ({
-  genreName,
   genreNameLower,
   screenings,
   genres,
@@ -28,13 +26,13 @@ const GenreRepertoireInner: React.FC<GenreRepertoireProps> = ({
   const { isPending } = useScreeningsTransition();
 
   return (
-    <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
-      <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
-        Aktualne seanse: {genreName}
-      </h2>
-
+    <section className="px-6 md:px-12 lg:px-16 pb-20 md:pb-28">
       <div className="mb-10 md:mb-12">
         <FilterBar genres={genres} hideGenres />
+        <div
+          className="mt-4 md:mt-5 -mx-6 md:-mx-12 lg:-mx-16 h-px bg-white/10"
+          aria-hidden="true"
+        />
       </div>
 
       <div
