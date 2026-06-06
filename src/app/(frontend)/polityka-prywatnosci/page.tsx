@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import Footer from "../(home)/_components/footer";
 import { CONTACT_EMAIL, SITE_DOMAIN } from "@/constants";
@@ -232,11 +233,11 @@ const PrivacyPolicyPage = () => {
       </div>
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-10 pb-14 md:pb-20">
-        <h1 className="text-4xl md:text-7xl lg:text-8xl font-medium uppercase -tracking-[0.04em] leading-[0.9] text-white">
+        <PageHeading variant="display">
           Polityka
           <br />
           prywatności
-        </h1>
+        </PageHeading>
         <p className="mt-10 md:mt-14 max-w-[58ch] text-lg md:text-2xl lg:text-3xl text-white/75 leading-[1.4] -tracking-[0.005em]">
           Klaps nie wymaga rejestracji ani danych osobowych. Poniżej opisujemy
           dokładnie, jakie dane techniczne mogą być przetwarzane

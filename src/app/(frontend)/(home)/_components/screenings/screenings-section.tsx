@@ -40,11 +40,11 @@ const ScreeningsSectionInner: React.FC<ScreeningsSectionProps> = ({
     <section id="seanse" className="relative bg-black text-white">
       <SectionHeader />
 
-      <div className="sticky top-0 z-20 bg-black/85 backdrop-blur-md">
+      <div>
         <div className="px-6 md:px-12 lg:px-16 py-4 md:py-5">
           <FilterBar genres={genres} />
         </div>
-        <div className="h-px w-full bg-white/[0.06]" aria-hidden="true" />
+        <div className="h-px w-full bg-white/10" aria-hidden="true" />
       </div>
 
       <div

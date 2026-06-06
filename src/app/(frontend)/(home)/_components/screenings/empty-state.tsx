@@ -38,8 +38,12 @@ const ScreeningsEmptyState: React.FC<ScreeningsEmptyStateProps> = ({
     cityId !== null || !!dateLabel || !!genresLabel || !!searchLabel;
 
   const handleClearAll = () => {
-    if (cityId !== null) setCityId(null);
+    // Single navigation clears every param (including "city") - the context
+    // only updates its state and storage, otherwise its own router.replace
+    // races with ours and restores the stale "city" param.
+    if (cityId !== null) setCityId(null, { navigate: false });
     updateParams((p) => {
+      p.delete("city");
       p.delete("dateFrom");
       p.delete("dateTo");
       p.delete("genres");
@@ -47,18 +51,31 @@ const ScreeningsEmptyState: React.FC<ScreeningsEmptyStateProps> = ({
     });
   };
 
+  if (hasAnyFilter) {
+    return (
+      <EmptyState
+        title="Nic tu nie gra."
+        description={
+          <>
+            Żaden seans nie pasuje do wybranych filtrów. Zmień miasto, zakres
+            dat, gatunek albo frazę. Możesz też zacząć od nowa.
+          </>
+        }
+        cta={{ label: "Wyczyść filtry", onClick: handleClearAll }}
+      />
+    );
+  }
+
   return (
     <EmptyState
+      title="Chwilowa przerwa."
       description={
-        hasAnyFilter
-          ? "Brak seansów pasujących do wybranych filtrów. Zmień zakres dat, miasto, gatunek lub frazę."
-          : "Repertuar jest właśnie aktualizowany. Wróć za chwilę — niezależne kina dodają seanse na bieżąco."
+        <>
+          Repertuar jest w&nbsp;trakcie aktualizacji. Kina studyjne dodają
+          seanse na bieżąco, zajrzyj ponownie wkrótce.
+        </>
       }
-      cta={
-        hasAnyFilter
-          ? { label: "Wyczyść filtry", onClick: handleClearAll }
-          : undefined
-      }
+      cta={{ label: "Przeglądaj kina", href: "/kina" }}
     />
   );
 };

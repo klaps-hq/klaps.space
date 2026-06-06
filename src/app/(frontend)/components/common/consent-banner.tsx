@@ -20,7 +20,7 @@ const updateGtagConsent = (value: ConsentValue) => {
     window.gtag("consent", "update", { analytics_storage: value });
     return;
   }
-  // gtag may not be defined yet — queue the update on the dataLayer.
+  // gtag may not be defined yet - queue the update on the dataLayer.
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push(["consent", "update", { analytics_storage: value }]);
 };
@@ -32,7 +32,7 @@ const subscribe = (callback: () => void) => {
 
 const getSnapshot = () => window.localStorage.getItem(CONSENT_STORAGE_KEY);
 
-// On the server we don't know the choice yet — render nothing.
+// On the server we don't know the choice yet - render nothing.
 const getServerSnapshot = () => "pending";
 
 const ConsentBanner: React.FC = () => {

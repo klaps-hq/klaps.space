@@ -11,6 +11,10 @@ interface MoviePosterProps {
   width: number;
   height: number;
   className?: string;
+  /** Responsive sizes hint - set per grid layout to avoid oversized downloads. */
+  sizes?: string;
+  /** Set for above-the-fold (LCP) posters to skip lazy loading. */
+  priority?: boolean;
 }
 
 const MoviePoster: React.FC<MoviePosterProps> = ({
@@ -19,6 +23,8 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
   width,
   height,
   className,
+  sizes,
+  priority = false,
 }) => {
   const [isError, setIsError] = useState(false);
 
@@ -32,6 +38,8 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
       alt={`Plakat filmu: ${title}`}
       width={width}
       height={height}
+      sizes={sizes}
+      priority={priority}
       className={className}
       onError={() => {
         setIsError(true);

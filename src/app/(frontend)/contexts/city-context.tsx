@@ -21,11 +21,16 @@ const ALL_CITIES_OPTION: CityOption = {
   label: "Wszystkie miasta",
 };
 
+interface SetCityIdOptions {
+  /** When false, skips the URL update and refresh - the caller owns navigation. */
+  navigate?: boolean;
+}
+
 interface CityContextValue {
   cityId: number | null;
   cityName: string;
   isHydrated: boolean;
-  setCityId: (cityId: number | null) => void;
+  setCityId: (cityId: number | null, options?: SetCityIdOptions) => void;
   options: CityOption[];
 }
 
@@ -113,10 +118,14 @@ export const CityProvider = ({ children, cities }: CityProviderProps) => {
   );
 
   const setCityId = useCallback(
-    (newCityId: number | null) => {
+    (newCityId: number | null, options?: SetCityIdOptions) => {
       setCityIdState(newCityId);
       localStorage.setItem(PREFERRED_CITY_KEY, newCityId !== null ? String(newCityId) : "");
       setPreferredCityCookie(newCityId);
+
+      if (options?.navigate === false) {
+        return;
+      }
 
       if (pathname === "/" || pathname === "/seanse") {
         const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");

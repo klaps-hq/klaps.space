@@ -1,42 +1,45 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { getCityBySlug } from "@/lib/cities";
 import { getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
 import { getScreenings } from "@/lib/screenings";
-import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { SITE_URL } from "@/lib/site-config";
-import {
-  BASE_OPEN_GRAPH,
-  NOINDEX_FOLLOW,
-  hasQueryParams,
-  pluralPl,
-} from "@/lib/seo";
+import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
+import SectionLoader from "@/components/ui/section-loader";
 import Footer from "../../(home)/_components/footer";
 import CityRepertoire from "./_components/city-repertoire";
 
+// ISR: cached HTML revalidated every 5 minutes. The repertoire filters
+// (genres, dates, search) are applied client-side in CityRepertoire,
+// so this page never reads searchParams and stays statically cacheable.
 export const revalidate = 300;
-
-type SearchParams = {
-  genres?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  search?: string;
-};
 
 type CityPageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<SearchParams>;
+};
+
+// Prebuild cities that have cinemas so bots never hit a cold render.
+// Other slugs still render on demand (dynamicParams defaults to true).
+export const generateStaticParams = async (): Promise<{ slug: string }[]> => {
+  try {
+    const { data: groups } = await getCinemas();
+    return groups
+      .filter((group) => group.cinemas.length > 0)
+      .map((group) => ({ slug: group.city.slug }));
+  } catch {
+    return [];
+  }
 };
 
 export const generateMetadata = async ({
   params,
-  searchParams,
 }: CityPageProps): Promise<Metadata> => {
-  const [{ slug }, queryParams] = await Promise.all([params, searchParams]);
+  const { slug } = await params;
   const { city, screenings: rawScreenings } = await getCityBySlug(slug);
 
   const cinemasResponse = await getCinemas({ cityId: city.id.toString() });
@@ -49,19 +52,20 @@ export const generateMetadata = async ({
     0
   );
 
-  const title = `Kina studyjne ${city.name} - repertuar seansów specjalnych`;
+  const title = `Kina studyjne w ${city.nameDeclinated} - repertuar seansów specjalnych`;
   const counts =
     screeningsCount > 0
       ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}`
       : `${cinemasCount} ${pluralPl(cinemasCount, "kino studyjne", "kina studyjne", "kin studyjnych")}`;
   const description =
     cinemasCount > 0
-      ? `${counts} w ${city.nameDeclinated}. Seanse specjalne, klasyka filmowa i retrospektywy - sprawdź repertuar kin w ${city.nameDeclinated}.`
+      ? `${counts} w ${city.nameDeclinated}. Seanse specjalne, klasyka filmowa i retrospektywy - sprawdź aktualny repertuar kin.`
       : `Kina studyjne i niezależne w ${city.nameDeclinated}. Aktualne seanse specjalne, klasyka filmowa i retrospektywy.`;
   const url = `${SITE_URL}/miasta/${city.slug}`;
 
   // A city without cinemas is thin content; keep it out of the index.
-  const noindex = cinemasCount === 0 || hasQueryParams(queryParams);
+  // Query-param duplicates (filters) are handled by the canonical alone.
+  const noindex = cinemasCount === 0;
 
   return {
     title,
@@ -82,54 +86,18 @@ export const generateMetadata = async ({
   };
 };
 
-const parseGenreIds = (raw: string | undefined): string[] => {
-  if (!raw) return [];
-  return raw
-    .split(",")
-    .map((v) => v.trim())
-    .filter((v) => v.length > 0 && !Number.isNaN(Number(v)));
-};
-
-const mergeScreeningGroups = (
-  groupArrays: IScreeningGroup[][]
-): IScreeningGroup[] => {
-  const map = new Map<number, IScreeningGroup>();
-  for (const groups of groupArrays) {
-    for (const group of groups) {
-      if (!map.has(group.movie.id)) map.set(group.movie.id, group);
-    }
-  }
-  return Array.from(map.values());
-};
-
-const CityPage = async ({ params, searchParams }: CityPageProps) => {
+const CityPage = async ({ params }: CityPageProps) => {
   const { slug } = await params;
-  const sp = await searchParams;
 
   const cityData = await getCityBySlug(slug);
   const city = cityData.city;
 
-  const genreIds = parseGenreIds(sp.genres);
-  const sharedFilters = {
-    cityId: city.id.toString(),
-    dateFrom: sp.dateFrom,
-    dateTo: sp.dateTo,
-    search: sp.search,
-  };
-
+  // Full unfiltered repertoire - CityRepertoire narrows it down
+  // client-side based on the URL params.
   const [{ data: cinemaGroups }, allGenres, screenings] = await Promise.all([
     getCinemas({ cityId: city.id.toString() }),
     getGenres(),
-    genreIds.length > 1
-      ? Promise.all(
-          genreIds.map((id) =>
-            getScreenings({ ...sharedFilters, genreId: id })
-          )
-        ).then(mergeScreeningGroups)
-      : getScreenings({
-          ...sharedFilters,
-          genreId: genreIds[0] ?? null,
-        }),
+    getScreenings({ cityId: city.id.toString() }),
   ]);
 
   const cinemas = cinemaGroups
@@ -152,19 +120,31 @@ const CityPage = async ({ params, searchParams }: CityPageProps) => {
       </div>
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-12 md:pb-16">
-        <Link
-          href="/miasta"
-          className="inline-block w-fit text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40 hover:text-white/80 transition-colors mb-3 md:mb-4"
-        >
-          Miasto
-        </Link>
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-medium uppercase -tracking-[0.03em] leading-[0.95] text-white max-w-[18ch]">
+        <PageHeading variant="detail" className="max-w-[18ch]">
           {city.name}
-        </h1>
-        {city.description && (
+        </PageHeading>
+        {city.description ? (
           <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
             {city.description}
           </p>
+        ) : (
+          cinemasCount > 0 && (
+            // Generated intro keeps description-less city pages from being
+            // thin content - unique copy via the live cinema count.
+            <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
+              W&nbsp;{cityForCopy}{" "}
+              {pluralPl(cinemasCount, "działa", "działają", "działa")}{" "}
+              {cinemasCount}{" "}
+              {pluralPl(
+                cinemasCount,
+                "kino studyjne",
+                "kina studyjne",
+                "kin studyjnych"
+              )}
+              . Sprawdź nadchodzące seanse specjalne, retrospektywy
+              i&nbsp;klasykę filmową na dużym ekranie.
+            </p>
+          )
         )}
       </header>
 
@@ -173,18 +153,22 @@ const CityPage = async ({ params, searchParams }: CityPageProps) => {
           <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
             Kina w&nbsp;{cityForCopy}
           </h2>
-          <div className="flex flex-wrap">
+          {/* Borders live on the cards (not the container) so lines end with
+              the last card instead of running across empty grid columns.
+              Negative margins collapse the doubled inner borders; opaque
+              #1a1a1a (white/10 on black) keeps overlaps from brightening. */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-px pl-px">
             {cinemas.map((cinema) => (
               <Link
                 key={cinema.id}
                 href={`/kina/${cinema.slug}`}
-                className="group bg-black hover:bg-white/[0.04] transition-colors border border-white/10 -mr-px -mb-px px-5 md:px-6 py-8 md:py-12 flex flex-col items-center justify-center gap-2 min-h-[120px] md:min-h-[160px] basis-1/2 sm:basis-1/3 lg:basis-1/4"
+                className="group bg-black hover:bg-white/[0.04] transition-colors border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1"
               >
-                <span className="text-base md:text-xl lg:text-2xl font-medium uppercase -tracking-[0.01em] text-white/70 group-hover:text-white transition-colors text-center">
+                <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
                   {cinema.name}
                 </span>
                 {cinema.street && (
-                  <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/40 text-center">
+                  <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/35">
                     {cinema.street}
                   </span>
                 )}
@@ -194,12 +178,15 @@ const CityPage = async ({ params, searchParams }: CityPageProps) => {
         </section>
       )}
 
-      <CityRepertoire
-        cityName={city.name}
-        cityForCopy={cityForCopy}
-        screenings={screenings}
-        genres={allGenres}
-      />
+      {/* Suspense: useSearchParams() in the client repertoire needs a
+          boundary during static prerender (CSR bailout). */}
+      <Suspense fallback={<SectionLoader label="Ładowanie repertuaru" />}>
+        <CityRepertoire
+          cityForCopy={cityForCopy}
+          screenings={screenings}
+          genres={allGenres}
+        />
+      </Suspense>
 
       <Footer />
     </main>

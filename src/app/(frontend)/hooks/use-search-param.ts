@@ -28,7 +28,10 @@ export const useSearchParam = (): UseSearchParamReturn => {
   const isUserInputRef = useRef(false);
 
   useEffect(() => {
-    if (searchParamValue !== searchQuery) {
+    // Compare trimmed values - the URL always stores the trimmed query,
+    // so a trailing space typed by the user must not trigger a reset
+    // that would erase it mid-typing.
+    if (searchParamValue.trim() !== searchQuery.trim()) {
       isUserInputRef.current = false;
       setSearchQuery(searchParamValue);
     }

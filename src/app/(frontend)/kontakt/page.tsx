@@ -7,6 +7,7 @@ import {
   FaXTwitter,
 } from "react-icons/fa6";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import Footer from "../(home)/_components/footer";
 import { CONTACT_EMAIL, SOCIAL_LINKS } from "@/constants";
@@ -55,9 +56,7 @@ const ContactPage = () => {
       </div>
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-10 pb-14 md:pb-20">
-        <h1 className="text-5xl md:text-8xl lg:text-9xl font-medium uppercase -tracking-[0.04em] leading-[0.9] text-white">
-          Kontakt
-        </h1>
+        <PageHeading variant="display">Kontakt</PageHeading>
         <p className="mt-10 md:mt-14 max-w-[58ch] text-lg md:text-2xl lg:text-3xl text-white/75 leading-[1.4] -tracking-[0.005em]">
           Napisz, jeśli masz pytanie, propozycję współpracy albo zauważyłeś
           coś, co powinniśmy poprawić. Odpowiadamy zwykle w&nbsp;ciągu kilku
@@ -73,7 +72,7 @@ const ContactPage = () => {
             </p>
             <p className="mt-6 md:mt-8 max-w-[44ch] text-base md:text-lg text-white/65 leading-relaxed">
               Najszybszy sposób kontaktu. Prosimy o&nbsp;zwięzły opis sprawy
-              w&nbsp;temacie wiadomości, ułatwi nam to szybką odpowiedź.
+              w&nbsp;temacie wiadomości, to ułatwi nam szybką odpowiedź.
             </p>
           </div>
           <div className="lg:col-span-8">

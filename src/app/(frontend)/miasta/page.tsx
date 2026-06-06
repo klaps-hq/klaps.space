@@ -3,7 +3,11 @@ import Link from "next/link";
 import { getCities } from "@/lib/cities";
 import { ICity } from "@/interfaces/ICities";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import PageHeading, {
+  PageHeadingMuted,
+} from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
+import SiteSearch from "@/components/common/site-search";
 import EmptyState from "@/components/common/empty-state";
 import Footer from "../(home)/_components/footer";
 
@@ -40,14 +44,12 @@ const CitiesPage = async () => {
       </div>
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-12 pb-10 md:pb-14">
-        <h1 className="text-3xl md:text-5xl lg:text-6xl leading-[1.05] -tracking-[0.02em] max-w-[26ch]">
-          <span className="block text-white font-medium">
-            Miasta z&nbsp;kinami studyjnymi.
-          </span>
-          <span className="block text-white/40">
-            Sprawdź repertuar w&nbsp;twojej okolicy.
-          </span>
-        </h1>
+        <PageHeading variant="editorial">
+          Miasta z&nbsp;kinami studyjnymi.
+          <PageHeadingMuted>
+            Sprawdź repertuar w&nbsp;Twojej okolicy.
+          </PageHeadingMuted>
+        </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
           Alfabetyczna lista wszystkich {totalCities} miast, w&nbsp;których
           działają niezależne kina studyjne. Łącznie {totalCinemas} ekranów
@@ -55,6 +57,7 @@ const CitiesPage = async () => {
           Wybierz miasto, żeby zobaczyć lokalne kina i&nbsp;ich aktualne
           repertuary.
         </p>
+        <SiteSearch mode="cities" className="mt-8 md:mt-10 max-w-md" />
       </div>
 
       <div className="px-6 md:px-12 lg:px-16 pb-24 md:pb-32">

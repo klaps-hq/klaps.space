@@ -90,6 +90,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            # Fail fast: a failed login/pull must fail the job instead of
+            # silently restarting the container from a stale local image.
+            set -e
+
             mkdir -p ${{ env.DEPLOY_DIR }}
             cd ${{ env.DEPLOY_DIR }}
 
@@ -101,7 +105,8 @@ jobs:
             MAINTENANCE_MODE=${{ secrets.MAINTENANCE_MODE }}
             ENVEOF
 
-            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            # GHCR_USER must be the account that owns GHCR_PAT.
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ secrets.GHCR_USER || github.actor }} --password-stdin
 
             export DOCKER_IMAGE=${{ secrets.DOCKER_IMAGE }}
             export DOMAIN=${{ env.DOMAIN }}

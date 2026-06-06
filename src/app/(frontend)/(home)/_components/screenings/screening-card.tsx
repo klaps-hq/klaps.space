@@ -28,6 +28,7 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({ group }) => {
             title={movie.title}
             width={400}
             height={600}
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 17vw, 10vw"
             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
           />
         ) : (

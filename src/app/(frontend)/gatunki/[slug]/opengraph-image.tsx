@@ -14,7 +14,7 @@ export default async function OgImage({ params }: OgImageProps) {
   const genre = await getGenreBySlug(slug);
 
   return buildOgImage({
-    eyebrow: "Gatunek",
+    eyebrow: "Seanse z gatunku",
     title: genre.name,
     subtitle: `Seanse z gatunku ${genre.name.toLowerCase()} w kinach studyjnych`,
   });

@@ -2,7 +2,11 @@ import React from "react";
 import Link from "next/link";
 import { getCinemas } from "@/lib/cinemas";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import PageHeading, {
+  PageHeadingMuted,
+} from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
+import SiteSearch from "@/components/common/site-search";
 import EmptyState from "@/components/common/empty-state";
 import Footer from "../(home)/_components/footer";
 
@@ -39,14 +43,12 @@ const CinemasPage = async () => {
       </div>
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-12 pb-10 md:pb-14">
-        <h1 className="text-3xl md:text-5xl lg:text-6xl leading-[1.05] -tracking-[0.02em] max-w-[26ch]">
-          <span className="block text-white font-medium">
-            Kina studyjne w&nbsp;Polsce.
-          </span>
-          <span className="block text-white/40">
+        <PageHeading variant="editorial">
+          Kina studyjne w&nbsp;Polsce.
+          <PageHeadingMuted>
             Niezależne ekrany z&nbsp;autorskim programem.
-          </span>
-        </h1>
+          </PageHeadingMuted>
+        </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
           Pełna lista {totalCinemas}{" "}
           {formatPlural(totalCinemas, [
@@ -57,8 +59,24 @@ const CinemasPage = async () => {
           w&nbsp;{totalCities}{" "}
           {formatPlural(totalCities, ["mieście", "miastach", "miastach"])}{" "}
           w&nbsp;Polsce. Niezależne miejsca z&nbsp;autorskim repertuarem.
-          Klasyka, retrospektywy, pokazy specjalne i&nbsp;kuratorowane cykle.
+          Klasyka, retrospektywy, pokazy specjalne i&nbsp;cykle tematyczne.
+          Zobacz też{" "}
+          <Link
+            href="/mapa-kin"
+            className="text-white/80 underline underline-offset-4 decoration-white/25 hover:text-white hover:decoration-white transition-colors"
+          >
+            mapę kin studyjnych
+          </Link>{" "}
+          albo przeglądaj{" "}
+          <Link
+            href="/miasta"
+            className="text-white/80 underline underline-offset-4 decoration-white/25 hover:text-white hover:decoration-white transition-colors"
+          >
+            kina według miast
+          </Link>
+          .
         </p>
+        <SiteSearch mode="cinemas" className="mt-8 md:mt-10 max-w-md" />
       </div>
 
       <div className="px-6 md:px-12 lg:px-16 pb-24 md:pb-32">

@@ -1,13 +1,8 @@
 import { Metadata } from "next";
 import { getMoviePageData, getMovieBySlug, getMovies } from "@/lib/movies";
-import { getMovieScreenings } from "@/lib/screenings";
+import { getMovieScreenings, getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
-import {
-  BASE_OPEN_GRAPH,
-  NOINDEX_FOLLOW,
-  hasQueryParams,
-  pluralPl,
-} from "@/lib/seo";
+import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
 import Footer from "@/app/(home)/_components/footer";
 import SiteHeader from "@/components/common/site-header";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
@@ -16,18 +11,31 @@ import MovieAbout from "./_components/movie-about";
 import MovieScreenings from "./_components/movie-screenings";
 import RelatedMovies from "./_components/related-movies";
 
-export const dynamic = "force-dynamic";
+// ISR: cached HTML revalidated every 5 minutes. Reading cookies or
+// searchParams here would force per-request rendering - the preferred-city
+// filter lives client-side in MovieScreenings instead.
+export const revalidate = 300;
 
 interface MoviePageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
+
+// Prebuild the indexable movie pages (those with upcoming screenings)
+// so bots never hit a cold render. Movies without screenings still
+// render on demand (dynamicParams defaults to true).
+export const generateStaticParams = async (): Promise<{ slug: string }[]> => {
+  try {
+    const groups = await getScreenings();
+    return groups.map((group) => ({ slug: group.movie.slug }));
+  } catch {
+    return [];
+  }
+};
 
 export const generateMetadata = async ({
   params,
-  searchParams,
 }: MoviePageProps): Promise<Metadata> => {
-  const [{ slug }, queryParams] = await Promise.all([params, searchParams]);
+  const { slug } = await params;
   const movie = await getMovieBySlug(slug);
 
   const screenings = await getMovieScreenings({
@@ -37,6 +45,12 @@ export const generateMetadata = async ({
 
   const genreNames = movie.genres.map((g) => g.name).join(", ");
   const directorNames = movie.directors?.map((d) => d.name).join(", ");
+  // Top-billed cast keeps description-less movies from sharing one
+  // near-identical fallback snippet.
+  const actorNames = movie.actors
+    ?.slice(0, 2)
+    .map((a) => a.name)
+    .join(", ");
 
   // Real screening counts in the description improve SERP CTR and uniqueness.
   const screeningsSuffix =
@@ -44,23 +58,32 @@ export const generateMetadata = async ({
       ? `Sprawdź ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")} w kinach studyjnych.`
       : "Sprawdź seanse w kinach studyjnych.";
 
-  const descriptionParts = [
-    `${movie.title} (${movie.productionYear})`,
-    genreNames && `- ${genreNames}`,
+  const metaLine = [
+    genreNames,
     directorNames && `reż. ${directorNames}`,
-    `- ${screeningsSuffix}`,
-  ].filter(Boolean);
+    actorNames && `wyst. ${actorNames}`,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const fallbackDescription = `${movie.title} (${movie.productionYear})${metaLine ? ` - ${metaLine}` : ""}. ${screeningsSuffix}`;
 
-  const description = movie.description
-    ? `${movie.description.slice(0, 120)} ${screeningsSuffix}`
-    : descriptionParts.join(" ");
+  // Truncate at a word boundary so the snippet never ends mid-word.
+  const excerpt =
+    movie.description && movie.description.length > 120
+      ? `${movie.description.slice(0, 120).replace(/\s+\S*$/, "")}…`
+      : movie.description;
+
+  const description = excerpt
+    ? `${excerpt} ${screeningsSuffix}`
+    : fallbackDescription;
 
   const title = `${movie.title} (${movie.productionYear}) - seanse w kinach`;
   const url = `${SITE_URL}/filmy/${movie.slug}`;
 
-  // Movies without upcoming screenings are thin TMDB duplicates — keep
-  // them out of the index until they have showtimes again.
-  const noindex = screeningsCount === 0 || hasQueryParams(queryParams);
+  // Movies without upcoming screenings are thin TMDB duplicates - keep
+  // them out of the index until they have showtimes again. Query-param
+  // duplicates are handled by the canonical URL alone.
+  const noindex = screeningsCount === 0;
 
   return {
     title,

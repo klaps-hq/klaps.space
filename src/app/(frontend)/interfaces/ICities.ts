@@ -8,6 +8,7 @@ export interface ICity {
   nameDeclinated: string;
   numberOfCinemas: number;
   description: string | null;
+  updatedAt?: string | null;
 }
 
 export interface ICityDetails extends ICity {

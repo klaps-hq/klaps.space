@@ -30,8 +30,24 @@ const Cinemas = async () => {
           Niezależne miejsca, w&nbsp;których kino traktuje się jak medium,
           nie atrakcję. Klasyka i&nbsp;współczesne kino autorskie,
           retrospektywy, pokazy specjalne i&nbsp;tematyczne cykle. Sprawdź
-          repertuary w&nbsp;miastach z&nbsp;całej Polski, otwórz interaktywną
-          mapę albo przejdź do pełnej listy kin.
+          repertuary w&nbsp;<Link
+            href="/miasta"
+            className="text-white/80 underline underline-offset-4 decoration-white/25 hover:text-white hover:decoration-white transition-colors"
+          >miastach z&nbsp;całej Polski</Link>, otwórz{" "}
+          <Link
+            href="/mapa-kin"
+            className="text-white/80 underline underline-offset-4 decoration-white/25 hover:text-white hover:decoration-white transition-colors"
+          >
+            interaktywną mapę
+          </Link>{" "}
+          albo przejdź do{" "}
+          <Link
+            href="/kina"
+            className="text-white/80 underline underline-offset-4 decoration-white/25 hover:text-white hover:decoration-white transition-colors"
+          >
+            pełnej listy kin
+          </Link>
+          .
         </p>
       </div>
 

@@ -13,7 +13,7 @@ const ScreeningsLoader: React.FC = () => (
       </div>
     </div>
 
-    <div className="sticky top-0 z-20 bg-black/85 backdrop-blur-md">
+    <div>
       <div className="px-6 md:px-12 lg:px-16 py-4 md:py-5">
         <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
           <div className="md:w-72 lg:w-80 h-9 border-b border-white/15" />
@@ -27,7 +27,7 @@ const ScreeningsLoader: React.FC = () => (
           </div>
         </div>
       </div>
-      <div className="h-px w-full bg-white/[0.06]" aria-hidden="true" />
+      <div className="h-px w-full bg-white/10" aria-hidden="true" />
     </div>
 
     <div className="px-6 md:px-12 lg:px-16 py-12 md:py-20">

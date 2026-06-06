@@ -15,9 +15,6 @@ const ErrorPage: React.FC<ErrorPageProps> = ({ reset }) => {
       <SiteHeader />
 
       <section className="flex-1 flex flex-col justify-center px-6 md:px-12 lg:px-16 py-16 md:py-24">
-        <p className="mb-4 md:mb-6 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40">
-          Błąd serwera
-        </p>
         <h1 className="text-[clamp(7rem,30vw,22rem)] font-medium uppercase -tracking-[0.04em] leading-[0.85] text-white">
           500
         </h1>

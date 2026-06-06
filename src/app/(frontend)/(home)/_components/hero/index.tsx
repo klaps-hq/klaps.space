@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
 import { IRandomScreening } from "@/interfaces/IScreenings";
 import { tmdbImageUrl } from "@/lib/tmdb";
-import { formatDuration } from "@/lib/utils";
+import { formatDuration, getYouTubeEmbedUrl } from "@/lib/utils";
+import TrailerModal from "@/components/common/trailer-modal";
 import HeroParallax from "./hero-parallax";
 import { CharsReveal, TitleReveal } from "./text-reveal";
 
@@ -15,7 +16,7 @@ interface HeroProps {
 
 const CTA_PRIMARY = "ZOBACZ SEANSE";
 
-// Short entrance animations — the hero title is the LCP element,
+// Short entrance animations - the hero title is the LCP element,
 // so long delays directly hurt Core Web Vitals.
 const navVariants: Variants = {
   hidden: { opacity: 0, y: -16 },
@@ -116,10 +117,25 @@ const HeroFallback: React.FC = () => (
   </section>
 );
 
+// The hero is a showcase - render it only when the movie has complete data,
+// otherwise fall back to the generic hero instead of showing empty gaps.
+const hasCompleteHeroData = (screening: IRandomScreening): boolean =>
+  Boolean(
+    screening.movie.title?.trim() &&
+      screening.movie.description?.trim() &&
+      screening.movie.backdropUrl
+  );
+
 const Hero: React.FC<HeroProps> = ({ screening }) => {
-  if (!screening) {
+  const [trailerOpen, setTrailerOpen] = useState(false);
+
+  if (!screening || !hasCompleteHeroData(screening)) {
     return <HeroFallback />;
   }
+
+  const embedUrl = screening.movie.videoUrl
+    ? getYouTubeEmbedUrl(screening.movie.videoUrl)
+    : null;
 
   const screeningDate = new Date(screening.screening.dateTime);
   const formattedDate = new Intl.DateTimeFormat("pl-PL", {
@@ -129,6 +145,11 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
 
   return (
     <section className="h-screen w-full bg-black flex items-center justify-center p-4 md:p-8">
+      {/* Stable, keyword-bearing h1 - the visible movie title rotates
+          per visit, so it renders as h2 (see TitleReveal). */}
+      <h1 className="sr-only">
+        Seanse specjalne i stare filmy w kinach studyjnych w Polsce
+      </h1>
       <HeroParallax
         backdropSrc={tmdbImageUrl(screening.movie.backdropUrl ?? "", "original")}
         alt={screening.movie.title}
@@ -144,7 +165,18 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-12">
             <div className="flex flex-col gap-6 md:flex-1 md:min-w-0">
               <CharsReveal
-                text={`${formattedDate} · ${screening.screening.time} · ${screening.screening.cinema.name} · ${screening.screening.cinema.city.name}`}
+                segments={[
+                  { text: `${formattedDate} · ${screening.screening.time} · ` },
+                  {
+                    text: screening.screening.cinema.name,
+                    href: `/kina/${screening.screening.cinema.slug}`,
+                  },
+                  { text: " · " },
+                  {
+                    text: screening.screening.cinema.city.name,
+                    href: `/miasta/${screening.screening.cinema.city.slug}`,
+                  },
+                ]}
                 className="text-xs md:text-sm uppercase tracking-[0.2em] text-white/70"
               />
 
@@ -201,11 +233,35 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
                 >
                   Pełny repertuar
                 </Link>
+                {embedUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setTrailerOpen(true)}
+                    className="group inline-flex items-center gap-2 text-base text-white/70 border-b border-white/30 pb-0.5 hover:text-white hover:border-white transition-colors"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="text-[9px] leading-none transition-transform group-hover:scale-110"
+                    >
+                      ▶
+                    </span>
+                    Zwiastun
+                  </button>
+                )}
               </motion.div>
             </div>
           </div>
         </motion.div>
       </HeroParallax>
+
+      {embedUrl && (
+        <TrailerModal
+          open={trailerOpen}
+          embedUrl={embedUrl}
+          movieTitle={screening.movie.title}
+          onClose={() => setTrailerOpen(false)}
+        />
+      )}
     </section>
   );
 };

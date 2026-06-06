@@ -60,6 +60,24 @@ export const getCinemaBySlug = async (slug: string): Promise<ICinema> => {
   return fetchOrNotFound(() => apiFetch<ICinema>(`/cinemas/${slug}`));
 };
 
+// Poland bounding box, used to drop cinemas with wrongly geocoded
+// coordinates that would otherwise render outside the country.
+const POLAND_BOUNDS = {
+  minLat: 49.0,
+  maxLat: 54.9,
+  minLng: 14.1,
+  maxLng: 24.2,
+};
+
+function isWithinPoland(latitude: number, longitude: number): boolean {
+  return (
+    latitude >= POLAND_BOUNDS.minLat &&
+    latitude <= POLAND_BOUNDS.maxLat &&
+    longitude >= POLAND_BOUNDS.minLng &&
+    longitude <= POLAND_BOUNDS.maxLng
+  );
+}
+
 export const getCinemasWithCoordinates = async (): Promise<ICinema[]> => {
   try {
     const { data: groups } = await getCinemas({ limit: 1000 });
@@ -75,7 +93,12 @@ export const getCinemasWithCoordinates = async (): Promise<ICinema[]> => {
         (r): r is PromiseFulfilledResult<ICinema> => r.status === "fulfilled"
       )
       .map((r) => r.value)
-      .filter((c) => c.latitude !== null && c.longitude !== null);
+      .filter(
+        (c) =>
+          c.latitude !== null &&
+          c.longitude !== null &&
+          isWithinPoland(c.latitude, c.longitude)
+      );
   } catch (error) {
     console.warn("Failed to fetch cinemas with coordinates:", error);
     return [];

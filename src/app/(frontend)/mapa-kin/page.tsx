@@ -1,6 +1,9 @@
 import React from "react";
 import { getCinemasWithCoordinates } from "@/lib/cinemas";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import PageHeading, {
+  PageHeadingMuted,
+} from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import EmptyState from "@/components/common/empty-state";
 import Footer from "../(home)/_components/footer";
@@ -21,19 +24,17 @@ const CinemaMapPage = async () => {
       </div>
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-10 md:pb-14">
-        <h1 className="text-3xl md:text-5xl lg:text-6xl leading-[1.05] -tracking-[0.02em] max-w-[26ch]">
-          <span className="block text-white font-medium">
-            Mapa kin studyjnych.
-          </span>
-          <span className="block text-white/40">
-            Sprawdź co gra w&nbsp;twojej okolicy.
-          </span>
-        </h1>
+        <PageHeading variant="editorial">
+          Mapa kin studyjnych.
+          <PageHeadingMuted>
+            Sprawdź, co gra w&nbsp;Twojej okolicy.
+          </PageHeadingMuted>
+        </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
           {cinemas.length} niezależnych ekranów w&nbsp;{cityCount} miastach
           z&nbsp;całej Polski. Kliknij pin, żeby zobaczyć szczegóły miejsca
-          i&nbsp;jego aktualny repertuar. Używaj scroll i&nbsp;zoom, żeby
-          zawęzić region.
+          i&nbsp;jego aktualny repertuar. Przesuwaj i&nbsp;przybliżaj mapę,
+          żeby zawęzić obszar.
         </p>
       </header>
 
