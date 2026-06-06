@@ -1,13 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
 import {
   ScreeningsTransitionProvider,
   useScreeningsTransition,
 } from "@/contexts/screenings-transition-context";
+import { usePreferredCity } from "@/contexts/city-context";
 import { cn } from "@/lib/utils";
+import { filterScreeningGroups } from "@/lib/screening-filters";
 import EmptyState from "@/components/common/empty-state";
 import FilterBar from "../../../../(home)/_components/screenings/filter-bar";
 import ScreeningCard from "../../../../(home)/_components/screenings/screening-card";
@@ -24,6 +27,30 @@ const GenreRepertoireInner: React.FC<GenreRepertoireProps> = ({
   genres,
 }) => {
   const { isPending } = useScreeningsTransition();
+  const searchParams = useSearchParams();
+  const { cityId: preferredCityId, isHydrated } = usePreferredCity();
+
+  // The page is statically cached (ISR) with the genre's nationwide
+  // repertoire; filters are applied here after hydration. An explicit
+  // ?city= deep link wins over the stored preference.
+  const cityParam = Number(searchParams.get("city"));
+  const cityId =
+    !Number.isNaN(cityParam) && cityParam > 0
+      ? cityParam
+      : isHydrated
+        ? preferredCityId
+        : null;
+
+  const visibleScreenings = useMemo(
+    () =>
+      filterScreeningGroups(screenings, {
+        cityId,
+        dateFrom: searchParams.get("dateFrom"),
+        dateTo: searchParams.get("dateTo"),
+        search: searchParams.get("search"),
+      }),
+    [screenings, cityId, searchParams]
+  );
 
   return (
     <section className="px-6 md:px-12 lg:px-16 pb-20 md:pb-28">
@@ -41,7 +68,7 @@ const GenreRepertoireInner: React.FC<GenreRepertoireProps> = ({
           isPending && "opacity-50 pointer-events-none"
         )}
       >
-        {screenings.length === 0 ? (
+        {visibleScreenings.length === 0 ? (
           <EmptyState
             description={
               <>
@@ -54,7 +81,7 @@ const GenreRepertoireInner: React.FC<GenreRepertoireProps> = ({
           />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-12">
-            {screenings.map((group) => (
+            {visibleScreenings.map((group) => (
               <ScreeningCard key={group.movie.id} group={group} />
             ))}
           </div>

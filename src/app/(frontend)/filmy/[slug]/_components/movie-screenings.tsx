@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { IScreening } from "@/interfaces/IScreenings";
 import CityField from "@/app/(home)/_components/screenings/city-field";
+import { usePreferredCity } from "@/contexts/city-context";
 import { groupScreeningsByCinema } from "@/lib/screenings";
 import { formatDateLabel, cn } from "@/lib/utils";
 
@@ -104,7 +105,21 @@ const CinemaRow: React.FC<CinemaRowProps> = ({ screenings }) => {
 };
 
 const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
-  const availableDates = [...new Set(screenings.map((s) => s.date))].sort();
+  const { cityId, isHydrated } = usePreferredCity();
+
+  // The page is statically cached with the nationwide list, so the
+  // preferred-city filter is applied here after hydration. When the
+  // chosen city has no showtimes, fall back to the nationwide list
+  // instead of dead-ending on an empty state.
+  const visibleScreenings = useMemo(() => {
+    if (!isHydrated || cityId === null) return screenings;
+    const inCity = screenings.filter((s) => s.cinema.city.id === cityId);
+    return inCity.length > 0 ? inCity : screenings;
+  }, [screenings, cityId, isHydrated]);
+
+  const availableDates = [
+    ...new Set(visibleScreenings.map((s) => s.date)),
+  ].sort();
   const [selectedDate, setSelectedDate] = useState<string | null>(
     () => availableDates[0] ?? null
   );
@@ -163,7 +178,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
       : availableDates[0];
 
   const groups = groupScreeningsByCinema(
-    screenings.filter((s) => s.date === activeDate)
+    visibleScreenings.filter((s) => s.date === activeDate)
   );
 
   return (

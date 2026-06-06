@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
-import { X } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { IMovie } from "@/interfaces/IMovies";
 import { tmdbImageUrl } from "@/lib/tmdb";
 import { formatDuration, getYouTubeEmbedUrl } from "@/lib/utils";
+import TrailerModal from "@/components/common/trailer-modal";
+import { PAGE_HEADING_CLASSES } from "@/components/ui/page-heading";
 
 interface MovieHeroProps {
   movie: IMovie;
@@ -17,14 +18,6 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
   const [trailerOpen, setTrailerOpen] = useState(false);
   const embedUrl = movie.videoUrl ? getYouTubeEmbedUrl(movie.videoUrl) : null;
 
-  useEffect(() => {
-    if (!trailerOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setTrailerOpen(false);
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [trailerOpen]);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -91,7 +84,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
             animate="visible"
             variants={{
               hidden: {},
-              // Short delays — the h1 below is the LCP element.
+              // Short delays - the h1 below is the LCP element.
               visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } },
             }}
           >
@@ -119,7 +112,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
                   transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
                 },
               }}
-              className="text-5xl md:text-7xl lg:text-8xl font-bold uppercase leading-[0.9] -tracking-[0.02em] text-white"
+              className={PAGE_HEADING_CLASSES.detail}
             >
               {movie.title}
             </motion.h1>
@@ -180,46 +173,14 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
         </motion.div>
       </div>
 
-      <AnimatePresence>
-        {trailerOpen && embedUrl && (
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Zwiastun filmu"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            onClick={() => setTrailerOpen(false)}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 md:p-12"
-          >
-            <button
-              type="button"
-              onClick={() => setTrailerOpen(false)}
-              aria-label="Zamknij zwiastun"
-              className="absolute top-5 right-5 md:top-8 md:right-8 flex items-center justify-center size-11 border border-white/20 text-white/70 hover:text-white hover:border-white transition-colors"
-            >
-              <X className="size-5" aria-hidden="true" />
-            </button>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-5xl aspect-video bg-black"
-            >
-              <iframe
-                src={`${embedUrl}${embedUrl.includes("?") ? "&" : "?"}autoplay=1`}
-                title={`Zwiastun: ${movie.title}`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {embedUrl && (
+        <TrailerModal
+          open={trailerOpen}
+          embedUrl={embedUrl}
+          movieTitle={movie.title}
+          onClose={() => setTrailerOpen(false)}
+        />
+      )}
     </section>
   );
 };

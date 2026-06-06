@@ -4,6 +4,17 @@ import { withPayload } from "@payloadcms/next/withPayload";
 const nextConfig: NextConfig = {
   output: "standalone",
   reactCompiler: true,
+  async redirects() {
+    return [
+      // /filmy has no listing page of its own; movie pages live at
+      // /filmy/[slug] and the listing equivalent is /seanse.
+      {
+        source: "/filmy",
+        destination: "/seanse",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

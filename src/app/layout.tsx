@@ -19,8 +19,8 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default:
-      "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych w Polsce",
+    // Kept under ~60 chars so SERPs render it without truncation.
+    default: "Klaps - Seanse specjalne i klasyka w kinach studyjnych",
     template: "%s - Klaps",
   },
   description:
@@ -29,26 +29,15 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pl_PL",
     siteName: "Klaps",
-    title:
-      "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych w Polsce",
+    title: "Klaps - Seanse specjalne i klasyka w kinach studyjnych",
     description:
-      "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych. Sprawdź co grają.",
-    images: [
-      {
-        url: "/klaps-og.png",
-        width: 1200,
-        height: 630,
-        alt: "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych",
-      },
-    ],
+      "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych. Sprawdź, co grają.",
   },
   twitter: {
     card: "summary_large_image",
-    title:
-      "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych w Polsce",
+    title: "Klaps - Seanse specjalne i klasyka w kinach studyjnych",
     description:
       "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych.",
-    images: ["/klaps-og.png"],
   },
   robots: {
     index: true,

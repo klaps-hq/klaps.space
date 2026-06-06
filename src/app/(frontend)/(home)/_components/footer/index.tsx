@@ -59,6 +59,13 @@ const Footer: React.FC = () => {
           ))}
         </div>
 
+        <p className="mb-8 max-w-[64ch] text-xs md:text-sm text-white/45 leading-relaxed">
+          Klaps to ogólnopolski przewodnik po seansach specjalnych, klasyce
+          filmowej i&nbsp;retrospektywach w&nbsp;kinach studyjnych. Repertuar,
+          filmy i&nbsp;kina w&nbsp;jednym miejscu, bezpłatnie i&nbsp;bez
+          rejestracji.
+        </p>
+
         <div className="flex items-center justify-between gap-4 pt-8 border-t border-white/10 text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/50">
           <span>&copy; {currentYear} Klaps</span>
           <a

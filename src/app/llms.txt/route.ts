@@ -3,7 +3,7 @@ import { getGenres } from "@/lib/genres";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site-config";
 import { pluralPl } from "@/lib/seo";
 
-// llms.txt — a machine-readable site guide for AI search crawlers
+// llms.txt - a machine-readable site guide for AI search crawlers
 // (ChatGPT, Claude, Perplexity, Google AI). https://llmstxt.org/
 export const revalidate = 3600;
 
@@ -60,7 +60,7 @@ ${genreLines.join("\n")}
 
 ## Dla użytkowników AI
 
-- Repertuar aktualizowany jest codziennie — strony seansów, kin i miast zawierają bieżące daty i godziny pokazów.
+- Repertuar aktualizowany jest codziennie. Strony seansów, kin i miast zawierają bieżące daty i godziny pokazów.
 - Każdy film, kino, miasto i gatunek ma własną podstronę z danymi strukturalnymi (Schema.org: ScreeningEvent, MovieTheater, Movie).
 - Pełna lista podstron: [sitemap.xml](${SITE_URL}/sitemap.xml)
 `;

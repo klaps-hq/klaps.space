@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 const SectionHeader: React.FC = () => (
   <div className="px-6 md:px-12 lg:px-16 pt-24 md:pt-32 pb-10 md:pb-14">
@@ -13,9 +14,15 @@ const SectionHeader: React.FC = () => (
     <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
       Aktualny program niezależnych kin studyjnych w&nbsp;Polsce.
       Retrospektywy, klasyka kina autorskiego, pokazy z&nbsp;dyskusją
-      i&nbsp;wydarzenia kuratorowane. Filtruj seanse po mieście, dacie
-      i&nbsp;gatunku poniżej. Pełny repertuar otwiera się pod przyciskiem
-      na&nbsp;dole sekcji.
+      i&nbsp;cykle tematyczne. Filtruj seanse po mieście, dacie
+      i&nbsp;gatunku poniżej albo przejdź do{" "}
+      <Link
+        href="/seanse"
+        className="text-white/80 underline underline-offset-4 decoration-white/25 hover:text-white hover:decoration-white transition-colors"
+      >
+        pełnego repertuaru
+      </Link>
+      .
     </p>
   </div>
 );

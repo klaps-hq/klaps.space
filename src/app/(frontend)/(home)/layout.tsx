@@ -5,7 +5,7 @@ import { BASE_OPEN_GRAPH } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Klaps - Seanse w kinach studyjnych i stare filmy w kinach",
+    absolute: "Klaps - Stare filmy i seanse specjalne w kinach studyjnych",
   },
   description:
     "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i starych filmach w kinach studyjnych w Polsce. Repertuar, filmy i kina w jednym miejscu.",
@@ -16,9 +16,9 @@ export const metadata: Metadata = {
     ...BASE_OPEN_GRAPH,
     type: "website",
     url: SITE_URL,
-    title: "Klaps - Seanse w kinach studyjnych i stare filmy w kinach",
+    title: "Klaps - Stare filmy i seanse specjalne w kinach studyjnych",
     description:
-      "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i starych filmach w kinach studyjnych. Sprawdź co grają.",
+      "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i starych filmach w kinach studyjnych. Sprawdź, co grają.",
   },
 };
 

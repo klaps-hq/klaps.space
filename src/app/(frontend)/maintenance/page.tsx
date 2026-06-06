@@ -1,3 +1,5 @@
+import PageHeading from "@/components/ui/page-heading";
+
 export default function MaintenancePage() {
   return (
     <main className="bg-black text-white min-h-screen flex flex-col">
@@ -25,11 +27,11 @@ export default function MaintenancePage() {
           <p className="mb-6 md:mb-8 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40">
             Przerwa techniczna
           </p>
-          <h1 className="text-5xl md:text-8xl lg:text-9xl font-medium uppercase -tracking-[0.04em] leading-[0.9] text-white">
+          <PageHeading variant="display">
             Zaraz
             <br />
             wracamy
-          </h1>
+          </PageHeading>
           <p className="mt-10 md:mt-14 max-w-[48ch] text-lg md:text-2xl lg:text-3xl text-white/75 leading-[1.4] -tracking-[0.005em]">
             Pracujemy nad ulepszeniem serwisu. Strona powinna wrócić
             w&nbsp;ciągu kilku minut.

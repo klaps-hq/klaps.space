@@ -7,7 +7,7 @@ import { getCinemas } from "./cinemas";
 
 export const getCities = async (): Promise<ICity[]> => {
   try {
-    // Awaited in the root layout on every page — cache aggressively
+    // Awaited in the root layout on every page - cache aggressively
     // so it never becomes a TTFB bottleneck.
     const cities = await apiFetch<ICity[]>("/cities", {
       next: { revalidate: 3600 },

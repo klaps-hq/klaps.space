@@ -6,7 +6,7 @@ import { IMovie } from "@/interfaces/IMovies";
 import { IScreening } from "@/interfaces/IScreenings";
 import JsonLd from "@/components/common/json-ld";
 
-// Keep the events payload reasonable — soonest screenings first.
+// Keep the events payload reasonable - soonest screenings first.
 const MAX_JSONLD_EVENTS = 50;
 
 type MovieLayoutProps = {
@@ -21,7 +21,7 @@ const buildMovieJsonLd = (movie: IMovie) => {
     name: movie.title,
     url: `${SITE_URL}/filmy/${movie.slug}`,
     description: movie.description ?? undefined,
-    dateCreated: movie.productionYear.toString(),
+    datePublished: movie.productionYear.toString(),
     genre: movie.genres.map((g) => g.name),
   };
 
@@ -53,7 +53,7 @@ const buildMovieJsonLd = (movie: IMovie) => {
     }));
   }
 
-  // Audience rating — also rendered visibly in MovieAbout, as Google
+  // Audience rating - also rendered visibly in MovieAbout, as Google
   // requires structured data to reflect on-page content.
   const userRating = movie.ratings?.users;
   if (userRating && userRating.votes > 0) {
@@ -72,30 +72,6 @@ const buildMovieJsonLd = (movie: IMovie) => {
 
   return jsonLd;
 };
-
-const buildMovieBreadcrumbJsonLd = (movie: IMovie) => ({
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [
-    {
-      "@type": "ListItem",
-      position: 1,
-      name: "Strona główna",
-      item: SITE_URL,
-    },
-    {
-      "@type": "ListItem",
-      position: 2,
-      name: "Seanse",
-      item: `${SITE_URL}/seanse`,
-    },
-    {
-      "@type": "ListItem",
-      position: 3,
-      name: movie.title,
-    },
-  ],
-});
 
 const buildScreeningEventsJsonLd = (movie: IMovie, screenings: IScreening[]) => {
   const movieUrl = `${SITE_URL}/filmy/${movie.slug}`;
@@ -127,6 +103,11 @@ const buildScreeningEventsJsonLd = (movie: IMovie, screenings: IScreening[]) => 
           addressLocality: screening.cinema.city.name,
           addressCountry: "PL",
         },
+      },
+      organizer: {
+        "@type": "Organization",
+        name: screening.cinema.name,
+        url: `${SITE_URL}/kina/${screening.cinema.slug}`,
       },
       workPresented: {
         "@type": "Movie",
@@ -168,7 +149,7 @@ export default async function MovieLayout({
   return (
     <>
       <JsonLd data={buildMovieJsonLd(movie)} />
-      <JsonLd data={buildMovieBreadcrumbJsonLd(movie)} />
+      {/* BreadcrumbList comes from the visible Breadcrumbs component. */}
       {events.length > 0 && <JsonLd data={events} />}
       {children}
     </>

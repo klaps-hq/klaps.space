@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site-config";
 
-// AI search and assistant crawlers — explicitly allowed so the site
+// AI search and assistant crawlers - explicitly allowed so the site
 // is eligible for citations in AI search results (GEO/AEO).
 const AI_CRAWLERS = [
   "GPTBot",
@@ -18,20 +18,34 @@ const AI_CRAWLERS = [
   "CCBot",
 ];
 
-const robots = (): MetadataRoute.Robots => ({
-  rules: [
-    {
-      userAgent: "*",
-      allow: "/",
-      disallow: ["/api/"],
-    },
-    {
-      userAgent: AI_CRAWLERS,
-      allow: "/",
-      disallow: ["/api/"],
-    },
-  ],
-  sitemap: `${SITE_URL}/sitemap.xml`,
-});
+const PRODUCTION_URL = "https://klaps.space";
+
+const DISALLOWED_PATHS = ["/api/", "/maintenance"];
+
+const robots = (): MetadataRoute.Robots => {
+  // Guard non-production deployments (preview/staging with a different
+  // NEXT_PUBLIC_SITE_URL) from being indexed.
+  if (SITE_URL !== PRODUCTION_URL) {
+    return {
+      rules: [{ userAgent: "*", disallow: "/" }],
+    };
+  }
+
+  return {
+    rules: [
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: DISALLOWED_PATHS,
+      },
+      {
+        userAgent: AI_CRAWLERS,
+        allow: "/",
+        disallow: DISALLOWED_PATHS,
+      },
+    ],
+    sitemap: `${SITE_URL}/sitemap.xml`,
+  };
+};
 
 export default robots;

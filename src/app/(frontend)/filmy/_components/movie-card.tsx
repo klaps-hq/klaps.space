@@ -40,6 +40,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
             title={movie.title}
             width={220}
             height={330}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 220px"
             className="w-full h-full object-cover min-w-full min-h-full"
           />
 

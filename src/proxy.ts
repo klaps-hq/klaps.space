@@ -78,7 +78,7 @@ export async function proxy(request: NextRequest) {
   if (segments.length === 2) {
     const [routePrefix, segment] = segments;
 
-    // Single-screening pages were removed — old URLs (previously in the
+    // Single-screening pages were removed - old URLs (previously in the
     // sitemap and Google's index) get a 301 to the screenings list.
     if (routePrefix === "seanse" && IS_NUMERIC.test(segment)) {
       return NextResponse.redirect(new URL("/seanse", request.url), 301);

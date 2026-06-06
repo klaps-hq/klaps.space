@@ -50,7 +50,7 @@ const Inner: React.FC<ScreeningsPageSectionProps> = ({
 
   return (
     <>
-      <div className="sticky top-[68px] z-20 bg-black/85 backdrop-blur-md">
+      <div>
         <div className="px-6 md:px-12 lg:px-16 py-4 md:py-5">
           <FilterBar genres={genres} />
         </div>

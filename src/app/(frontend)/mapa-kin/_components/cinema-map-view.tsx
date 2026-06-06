@@ -12,6 +12,14 @@ import { ICinema } from "@/interfaces/ICinema";
 
 const POLAND_CENTER: [number, number] = [19.4, 52.0];
 const POLAND_ZOOM = 5.5;
+// Pan/zoom limits around Poland. The horizontal buffer is wide enough
+// for the whole country to fit vertically in a wide (~2.2:1) container,
+// while still keeping distant foreign labels (Hamburg, Minsk, Kyiv) out
+// of reach.
+const POLAND_MAX_BOUNDS: [[number, number], [number, number]] = [
+  [9.5, 47.6],
+  [29.3, 56.4],
+];
 
 type SelectedCinema = {
   name: string;
@@ -51,7 +59,7 @@ const CinemaMapView: React.FC<CinemaMapViewProps> = ({ cinemas }) => {
 
   return (
     <div
-      className="relative w-full h-[70vh] min-h-[480px] max-h-[820px] border border-white/10"
+      className="relative w-full h-[78vh] min-h-[520px] max-h-[900px] border border-white/10"
       data-nosnippet
       data-lenis-prevent
     >
@@ -59,6 +67,7 @@ const CinemaMapView: React.FC<CinemaMapViewProps> = ({ cinemas }) => {
         theme="dark"
         center={POLAND_CENTER}
         zoom={POLAND_ZOOM}
+        maxBounds={POLAND_MAX_BOUNDS}
         minZoom={5}
         maxZoom={18}
         scrollZoom

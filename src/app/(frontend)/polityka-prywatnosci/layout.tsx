@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: `${SITE_URL}/polityka-prywatnosci`,
   },
+  openGraph: {
+    title: "Polityka prywatności",
+    description:
+      "Polityka prywatności serwisu Klaps. Informacje o przetwarzaniu danych, plikach cookies i prawach użytkowników.",
+    url: `${SITE_URL}/polityka-prywatnosci`,
+  },
 };
 
 export default function PrivacyPolicyLayout({

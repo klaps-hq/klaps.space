@@ -14,7 +14,7 @@ const CustomCursor = () => {
   const mouseY = useMotionValue(-100);
 
   useEffect(() => {
-    // No custom cursor on touch devices — skip all listeners.
+    // No custom cursor on touch devices - skip all listeners.
     const isFinePointer = window.matchMedia(
       "(hover: hover) and (pointer: fine)"
     ).matches;

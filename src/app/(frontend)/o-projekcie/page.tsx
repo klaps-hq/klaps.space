@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import Footer from "../(home)/_components/footer";
 
@@ -36,7 +37,7 @@ const MANIFESTO: ManifestoItem[] = [
   {
     n: "04",
     title: "Czytelność",
-    body: "Interfejs ma pomagać, nie rozpraszać. Bez nadmiaru bodźców. Sprawdzasz co gra, idziesz do kina, wychodzisz ze strony.",
+    body: "Interfejs ma pomagać, nie rozpraszać. Bez nadmiaru bodźców. Sprawdzasz, co gra, idziesz do kina, wychodzisz ze strony.",
   },
   {
     n: "05",
@@ -69,7 +70,7 @@ const SCOPE_EXCLUDED = [
 const AUDIENCE = [
   "Osoby zainteresowane kinem klasycznym i historią filmu",
   "Widzowie chcący wychodzić do kina częściej",
-  "Osoby nie śledzące na bieżąco repertuarów poszczególnych kin",
+  "Osoby nieśledzące na bieżąco repertuarów poszczególnych kin",
   "Mieszkańcy mniejszych miast, gdzie informacje o seansach są trudniej dostępne",
   "Widzowie zmęczeni algorytmicznym podawaniem treści",
 ];
@@ -105,9 +106,7 @@ const AboutPage = () => {
       </div>
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-10 pb-14 md:pb-20">
-        <h1 className="text-5xl md:text-8xl lg:text-9xl font-medium uppercase -tracking-[0.04em] leading-[0.9] text-white">
-          Klaps
-        </h1>
+        <PageHeading variant="display">Klaps</PageHeading>
         <p className="mt-10 md:mt-14 max-w-[58ch] text-lg md:text-2xl lg:text-3xl text-white/75 leading-[1.4] -tracking-[0.005em]">
           Niezależny, ogólnopolski przewodnik po repertuarze kinowym, skupiony
           na seansach specjalnych, klasyce i&nbsp;filmach spoza komercyjnego
@@ -129,7 +128,7 @@ const AboutPage = () => {
             Projekt nie konkuruje z&nbsp;dużymi portalami filmowymi ani nie
             tworzy kolejnej bazy danych filmów. Nie ma recenzji redakcyjnych
             ani rekomendacji algorytmicznych. Klaps pełni rolę jednego,
-            spójnego miejsca: sprawdzasz co gra, planujesz wyjście, idziesz
+            spójnego miejsca: sprawdzasz, co gra, planujesz wyjście, idziesz
             do kina.
           </p>
           <p>
@@ -217,7 +216,7 @@ const AboutPage = () => {
             </p>
             <p>
               Nie sprzedajemy biletów ani nie pośredniczymy
-              w&nbsp;rezerwacjach. Klaps to informator. Pokazujemy gdzie
+              w&nbsp;rezerwacjach. Klaps to informator. Pokazujemy, gdzie
               i&nbsp;kiedy odbywa się dany seans, a&nbsp;zakup biletu odbywa
               się bezpośrednio na stronie kina.
             </p>
@@ -283,7 +282,7 @@ const AboutPage = () => {
             <p className="mt-6 md:mt-8 max-w-[44ch] text-base md:text-lg text-white/65 leading-relaxed">
               Klaps powstaje publicznie. Frontend i&nbsp;backend są open
               source, kod możesz przeczytać, sklonować, zgłosić problem albo
-              zaproponować zmianę. Scrapper pobierający dane z&nbsp;kin
+              zaproponować zmianę. Scraper pobierający dane z&nbsp;kin
               pozostaje zamknięty z&nbsp;przyczyn prawnych.
             </p>
           </div>

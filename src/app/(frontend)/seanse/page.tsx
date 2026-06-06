@@ -1,6 +1,11 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
+import Link from "next/link";
+import JsonLd from "@/components/common/json-ld";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import PageHeading, {
+  PageHeadingMuted,
+} from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import Footer from "../(home)/_components/footer";
 import { getPaginatedScreenings } from "@/lib/screenings";
@@ -9,11 +14,7 @@ import { getPreferredCityId } from "@/lib/get-preferred-city";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { PaginatedResponse } from "@/interfaces/IMovies";
 import { SITE_URL } from "@/lib/site-config";
-import {
-  BASE_OPEN_GRAPH,
-  NOINDEX_FOLLOW,
-  hasQueryParams,
-} from "@/lib/seo";
+import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, hasFilterParams } from "@/lib/seo";
 import ScreeningsPageSection from "./_components/screenings-page-section";
 import ScreeningsPageLoader from "./_components/screenings-page-loader";
 
@@ -38,23 +39,40 @@ export const generateMetadata = async ({
   searchParams,
 }: ScreeningsPageProps): Promise<Metadata> => {
   const queryParams = await searchParams;
-  const title = "Seanse specjalne w kinach studyjnych - repertuar";
   const description =
     "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce. Filtruj po mieście, dacie i gatunku.";
   const url = `${SITE_URL}/seanse`;
 
-  const noindex = hasQueryParams(queryParams);
+  // Filtered views are duplicates of the base listing: noindex.
+  // Unknown params (utm_* etc.) fall through to the canonical below.
+  if (hasFilterParams(queryParams)) {
+    return {
+      title: "Seanse specjalne w kinach studyjnych - repertuar",
+      description,
+      ...NOINDEX_FOLLOW,
+    };
+  }
+
+  // Plain pagination stays indexable: unique title + self-canonical,
+  // so the deeper parts of the listing keep their crawl path.
+  const pageNumber = Number(queryParams.page);
+  const isPaginated = Number.isInteger(pageNumber) && pageNumber >= 2;
+
+  const title = isPaginated
+    ? `Seanse specjalne w kinach studyjnych - repertuar (strona ${pageNumber})`
+    : "Seanse specjalne w kinach studyjnych - repertuar";
+  const canonical = isPaginated ? `${url}?page=${pageNumber}` : url;
 
   return {
     title,
     description,
-    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
+    alternates: { canonical },
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
       title,
       description,
-      url,
+      url: canonical,
     },
     twitter: {
       card: "summary_large_image",
@@ -143,11 +161,21 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
   );
 };
 
+const SCREENINGS_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Seanse specjalne w kinach studyjnych - repertuar",
+  url: `${SITE_URL}/seanse`,
+  description:
+    "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce.",
+};
+
 const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
   const params = await searchParams;
 
   return (
     <main className="bg-black text-white min-h-screen">
+      <JsonLd data={SCREENINGS_JSONLD} />
       <SiteHeader />
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-4">
@@ -155,19 +183,31 @@ const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
       </div>
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-10 pb-10 md:pb-14">
-        <h1 className="text-3xl md:text-5xl lg:text-6xl leading-[1.05] -tracking-[0.02em] max-w-[26ch]">
-          <span className="block text-white font-medium">
-            Repertuar kin studyjnych.
-          </span>
-          <span className="block text-white/40">
+        <PageHeading variant="editorial">
+          Repertuar kin studyjnych.
+          <PageHeadingMuted>
             Klasyka i&nbsp;pokazy specjalne w&nbsp;całej Polsce.
-          </span>
-        </h1>
+          </PageHeadingMuted>
+        </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
           Aktualny program niezależnych kin studyjnych w&nbsp;Polsce.
           Retrospektywy, klasyka kina autorskiego, pokazy z&nbsp;dyskusją
-          i&nbsp;wydarzenia kuratorowane. Filtruj seanse po mieście, dacie
-          i&nbsp;gatunku poniżej.
+          i&nbsp;cykle tematyczne. Filtruj seanse po mieście, dacie
+          i&nbsp;gatunku poniżej albo przeglądaj repertuar według{" "}
+          <Link
+            href="/gatunki"
+            className="text-white/80 underline underline-offset-4 decoration-white/25 hover:text-white hover:decoration-white transition-colors"
+          >
+            gatunków
+          </Link>{" "}
+          i&nbsp;
+          <Link
+            href="/miasta"
+            className="text-white/80 underline underline-offset-4 decoration-white/25 hover:text-white hover:decoration-white transition-colors"
+          >
+            miast
+          </Link>
+          .
         </p>
       </header>
 

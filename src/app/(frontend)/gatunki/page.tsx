@@ -2,6 +2,9 @@ import React from "react";
 import Link from "next/link";
 import { getGenres } from "@/lib/genres";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
+import PageHeading, {
+  PageHeadingMuted,
+} from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import EmptyState from "@/components/common/empty-state";
 import Footer from "../(home)/_components/footer";
@@ -23,19 +26,17 @@ const GenresPage = async () => {
       </div>
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-12 pb-10 md:pb-14">
-        <h1 className="text-3xl md:text-5xl lg:text-6xl leading-[1.05] -tracking-[0.02em] max-w-[26ch]">
-          <span className="block text-white font-medium">
-            Gatunki filmowe.
-          </span>
-          <span className="block text-white/40">
+        <PageHeading variant="editorial">
+          Gatunki filmowe.
+          <PageHeadingMuted>
             Filtruj seanse po nastroju wieczoru.
-          </span>
-        </h1>
+          </PageHeadingMuted>
+        </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
           Pełna lista gatunków filmowych dostępnych w&nbsp;polskich kinach
           studyjnych. Klasyka, retrospektywy, dokumenty, kino autorskie, anime
           i&nbsp;eksperymenty. Wybierz kategorię i&nbsp;zobacz wszystkie
-          seanse z&nbsp;niej.
+          seanse z&nbsp;tego gatunku.
         </p>
       </div>
 

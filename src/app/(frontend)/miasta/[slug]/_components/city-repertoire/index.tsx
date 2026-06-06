@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
 import {
@@ -8,24 +9,40 @@ import {
   useScreeningsTransition,
 } from "@/contexts/screenings-transition-context";
 import { cn } from "@/lib/utils";
+import {
+  filterScreeningGroups,
+  parseGenreIdsParam,
+} from "@/lib/screening-filters";
 import EmptyState from "@/components/common/empty-state";
 import FilterBar from "../../../../(home)/_components/screenings/filter-bar";
 import ScreeningCard from "../../../../(home)/_components/screenings/screening-card";
 
 interface CityRepertoireProps {
-  cityName: string;
   cityForCopy: string;
   screenings: IScreeningGroup[];
   genres: IGenre[];
 }
 
 const CityRepertoireInner: React.FC<CityRepertoireProps> = ({
-  cityName,
   cityForCopy,
   screenings,
   genres,
 }) => {
   const { isPending } = useScreeningsTransition();
+  const searchParams = useSearchParams();
+
+  // The page is statically cached (ISR) with the city's full repertoire,
+  // so the URL-param filters are applied here instead of on the server.
+  const visibleScreenings = useMemo(
+    () =>
+      filterScreeningGroups(screenings, {
+        genreIds: parseGenreIdsParam(searchParams.get("genres")),
+        dateFrom: searchParams.get("dateFrom"),
+        dateTo: searchParams.get("dateTo"),
+        search: searchParams.get("search"),
+      }),
+    [screenings, searchParams]
+  );
 
   return (
     <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
@@ -47,7 +64,7 @@ const CityRepertoireInner: React.FC<CityRepertoireProps> = ({
           isPending && "opacity-50 pointer-events-none"
         )}
       >
-        {screenings.length === 0 ? (
+        {visibleScreenings.length === 0 ? (
           <EmptyState
             description={
               <>
@@ -59,7 +76,7 @@ const CityRepertoireInner: React.FC<CityRepertoireProps> = ({
           />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-12">
-            {screenings.map((group) => (
+            {visibleScreenings.map((group) => (
               <ScreeningCard key={group.movie.id} group={group} />
             ))}
           </div>
