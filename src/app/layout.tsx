@@ -99,6 +99,13 @@ export default async function RootLayout({
             </Script>
           </>
         )}
+        {process.env.AHREFS_ANALYTICS_KEY && (
+          <Script
+            src="https://analytics.ahrefs.com/analytics.js"
+            data-key={process.env.AHREFS_ANALYTICS_KEY}
+            strategy="afterInteractive"
+          />
+        )}
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <JsonLd
