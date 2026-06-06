@@ -101,6 +101,7 @@ jobs:
             API_URL=${{ secrets.API_URL }}
             INTERNAL_API_KEY=${{ secrets.INTERNAL_API_KEY }}
             GA_MEASUREMENT_ID=${{ secrets.GA_MEASUREMENT_ID }}
+            AHREFS_ANALYTICS_KEY=${{ secrets.AHREFS_ANALYTICS_KEY }}
             DOMAIN=${{ env.DOMAIN }}
             MAINTENANCE_MODE=${{ secrets.MAINTENANCE_MODE }}
             ENVEOF

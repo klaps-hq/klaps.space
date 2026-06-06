@@ -89,7 +89,10 @@ export async function proxy(request: NextRequest) {
     if (apiEntity && IS_NUMERIC.test(segment)) {
       const slug = await fetchSlugById(apiEntity, segment);
 
-      if (slug) {
+      // Some slugs are purely numeric (movies titled "1976", "1990");
+      // redirecting to the same path would loop forever, so only
+      // redirect when the resolved slug actually differs.
+      if (slug && slug !== segment) {
         const destination = new URL(`/${routePrefix}/${slug}`, request.url);
         destination.search = search;
         return NextResponse.redirect(destination, 301);
