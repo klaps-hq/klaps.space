@@ -13,11 +13,14 @@ interface OgImageOptions {
   posterUrl?: string | null;
 }
 
+// Sized so text stays legible when scaled down to small link embeds
+// (Discord/Slack render OG images at roughly 440px wide).
 const getTitleSize = (title: string, hasPoster: boolean): number => {
   const base = hasPoster ? 0.82 : 1;
-  if (title.length > 24) return Math.round(58 * base);
-  if (title.length > 14) return Math.round(76 * base);
-  return Math.round(104 * base);
+  if (title.length > 24) return Math.round(72 * base);
+  if (title.length > 14) return Math.round(96 * base);
+  if (title.length > 9) return Math.round(112 * base);
+  return Math.round(136 * base);
 };
 
 export async function buildOgImage({
@@ -65,12 +68,12 @@ export async function buildOgImage({
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <svg width="30" height="21" viewBox="0 0 28 20">
+              <svg width="34" height="24" viewBox="0 0 28 20">
                 <polygon points="0,8 28,0 28,20 0,12" fill="#ffffff" />
               </svg>
               <span
                 style={{
-                  fontSize: 32,
+                  fontSize: 36,
                   fontWeight: 700,
                   letterSpacing: "-0.02em",
                 }}
@@ -81,10 +84,10 @@ export async function buildOgImage({
             {eyebrow && (
               <span
                 style={{
-                  fontSize: 17,
+                  fontSize: 20,
                   textTransform: "uppercase",
                   letterSpacing: "0.3em",
-                  color: "rgba(255,255,255,0.4)",
+                  color: "rgba(255,255,255,0.45)",
                 }}
               >
                 {eyebrow}
@@ -116,11 +119,11 @@ export async function buildOgImage({
             {subtitle && (
               <span
                 style={{
-                  marginTop: 24,
-                  fontSize: 26,
-                  color: "rgba(255,255,255,0.55)",
-                  lineHeight: 1.4,
-                  maxWidth: 920,
+                  marginTop: 28,
+                  fontSize: 34,
+                  color: "rgba(255,255,255,0.6)",
+                  lineHeight: 1.35,
+                  maxWidth: 980,
                 }}
               >
                 {subtitle}
@@ -140,15 +143,15 @@ export async function buildOgImage({
           >
             <span
               style={{
-                fontSize: 16,
+                fontSize: 19,
                 textTransform: "uppercase",
                 letterSpacing: "0.3em",
-                color: "rgba(255,255,255,0.4)",
+                color: "rgba(255,255,255,0.45)",
               }}
             >
               klaps.space
             </span>
-            <span style={{ fontSize: 24, color: "rgba(255,255,255,0.4)" }}>
+            <span style={{ fontSize: 28, color: "rgba(255,255,255,0.45)" }}>
               →
             </span>
           </div>

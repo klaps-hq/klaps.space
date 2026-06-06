@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // 60 is used for hero backdrops, which sit under heavy gradient
+    // overlays, so the lower quality is invisible but saves bytes.
+    qualities: [60, 75],
     remotePatterns: [
       {
         protocol: "https",

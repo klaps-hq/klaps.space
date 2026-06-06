@@ -43,11 +43,15 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
+            {/* w1280 instead of original: TMDB originals are multi-MB and
+                slow down the optimizer fetch; the backdrop sits under a
+                heavy gradient + grain so the smaller source is fine. */}
             <Image
-              src={tmdbImageUrl(movie.backdropUrl, "original")}
+              src={tmdbImageUrl(movie.backdropUrl, "w1280")}
               alt={movie.title}
               fill
               sizes="100vw"
+              quality={60}
               className="object-cover"
               priority
             />
