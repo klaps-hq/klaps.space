@@ -1,89 +1,215 @@
-import { Suspense } from "react";
-import { getCinemaPageData } from "@/lib/cinemas";
+import React, { Suspense } from "react";
+import Link from "next/link";
+import { Metadata } from "next";
+import { getCinemaPageData, getCinemaBySlug, getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
-import SectionDivider from "@/components/ui/section-divider";
-import CinemaMapLazy from "./_components/cinema-map-lazy";
-import CinemaScreenings from "./_components/cinema-screenings";
+import { getScreenings } from "@/lib/screenings";
+import { SITE_URL } from "@/lib/site-config";
+import { BASE_OPEN_GRAPH, pluralPl } from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
-import SectionHeader from "@/components/common/section-header";
+import PageHeading from "@/components/ui/page-heading";
+import SiteHeader from "@/components/common/site-header";
 import SectionLoader from "@/components/ui/section-loader";
+import Footer from "../../(home)/_components/footer";
+import CinemaMapLazy from "./_components/cinema-map-lazy";
+import CinemaRepertoire from "./_components/cinema-repertoire";
 
-export const dynamic = "force-dynamic";
-
-type SearchParams = {
-  genre?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  search?: string;
-};
+// ISR: cached HTML revalidated every 5 minutes. The repertoire filters
+// (genres, dates, search) are applied client-side in CinemaRepertoire,
+// so this page never reads searchParams and stays statically cacheable.
+export const revalidate = 300;
 
 type CinemaPageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<SearchParams>;
 };
 
-const CinemaPageContent = async ({
-  slug,
-  searchParams,
-}: {
-  slug: string;
-  searchParams: SearchParams;
-}) => {
-  const [{ cinema, screenings }, genres] = await Promise.all([
-    getCinemaPageData(slug, {
-      genreId: searchParams.genre,
-      dateFrom: searchParams.dateFrom,
-      dateTo: searchParams.dateTo,
-      search: searchParams.search,
-    }),
+// Prebuild all cinema pages so bots never hit a cold render.
+export const generateStaticParams = async (): Promise<{ slug: string }[]> => {
+  try {
+    const { data: groups } = await getCinemas();
+    return groups.flatMap((group) =>
+      group.cinemas.map((cinema) => ({ slug: cinema.slug }))
+    );
+  } catch {
+    return [];
+  }
+};
+
+const MAX_DESCRIPTION_LENGTH = 160;
+
+// Live repertoire counts and an example title make every cinema's
+// description unique, which improves SERP CTR and avoids the
+// boilerplate-description pattern across 500+ cinema pages.
+const buildCinemaDescription = (
+  cinemaName: string,
+  cityName: string,
+  screeningGroups: { movie: { title: string }; screenings: unknown[] }[]
+): string => {
+  const moviesCount = screeningGroups.length;
+  if (moviesCount === 0) {
+    return `Repertuar kina ${cinemaName} w ${cityName}: seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź, co aktualnie grają.`;
+  }
+
+  const screeningsCount = screeningGroups.reduce(
+    (sum, group) => sum + group.screenings.length,
+    0
+  );
+  const counts = `${moviesCount} ${pluralPl(moviesCount, "film", "filmy", "filmów")} i ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")}`;
+  const base = `Repertuar kina ${cinemaName} w ${cityName}: ${counts}`;
+  const suffix = ". Seanse specjalne, klasyka filmowa i retrospektywy.";
+
+  // Add an example title only when it fits the SERP snippet budget.
+  const firstTitle = screeningGroups[0]?.movie.title;
+  const withTitle = firstTitle
+    ? `${base}, m.in. „${firstTitle}"${suffix}`
+    : `${base}${suffix}`;
+
+  return withTitle.length <= MAX_DESCRIPTION_LENGTH
+    ? withTitle
+    : `${base}${suffix}`;
+};
+
+export const generateMetadata = async ({
+  params,
+}: CinemaPageProps): Promise<Metadata> => {
+  const { slug } = await params;
+  const cinema = await getCinemaBySlug(slug);
+
+  // Same call as the page body: deduped by the fetch cache.
+  const screeningGroups = await getScreenings({
+    cinemaId: cinema.id.toString(),
+  }).catch(() => []);
+
+  // Locative city name ("w Krakowie", not "w Kraków") for natural phrasing.
+  const cityName = cinema.city.nameDeclinated ?? cinema.city.name;
+  const title = `${cinema.name} - kino studyjne w ${cityName}`;
+  const description = buildCinemaDescription(
+    cinema.name,
+    cityName,
+    screeningGroups
+  );
+  const url = `${SITE_URL}/kina/${cinema.slug}`;
+
+  return {
+    title,
+    description,
+    // Query-param duplicates (filters) are handled by the canonical alone.
+    alternates: { canonical: url },
+    openGraph: {
+      ...BASE_OPEN_GRAPH,
+      type: "website",
+      title,
+      description,
+      url,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+};
+
+const CinemaPageContent = async ({ slug }: { slug: string }) => {
+  const [{ cinema }, allGenres] = await Promise.all([
+    getCinemaPageData(slug),
     getGenres(),
   ]);
 
+  // Full unfiltered repertoire - CinemaRepertoire narrows it down
+  // client-side based on the URL params.
+  const screenings = await getScreenings({
+    cinemaId: cinema.id.toString(),
+  });
+
+  const hasCoordinates = cinema.latitude !== null && cinema.longitude !== null;
+  const cityForCopy = cinema.city.nameDeclinated ?? cinema.city.name;
+
   return (
     <>
-      <Breadcrumbs
-        items={[{ name: "Kina", href: "/kina" }, { name: cinema.name }]}
-      />
-      <SectionHeader
-        prefix="Kino"
-        title={cinema.name}
-        description={cinema?.description ?? undefined}
-      />
-      <SectionDivider />
+      <div className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-4">
+        <Breadcrumbs
+          items={[
+            { name: "Kina", href: "/kina" },
+            { name: cinema.name },
+          ]}
+        />
+      </div>
 
-      <section className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
-          <h2 className="text-2xl md:text-3xl font-semibold uppercase text-white tracking-wide">
-            Lokalizacja kina
-          </h2>
+      <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-12 md:pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          <div className="lg:col-span-5">
+            <PageHeading variant="detail" className="max-w-[20ch]">
+              {cinema.name}
+            </PageHeading>
+            <div className="mt-4 md:mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/45">
+              <span>
+                {cinema.street && <>{cinema.street}, </>}
+                <Link
+                  href={`/miasta/${cinema.city.slug}`}
+                  className="text-white/70 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
+                >
+                  {cinema.city.name}
+                </Link>
+              </span>
+              {cinema.sourceUrl && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <Link
+                    href={cinema.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer noopener nofollow"
+                    className="text-white/70 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
+                  >
+                    Strona kina ↗
+                  </Link>
+                </>
+              )}
+            </div>
+            {cinema.description ? (
+              <p className="mt-8 md:mt-10 max-w-[60ch] text-base md:text-lg text-white/65 leading-relaxed">
+                {cinema.description}
+              </p>
+            ) : (
+              // Generated intro keeps description-less cinema pages from
+              // being thin content.
+              <p className="mt-8 md:mt-10 max-w-[60ch] text-base md:text-lg text-white/65 leading-relaxed">
+                {cinema.name} to kino studyjne w&nbsp;{cityForCopy}. Sprawdź
+                aktualny repertuar seansów specjalnych, retrospektyw
+                i&nbsp;klasyki filmowej na dużym ekranie.
+              </p>
+            )}
+          </div>
 
-          <address className="text-white/80 max-w-4xl">
-            {cinema.street
-              ? `${cinema.name}, ${cinema.street}, ${cinema.city.name}.`
-              : `${cinema.name}, ${cinema.city.name}.`}
-          </address>
+          {hasCoordinates && (
+            <div className="lg:col-span-7">
+              <CinemaMapLazy cinema={cinema} />
+            </div>
+          )}
         </div>
+      </header>
 
-        <CinemaMapLazy cinema={cinema} />
-      </section>
-
-      <SectionDivider />
-      <CinemaScreenings screenings={screenings} genres={genres} />
+      <CinemaRepertoire
+        cinemaName={cinema.name}
+        citySlug={cinema.city.slug}
+        cityForCopy={cityForCopy}
+        screenings={screenings}
+        genres={allGenres}
+      />
     </>
   );
 };
 
-const CinemaPage = async ({ params, searchParams }: CinemaPageProps) => {
+const CinemaPage = async ({ params }: CinemaPageProps) => {
   const { slug } = await params;
-  const sp = await searchParams;
 
   return (
-    <main className="bg-black min-h-screen px-8 py-24 md:py-32">
-      <div className="max-w-[1400px] mx-auto flex flex-col gap-16">
-        <Suspense fallback={<SectionLoader label="Ladowanie kina" />}>
-          <CinemaPageContent slug={slug} searchParams={sp} />
-        </Suspense>
-      </div>
+    <main className="bg-black text-white min-h-screen">
+      <SiteHeader />
+      <Suspense fallback={<SectionLoader label="Ładowanie kina" />}>
+        <CinemaPageContent slug={slug} />
+      </Suspense>
+      <Footer />
     </main>
   );
 };

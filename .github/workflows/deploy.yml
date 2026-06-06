@@ -90,6 +90,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            # Fail fast: a failed login/pull must fail the job instead of
+            # silently restarting the container from a stale local image.
+            set -e
+
             mkdir -p ${{ env.DEPLOY_DIR }}
             cd ${{ env.DEPLOY_DIR }}
 
@@ -101,10 +105,17 @@ jobs:
             MAINTENANCE_MODE=${{ secrets.MAINTENANCE_MODE }}
             ENVEOF
 
-            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            # GHCR_USER must be the account that owns GHCR_PAT.
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ secrets.GHCR_USER || github.actor }} --password-stdin
 
-            docker pull ${{ secrets.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
+            export DOCKER_IMAGE=${{ secrets.DOCKER_IMAGE }}
+            export DOMAIN=${{ env.DOMAIN }}
+            export ENV_SUFFIX=${{ env.ENV_SUFFIX }}
+            export IMAGE_TAG=${{ env.IMAGE_TAG }}
 
-            DOMAIN=${{ env.DOMAIN }} ENV_SUFFIX=${{ env.ENV_SUFFIX }} IMAGE_TAG=${{ env.IMAGE_TAG }} docker compose -p klaps-frontend-${{ env.ENV_SUFFIX }} up -d --force-recreate
+            # compose pull guarantees we pull exactly the image compose
+            # is about to run (single source of truth for the image name).
+            docker compose -p klaps-frontend-${{ env.ENV_SUFFIX }} pull
+            docker compose -p klaps-frontend-${{ env.ENV_SUFFIX }} up -d --force-recreate
 
             docker image prune -f || true

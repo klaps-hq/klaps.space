@@ -1,71 +1,43 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
-import ScrollToTop from "@/components/common/scroll-to-top";
 import JsonLd from "@/components/common/json-ld";
+import SmoothScroll from "@/components/common/smooth-scroll";
+import CustomCursor from "@/components/common/custom-cursor";
+import ConsentBanner from "@/components/common/consent-banner";
 import { CityProvider } from "@/contexts/city-context";
 import { SOCIAL_PROFILE_URLS } from "@/constants";
 import { getCities } from "@/lib/cities";
 import { SITE_URL } from "@/lib/site-config";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin", "latin-ext"],
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default:
-      "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych w Polsce",
+    // Kept under ~60 chars so SERPs render it without truncation.
+    default: "Klaps - Seanse specjalne i klasyka w kinach studyjnych",
     template: "%s - Klaps",
   },
   description:
     "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych w Polsce. Repertuar, filmy i kina w jednym miejscu.",
-  keywords: [
-    "kina studyjne",
-    "seanse specjalne",
-    "klasyka filmowa",
-    "retrospektywy filmowe",
-    "kino niezależne",
-    "repertuar kin studyjnych",
-    "filmy klasyczne w kinie",
-    "pokazy specjalne",
-    "kino artystyczne",
-    "wznowienia filmowe",
-  ],
   openGraph: {
     type: "website",
     locale: "pl_PL",
     siteName: "Klaps",
-    title:
-      "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych w Polsce",
+    title: "Klaps - Seanse specjalne i klasyka w kinach studyjnych",
     description:
-      "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych. Sprawdź co grają.",
-    images: [
-      {
-        url: "/klaps-og.png",
-        width: 1200,
-        height: 630,
-        alt: "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych",
-      },
-    ],
+      "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych. Sprawdź, co grają.",
   },
   twitter: {
     card: "summary_large_image",
-    title:
-      "Klaps - Seanse specjalne i klasyka filmowa w kinach studyjnych w Polsce",
+    title: "Klaps - Seanse specjalne i klasyka w kinach studyjnych",
     description:
       "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych.",
-    images: ["/klaps-og.png"],
   },
   robots: {
     index: true,
@@ -115,6 +87,12 @@ export default async function RootLayout({
               {`
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
+                gtag('consent', 'default', {
+                  ad_storage: 'denied',
+                  ad_user_data: 'denied',
+                  ad_personalization: 'denied',
+                  analytics_storage: 'denied'
+                });
                 gtag('js', new Date());
                 gtag('config', '${process.env.GA_MEASUREMENT_ID}');
               `}
@@ -122,16 +100,14 @@ export default async function RootLayout({
           </>
         )}
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${inter.variable} font-sans antialiased`}>
         <JsonLd
           data={{
             "@context": "https://schema.org",
             "@type": "Organization",
             name: "Klaps",
             url: SITE_URL,
-            logo: `${SITE_URL}/favicon.svg`,
+            logo: `${SITE_URL}/web-app-manifest-512x512.png`,
             description:
               "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych w Polsce.",
             sameAs: [
@@ -140,14 +116,10 @@ export default async function RootLayout({
             ],
           }}
         />
-        <CityProvider cities={cities}>
-          <Header cities={cities} />
-
-          {children}
-
-          <Footer />
-          <ScrollToTop />
-        </CityProvider>
+        <SmoothScroll />
+        <CustomCursor />
+        {process.env.GA_MEASUREMENT_ID && <ConsentBanner />}
+        <CityProvider cities={cities}>{children}</CityProvider>
       </body>
     </html>
   );

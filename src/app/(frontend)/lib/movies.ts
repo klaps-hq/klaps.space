@@ -8,7 +8,6 @@ import {
 import { IScreening } from "@/interfaces/IScreenings";
 import { apiFetch, fetchOrNotFound } from "./client";
 import { getMovieScreenings } from "./screenings";
-import { getPreferredCityId } from "./get-preferred-city";
 
 interface GetMoviesParams {
   page?: number;
@@ -60,13 +59,15 @@ export const getMovieById = async (id: number): Promise<IMovie> => {
 };
 
 export const getMovieBySlug = async (slug: string): Promise<IMovie> => {
-  const movie = await apiFetch<IMovie>(`/movies/${slug}`);
-  return movie;
+  return fetchOrNotFound(() => apiFetch<IMovie>(`/movies/${slug}`));
 };
 
 export const getMoviePageData = async (
   slug: string
-): Promise<{ movie: IMovie; screenings: IScreening[] }> => {
+): Promise<{
+  movie: IMovie;
+  screenings: IScreening[];
+}> => {
   return fetchOrNotFound(async () => {
     const movie = await getMovieBySlug(slug);
 
@@ -74,10 +75,11 @@ export const getMoviePageData = async (
       permanentRedirect(`/filmy/${movie.slug}`);
     }
 
-    const cityId = await getPreferredCityId();
+    // Always fetch the nationwide list so the page can be statically
+    // cached (ISR); the preferred-city filter is applied client-side
+    // in MovieScreenings instead of via the request cookie.
     const screenings = await getMovieScreenings({
       movieId: movie.id.toString(),
-      cityId,
     });
 
     return { movie, screenings };

@@ -2,46 +2,56 @@
 
 import React from "react";
 import Link from "next/link";
-import { AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import SiteHeader from "@/components/common/site-header";
 
-type ErrorPageProps = {
+interface ErrorPageProps {
   error: Error & { digest?: string };
   reset: () => void;
-};
+}
 
 const ErrorPage: React.FC<ErrorPageProps> = ({ reset }) => {
-  const handleReset = () => {
-    reset();
-  };
-
   return (
-    <main className="bg-black min-h-screen px-8 py-24 md:py-32">
-      <div className="max-w-[1400px] mx-auto flex flex-col items-center justify-center min-h-[60vh] gap-10">
-        <AlertTriangle className="size-16 md:size-20 text-blood-red" strokeWidth={1.5} />
+    <main className="bg-black text-white min-h-screen flex flex-col">
+      <SiteHeader />
 
-        <div className="flex flex-col items-center gap-3 text-center">
-          <span className="text-blood-red text-sm uppercase tracking-widest">
-            Błąd serwera
-          </span>
-          <h1 className="text-white text-3xl md:text-5xl font-bold uppercase tracking-wide">
-            Coś poszło nie tak
-          </h1>
-          <p className="text-neutral-400 text-base md:text-lg max-w-lg leading-relaxed">
-            Wystąpił nieoczekiwany błąd. Spróbuj odświeżyć stronę lub wróć do
-            strony głównej.
-          </p>
-        </div>
+      <section className="flex-1 flex flex-col justify-center px-6 md:px-12 lg:px-16 py-16 md:py-24">
+        <h1 className="text-[clamp(7rem,30vw,22rem)] font-medium uppercase -tracking-[0.04em] leading-[0.85] text-white">
+          500
+        </h1>
 
-        <div className="flex flex-col md:flex-row items-center gap-3">
-          <Button variant="primary" size="lg" onClick={handleReset}>
+        <p className="mt-8 md:mt-12 max-w-[48ch] text-lg md:text-2xl lg:text-3xl text-white/75 leading-[1.4] -tracking-[0.005em]">
+          Coś poszło nie tak po naszej stronie. Spróbuj ponownie za chwilę
+          albo wróć do repertuaru.
+        </p>
+
+        <div className="mt-10 md:mt-14 flex flex-wrap items-center gap-x-8 gap-y-5">
+          <button
+            type="button"
+            onClick={reset}
+            className="group inline-flex items-center gap-4 text-xs md:text-sm uppercase tracking-[0.28em] text-white border border-white/25 hover:border-white hover:bg-white/[0.04] px-8 md:px-10 py-4 md:py-5 transition-colors"
+          >
             Spróbuj ponownie
-          </Button>
-          <Button variant="secondary" size="lg" asChild>
-            <Link href="/">Strona główna</Link>
-          </Button>
+            <span
+              aria-hidden="true"
+              className="transition-transform group-hover:rotate-90 duration-300"
+            >
+              ↻
+            </span>
+          </button>
+          <Link
+            href="/"
+            className="text-base uppercase text-white border-b border-white/50 pb-0.5 hover:border-white transition-colors"
+          >
+            Strona główna
+          </Link>
+          <Link
+            href="/seanse"
+            className="text-base uppercase text-white border-b border-white/50 pb-0.5 hover:border-white transition-colors"
+          >
+            Zobacz seanse
+          </Link>
         </div>
-      </div>
+      </section>
     </main>
   );
 };

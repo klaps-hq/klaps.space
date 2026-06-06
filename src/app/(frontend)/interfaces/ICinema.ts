@@ -6,6 +6,7 @@ export interface ICinemaSummary {
   name: string;
   street: string | null;
   city: ICity;
+  updatedAt?: string | null;
 }
 
 export interface ICinema {

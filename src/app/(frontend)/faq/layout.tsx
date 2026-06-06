@@ -1,38 +1,37 @@
 import { Metadata } from "next";
 import JsonLd from "@/components/common/json-ld";
 import { SITE_URL } from "@/lib/site-config";
-import FAQ_ITEMS from "./faq.json";
+import { FAQ_SECTIONS } from "./faq-data";
 
+// JSON-LD is built from the same source as the visible page content,
+// Google guidelines require FAQPage questions/answers to be present
+// on the page.
 const buildFaqJsonLd = () => ({
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  mainEntity: FAQ_ITEMS.map((item) => ({
-    "@type": "Question",
-    name: item.question,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: item.answer,
-    },
-  })),
+  mainEntity: FAQ_SECTIONS.flatMap((section) =>
+    section.questions.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.aText,
+      },
+    })),
+  ),
 });
 
 export const metadata: Metadata = {
-  title: "Najczęściej zadawane pytania o kinach studyjnych",
+  title: "FAQ - pytania o kina studyjne i seanse specjalne",
   description:
-    "Odpowiedzi na pytania o seansach specjalnych, repertuarze kin studyjnych, biletach i funkcjach serwisu Klaps. Dowiedz się jak znaleźć klasykę filmową w kinie.",
-  keywords: [
-    "kina studyjne pytania",
-    "seanse specjalne FAQ",
-    "jak działa Klaps",
-    "FAQ o kinach studyjnych",
-  ],
+    "Odpowiedzi na najczęstsze pytania o seanse specjalne, repertuar kin studyjnych i działanie serwisu Klaps. Dowiedz się, jak znaleźć klasykę filmową w kinie.",
   alternates: {
     canonical: `${SITE_URL}/faq`,
   },
   openGraph: {
-    title: "FAQ - Najczęściej zadawane pytania o kinach studyjnych",
+    title: "FAQ - pytania o kina studyjne i seanse specjalne",
     description:
-      "Odpowiedzi na pytania o seansach specjalnych, repertuarze kin studyjnych i funkcjach serwisu Klaps.",
+      "Odpowiedzi na najczęstsze pytania o seanse specjalne, repertuar kin studyjnych i działanie serwisu Klaps.",
   },
 };
 

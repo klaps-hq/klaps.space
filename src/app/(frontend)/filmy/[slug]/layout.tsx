@@ -1,27 +1,18 @@
-import { Metadata } from "next";
 import { getMovieBySlug } from "@/lib/movies";
+import { getMovieScreenings } from "@/lib/screenings";
 import { tmdbImageUrl } from "@/lib/tmdb";
 import { SITE_URL } from "@/lib/site-config";
 import { IMovie } from "@/interfaces/IMovies";
+import { IScreening } from "@/interfaces/IScreenings";
 import JsonLd from "@/components/common/json-ld";
+
+// Keep the events payload reasonable - soonest screenings first.
+const MAX_JSONLD_EVENTS = 50;
 
 type MovieLayoutProps = {
   children: React.ReactNode;
   params: Promise<{ slug: string }>;
 };
-
-type MoviePageParams = {
-  params: Promise<{ slug: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-};
-
-const hasQueryParams = (params: Record<string, string | string[] | undefined> | null | undefined) =>
-  params != null &&
-  Object.values(params).some((value) =>
-    Array.isArray(value)
-      ? value.some((item) => item.trim().length > 0)
-      : typeof value === "string" && value.trim().length > 0
-  );
 
 const buildMovieJsonLd = (movie: IMovie) => {
   const jsonLd: Record<string, unknown> = {
@@ -30,7 +21,7 @@ const buildMovieJsonLd = (movie: IMovie) => {
     name: movie.title,
     url: `${SITE_URL}/filmy/${movie.slug}`,
     description: movie.description ?? undefined,
-    dateCreated: movie.productionYear.toString(),
+    datePublished: movie.productionYear.toString(),
     genre: movie.genres.map((g) => g.name),
   };
 
@@ -62,61 +53,85 @@ const buildMovieJsonLd = (movie: IMovie) => {
     }));
   }
 
+  // Audience rating - also rendered visibly in MovieAbout, as Google
+  // requires structured data to reflect on-page content.
+  const userRating = movie.ratings?.users;
+  if (userRating && userRating.votes > 0) {
+    jsonLd.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: Number(userRating.score.toFixed(1)),
+      ratingCount: userRating.votes,
+      bestRating: 10,
+      worstRating: 1,
+    };
+  }
+
+  if (movie.filmwebUrl) {
+    jsonLd.sameAs = [movie.filmwebUrl];
+  }
+
   return jsonLd;
 };
 
-export const generateMetadata = async ({
-  params,
-  searchParams,
-}: MoviePageParams): Promise<Metadata> => {
-  const { slug } = await params;
-  const queryParams = searchParams ? await searchParams : {};
-  const movie = await getMovieBySlug(slug);
+const buildScreeningEventsJsonLd = (movie: IMovie, screenings: IScreening[]) => {
+  const movieUrl = `${SITE_URL}/filmy/${movie.slug}`;
+  const now = Date.now();
 
-  const genreNames = movie.genres.map((g) => g.name).join(", ");
-  const directorNames = movie.directors?.map((d) => d.name).join(", ");
+  const upcoming = screenings
+    .filter((s) => {
+      const start = new Date(s.dateTime).getTime();
+      return !Number.isNaN(start) && start >= now;
+    })
+    .sort((a, b) => a.dateTime.localeCompare(b.dateTime))
+    .slice(0, MAX_JSONLD_EVENTS);
 
-  const descriptionParts = [
-    `${movie.title} (${movie.productionYear})`,
-    genreNames && `- ${genreNames}`,
-    directorNames && `reż. ${directorNames}`,
-    "- seanse specjalne w kinach studyjnych w Polsce.",
-  ].filter(Boolean);
-
-  const description = movie.description
-    ? `${movie.description.slice(0, 130)} Sprawdź seanse w kinach studyjnych.`
-    : descriptionParts.join(" ");
-
-  const title = `${movie.title} - seanse w kinach (${movie.productionYear})`;
-
-  return {
-    title,
-    description,
-    keywords: [
-      movie.title,
-      movie.titleOriginal,
-      `${movie.title} seanse w kinach`,
-      `${movie.title} kino`,
-      `${movie.title} seans specjalny`,
-      ...movie.genres.map((g) => g.name.toLowerCase()),
-    ].filter(Boolean) as string[],
-    alternates: {
-      canonical: `${SITE_URL}/filmy/${movie.slug}`,
-    },
-    ...(hasQueryParams(queryParams) && {
-      robots: {
-        index: false,
-        follow: true,
+  return upcoming.map((screening) => {
+    const event: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": "ScreeningEvent",
+      name: `${movie.title} - seans w ${screening.cinema.name}, ${screening.cinema.city.name}`,
+      startDate: screening.dateTime,
+      eventStatus: "https://schema.org/EventScheduled",
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      url: movieUrl,
+      location: {
+        "@type": "MovieTheater",
+        name: screening.cinema.name,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: screening.cinema.street ?? undefined,
+          addressLocality: screening.cinema.city.name,
+          addressCountry: "PL",
+        },
       },
-    }),
-    openGraph: {
-      title: `${movie.title} - seanse w kinach`,
-      description,
-      ...(movie.posterUrl && {
-        images: [{ url: tmdbImageUrl(movie.posterUrl, "w780"), alt: movie.title }],
-      }),
-    },
-  };
+      organizer: {
+        "@type": "Organization",
+        name: screening.cinema.name,
+        url: `${SITE_URL}/kina/${screening.cinema.slug}`,
+      },
+      workPresented: {
+        "@type": "Movie",
+        name: movie.title,
+        url: movieUrl,
+      },
+    };
+
+    if (movie.duration) {
+      event.endDate = new Date(
+        new Date(screening.dateTime).getTime() + movie.duration * 60 * 1000
+      ).toISOString();
+    }
+
+    if (screening.ticketUrl) {
+      event.offers = {
+        "@type": "Offer",
+        url: screening.ticketUrl,
+        availability: "https://schema.org/InStock",
+      };
+    }
+
+    return event;
+  });
 };
 
 export default async function MovieLayout({
@@ -125,10 +140,17 @@ export default async function MovieLayout({
 }: Readonly<MovieLayoutProps>) {
   const { slug } = await params;
   const movie = await getMovieBySlug(slug);
+  const screenings = await getMovieScreenings({
+    movieId: movie.id.toString(),
+  }).catch(() => []);
+
+  const events = buildScreeningEventsJsonLd(movie, screenings);
 
   return (
     <>
       <JsonLd data={buildMovieJsonLd(movie)} />
+      {/* BreadcrumbList comes from the visible Breadcrumbs component. */}
+      {events.length > 0 && <JsonLd data={events} />}
       {children}
     </>
   );

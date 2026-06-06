@@ -37,10 +37,7 @@ const CinemaScreeningsContent: React.FC<CinemaScreeningsProps> = ({
       <CinemaScreeningsFilters genres={genres} />
 
       {screenings.length === 0 ? (
-        <EmptyState
-          headline="Brak seansow"
-          description="Nie znaleziono seansow pasujacych do wybranych filtrow."
-        />
+        <EmptyState description="Nie znaleziono seansów pasujących do wybranych filtrów." />
       ) : (
         <MoviesGrid
           movies={movies}

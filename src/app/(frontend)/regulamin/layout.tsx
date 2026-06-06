@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: `${SITE_URL}/regulamin`,
   },
+  openGraph: {
+    title: "Regulamin",
+    description:
+      "Regulamin korzystania z serwisu Klaps. Zasady, odpowiedzialność, prawa autorskie i dane kontaktowe.",
+    url: `${SITE_URL}/regulamin`,
+  },
 };
 
 export default function TermsLayout({

@@ -19,10 +19,7 @@ const MoviesGrid: React.FC<MoviesGridProps> = ({
 }) => {
   if (movies.length === 0) {
     return (
-      <EmptyState
-        headline="Brak filmów"
-        description="Nie znaleziono filmów do wyświetlenia. Sprawdź ponownie później."
-      />
+      <EmptyState description="Nie znaleziono filmów do wyświetlenia. Sprawdź ponownie później." />
     );
   }
 

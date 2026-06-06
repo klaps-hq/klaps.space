@@ -1,10 +1,11 @@
 import { Metadata } from "next";
 import JsonLd from "@/components/common/json-ld";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site-config";
+import { BASE_OPEN_GRAPH } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Klaps - Seanse w kinach studyjnych i stare filmy w kinach",
+    absolute: "Klaps - Stare filmy i seanse specjalne w kinach studyjnych",
   },
   description:
     "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i starych filmach w kinach studyjnych w Polsce. Repertuar, filmy i kina w jednym miejscu.",
@@ -12,9 +13,12 @@ export const metadata: Metadata = {
     canonical: SITE_URL,
   },
   openGraph: {
-    title: "Klaps - Seanse w kinach studyjnych i stare filmy w kinach",
+    ...BASE_OPEN_GRAPH,
+    type: "website",
+    url: SITE_URL,
+    title: "Klaps - Stare filmy i seanse specjalne w kinach studyjnych",
     description:
-      "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i starych filmach w kinach studyjnych. Sprawdź co grają.",
+      "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i starych filmach w kinach studyjnych. Sprawdź, co grają.",
   },
 };
 
@@ -32,6 +36,15 @@ export default function HomeLayout({
           name: SITE_NAME,
           url: SITE_URL,
           description: SITE_DESCRIPTION,
+          inLanguage: "pl-PL",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: `${SITE_URL}/seanse?search={search_term_string}`,
+            },
+            "query-input": "required name=search_term_string",
+          },
         }}
       />
       {children}

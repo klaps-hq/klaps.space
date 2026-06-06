@@ -3,6 +3,7 @@ export interface IGenre {
   slug: string;
   name: string;
   description: string | null;
+  updatedAt?: string | null;
 }
 
 export interface IMoviePerson {
@@ -27,11 +28,23 @@ export interface IMovieSummary {
   duration: number | null;
   posterUrl: string | null;
   genres: IGenre[];
+  updatedAt?: string | null;
 }
 
 export interface IMovieHero extends IMovieSummary {
   description: string | null;
   backdropUrl: string | null;
+  videoUrl: string | null;
+}
+
+export interface IMovieRatingScore {
+  score: number;
+  votes: number;
+}
+
+export interface IMovieRatings {
+  users: IMovieRatingScore | null;
+  critics: IMovieRatingScore | null;
 }
 
 export interface IMovie {
@@ -55,7 +68,9 @@ export interface IMovie {
   countryOfOrigin?: IMovieCountry[] | null;
   screenwriters?: IMoviePerson[] | null;
   genres: IGenre[];
-  sourceUrl: string;
+  sourceUrl?: string | null;
+  ratings?: IMovieRatings | null;
+  filmwebUrl?: string | null;
 }
 
 export interface IMultiCityMovie {
