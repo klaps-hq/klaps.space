@@ -45,6 +45,7 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
             alt={alt}
             fill
             sizes="100vw"
+            quality={60}
             className="object-cover"
             priority
           />

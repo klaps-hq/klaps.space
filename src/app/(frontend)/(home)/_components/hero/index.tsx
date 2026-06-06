@@ -150,8 +150,11 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
       <h1 className="sr-only">
         Seanse specjalne i stare filmy w kinach studyjnych w Polsce
       </h1>
+      {/* w1280 instead of original: TMDB originals are multi-MB and slow
+          down the optimizer fetch; the backdrop sits under a heavy
+          gradient + grain so the smaller source is indistinguishable. */}
       <HeroParallax
-        backdropSrc={tmdbImageUrl(screening.movie.backdropUrl ?? "", "original")}
+        backdropSrc={tmdbImageUrl(screening.movie.backdropUrl ?? "", "w1280")}
         alt={screening.movie.title}
       >
         <HeroNav />
