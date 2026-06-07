@@ -8,13 +8,21 @@ import PageHeading, {
 } from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import Footer from "../(home)/_components/footer";
-import { getPaginatedScreenings } from "@/lib/screenings";
+import {
+  getPaginatedScreenings,
+  getScreeningsLastUpdated,
+} from "@/lib/screenings";
 import { getGenres } from "@/lib/genres";
-import { getPreferredCityId } from "@/lib/get-preferred-city";
+import { getPreferredLocation } from "@/lib/get-preferred-city";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { PaginatedResponse } from "@/interfaces/IMovies";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, hasFilterParams } from "@/lib/seo";
+import {
+  BASE_OPEN_GRAPH,
+  NOINDEX_FOLLOW,
+  formatPlDate,
+  hasFilterParams,
+} from "@/lib/seo";
 import ScreeningsPageSection from "./_components/screenings-page-section";
 import ScreeningsPageLoader from "./_components/screenings-page-loader";
 
@@ -24,6 +32,7 @@ const PAGE_SIZE = 30;
 
 interface SearchParams {
   city?: string;
+  voivodeship?: string;
   genres?: string;
   dateFrom?: string;
   dateTo?: string;
@@ -110,12 +119,13 @@ const unwrapResponse = (
   Array.isArray(response) ? response : [...response.data];
 
 const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
-  const cityId = await getPreferredCityId(params);
+  const { cityId, voivodeship } = await getPreferredLocation(params);
   const genreIds = parseGenreIds(params.genres);
   const requestedPage = Math.max(1, Number(params.page || "1"));
 
   const sharedFilters = {
     cityId,
+    voivodeship,
     dateFrom: params.dateFrom,
     dateTo: params.dateTo,
     search: params.search,
@@ -145,37 +155,63 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
     currentPage * PAGE_SIZE
   );
 
-  const genres = await getGenres();
+  const [genres, lastUpdated] = await Promise.all([
+    getGenres(),
+    getScreeningsLastUpdated({ cityId, voivodeship }),
+  ]);
 
   return (
-    <ScreeningsPageSection
-      screenings={screenings}
-      genres={genres}
-      selectedGenreIds={genreIds.map(Number)}
-      dateFrom={params.dateFrom ?? null}
-      dateTo={params.dateTo ?? null}
-      search={params.search ?? null}
-      currentPage={currentPage}
-      totalPages={totalPages}
-    />
+    <>
+      <JsonLd
+        data={buildScreeningsJsonLd(screenings, lastUpdated ?? new Date())}
+      />
+      <ScreeningsPageSection
+        screenings={screenings}
+        genres={genres}
+        selectedGenreIds={genreIds.map(Number)}
+        dateFrom={params.dateFrom ?? null}
+        dateTo={params.dateTo ?? null}
+        search={params.search ?? null}
+        currentPage={currentPage}
+        totalPages={totalPages}
+      />
+    </>
   );
 };
 
-const SCREENINGS_JSONLD = {
+// CollectionPage with the visible movie list mirrored as an ItemList,
+// so AI search results get a machine-readable "what's playing" list.
+// dateModified reflects the newest screening's updatedAt, i.e. when the
+// repertoire data was last added (freshness signal for AI Overviews).
+const buildScreeningsJsonLd = (
+  screenings: IScreeningGroup[],
+  dateModified: Date
+) => ({
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   name: "Seanse specjalne w kinach studyjnych - repertuar",
   url: `${SITE_URL}/seanse`,
   description:
     "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce.",
-};
+  dateModified: dateModified.toISOString(),
+  mainEntity: {
+    "@type": "ItemList",
+    numberOfItems: screenings.length,
+    itemListElement: screenings.map((group, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${SITE_URL}/filmy/${group.movie.slug}`,
+      name: `${group.movie.title} (${group.movie.productionYear})`,
+    })),
+  },
+});
 
 const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
   const params = await searchParams;
+  const lastUpdated = (await getScreeningsLastUpdated()) ?? new Date();
 
   return (
     <main className="bg-black text-white min-h-screen">
-      <JsonLd data={SCREENINGS_JSONLD} />
       <SiteHeader />
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-4">
@@ -208,6 +244,10 @@ const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
             miast
           </Link>
           .
+        </p>
+        {/* Visible freshness signal, mirrors dateModified in JSON-LD. */}
+        <p className="mt-5 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/35">
+          Repertuar zaktualizowano: {formatPlDate(lastUpdated)}
         </p>
       </header>
 

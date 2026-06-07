@@ -107,7 +107,7 @@ const GenrePage = async ({ params }: GenrePageProps) => {
         />
       </div>
 
-      <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-12 md:pb-16">
+      <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-8 md:pb-12">
         <PageHeading variant="detail" className="max-w-[20ch]">
           Filmy z&nbsp;gatunku {genreNameLower}
         </PageHeading>

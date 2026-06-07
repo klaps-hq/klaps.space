@@ -17,6 +17,9 @@ const buildCitiesJsonLd = (cinemaGroups: readonly ICinemaGroup[]) => {
     url: `${SITE_URL}/miasta`,
     description:
       "Miasta w Polsce z kinami studyjnymi i repertuarem seansów specjalnych.",
+    // Freshness signal for AI Overviews: render time equals the moment
+    // the city data was last refreshed (ISR).
+    dateModified: new Date().toISOString(),
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: cities.length,

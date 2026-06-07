@@ -135,9 +135,18 @@ const MoviePage = async ({ params }: MoviePageProps) => {
         />
       </div>
 
-      <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-14 md:pb-20">
+      {/* The id anchors #seanse deep links from shared screenings. */}
+      <section
+        id="seanse"
+        className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-14 md:pb-20 scroll-mt-20"
+      >
         {screenings.length === 0 ? (
-          <MovieScreenings screenings={screenings} />
+          <MovieScreenings
+            screenings={screenings}
+            movieTitle={movie.title}
+            movieSlug={movie.slug}
+            movieDuration={movie.duration}
+          />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
             <div className="lg:col-span-4">
@@ -146,7 +155,12 @@ const MoviePage = async ({ params }: MoviePageProps) => {
               </h2>
             </div>
             <div className="lg:col-span-8">
-              <MovieScreenings screenings={screenings} />
+              <MovieScreenings
+                screenings={screenings}
+                movieTitle={movie.title}
+                movieSlug={movie.slug}
+                movieDuration={movie.duration}
+              />
             </div>
           </div>
         )}

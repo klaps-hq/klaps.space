@@ -8,6 +8,8 @@ export interface ICity {
   nameDeclinated: string;
   numberOfCinemas: number;
   description: string | null;
+  /** Canonical lowercase name (e.g. "mazowieckie"); null when unknown. */
+  voivodeship: string | null;
   updatedAt?: string | null;
 }
 

@@ -4,9 +4,14 @@ import { Metadata } from "next";
 import { getCityBySlug } from "@/lib/cities";
 import { getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
-import { getScreenings } from "@/lib/screenings";
+import { getScreenings, getScreeningsLastUpdated } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
+import {
+  BASE_OPEN_GRAPH,
+  NOINDEX_FOLLOW,
+  formatPlDate,
+  pluralPl,
+} from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
@@ -94,11 +99,13 @@ const CityPage = async ({ params }: CityPageProps) => {
 
   // Full unfiltered repertoire - CityRepertoire narrows it down
   // client-side based on the URL params.
-  const [{ data: cinemaGroups }, allGenres, screenings] = await Promise.all([
-    getCinemas({ cityId: city.id.toString() }),
-    getGenres(),
-    getScreenings({ cityId: city.id.toString() }),
-  ]);
+  const [{ data: cinemaGroups }, allGenres, screenings, lastUpdated] =
+    await Promise.all([
+      getCinemas({ cityId: city.id.toString() }),
+      getGenres(),
+      getScreenings({ cityId: city.id.toString() }),
+      getScreeningsLastUpdated({ cityId: city.id.toString() }),
+    ]);
 
   const cinemas = cinemaGroups
     .flatMap((g) => g.cinemas)
@@ -120,6 +127,13 @@ const CityPage = async ({ params }: CityPageProps) => {
       </div>
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-12 md:pb-16">
+        {city.voivodeship && (
+          // Canonical lowercase name reads correctly after "województwo"
+          // (both nominative); CSS uppercases it visually.
+          <p className="mb-4 md:mb-5 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/45">
+            Województwo {city.voivodeship}
+          </p>
+        )}
         <PageHeading variant="detail" className="max-w-[18ch]">
           {city.name}
         </PageHeading>
@@ -145,6 +159,12 @@ const CityPage = async ({ params }: CityPageProps) => {
               i&nbsp;klasykę filmową na dużym ekranie.
             </p>
           )
+        )}
+        {cinemasCount > 0 && (
+          // Visible freshness signal: newest screening updatedAt for this city.
+          <p className="mt-5 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/35">
+            Repertuar zaktualizowano: {formatPlDate(lastUpdated ?? new Date())}
+          </p>
         )}
       </header>
 

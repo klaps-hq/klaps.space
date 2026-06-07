@@ -46,9 +46,11 @@ export const TitleReveal: React.FC<TitleRevealProps> = ({
     // sr-only h1 in the hero carries the page's main heading instead.
     <motion.h2 className={className} variants={wordRevealContainer}>
       {words.map((word, i) => (
+        // Top padding + matching negative margin keep the slide-up mask
+        // from clipping tall diacritics (Ś, Ć, Ó) without shifting layout.
         <span
           key={`${word}-${i}`}
-          className="inline-block overflow-hidden pb-[0.08em] mr-[0.25em] align-bottom"
+          className="inline-block overflow-hidden pt-[0.2em] -mt-[0.2em] pb-[0.08em] mr-[0.25em] align-bottom"
         >
           <motion.span className="inline-block" variants={wordRevealItem}>
             {word}
