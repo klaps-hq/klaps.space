@@ -61,7 +61,13 @@ const resolveInitialCityId = (
 
   let resolved: number | null = null;
 
-  if (pathname === "/" || pathname === "/seanse") {
+  // Movie pages accept ?city= from shared screening links so the
+  // recipient lands on the city the sharer was looking at.
+  if (
+    pathname === "/" ||
+    pathname === "/seanse" ||
+    pathname.startsWith("/filmy/")
+  ) {
     const params = new URLSearchParams(window.location.search);
     const urlCity = params.get("city");
     if (urlCity) {
