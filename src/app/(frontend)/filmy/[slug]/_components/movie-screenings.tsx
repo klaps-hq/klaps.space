@@ -181,8 +181,21 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
   movieSlug,
   movieDuration,
 }) => {
-  const { cityId, voivodeship, locationLabel, isHydrated, setCityId } =
+  const { cityId, voivodeship, locationLabel, isHydrated, setCityId, cities } =
     usePreferredCity();
+
+  // Resolve voivodeship from the canonical cities list (the same source
+  // the city select is built from) keyed by city id, rather than the
+  // screening payload's city.voivodeship - that field is not guaranteed
+  // to be populated on the per-movie screenings endpoint, which would
+  // wrongly empty the list for a voivodeship that does have showtimes.
+  const voivodeshipByCityId = useMemo(() => {
+    const map = new Map<number, string | null>();
+    for (const city of cities) {
+      map.set(city.id, city.voivodeship);
+    }
+    return map;
+  }, [cities]);
 
   // The page is statically cached with the nationwide list, so the
   // preferred-location filter is applied here after hydration. A city
@@ -194,8 +207,10 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
     if (cityId !== null) {
       return screenings.filter((s) => s.cinema.city.id === cityId);
     }
-    return screenings.filter((s) => s.cinema.city.voivodeship === voivodeship);
-  }, [screenings, cityId, voivodeship, isHydrated]);
+    return screenings.filter(
+      (s) => voivodeshipByCityId.get(s.cinema.city.id) === voivodeship
+    );
+  }, [screenings, cityId, voivodeship, isHydrated, voivodeshipByCityId]);
 
   const cityEmpty = screenings.length > 0 && visibleScreenings.length === 0;
 
@@ -269,7 +284,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
   if (cityEmpty) {
     return (
       <div className="flex flex-col">
-        <div className="flex justify-end pb-5 border-b border-white/10">
+        <div className="flex justify-end">
           <CityField />
         </div>
         <div className="flex flex-col items-center text-center gap-6 py-10 md:py-14">
