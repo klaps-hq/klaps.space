@@ -27,6 +27,14 @@ interface GetMovieScreeningsParams {
   cityId?: string | null;
 }
 
+interface GetLastUpdatedParams {
+  cityId?: string | null;
+  voivodeship?: string | null;
+  citySlug?: string | null;
+  cinemaId?: string | null;
+  cinemaSlug?: string | null;
+}
+
 export const getScreenings = async (
   params: GetScreeningsParams = {}
 ): Promise<IScreeningGroup[]> => {
@@ -101,6 +109,36 @@ export const getPaginatedScreenings = async (
         totalPages: 0,
       },
     };
+  }
+};
+
+/**
+ * Newest screening `updatedAt` for the (optionally location-filtered) set,
+ * i.e. when repertoire data was last added. Backs the visible
+ * "Repertuar zaktualizowano" label and JSON-LD dateModified.
+ * Returns null when nothing matches or the request fails.
+ */
+export const getScreeningsLastUpdated = async (
+  params: GetLastUpdatedParams = {}
+): Promise<Date | null> => {
+  try {
+    const response = await apiFetch<{ updatedAt: string | null }>(
+      "/screenings/last-updated",
+      {
+        params: {
+          cityId: params.cityId ?? "",
+          voivodeship: params.voivodeship ?? "",
+          citySlug: params.citySlug ?? "",
+          cinemaId: params.cinemaId ?? "",
+          cinemaSlug: params.cinemaSlug ?? "",
+        },
+      }
+    );
+
+    return response.updatedAt ? new Date(response.updatedAt) : null;
+  } catch (error) {
+    console.warn("Falling back to null screenings last-updated:", error);
+    return null;
   }
 };
 
