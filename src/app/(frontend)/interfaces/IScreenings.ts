@@ -6,7 +6,6 @@ export interface IScreening {
   date: string;
   time: string;
   dateTime: string;
-  ticketUrl: string | null;
   isDubbing: boolean;
   isSubtitled: boolean;
   cinema: ICinemaSummary;

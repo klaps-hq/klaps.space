@@ -24,7 +24,6 @@ export interface ScreeningEventData {
   movie: ScreeningEventMovie;
   cinema: ScreeningEventCinema;
   dateTime: string;
-  ticketUrl: string | null;
 }
 
 // Keep the events payload reasonable - soonest screenings first.
@@ -34,7 +33,7 @@ const buildEvent = (
   data: ScreeningEventData,
   pageUrl: string
 ): Record<string, unknown> => {
-  const { movie, cinema, dateTime, ticketUrl } = data;
+  const { movie, cinema, dateTime } = data;
 
   const location: Record<string, unknown> = {
     "@type": "MovieTheater",
@@ -80,14 +79,6 @@ const buildEvent = (
     event.endDate = new Date(
       new Date(dateTime).getTime() + movie.duration * 60 * 1000
     ).toISOString();
-  }
-
-  if (ticketUrl) {
-    event.offers = {
-      "@type": "Offer",
-      url: ticketUrl,
-      availability: "https://schema.org/InStock",
-    };
   }
 
   return event;

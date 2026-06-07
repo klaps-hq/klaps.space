@@ -63,7 +63,6 @@ const buildCinemaScreeningEvents = (
           longitude: cinema.longitude,
         },
         dateTime: screening.dateTime,
-        ticketUrl: screening.ticketUrl,
       }))
     ),
     `${SITE_URL}/kina/${cinema.slug}`

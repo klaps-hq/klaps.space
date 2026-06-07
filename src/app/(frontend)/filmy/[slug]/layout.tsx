@@ -86,7 +86,6 @@ const buildMovieScreeningEvents = (movie: IMovie, screenings: IScreening[]) =>
         cityName: screening.cinema.city.name,
       },
       dateTime: screening.dateTime,
-      ticketUrl: screening.ticketUrl,
     })),
     `${SITE_URL}/filmy/${movie.slug}`
   );
