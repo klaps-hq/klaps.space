@@ -110,8 +110,8 @@ const Footer: React.FC = () => {
           <Image src="/tmdb-logo.svg" alt="TMDB" width={60} height={8} />
         </a>
         <p>
-          Dane filmowe dostarcza TMDB. Serwis nie jest powiązany
-          z&nbsp;TMDB.
+          Korzystamy z&nbsp;API TMDB, ale nie jesteśmy przez TMDB wspierani
+          ani certyfikowani.
         </p>
       </div>
     </footer>

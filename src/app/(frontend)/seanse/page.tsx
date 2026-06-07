@@ -8,7 +8,10 @@ import PageHeading, {
 } from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import Footer from "../(home)/_components/footer";
-import { getPaginatedScreenings } from "@/lib/screenings";
+import {
+  getPaginatedScreenings,
+  getScreeningsLastUpdated,
+} from "@/lib/screenings";
 import { getGenres } from "@/lib/genres";
 import { getPreferredLocation } from "@/lib/get-preferred-city";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
@@ -152,11 +155,16 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
     currentPage * PAGE_SIZE
   );
 
-  const genres = await getGenres();
+  const [genres, lastUpdated] = await Promise.all([
+    getGenres(),
+    getScreeningsLastUpdated({ cityId, voivodeship }),
+  ]);
 
   return (
     <>
-      <JsonLd data={buildScreeningsJsonLd(screenings)} />
+      <JsonLd
+        data={buildScreeningsJsonLd(screenings, lastUpdated ?? new Date())}
+      />
       <ScreeningsPageSection
         screenings={screenings}
         genres={genres}
@@ -173,16 +181,19 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
 
 // CollectionPage with the visible movie list mirrored as an ItemList,
 // so AI search results get a machine-readable "what's playing" list.
-// dateModified reflects the render time, i.e. when the repertoire data
-// was last refreshed (freshness signal for AI Overviews).
-const buildScreeningsJsonLd = (screenings: IScreeningGroup[]) => ({
+// dateModified reflects the newest screening's updatedAt, i.e. when the
+// repertoire data was last added (freshness signal for AI Overviews).
+const buildScreeningsJsonLd = (
+  screenings: IScreeningGroup[],
+  dateModified: Date
+) => ({
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   name: "Seanse specjalne w kinach studyjnych - repertuar",
   url: `${SITE_URL}/seanse`,
   description:
     "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce.",
-  dateModified: new Date().toISOString(),
+  dateModified: dateModified.toISOString(),
   mainEntity: {
     "@type": "ItemList",
     numberOfItems: screenings.length,
@@ -197,6 +208,7 @@ const buildScreeningsJsonLd = (screenings: IScreeningGroup[]) => ({
 
 const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
   const params = await searchParams;
+  const lastUpdated = (await getScreeningsLastUpdated()) ?? new Date();
 
   return (
     <main className="bg-black text-white min-h-screen">
@@ -235,7 +247,7 @@ const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
         </p>
         {/* Visible freshness signal, mirrors dateModified in JSON-LD. */}
         <p className="mt-5 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/35">
-          Repertuar zaktualizowano: {formatPlDate(new Date())}
+          Repertuar zaktualizowano: {formatPlDate(lastUpdated)}
         </p>
       </header>
 

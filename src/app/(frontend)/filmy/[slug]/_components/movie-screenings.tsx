@@ -41,24 +41,9 @@ const formatShortDate = (dateStr: string): string =>
     month: "2-digit",
   });
 
+// We do not sell tickets or broker reservations, so the time is plain
+// text and never links out to a booking page.
 const ScreeningTime: React.FC<ScreeningTimeProps> = ({ screening }) => {
-  if (screening.ticketUrl) {
-    return (
-      <a
-        href={screening.ticketUrl}
-        target="_blank"
-        rel="noreferrer noopener nofollow"
-        className="group/time flex flex-col items-center gap-1.5"
-      >
-        <span className="text-2xl md:text-3xl font-semibold tabular-nums -tracking-[0.01em] text-white underline underline-offset-8 decoration-2 decoration-white/30 group-hover/time:decoration-white transition-colors">
-          {screening.time}
-        </span>
-        <span className="text-[10px] uppercase tracking-[0.2em] tabular-nums text-white/45">
-          {formatShortDate(screening.date)}
-        </span>
-      </a>
-    );
-  }
   return (
     <span className="flex flex-col items-center gap-1.5 cursor-default">
       <span className="text-2xl md:text-3xl font-semibold tabular-nums -tracking-[0.01em] text-white/80">
@@ -119,11 +104,8 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
     fileName: `${movieSlug}-${screening.date}-${screening.time.replace(":", "")}.ics`,
     description: [
       `Seans filmu "${movieTitle}" w ${first.cinema.name}, ${first.cinema.city.name}.`,
-      screening.ticketUrl ? `Bilety: ${screening.ticketUrl}` : null,
       `Szczegóły: ${movieUrl}`,
-    ]
-      .filter(Boolean)
-      .join("\n"),
+    ].join("\n"),
   }));
 
   return (

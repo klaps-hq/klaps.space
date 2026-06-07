@@ -76,7 +76,7 @@ const GenreRepertoireInner: React.FC<GenreRepertoireProps> = ({
       <div className="mb-10 md:mb-12">
         <FilterBar genres={genres} hideGenres />
         <div
-          className="mt-4 md:mt-5 -mx-6 md:-mx-12 lg:-mx-16 h-px bg-white/10"
+          className="mt-8 md:mt-12 -mx-6 md:-mx-12 lg:-mx-16 h-px bg-white/10"
           aria-hidden="true"
         />
       </div>

@@ -4,7 +4,7 @@ import { Metadata } from "next";
 import { getCityBySlug } from "@/lib/cities";
 import { getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
-import { getScreenings } from "@/lib/screenings";
+import { getScreenings, getScreeningsLastUpdated } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import {
   BASE_OPEN_GRAPH,
@@ -99,11 +99,13 @@ const CityPage = async ({ params }: CityPageProps) => {
 
   // Full unfiltered repertoire - CityRepertoire narrows it down
   // client-side based on the URL params.
-  const [{ data: cinemaGroups }, allGenres, screenings] = await Promise.all([
-    getCinemas({ cityId: city.id.toString() }),
-    getGenres(),
-    getScreenings({ cityId: city.id.toString() }),
-  ]);
+  const [{ data: cinemaGroups }, allGenres, screenings, lastUpdated] =
+    await Promise.all([
+      getCinemas({ cityId: city.id.toString() }),
+      getGenres(),
+      getScreenings({ cityId: city.id.toString() }),
+      getScreeningsLastUpdated({ cityId: city.id.toString() }),
+    ]);
 
   const cinemas = cinemaGroups
     .flatMap((g) => g.cinemas)
@@ -159,9 +161,9 @@ const CityPage = async ({ params }: CityPageProps) => {
           )
         )}
         {cinemasCount > 0 && (
-          // Visible freshness signal, mirrors dateModified in JSON-LD.
+          // Visible freshness signal: newest screening updatedAt for this city.
           <p className="mt-5 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/35">
-            Repertuar zaktualizowano: {formatPlDate(new Date())}
+            Repertuar zaktualizowano: {formatPlDate(lastUpdated ?? new Date())}
           </p>
         )}
       </header>

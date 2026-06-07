@@ -22,7 +22,7 @@ const MANIFESTO: ManifestoItem[] = [
   {
     n: "01",
     title: "Niezależność",
-    body: "Bez reklam, bez algorytmów rekomendujących, bez rankingów. Treści nie są promowane komercyjnie ani wartościowane liczbami.",
+    body: "Bez reklam i bez płatnych wyróżnień. Żaden seans nie trafia wyżej dlatego, że ktoś za to zapłacił.",
   },
   {
     n: "02",
@@ -32,7 +32,7 @@ const MANIFESTO: ManifestoItem[] = [
   {
     n: "03",
     title: "Cała Polska",
-    body: "Repertuar kin studyjnych z każdego miasta i wybrane seanse specjalne organizowane przez kina sieciowe. Bez podziału na lepsze i gorsze.",
+    body: "Repertuar kin studyjnych z każdego miasta i wybrane seanse specjalne organizowane przez kina sieciowe. Wielka metropolia czy mała miejscowość, traktujemy je tak samo.",
   },
   {
     n: "04",
@@ -42,7 +42,7 @@ const MANIFESTO: ManifestoItem[] = [
   {
     n: "05",
     title: "Otwartość",
-    body: "Otwarty kod źródłowy, otwarta baza danych, otwarta misja. Bezpłatnie i na zawsze. Klaps należy do widzów, nie do inwestorów.",
+    body: "Otwarty kod źródłowy, otwarta misja. Bezpłatnie i na zawsze. Klaps należy do widzów, nie do inwestorów.",
   },
   {
     n: "06",
@@ -208,11 +208,12 @@ const AboutPage = () => {
           </h2>
           <div className="lg:col-span-8 flex flex-col gap-5 max-w-[68ch] text-base md:text-lg text-white/65 leading-relaxed">
             <p>
-              Repertuar pozyskujemy z&nbsp;publicznie dostępnych źródeł kin,
-              które regularnie organizują pokazy specjalne, retrospektywy
-              i&nbsp;wznowienia. Nie korzystamy z&nbsp;zamkniętych baz danych
-              ani komercyjnych API. Klaps zbiera informacje w&nbsp;jednym
-              miejscu i&nbsp;pokazuje je w&nbsp;ujednoliconej formie.
+              Repertuar agregujemy z&nbsp;publicznie dostępnych źródeł
+              internetowych o&nbsp;pokazach specjalnych, retrospektywach
+              i&nbsp;wznowieniach. Dane o&nbsp;filmach, czyli opisy, oceny
+              i&nbsp;plakaty, pochodzą z&nbsp;TMDB. Klaps zbiera te informacje
+              w&nbsp;jednym miejscu i&nbsp;pokazuje je w&nbsp;ujednoliconej
+              formie.
             </p>
             <p>
               Nie sprzedajemy biletów ani nie pośredniczymy
@@ -258,19 +259,26 @@ const AboutPage = () => {
       </section>
 
       <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-14 md:pt-20 pb-14 md:pb-20">
-        <h2 className="mb-10 md:mb-14 text-3xl md:text-5xl lg:text-6xl leading-[1] -tracking-[0.03em] text-white font-medium">
-          Dla kogo
-        </h2>
-        <ul className="flex flex-col">
-          {AUDIENCE.map((item) => (
-            <li
-              key={item}
-              className="border-t border-white/10 last:border-b py-5 md:py-6 text-xl md:text-2xl lg:text-3xl text-white/85 -tracking-[0.01em] leading-snug"
-            >
-              {item}
-            </li>
-          ))}
-        </ul>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          <h2 className="lg:col-span-4 text-3xl md:text-5xl lg:text-6xl leading-[1] -tracking-[0.03em] text-white font-medium">
+            Dla kogo
+          </h2>
+          <ol className="lg:col-span-8 flex flex-col">
+            {AUDIENCE.map((item, index) => (
+              <li
+                key={item}
+                className="group flex items-baseline gap-5 md:gap-8 border-t border-white/10 last:border-b py-5 md:py-7"
+              >
+                <span className="shrink-0 text-xs md:text-sm tabular-nums text-white/30 leading-none">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="max-w-[42ch] text-lg md:text-2xl text-white/80 group-hover:text-white -tracking-[0.01em] leading-snug transition-colors">
+                  {item}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
       </section>
 
       <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-14 md:pt-20 pb-14 md:pb-20">

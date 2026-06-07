@@ -142,29 +142,32 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
             <PageHeading variant="detail" className="max-w-[20ch]">
               {cinema.name}
             </PageHeading>
-            <div className="mt-4 md:mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/45">
-              <span>
-                {cinema.street && <>{cinema.street}, </>}
-                <Link
-                  href={`/miasta/${cinema.city.slug}`}
-                  className="text-white/70 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
-                >
-                  {cinema.city.name}
-                </Link>
-              </span>
-              {cinema.sourceUrl && (
-                <>
-                  <span aria-hidden="true">·</span>
+            <div className="mt-4 md:mt-5 flex flex-col gap-1.5 text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/45">
+              {cinema.street && <span>{cinema.street}</span>}
+              <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <span>
                   <Link
-                    href={cinema.sourceUrl}
-                    target="_blank"
-                    rel="noreferrer noopener nofollow"
+                    href={`/miasta/${cinema.city.slug}`}
                     className="text-white/70 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
                   >
-                    Strona kina ↗
+                    {cinema.city.name}
                   </Link>
-                </>
-              )}
+                  {cinema.city.voivodeship && <>, {cinema.city.voivodeship}</>}
+                </span>
+                {cinema.sourceUrl && (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <Link
+                      href={cinema.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer noopener nofollow"
+                      className="text-white/70 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
+                    >
+                      Strona kina ↗
+                    </Link>
+                  </>
+                )}
+              </span>
             </div>
             {cinema.description ? (
               <p className="mt-8 md:mt-10 max-w-[60ch] text-base md:text-lg text-white/65 leading-relaxed">
