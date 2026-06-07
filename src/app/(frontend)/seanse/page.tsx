@@ -14,7 +14,12 @@ import { getPreferredCityId } from "@/lib/get-preferred-city";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { PaginatedResponse } from "@/interfaces/IMovies";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, hasFilterParams } from "@/lib/seo";
+import {
+  BASE_OPEN_GRAPH,
+  NOINDEX_FOLLOW,
+  formatPlDate,
+  hasFilterParams,
+} from "@/lib/seo";
 import ScreeningsPageSection from "./_components/screenings-page-section";
 import ScreeningsPageLoader from "./_components/screenings-page-loader";
 
@@ -148,34 +153,51 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
   const genres = await getGenres();
 
   return (
-    <ScreeningsPageSection
-      screenings={screenings}
-      genres={genres}
-      selectedGenreIds={genreIds.map(Number)}
-      dateFrom={params.dateFrom ?? null}
-      dateTo={params.dateTo ?? null}
-      search={params.search ?? null}
-      currentPage={currentPage}
-      totalPages={totalPages}
-    />
+    <>
+      <JsonLd data={buildScreeningsJsonLd(screenings)} />
+      <ScreeningsPageSection
+        screenings={screenings}
+        genres={genres}
+        selectedGenreIds={genreIds.map(Number)}
+        dateFrom={params.dateFrom ?? null}
+        dateTo={params.dateTo ?? null}
+        search={params.search ?? null}
+        currentPage={currentPage}
+        totalPages={totalPages}
+      />
+    </>
   );
 };
 
-const SCREENINGS_JSONLD = {
+// CollectionPage with the visible movie list mirrored as an ItemList,
+// so AI search results get a machine-readable "what's playing" list.
+// dateModified reflects the render time, i.e. when the repertoire data
+// was last refreshed (freshness signal for AI Overviews).
+const buildScreeningsJsonLd = (screenings: IScreeningGroup[]) => ({
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   name: "Seanse specjalne w kinach studyjnych - repertuar",
   url: `${SITE_URL}/seanse`,
   description:
     "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce.",
-};
+  dateModified: new Date().toISOString(),
+  mainEntity: {
+    "@type": "ItemList",
+    numberOfItems: screenings.length,
+    itemListElement: screenings.map((group, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${SITE_URL}/filmy/${group.movie.slug}`,
+      name: `${group.movie.title} (${group.movie.productionYear})`,
+    })),
+  },
+});
 
 const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
   const params = await searchParams;
 
   return (
     <main className="bg-black text-white min-h-screen">
-      <JsonLd data={SCREENINGS_JSONLD} />
       <SiteHeader />
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-4">
@@ -208,6 +230,10 @@ const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
             miast
           </Link>
           .
+        </p>
+        {/* Visible freshness signal, mirrors dateModified in JSON-LD. */}
+        <p className="mt-5 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/35">
+          Repertuar zaktualizowano: {formatPlDate(new Date())}
         </p>
       </header>
 

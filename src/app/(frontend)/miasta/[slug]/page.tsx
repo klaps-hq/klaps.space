@@ -6,7 +6,12 @@ import { getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
 import { getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
+import {
+  BASE_OPEN_GRAPH,
+  NOINDEX_FOLLOW,
+  formatPlDate,
+  pluralPl,
+} from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
@@ -145,6 +150,12 @@ const CityPage = async ({ params }: CityPageProps) => {
               i&nbsp;klasykę filmową na dużym ekranie.
             </p>
           )
+        )}
+        {cinemasCount > 0 && (
+          // Visible freshness signal, mirrors dateModified in JSON-LD.
+          <p className="mt-5 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/35">
+            Repertuar zaktualizowano: {formatPlDate(new Date())}
+          </p>
         )}
       </header>
 

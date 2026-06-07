@@ -45,7 +45,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      "max-snippet": 160,
+      // Unlimited snippet length: Google applies this limit to AI Overviews
+      // and AI Mode citations as well, so capping it hurts GEO/AEO.
+      "max-snippet": -1,
       "max-image-preview": "large",
       "max-video-preview": -1,
     },

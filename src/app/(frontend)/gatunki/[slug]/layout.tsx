@@ -15,6 +15,9 @@ const buildGenreJsonLd = (genre: IGenre, movies: readonly IMovieSummary[]) => ({
   name: `${genre.name} - Filmy`,
   url: `${SITE_URL}/gatunki/${genre.slug}`,
   description: `Filmy z gatunku ${genre.name.toLowerCase()} dostępne w serwisie Klaps.`,
+  // Freshness signal for AI Overviews: render time equals the moment
+  // the movie data was last refreshed (ISR).
+  dateModified: new Date().toISOString(),
   mainEntity: {
     "@type": "ItemList",
     numberOfItems: movies.length,

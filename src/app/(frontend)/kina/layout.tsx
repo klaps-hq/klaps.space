@@ -14,6 +14,9 @@ const buildCinemasJsonLd = (cinemaGroups: readonly ICinemaGroup[]) => {
     url: `${SITE_URL}/kina`,
     description:
       "Pełna lista kin studyjnych i niezależnych w Polsce wraz z repertuarem seansów specjalnych.",
+    // Freshness signal for AI Overviews: render time equals the moment
+    // the cinema data was last refreshed (ISR).
+    dateModified: new Date().toISOString(),
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: cinemas.length,
