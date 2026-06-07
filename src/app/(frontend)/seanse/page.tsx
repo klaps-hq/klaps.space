@@ -10,7 +10,7 @@ import SiteHeader from "@/components/common/site-header";
 import Footer from "../(home)/_components/footer";
 import { getPaginatedScreenings } from "@/lib/screenings";
 import { getGenres } from "@/lib/genres";
-import { getPreferredCityId } from "@/lib/get-preferred-city";
+import { getPreferredLocation } from "@/lib/get-preferred-city";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { PaginatedResponse } from "@/interfaces/IMovies";
 import { SITE_URL } from "@/lib/site-config";
@@ -29,6 +29,7 @@ const PAGE_SIZE = 30;
 
 interface SearchParams {
   city?: string;
+  voivodeship?: string;
   genres?: string;
   dateFrom?: string;
   dateTo?: string;
@@ -115,12 +116,13 @@ const unwrapResponse = (
   Array.isArray(response) ? response : [...response.data];
 
 const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
-  const cityId = await getPreferredCityId(params);
+  const { cityId, voivodeship } = await getPreferredLocation(params);
   const genreIds = parseGenreIds(params.genres);
   const requestedPage = Math.max(1, Number(params.page || "1"));
 
   const sharedFilters = {
     cityId,
+    voivodeship,
     dateFrom: params.dateFrom,
     dateTo: params.dateTo,
     search: params.search,

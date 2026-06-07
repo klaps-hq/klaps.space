@@ -14,6 +14,7 @@ export const revalidate = 300;
 
 interface HomePageSearchParams {
   city?: string;
+  voivodeship?: string;
   genres?: string;
   dateFrom?: string;
   dateTo?: string;

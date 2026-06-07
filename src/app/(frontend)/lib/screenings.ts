@@ -8,6 +8,8 @@ import { apiFetch } from "./client";
 
 interface GetScreeningsParams {
   cityId?: string | null;
+  // The API prioritizes city over voivodeship - callers send one of them.
+  voivodeship?: string | null;
   cinemaId?: string | null;
   genreId?: string | null;
   dateFrom?: string | null;
@@ -34,6 +36,7 @@ export const getScreenings = async (
     >("/screenings", {
       params: {
         cityId: params.cityId ?? "",
+        voivodeship: params.voivodeship ?? "",
         cinemaId: params.cinemaId ?? "",
         genreId: params.genreId ?? "",
         dateFrom: params.dateFrom ?? "",
@@ -75,6 +78,7 @@ export const getPaginatedScreenings = async (
     >("/screenings", {
       params: {
         cityId: params.cityId ?? "",
+        voivodeship: params.voivodeship ?? "",
         cinemaId: params.cinemaId ?? "",
         genreId: params.genreId ?? "",
         dateFrom: params.dateFrom ?? "",

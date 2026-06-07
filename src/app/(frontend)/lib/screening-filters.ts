@@ -3,6 +3,7 @@ import { IScreening, IScreeningGroup } from "@/interfaces/IScreenings";
 export interface ScreeningGroupFilters {
   genreIds?: number[];
   cityId?: number | null;
+  voivodeship?: string | null;
   dateFrom?: string | null;
   dateTo?: string | null;
   search?: string | null;
@@ -37,9 +38,9 @@ const rebuildGroup = (
  * Listing pages are statically cached (ISR) with the full data set
  * and narrow it here based on the URL params / preferred city.
  *
- * Genre and search match on the whole group (movie-level); city and
- * date range narrow the screenings within a group and drop groups
- * that end up empty.
+ * Genre and search match on the whole group (movie-level); city,
+ * voivodeship and date range narrow the screenings within a group
+ * and drop groups that end up empty.
  */
 export const filterScreeningGroups = (
   groups: IScreeningGroup[],
@@ -47,8 +48,12 @@ export const filterScreeningGroups = (
 ): IScreeningGroup[] => {
   const genreIds = filters.genreIds ?? [];
   const search = filters.search?.trim().toLowerCase() ?? "";
-  const { cityId, dateFrom, dateTo } = filters;
-  const narrows = cityId != null || Boolean(dateFrom) || Boolean(dateTo);
+  const { cityId, voivodeship, dateFrom, dateTo } = filters;
+  const narrows =
+    cityId != null ||
+    voivodeship != null ||
+    Boolean(dateFrom) ||
+    Boolean(dateTo);
 
   return groups
     .filter((group) => {
@@ -73,6 +78,8 @@ export const filterScreeningGroups = (
       const screenings = group.screenings.filter(
         (s) =>
           (cityId == null || s.cinema.city.id === cityId) &&
+          (voivodeship == null ||
+            s.cinema.city.voivodeship === voivodeship) &&
           (!dateFrom || s.date >= dateFrom) &&
           (!dateTo || s.date <= dateTo)
       );

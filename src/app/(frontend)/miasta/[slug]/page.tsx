@@ -125,6 +125,13 @@ const CityPage = async ({ params }: CityPageProps) => {
       </div>
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-12 md:pb-16">
+        {city.voivodeship && (
+          // Canonical lowercase name reads correctly after "województwo"
+          // (both nominative); CSS uppercases it visually.
+          <p className="mb-4 md:mb-5 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/45">
+            Województwo {city.voivodeship}
+          </p>
+        )}
         <PageHeading variant="detail" className="max-w-[18ch]">
           {city.name}
         </PageHeading>

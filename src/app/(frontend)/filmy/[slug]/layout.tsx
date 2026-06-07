@@ -2,12 +2,10 @@ import { getMovieBySlug } from "@/lib/movies";
 import { getMovieScreenings } from "@/lib/screenings";
 import { tmdbImageUrl } from "@/lib/tmdb";
 import { SITE_URL } from "@/lib/site-config";
+import { buildScreeningEventsJsonLd } from "@/lib/screening-event-jsonld";
 import { IMovie } from "@/interfaces/IMovies";
 import { IScreening } from "@/interfaces/IScreenings";
 import JsonLd from "@/components/common/json-ld";
-
-// Keep the events payload reasonable - soonest screenings first.
-const MAX_JSONLD_EVENTS = 50;
 
 type MovieLayoutProps = {
   children: React.ReactNode;
@@ -73,66 +71,25 @@ const buildMovieJsonLd = (movie: IMovie) => {
   return jsonLd;
 };
 
-const buildScreeningEventsJsonLd = (movie: IMovie, screenings: IScreening[]) => {
-  const movieUrl = `${SITE_URL}/filmy/${movie.slug}`;
-  const now = Date.now();
-
-  const upcoming = screenings
-    .filter((s) => {
-      const start = new Date(s.dateTime).getTime();
-      return !Number.isNaN(start) && start >= now;
-    })
-    .sort((a, b) => a.dateTime.localeCompare(b.dateTime))
-    .slice(0, MAX_JSONLD_EVENTS);
-
-  return upcoming.map((screening) => {
-    const event: Record<string, unknown> = {
-      "@context": "https://schema.org",
-      "@type": "ScreeningEvent",
-      name: `${movie.title} - seans w ${screening.cinema.name}, ${screening.cinema.city.name}`,
-      startDate: screening.dateTime,
-      eventStatus: "https://schema.org/EventScheduled",
-      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-      url: movieUrl,
-      location: {
-        "@type": "MovieTheater",
+const buildMovieScreeningEvents = (movie: IMovie, screenings: IScreening[]) =>
+  buildScreeningEventsJsonLd(
+    screenings.map((screening) => ({
+      movie: {
+        title: movie.title,
+        slug: movie.slug,
+        duration: movie.duration,
+      },
+      cinema: {
         name: screening.cinema.name,
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: screening.cinema.street ?? undefined,
-          addressLocality: screening.cinema.city.name,
-          addressCountry: "PL",
-        },
+        slug: screening.cinema.slug,
+        street: screening.cinema.street,
+        cityName: screening.cinema.city.name,
       },
-      organizer: {
-        "@type": "Organization",
-        name: screening.cinema.name,
-        url: `${SITE_URL}/kina/${screening.cinema.slug}`,
-      },
-      workPresented: {
-        "@type": "Movie",
-        name: movie.title,
-        url: movieUrl,
-      },
-    };
-
-    if (movie.duration) {
-      event.endDate = new Date(
-        new Date(screening.dateTime).getTime() + movie.duration * 60 * 1000
-      ).toISOString();
-    }
-
-    if (screening.ticketUrl) {
-      event.offers = {
-        "@type": "Offer",
-        url: screening.ticketUrl,
-        availability: "https://schema.org/InStock",
-      };
-    }
-
-    return event;
-  });
-};
+      dateTime: screening.dateTime,
+      ticketUrl: screening.ticketUrl,
+    })),
+    `${SITE_URL}/filmy/${movie.slug}`
+  );
 
 export default async function MovieLayout({
   children,
@@ -144,7 +101,7 @@ export default async function MovieLayout({
     movieId: movie.id.toString(),
   }).catch(() => []);
 
-  const events = buildScreeningEventsJsonLd(movie, screenings);
+  const events = buildMovieScreeningEvents(movie, screenings);
 
   return (
     <>
