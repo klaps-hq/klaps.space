@@ -32,6 +32,15 @@ export const pluralPl = (
   return many;
 };
 
+/** Date in Polish long form, e.g. "7 czerwca 2026". Used for the visible
+ * "repertoire updated" note that mirrors dateModified in JSON-LD. */
+export const formatPlDate = (date: Date): string =>
+  new Intl.DateTimeFormat("pl-PL", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+
 /** Query params that change the visible result set on listing pages. */
 export const SCREENING_FILTER_PARAM_KEYS = [
   "city",
