@@ -1,15 +1,19 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { IScreening } from "@/interfaces/IScreenings";
 import CityField from "@/app/(home)/_components/screenings/city-field";
+import ShareButton from "@/components/common/share-button";
 import { usePreferredCity } from "@/contexts/city-context";
 import { groupScreeningsByCinema } from "@/lib/screenings";
+import { SITE_URL } from "@/lib/site-config";
 import { formatDateLabel, cn } from "@/lib/utils";
 
 interface MovieScreeningsProps {
   screenings: IScreening[];
+  movieTitle: string;
+  movieSlug: string;
 }
 
 interface ScreeningTimeProps {
@@ -66,15 +70,41 @@ const ScreeningTime: React.FC<ScreeningTimeProps> = ({ screening }) => {
 
 interface CinemaRowProps {
   screenings: IScreening[];
+  movieTitle: string;
+  movieSlug: string;
+  activeDate: string;
 }
 
-const CinemaRow: React.FC<CinemaRowProps> = ({ screenings }) => {
+// Weekday + numeric date for the share message, e.g. "czw., 12.06".
+const formatShareDate = (dateStr: string): string =>
+  new Date(dateStr).toLocaleDateString("pl-PL", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  });
+
+const CinemaRow: React.FC<CinemaRowProps> = ({
+  screenings,
+  movieTitle,
+  movieSlug,
+  activeDate,
+}) => {
   const first = screenings[0];
   if (!first) return null;
 
   const sorted = [...screenings].sort((a, b) =>
     a.dateTime.localeCompare(b.dateTime)
   );
+
+  // Deep link back to this exact view: the ?city/?date params preselect
+  // the sharer's city and date, #seanse scrolls to the screenings section.
+  const shareParams = new URLSearchParams({
+    city: String(first.cinema.city.id),
+    date: activeDate,
+  });
+  const shareUrl = `${SITE_URL}/filmy/${movieSlug}?${shareParams.toString()}#seanse`;
+  const shareTimes = sorted.map((s) => s.time).join(", ");
+  const shareText = `${movieTitle} - ${first.cinema.name}, ${first.cinema.city.name}, ${formatShareDate(activeDate)}, godz. ${shareTimes}`;
 
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-8 py-5 md:py-6">
@@ -99,23 +129,34 @@ const CinemaRow: React.FC<CinemaRowProps> = ({ screenings }) => {
         {sorted.map((screening) => (
           <ScreeningTime key={screening.id} screening={screening} />
         ))}
+        <ShareButton
+          variant="compact"
+          title={`${movieTitle} - ${first.cinema.name}`}
+          text={shareText}
+          url={shareUrl}
+          className="md:ml-2"
+        />
       </div>
     </div>
   );
 };
 
-const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
-  const { cityId, isHydrated } = usePreferredCity();
+const MovieScreenings: React.FC<MovieScreeningsProps> = ({
+  screenings,
+  movieTitle,
+  movieSlug,
+}) => {
+  const { cityId, cityName, isHydrated, setCityId } = usePreferredCity();
 
   // The page is statically cached with the nationwide list, so the
-  // preferred-city filter is applied here after hydration. When the
-  // chosen city has no showtimes, fall back to the nationwide list
-  // instead of dead-ending on an empty state.
+  // preferred-city filter is applied here after hydration. A city with
+  // no showtimes renders an explicit empty state below.
   const visibleScreenings = useMemo(() => {
     if (!isHydrated || cityId === null) return screenings;
-    const inCity = screenings.filter((s) => s.cinema.city.id === cityId);
-    return inCity.length > 0 ? inCity : screenings;
+    return screenings.filter((s) => s.cinema.city.id === cityId);
   }, [screenings, cityId, isHydrated]);
+
+  const cityEmpty = screenings.length > 0 && visibleScreenings.length === 0;
 
   const availableDates = [
     ...new Set(visibleScreenings.map((s) => s.date)),
@@ -123,6 +164,18 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
   const [selectedDate, setSelectedDate] = useState<string | null>(
     () => availableDates[0] ?? null
   );
+
+  // Shared screening links carry ?date= - preselect that day when it
+  // still has showtimes. Read from window (not useSearchParams) to keep
+  // the statically cached page free of a Suspense boundary.
+  useEffect(() => {
+    const dateParam = new URLSearchParams(window.location.search).get("date");
+    if (dateParam && screenings.some((s) => s.date === dateParam)) {
+      setSelectedDate(dateParam);
+    }
+    // Run once on mount - the param does not change without navigation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (screenings.length === 0) {
     return (
@@ -170,6 +223,30 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
     );
   }
 
+  // The chosen city has no showtimes for this movie: explicit empty
+  // state with the city select still available, plus a one-click reset.
+  if (cityEmpty) {
+    return (
+      <div className="flex flex-col">
+        <div className="flex justify-end pb-5 border-b border-white/10">
+          <CityField />
+        </div>
+        <div className="flex flex-col items-center text-center gap-6 py-10 md:py-14">
+          <p className="text-xl md:text-2xl font-medium -tracking-[0.01em] leading-tight text-white max-w-[28ch]">
+            Brak seansów tego filmu w mieście {cityName}.
+          </p>
+          <button
+            type="button"
+            onClick={() => setCityId(null)}
+            className="inline-flex items-center border border-white/30 hover:border-white hover:bg-white/[0.06] px-6 md:px-8 py-3 text-[11px] md:text-xs uppercase tracking-[0.28em] text-white transition-colors"
+          >
+            Pokaż wszystkie miasta
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Always exactly one selected date; if the selected one disappeared
   // (e.g. after a city change), fall back to the earliest available.
   const activeDate =
@@ -210,7 +287,12 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({ screenings }) => {
       <ul className="divide-y divide-white/10">
         {groups.map((cinemaScreenings) => (
           <li key={cinemaScreenings[0].cinema.id}>
-            <CinemaRow screenings={cinemaScreenings} />
+            <CinemaRow
+              screenings={cinemaScreenings}
+              movieTitle={movieTitle}
+              movieSlug={movieSlug}
+              activeDate={activeDate}
+            />
           </li>
         ))}
       </ul>
