@@ -67,9 +67,9 @@ const ContactPage = () => {
       <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-14 md:pt-20 pb-14 md:pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 lg:items-center">
           <div className="lg:col-span-4">
-            <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40">
+            <h2 className="text-3xl md:text-5xl lg:text-6xl leading-[1] -tracking-[0.03em] text-white font-medium">
               E-mail
-            </p>
+            </h2>
             <p className="mt-6 md:mt-8 max-w-[44ch] text-base md:text-lg text-white/65 leading-relaxed">
               Najszybszy sposób kontaktu. Prosimy o&nbsp;zwięzły opis sprawy
               w&nbsp;temacie wiadomości, to ułatwi nam szybką odpowiedź.
