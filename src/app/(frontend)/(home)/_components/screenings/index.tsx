@@ -3,13 +3,14 @@ import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { PaginatedResponse } from "@/interfaces/IMovies";
 import { getPaginatedScreenings } from "@/lib/screenings";
 import { getGenres } from "@/lib/genres";
-import { getPreferredCityId } from "@/lib/get-preferred-city";
+import { getPreferredLocation } from "@/lib/get-preferred-city";
 import ScreeningsSection from "./screenings-section";
 
 const HOMEPAGE_LIMIT = 30;
 
 interface ScreeningsSearchParams {
   city?: string;
+  voivodeship?: string;
   genres?: string;
   dateFrom?: string;
   dateTo?: string;
@@ -23,7 +24,9 @@ interface ScreeningsProps {
 const buildSeeAllHref = (searchParams: ScreeningsSearchParams): string => {
   const params = new URLSearchParams();
   if (searchParams.city) params.set("city", searchParams.city);
-  if (searchParams.genres) params.set("genre", searchParams.genres);
+  if (searchParams.voivodeship)
+    params.set("voivodeship", searchParams.voivodeship);
+  if (searchParams.genres) params.set("genres", searchParams.genres);
   if (searchParams.dateFrom) params.set("dateFrom", searchParams.dateFrom);
   if (searchParams.dateTo) params.set("dateTo", searchParams.dateTo);
   if (searchParams.search) params.set("search", searchParams.search);
@@ -59,11 +62,12 @@ const unwrapResponse = (
   Array.isArray(response) ? response : [...response.data];
 
 const Screenings = async ({ searchParams }: ScreeningsProps) => {
-  const cityId = await getPreferredCityId(searchParams);
+  const { cityId, voivodeship } = await getPreferredLocation(searchParams);
   const genreIds = parseGenreIds(searchParams.genres);
 
   const sharedFilters = {
     cityId,
+    voivodeship,
     dateFrom: searchParams.dateFrom,
     dateTo: searchParams.dateTo,
     search: searchParams.search,

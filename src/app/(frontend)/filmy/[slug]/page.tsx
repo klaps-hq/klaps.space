@@ -145,6 +145,7 @@ const MoviePage = async ({ params }: MoviePageProps) => {
             screenings={screenings}
             movieTitle={movie.title}
             movieSlug={movie.slug}
+            movieDuration={movie.duration}
           />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
@@ -158,6 +159,7 @@ const MoviePage = async ({ params }: MoviePageProps) => {
                 screenings={screenings}
                 movieTitle={movie.title}
                 movieSlug={movie.slug}
+                movieDuration={movie.duration}
               />
             </div>
           </div>

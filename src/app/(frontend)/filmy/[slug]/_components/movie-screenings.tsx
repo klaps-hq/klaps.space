@@ -4,16 +4,19 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { IScreening } from "@/interfaces/IScreenings";
 import CityField from "@/app/(home)/_components/screenings/city-field";
+import AddToCalendarButton from "@/components/common/add-to-calendar-button";
 import ShareButton from "@/components/common/share-button";
 import { usePreferredCity } from "@/contexts/city-context";
 import { groupScreeningsByCinema } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { formatDateLabel, cn } from "@/lib/utils";
+import { voivodeshipLocative } from "@/lib/voivodeships";
 
 interface MovieScreeningsProps {
   screenings: IScreening[];
   movieTitle: string;
   movieSlug: string;
+  movieDuration: number | null;
 }
 
 interface ScreeningTimeProps {
@@ -72,6 +75,7 @@ interface CinemaRowProps {
   screenings: IScreening[];
   movieTitle: string;
   movieSlug: string;
+  movieDuration: number | null;
   activeDate: string;
 }
 
@@ -87,6 +91,7 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
   screenings,
   movieTitle,
   movieSlug,
+  movieDuration,
   activeDate,
 }) => {
   const first = screenings[0];
@@ -105,6 +110,21 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
   const shareUrl = `${SITE_URL}/filmy/${movieSlug}?${shareParams.toString()}#seanse`;
   const shareTimes = sorted.map((s) => s.time).join(", ");
   const shareText = `${movieTitle} - ${first.cinema.name}, ${first.cinema.city.name}, ${formatShareDate(activeDate)}, godz. ${shareTimes}`;
+
+  const movieUrl = `${SITE_URL}/filmy/${movieSlug}`;
+  const calendarOptions = sorted.map((screening) => ({
+    label: `${screening.time} · ${formatShortDate(screening.date)}`,
+    start: screening.dateTime,
+    uid: `screening-${screening.id}@klaps.space`,
+    fileName: `${movieSlug}-${screening.date}-${screening.time.replace(":", "")}.ics`,
+    description: [
+      `Seans filmu "${movieTitle}" w ${first.cinema.name}, ${first.cinema.city.name}.`,
+      screening.ticketUrl ? `Bilety: ${screening.ticketUrl}` : null,
+      `Szczegóły: ${movieUrl}`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  }));
 
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-8 py-5 md:py-6">
@@ -125,17 +145,49 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
           {first.cinema.street ? ` · ${first.cinema.street}` : ""}
         </span>
       </div>
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 md:justify-end shrink-0">
-        {sorted.map((screening) => (
-          <ScreeningTime key={screening.id} screening={screening} />
-        ))}
-        <ShareButton
-          variant="compact"
-          title={`${movieTitle} - ${first.cinema.name}`}
-          text={shareText}
-          url={shareUrl}
-          className="md:ml-2"
-        />
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 md:justify-end md:gap-x-7 shrink-0">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 md:justify-end">
+          {sorted.map((screening) => (
+            <ScreeningTime key={screening.id} screening={screening} />
+          ))}
+        </div>
+        {/* Desktop: quiet icon actions behind a divider. */}
+        <div className="hidden md:flex items-center gap-5 self-stretch border-l border-white/10 pl-7">
+          <AddToCalendarButton
+            title={`${movieTitle} - ${first.cinema.name}`}
+            durationMinutes={movieDuration}
+            location={[first.cinema.name, first.cinema.street, first.cinema.city.name]
+              .filter(Boolean)
+              .join(", ")}
+            url={movieUrl}
+            options={calendarOptions}
+          />
+          <ShareButton
+            variant="compact"
+            title={`${movieTitle} - ${first.cinema.name}`}
+            text={shareText}
+            url={shareUrl}
+          />
+        </div>
+        {/* Mobile: right-aligned column of labeled buttons with tall touch targets. */}
+        <div className="flex md:hidden flex-col items-start gap-y-2 ml-auto">
+          <AddToCalendarButton
+            variant="labeled"
+            title={`${movieTitle} - ${first.cinema.name}`}
+            durationMinutes={movieDuration}
+            location={[first.cinema.name, first.cinema.street, first.cinema.city.name]
+              .filter(Boolean)
+              .join(", ")}
+            url={movieUrl}
+            options={calendarOptions}
+          />
+          <ShareButton
+            variant="labeled"
+            title={`${movieTitle} - ${first.cinema.name}`}
+            text={shareText}
+            url={shareUrl}
+          />
+        </div>
       </div>
     </div>
   );
@@ -145,16 +197,23 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
   screenings,
   movieTitle,
   movieSlug,
+  movieDuration,
 }) => {
-  const { cityId, cityName, isHydrated, setCityId } = usePreferredCity();
+  const { cityId, voivodeship, locationLabel, isHydrated, setCityId } =
+    usePreferredCity();
 
   // The page is statically cached with the nationwide list, so the
-  // preferred-city filter is applied here after hydration. A city with
-  // no showtimes renders an explicit empty state below.
+  // preferred-location filter is applied here after hydration. A city
+  // or voivodeship with no showtimes renders an explicit empty state.
   const visibleScreenings = useMemo(() => {
-    if (!isHydrated || cityId === null) return screenings;
-    return screenings.filter((s) => s.cinema.city.id === cityId);
-  }, [screenings, cityId, isHydrated]);
+    if (!isHydrated || (cityId === null && voivodeship === null)) {
+      return screenings;
+    }
+    if (cityId !== null) {
+      return screenings.filter((s) => s.cinema.city.id === cityId);
+    }
+    return screenings.filter((s) => s.cinema.city.voivodeship === voivodeship);
+  }, [screenings, cityId, voivodeship, isHydrated]);
 
   const cityEmpty = screenings.length > 0 && visibleScreenings.length === 0;
 
@@ -223,7 +282,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
     );
   }
 
-  // The chosen city has no showtimes for this movie: explicit empty
+  // The chosen location has no showtimes for this movie: explicit empty
   // state with the city select still available, plus a one-click reset.
   if (cityEmpty) {
     return (
@@ -233,7 +292,9 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
         </div>
         <div className="flex flex-col items-center text-center gap-6 py-10 md:py-14">
           <p className="text-xl md:text-2xl font-medium -tracking-[0.01em] leading-tight text-white max-w-[28ch]">
-            Brak seansów tego filmu w mieście {cityName}.
+            {voivodeship !== null
+              ? `Brak seansów tego filmu w województwie ${voivodeshipLocative(voivodeship)}.`
+              : `Brak seansów tego filmu w mieście ${locationLabel}.`}
           </p>
           <button
             type="button"
@@ -291,6 +352,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
               screenings={cinemaScreenings}
               movieTitle={movieTitle}
               movieSlug={movieSlug}
+              movieDuration={movieDuration}
               activeDate={activeDate}
             />
           </li>

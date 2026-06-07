@@ -44,6 +44,7 @@ export const formatPlDate = (date: Date): string =>
 /** Query params that change the visible result set on listing pages. */
 export const SCREENING_FILTER_PARAM_KEYS = [
   "city",
+  "voivodeship",
   "genres",
   "dateFrom",
   "dateTo",

@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getCities } from "@/lib/cities";
+import { formatVoivodeship } from "@/lib/voivodeships";
 import { ICity } from "@/interfaces/ICities";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, {
@@ -13,25 +14,31 @@ import Footer from "../(home)/_components/footer";
 
 export const revalidate = 300;
 
-const groupByLetter = (cities: ICity[]): [string, ICity[]][] => {
+// Cities with no voivodeship (defensive, should not happen) end up
+// in a trailing "Pozostałe" bucket instead of disappearing.
+const FALLBACK_GROUP = "pozostałe";
+
+const groupByVoivodeship = (cities: ICity[]): [string, ICity[]][] => {
   const sorted = [...cities].sort((a, b) =>
     a.name.localeCompare(b.name, "pl")
   );
   const groups = new Map<string, ICity[]>();
   for (const city of sorted) {
-    const letter = city.name[0]?.toUpperCase() ?? "?";
-    const bucket = groups.get(letter);
+    const key = city.voivodeship ?? FALLBACK_GROUP;
+    const bucket = groups.get(key);
     if (bucket) bucket.push(city);
-    else groups.set(letter, [city]);
+    else groups.set(key, [city]);
   }
-  return Array.from(groups.entries()).sort(([a], [b]) =>
-    a.localeCompare(b, "pl")
-  );
+  return Array.from(groups.entries()).sort(([a], [b]) => {
+    if (a === FALLBACK_GROUP) return 1;
+    if (b === FALLBACK_GROUP) return -1;
+    return a.localeCompare(b, "pl");
+  });
 };
 
 const CitiesPage = async () => {
   const cities = await getCities();
-  const letterGroups = groupByLetter(cities);
+  const voivodeshipGroups = groupByVoivodeship(cities);
   const totalCities = cities.length;
   const totalCinemas = cities.reduce((acc, c) => acc + c.numberOfCinemas, 0);
 
@@ -51,28 +58,28 @@ const CitiesPage = async () => {
           </PageHeadingMuted>
         </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
-          Alfabetyczna lista wszystkich {totalCities} miast, w&nbsp;których
-          działają niezależne kina studyjne. Łącznie {totalCinemas} ekranów
-          z&nbsp;klasyką, retrospektywami i&nbsp;pokazami specjalnymi.
-          Wybierz miasto, żeby zobaczyć lokalne kina i&nbsp;ich aktualne
-          repertuary.
+          Lista wszystkich {totalCities} miast, w&nbsp;których działają
+          niezależne kina studyjne, pogrupowana według województw. Łącznie{" "}
+          {totalCinemas} ekranów z&nbsp;klasyką, retrospektywami
+          i&nbsp;pokazami specjalnymi. Wybierz miasto, żeby zobaczyć lokalne
+          kina i&nbsp;ich aktualne repertuary.
         </p>
         <SiteSearch mode="cities" className="mt-8 md:mt-10 max-w-md" />
       </div>
 
       <div className="px-6 md:px-12 lg:px-16 pb-24 md:pb-32">
-        {letterGroups.length === 0 ? (
+        {voivodeshipGroups.length === 0 ? (
           <EmptyState description="Brak miast do wyświetlenia." />
         ) : (
           <div className="columns-1 md:columns-2 lg:columns-3 gap-x-12 lg:gap-x-16">
-            {letterGroups.map(([letter, citiesInGroup]) => (
+            {voivodeshipGroups.map(([voivodeship, citiesInGroup]) => (
               <section
-                key={letter}
+                key={voivodeship}
                 className="mb-12 md:mb-16 break-inside-avoid"
               >
                 <div className="flex items-baseline gap-3 border-b border-white/10 pb-3 mb-5">
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold uppercase -tracking-[0.02em] text-white">
-                    {letter}
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold uppercase -tracking-[0.02em] text-white">
+                    {formatVoivodeship(voivodeship)}
                   </h2>
                   <span className="text-[10px] uppercase tracking-[0.3em] text-white/35 tabular-nums">
                     {citiesInGroup.length}

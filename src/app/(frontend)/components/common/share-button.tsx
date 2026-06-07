@@ -8,8 +8,11 @@ interface ShareButtonProps {
   title: string;
   url: string;
   text?: string;
-  /** "default" renders a bordered labeled button, "compact" an icon-only one. */
-  variant?: "default" | "compact";
+  /**
+   * "default" renders a bordered labeled button, "compact" an icon-only
+   * one, "labeled" a flat icon + label button with a tall touch target.
+   */
+  variant?: "default" | "compact" | "labeled";
   className?: string;
 }
 
@@ -54,6 +57,30 @@ const ShareButton: React.FC<ShareButtonProps> = ({
       // Clipboard unavailable (e.g. insecure context) - silently ignore.
     }
   };
+
+  if (variant === "labeled") {
+    return (
+      <button
+        type="button"
+        onClick={handleShare}
+        aria-label={`Udostępnij: ${title}`}
+        className={cn(
+          "inline-flex items-center gap-2 py-2 text-[10px] uppercase tracking-[0.2em] text-white/70 hover:text-white transition-colors",
+          copied && "text-white",
+          className
+        )}
+      >
+        {copied ? (
+          <Check aria-hidden="true" className="w-4 h-4" />
+        ) : (
+          <Share2 aria-hidden="true" className="w-4 h-4" />
+        )}
+        <span aria-live="polite">
+          {copied ? "Skopiowano link" : "Udostępnij"}
+        </span>
+      </button>
+    );
+  }
 
   if (variant === "compact") {
     return (

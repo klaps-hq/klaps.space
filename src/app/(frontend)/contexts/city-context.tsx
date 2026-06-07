@@ -12,7 +12,13 @@ import {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ICity } from "@/interfaces/ICities";
-import { PREFERRED_CITY_KEY, setPreferredCityCookie } from "@/lib/city-storage";
+import {
+  PREFERRED_CITY_KEY,
+  PREFERRED_VOIVODESHIP_KEY,
+  setPreferredCityCookie,
+  setPreferredVoivodeshipCookie,
+} from "@/lib/city-storage";
+import { formatVoivodeship, isVoivodeship } from "@/lib/voivodeships";
 
 export type CityOption = { value: number | null; label: string };
 
@@ -21,17 +27,34 @@ const ALL_CITIES_OPTION: CityOption = {
   label: "Wszystkie miasta",
 };
 
-interface SetCityIdOptions {
+const ALL_CITIES_LABEL = ALL_CITIES_OPTION.label;
+
+/** Exactly one of the two is set; both null means "no filter". */
+interface LocationState {
+  cityId: number | null;
+  voivodeship: string | null;
+}
+
+const EMPTY_LOCATION: LocationState = { cityId: null, voivodeship: null };
+
+interface SetLocationOptions {
   /** When false, skips the URL update and refresh - the caller owns navigation. */
   navigate?: boolean;
 }
 
 interface CityContextValue {
   cityId: number | null;
-  cityName: string;
+  voivodeship: string | null;
+  /** Display label of the active filter: city name, voivodeship or "Wszystkie miasta". */
+  locationLabel: string;
   isHydrated: boolean;
-  setCityId: (cityId: number | null, options?: SetCityIdOptions) => void;
+  setCityId: (cityId: number | null, options?: SetLocationOptions) => void;
+  setVoivodeship: (
+    voivodeship: string | null,
+    options?: SetLocationOptions
+  ) => void;
   options: CityOption[];
+  cities: ICity[];
 }
 
 const CityContext = createContext<CityContextValue | null>(null);
@@ -51,15 +74,13 @@ interface CityProviderProps {
 
 const HYDRATION_SUBSCRIBE = () => () => {};
 
-const resolveInitialCityId = (
+const resolveInitialLocation = (
   cities: ICity[],
   pathname: string
-): number | null => {
+): LocationState => {
   if (typeof window === "undefined") {
-    return null;
+    return EMPTY_LOCATION;
   }
-
-  let resolved: number | null = null;
 
   // Movie pages accept ?city= from shared screening links so the
   // recipient lands on the city the sharer was looking at.
@@ -73,22 +94,42 @@ const resolveInitialCityId = (
     if (urlCity) {
       const parsed = Number(urlCity);
       if (cities.some((city) => city.id === parsed)) {
-        resolved = parsed;
+        return { cityId: parsed, voivodeship: null };
       }
+    }
+    const urlVoivodeship = params.get("voivodeship");
+    if (urlVoivodeship && isVoivodeship(urlVoivodeship)) {
+      return { cityId: null, voivodeship: urlVoivodeship };
     }
   }
 
-  if (resolved !== null) {
-    return resolved;
+  const storedCity = localStorage.getItem(PREFERRED_CITY_KEY);
+  if (storedCity) {
+    const parsed = Number(storedCity);
+    if (cities.some((city) => city.id === parsed)) {
+      return { cityId: parsed, voivodeship: null };
+    }
   }
 
-  const stored = localStorage.getItem(PREFERRED_CITY_KEY);
-  if (!stored) {
-    return null;
+  const storedVoivodeship = localStorage.getItem(PREFERRED_VOIVODESHIP_KEY);
+  if (storedVoivodeship && isVoivodeship(storedVoivodeship)) {
+    return { cityId: null, voivodeship: storedVoivodeship };
   }
 
-  const parsed = Number(stored);
-  return cities.some((city) => city.id === parsed) ? parsed : null;
+  return EMPTY_LOCATION;
+};
+
+const persistLocation = (location: LocationState): void => {
+  localStorage.setItem(
+    PREFERRED_CITY_KEY,
+    location.cityId !== null ? String(location.cityId) : ""
+  );
+  localStorage.setItem(
+    PREFERRED_VOIVODESHIP_KEY,
+    location.voivodeship ?? ""
+  );
+  setPreferredCityCookie(location.cityId);
+  setPreferredVoivodeshipCookie(location.voivodeship);
 };
 
 export const CityProvider = ({ children, cities }: CityProviderProps) => {
@@ -100,8 +141,8 @@ export const CityProvider = ({ children, cities }: CityProviderProps) => {
     [cities]
   );
 
-  const [cityId, setCityIdState] = useState<number | null>(() =>
-    resolveInitialCityId(cities, pathname)
+  const [location, setLocationState] = useState<LocationState>(() =>
+    resolveInitialLocation(cities, pathname)
   );
   const isHydrated = useSyncExternalStore(
     HYDRATION_SUBSCRIBE,
@@ -109,25 +150,31 @@ export const CityProvider = ({ children, cities }: CityProviderProps) => {
     () => false
   );
 
+  // Persist the initial URL-derived selection (deep links); an empty
+  // initial state must not wipe a preference stored by another tab.
   useEffect(() => {
-    if (cityId === null) {
+    if (location.cityId === null && location.voivodeship === null) {
       return;
     }
+    persistLocation(location);
+  }, [location]);
 
-    localStorage.setItem(PREFERRED_CITY_KEY, String(cityId));
-    setPreferredCityCookie(cityId);
-  }, [cityId]);
+  const locationLabel = useMemo(() => {
+    if (location.cityId !== null) {
+      return (
+        cities.find((c) => c.id === location.cityId)?.name ?? ALL_CITIES_LABEL
+      );
+    }
+    if (location.voivodeship !== null) {
+      return formatVoivodeship(location.voivodeship);
+    }
+    return ALL_CITIES_LABEL;
+  }, [location, cities]);
 
-  const cityName = useMemo(
-    () => (cityId ? cities.find((c) => c.id === cityId)?.name ?? "Wszystkie miasta" : "Wszystkie miasta"),
-    [cityId, cities]
-  );
-
-  const setCityId = useCallback(
-    (newCityId: number | null, options?: SetCityIdOptions) => {
-      setCityIdState(newCityId);
-      localStorage.setItem(PREFERRED_CITY_KEY, newCityId !== null ? String(newCityId) : "");
-      setPreferredCityCookie(newCityId);
+  const setLocation = useCallback(
+    (newLocation: LocationState, options?: SetLocationOptions) => {
+      setLocationState(newLocation);
+      persistLocation(newLocation);
 
       if (options?.navigate === false) {
         return;
@@ -135,10 +182,15 @@ export const CityProvider = ({ children, cities }: CityProviderProps) => {
 
       if (pathname === "/" || pathname === "/seanse") {
         const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
-        if (newCityId !== null) {
-          params.set("city", String(newCityId));
+        if (newLocation.cityId !== null) {
+          params.set("city", String(newLocation.cityId));
         } else {
           params.delete("city");
+        }
+        if (newLocation.voivodeship !== null) {
+          params.set("voivodeship", newLocation.voivodeship);
+        } else {
+          params.delete("voivodeship");
         }
         const queryString = params.toString();
         const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
@@ -150,15 +202,40 @@ export const CityProvider = ({ children, cities }: CityProviderProps) => {
     [pathname, router]
   );
 
+  const setCityId = useCallback(
+    (cityId: number | null, options?: SetLocationOptions) => {
+      setLocation({ cityId, voivodeship: null }, options);
+    },
+    [setLocation]
+  );
+
+  const setVoivodeship = useCallback(
+    (voivodeship: string | null, options?: SetLocationOptions) => {
+      setLocation({ cityId: null, voivodeship }, options);
+    },
+    [setLocation]
+  );
+
   const value = useMemo(
     () => ({
-      cityId,
-      cityName,
+      cityId: location.cityId,
+      voivodeship: location.voivodeship,
+      locationLabel,
       isHydrated,
       setCityId,
+      setVoivodeship,
       options,
+      cities,
     }),
-    [cityId, cityName, isHydrated, setCityId, options]
+    [
+      location,
+      locationLabel,
+      isHydrated,
+      setCityId,
+      setVoivodeship,
+      options,
+      cities,
+    ]
   );
 
   return <CityContext.Provider value={value}>{children}</CityContext.Provider>;

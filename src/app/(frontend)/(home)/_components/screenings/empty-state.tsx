@@ -21,7 +21,7 @@ const ScreeningsEmptyState: React.FC<ScreeningsEmptyStateProps> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { startTransition } = useScreeningsTransition();
-  const { cityId, setCityId } = usePreferredCity();
+  const { cityId, voivodeship, setCityId } = usePreferredCity();
 
   const updateParams = (mutator: (params: URLSearchParams) => void) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -35,15 +35,22 @@ const ScreeningsEmptyState: React.FC<ScreeningsEmptyStateProps> = ({
   };
 
   const hasAnyFilter =
-    cityId !== null || !!dateLabel || !!genresLabel || !!searchLabel;
+    cityId !== null ||
+    voivodeship !== null ||
+    !!dateLabel ||
+    !!genresLabel ||
+    !!searchLabel;
 
   const handleClearAll = () => {
-    // Single navigation clears every param (including "city") - the context
-    // only updates its state and storage, otherwise its own router.replace
-    // races with ours and restores the stale "city" param.
-    if (cityId !== null) setCityId(null, { navigate: false });
+    // Single navigation clears every param (including the location ones) -
+    // the context only updates its state and storage, otherwise its own
+    // router.replace races with ours and restores the stale params.
+    if (cityId !== null || voivodeship !== null) {
+      setCityId(null, { navigate: false });
+    }
     updateParams((p) => {
       p.delete("city");
+      p.delete("voivodeship");
       p.delete("dateFrom");
       p.delete("dateTo");
       p.delete("genres");
