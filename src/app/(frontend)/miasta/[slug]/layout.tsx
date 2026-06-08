@@ -1,5 +1,6 @@
 import { getCityBySlug } from "@/lib/cities";
 import { getCinemas } from "@/lib/cinemas";
+import { getScreeningsLastUpdated } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { ICity } from "@/interfaces/ICities";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
@@ -14,16 +15,18 @@ const buildCityJsonLd = (
   city: ICity,
   cinemasCount: number,
   screeningsCount: number,
-  screeningGroups: IScreeningGroup[]
+  screeningGroups: IScreeningGroup[],
+  lastUpdated: Date | null
 ) => ({
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   name: `Kina i seanse w ${city.nameDeclinated}`,
   url: `${SITE_URL}/miasta/${city.slug}`,
   description: `${cinemasCount} kin i ${screeningsCount} seansów specjalnych w ${city.nameDeclinated}.`,
-  // Freshness signal for AI Overviews: render time equals the moment
-  // the repertoire data was last refreshed (ISR).
-  dateModified: new Date().toISOString(),
+  // Freshness signal for AI Overviews: newest screening `updatedAt` for this
+  // city (mirrors the visible "Repertuar zaktualizowano" note), i.e. a real
+  // data change rather than render time. Omitted when the date is unknown.
+  ...(lastUpdated && { dateModified: lastUpdated.toISOString() }),
   // The visible repertoire mirrored as an ItemList, so AI search gets
   // a machine-readable "what's playing in this city" list.
   mainEntity: {
@@ -45,9 +48,10 @@ export default async function CityLayout({
   const { slug } = await params;
   const { city, screenings: rawScreenings } = await getCityBySlug(slug);
 
-  const cinemasResponse = await getCinemas({
-    cityId: city.id.toString(),
-  });
+  const [cinemasResponse, lastUpdated] = await Promise.all([
+    getCinemas({ cityId: city.id.toString() }),
+    getScreeningsLastUpdated({ cityId: city.id.toString() }),
+  ]);
 
   const screenings = Array.isArray(rawScreenings)
     ? rawScreenings
@@ -62,7 +66,13 @@ export default async function CityLayout({
   return (
     <>
       <JsonLd
-        data={buildCityJsonLd(city, cinemasCount, screeningsCount, screenings)}
+        data={buildCityJsonLd(
+          city,
+          cinemasCount,
+          screeningsCount,
+          screenings,
+          lastUpdated
+        )}
       />
       {children}
     </>
