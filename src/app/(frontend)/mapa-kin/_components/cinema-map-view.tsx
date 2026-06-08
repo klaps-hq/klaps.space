@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import {
   Map,
   MapClusterLayer,
@@ -125,16 +126,14 @@ const CinemaMapView: React.FC<CinemaMapViewProps> = ({ cinemas }) => {
                   {selected.address}
                 </p>
               </div>
-              <div className="px-5 py-3 flex items-baseline justify-between gap-2">
+              <div className="px-5 py-3 flex items-center justify-between gap-2">
                 <span className="text-[10px] uppercase tracking-[0.28em] text-white/65 group-hover:text-white transition-colors">
                   Sprawdź repertuar
                 </span>
-                <span
+                <ArrowRight
                   aria-hidden="true"
-                  className="text-white/65 group-hover:text-white transition-transform group-hover:translate-x-1"
-                >
-                  →
-                </span>
+                  className="size-3.5 shrink-0 text-white/65 group-hover:text-white transition-transform group-hover:translate-x-1"
+                />
               </div>
             </Link>
           </MapPopup>

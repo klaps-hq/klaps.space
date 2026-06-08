@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import WilhelmEgg from "./wilhelm-egg";
 
 const NAV_COLUMNS = [
@@ -11,6 +12,7 @@ const NAV_COLUMNS = [
       { label: "Kina", href: "/kina" },
       { label: "Miasta", href: "/miasta" },
       { label: "Gatunki", href: "/gatunki" },
+      { label: "Reżyserzy", href: "/rezyserzy" },
       { label: "Mapa kin", href: "/mapa-kin" },
     ],
   },
@@ -72,17 +74,15 @@ const Footer: React.FC = () => {
             href="https://github.com/klaps-hq"
             target="_blank"
             rel="noreferrer noopener nofollow"
-            className="group inline-flex items-baseline gap-2 hover:text-white transition-colors"
+            className="group inline-flex items-center gap-2 hover:text-white transition-colors"
           >
             <span className="underline underline-offset-4 decoration-white/25 group-hover:decoration-white transition-colors">
               github.com/klaps-hq
             </span>
-            <span
+            <ArrowUpRight
               aria-hidden="true"
-              className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-            >
-              ↗
-            </span>
+              className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            />
           </a>
         </div>
       </div>
@@ -94,13 +94,13 @@ const Footer: React.FC = () => {
           aria-label="Klaps, strona główna"
           className="block"
         >
-          <h2 className="text-[24vw] leading-[0.78] font-bold uppercase text-white -tracking-[0.04em] whitespace-nowrap">
+          <h2 className="text-[20vw] md:text-[24vw] leading-[0.78] font-bold uppercase text-white -tracking-[0.04em] whitespace-nowrap">
             Klaps
           </h2>
         </Link>
       </div>
 
-      <div className="flex items-center gap-2 px-6 md:px-12 lg:px-16 pb-6 text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-white/40">
+      <div className="flex flex-col sm:flex-row items-center gap-2 px-6 md:px-12 lg:px-16 pt-8 md:pt-4 pb-6 text-center sm:text-left text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-white/40">
         <a
           href="https://www.themoviedb.org/"
           target="_blank"

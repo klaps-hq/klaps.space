@@ -8,6 +8,7 @@ import {
 import { IScreening } from "@/interfaces/IScreenings";
 import { apiFetch, fetchOrNotFound } from "./client";
 import { getMovieScreenings } from "./screenings";
+import { tmdbImageUrl } from "./tmdb";
 
 interface GetMoviesParams {
   page?: number;
@@ -51,6 +52,37 @@ export const getMovies = async (
       },
     };
   }
+};
+
+// Safety cap so a misbehaving feed can never loop forever: 50 pages x 100 =
+// 5000 movies, comfortably above the real catalogue.
+const MAX_POSTER_PAGES = 50;
+
+const toAbsolutePosterUrl = (posterUrl: string): string =>
+  posterUrl.startsWith("http") ? posterUrl : tmdbImageUrl(posterUrl, "w780");
+
+/**
+ * slug -> absolute poster URL for every movie that has one. Backs the
+ * <image:image> entries in sitemap.xml. Paginates the movies feed; getMovies
+ * swallows errors into an empty page, so a failed request just ends the loop.
+ */
+export const getMoviePosterMap = async (): Promise<Map<string, string>> => {
+  const posters = new Map<string, string>();
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const { data, meta } = await getMovies({ page, limit: 100 });
+    for (const movie of data) {
+      if (movie.posterUrl) {
+        posters.set(movie.slug, toAbsolutePosterUrl(movie.posterUrl));
+      }
+    }
+    totalPages = meta.totalPages || 1;
+    page += 1;
+  } while (page <= totalPages && page <= MAX_POSTER_PAGES);
+
+  return posters;
 };
 
 export const getMovieById = async (id: number): Promise<IMovie> => {

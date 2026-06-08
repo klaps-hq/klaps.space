@@ -173,6 +173,9 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
           sideOffset={1}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
+            // iOS zooms in and scrolls to a focused sub-16px input. Skip
+            // autofocus on touch so opening the picker stays in place.
+            if (window.matchMedia("(pointer: coarse)").matches) return;
             inputRef.current?.focus();
           }}
           className="z-50 w-[300px] bg-black border border-white/15 text-white data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-150"

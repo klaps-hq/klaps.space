@@ -8,3 +8,19 @@ export function tmdbImageUrl(
 ): string {
   return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
 }
+
+/**
+ * Resolve a person/poster image into a usable absolute URL.
+ * Directors come from TMDB, so photoUrl is normally a profile path
+ * ("/abc.jpg"). next/image only whitelists image.tmdb.org, so values from
+ * any other host return null and the caller falls back to a placeholder.
+ */
+export function resolveTmdbPhotoUrl(
+  photoUrl: string | null | undefined,
+  size: TmdbImageSize = "w342"
+): string | null {
+  if (!photoUrl) return null;
+  if (photoUrl.startsWith("/")) return tmdbImageUrl(photoUrl, size);
+  if (photoUrl.includes("image.tmdb.org")) return photoUrl;
+  return null;
+}

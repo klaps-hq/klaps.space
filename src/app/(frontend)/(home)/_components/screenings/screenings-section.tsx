@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
 import {
@@ -69,12 +70,10 @@ const ScreeningsSectionInner: React.FC<ScreeningsSectionProps> = ({
               className="group inline-flex items-center gap-4 text-xs md:text-sm uppercase tracking-[0.28em] text-white border border-white/25 hover:border-white hover:bg-white/[0.04] px-8 md:px-10 py-4 md:py-5 transition-colors"
             >
               Zobacz wszystkie seanse
-              <span
+              <ArrowRight
                 aria-hidden="true"
-                className="transition-transform group-hover:translate-x-1"
-              >
-                →
-              </span>
+                className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
+              />
             </Link>
           </div>
         )}

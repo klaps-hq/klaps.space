@@ -58,7 +58,7 @@ const PaginatedNav: React.FC<PaginatedNavProps> = ({
 
   return (
     <Pagination>
-      <PaginationContent className="gap-1">
+      <PaginationContent className="gap-4 md:gap-6">
         <PaginationItem>
           <PaginationPrevious
             href={hasPrevious ? buildHref(currentPage - 1) : undefined}

@@ -8,6 +8,8 @@ import { IRandomScreening } from "@/interfaces/IScreenings";
 import { tmdbImageUrl } from "@/lib/tmdb";
 import { formatDuration, getYouTubeEmbedUrl } from "@/lib/utils";
 import TrailerModal from "@/components/common/trailer-modal";
+import MobileNav from "@/components/common/mobile-nav";
+import { NAV_LINKS } from "@/components/common/nav-links";
 import HeroParallax from "./hero-parallax";
 import { CharsReveal, TitleReveal } from "./text-reveal";
 
@@ -68,22 +70,17 @@ const HeroNav: React.FC = () => (
       </span>
     </Link>
     <div className="hidden md:flex items-center gap-6 lg:gap-8 text-sm text-white/80">
-      <Link href="/seanse" className="hover:text-white transition-colors">
-        Seanse
-      </Link>
-      <Link href="/gatunki" className="hover:text-white transition-colors">
-        Gatunki
-      </Link>
-      <Link href="/kina" className="hover:text-white transition-colors">
-        Kina
-      </Link>
-      <Link href="/miasta" className="hover:text-white transition-colors">
-        Miasta
-      </Link>
-      <Link href="/mapa-kin" className="hover:text-white transition-colors">
-        Mapa
-      </Link>
+      {NAV_LINKS.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          className="hover:text-white transition-colors"
+        >
+          {link.label}
+        </Link>
+      ))}
     </div>
+    <MobileNav links={NAV_LINKS} />
   </motion.nav>
 );
 
@@ -156,6 +153,11 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
           gradient + grain so the smaller source is indistinguishable. */}
       <HeroParallax
         backdropSrc={tmdbImageUrl(screening.movie.backdropUrl ?? "", "w1280")}
+        posterSrc={
+          screening.movie.posterUrl
+            ? tmdbImageUrl(screening.movie.posterUrl, "w780")
+            : null
+        }
         alt={screening.movie.title}
       >
         <HeroNav />
@@ -230,12 +232,6 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
                   className="text-base text-white border-b border-white/50 pb-0.5 hover:border-white transition-colors"
                 >
                   {CTA_PRIMARY}
-                </Link>
-                <Link
-                  href="/seanse"
-                  className="text-base text-white/70 border-b border-white/30 pb-0.5 hover:text-white hover:border-white transition-colors"
-                >
-                  Pełny repertuar
                 </Link>
                 {embedUrl && (
                   <button

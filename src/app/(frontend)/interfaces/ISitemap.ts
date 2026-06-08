@@ -10,4 +10,6 @@ export interface ISitemapResponse {
   /** Only cities with at least one cinema. */
   cities: ISitemapEntry[];
   genres: ISitemapEntry[];
+  /** Only directors above the indexing threshold (>= 3 upcoming screenings). */
+  directors?: ISitemapEntry[];
 }

@@ -6,12 +6,16 @@ import { motion, useScroll, useTransform } from "framer-motion";
 
 interface HeroParallaxProps {
   backdropSrc: string;
+  // Portrait poster shown on mobile, where the wide backdrop would crop to an
+  // unflattering center strip. Falls back to the backdrop when absent.
+  posterSrc?: string | null;
   alt: string;
   children: React.ReactNode;
 }
 
 const HeroParallax: React.FC<HeroParallaxProps> = ({
   backdropSrc,
+  posterSrc,
   alt,
   children,
 }) => {
@@ -40,15 +44,40 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
           className="absolute inset-0"
           style={{ y: imageY, scale: imageScale }}
         >
-          <Image
-            src={backdropSrc}
-            alt={alt}
-            fill
-            sizes="100vw"
-            quality={60}
-            className="object-cover"
-            priority
-          />
+          {posterSrc ? (
+            <>
+              {/* Mobile: portrait poster fills the tall viewport cleanly. */}
+              <Image
+                src={posterSrc}
+                alt={alt}
+                fill
+                sizes="100vw"
+                quality={65}
+                className="object-cover md:hidden"
+                priority
+              />
+              {/* Desktop: cinematic landscape backdrop. */}
+              <Image
+                src={backdropSrc}
+                alt={alt}
+                fill
+                sizes="100vw"
+                quality={60}
+                className="object-cover hidden md:block"
+                priority
+              />
+            </>
+          ) : (
+            <Image
+              src={backdropSrc}
+              alt={alt}
+              fill
+              sizes="100vw"
+              quality={60}
+              className="object-cover"
+              priority
+            />
+          )}
         </motion.div>
       </motion.div>
 
