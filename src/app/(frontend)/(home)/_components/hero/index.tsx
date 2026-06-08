@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
+import { Play } from "lucide-react";
 import { IRandomScreening } from "@/interfaces/IScreenings";
 import { tmdbImageUrl } from "@/lib/tmdb";
 import { formatDuration, getYouTubeEmbedUrl } from "@/lib/utils";
@@ -242,12 +243,10 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
                     onClick={() => setTrailerOpen(true)}
                     className="group inline-flex items-center gap-2 text-base text-white/70 border-b border-white/30 pb-0.5 hover:text-white hover:border-white transition-colors"
                   >
-                    <span
+                    <Play
                       aria-hidden="true"
-                      className="text-[9px] leading-none transition-transform group-hover:scale-110"
-                    >
-                      ▶
-                    </span>
+                      className="size-3 fill-current transition-transform group-hover:scale-110"
+                    />
                     Zwiastun
                   </button>
                 )}
