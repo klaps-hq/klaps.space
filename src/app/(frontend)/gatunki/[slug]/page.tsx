@@ -7,6 +7,7 @@ import { getMovies } from "@/lib/movies";
 import { getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
+import { genreFallbackIntro } from "@/lib/listing-copy";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
@@ -118,9 +119,7 @@ const GenrePage = async ({ params }: GenrePageProps) => {
           </p>
         ) : (
           <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
-            Filmy z&nbsp;gatunku {genreNameLower} pokazywane aktualnie
-            w&nbsp;polskich kinach studyjnych. Filtruj po mieście, dacie
-            lub frazie poniżej.
+            {genreFallbackIntro(genreNameLower, screenings)}
           </p>
         )}
       </header>

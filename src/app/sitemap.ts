@@ -4,7 +4,7 @@ import { SITE_URL } from "@/lib/site-config";
 // sitemap.ts anywhere under app/ would register as a metadata route.
 import { getSitemapEntries } from "@/lib/sitemap-entries";
 import { getScreenings } from "@/lib/screenings";
-import { getMovies } from "@/lib/movies";
+import { getMovies, getMoviePosterMap } from "@/lib/movies";
 import { getGenres } from "@/lib/genres";
 import { ISitemapEntry } from "@/interfaces/ISitemap";
 
@@ -28,7 +28,10 @@ const toPages = (
   entries: ISitemapEntry[],
   basePath: string,
   changeFrequency: "daily" | "weekly",
-  priority: number
+  priority: number,
+  // Optional per-slug image resolver: returns an absolute image URL to attach
+  // as a sitemap <image:image> entry, or undefined when the slug has none.
+  imageFor?: (slug: string) => string | undefined
 ): MetadataRoute.Sitemap =>
   entries
     .map((entry) => ({
@@ -36,12 +39,16 @@ const toPages = (
       lastModified: toLastModified(entry.updatedAt),
     }))
     .filter(({ slug }) => isValidSlug(slug))
-    .map(({ slug, lastModified }) => ({
-      url: `${SITE_URL}/${basePath}/${encodeURIComponent(slug)}`,
-      lastModified,
-      changeFrequency,
-      priority,
-    }));
+    .map(({ slug, lastModified }) => {
+      const image = imageFor?.(slug);
+      return {
+        url: `${SITE_URL}/${basePath}/${encodeURIComponent(slug)}`,
+        lastModified,
+        changeFrequency,
+        priority,
+        ...(image ? { images: [image] } : {}),
+      };
+    });
 
 // Movie pages without upcoming screenings render with a noindex meta;
 // submitting them would conflict with that signal ("Submitted URL marked
@@ -116,14 +123,17 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 
   // Cities arrive pre-filtered by the API (only those with cinemas);
   // movies and genres are cross-checked here against their noindex rules.
-  const [movies, genres] = await Promise.all([
+  // Poster URLs ride along for the movie image sitemap; on failure the map is
+  // empty and movie entries simply ship without an <image:image>.
+  const [movies, genres, posters] = await Promise.all([
     filterMoviesWithScreenings(entries.movies),
     filterNonEmptyGenres(entries.genres),
+    getMoviePosterMap().catch(() => new Map<string, string>()),
   ]);
 
   const allPages = [
     ...staticPages,
-    ...toPages(movies, "filmy", "daily", 0.7),
+    ...toPages(movies, "filmy", "daily", 0.7, (slug) => posters.get(slug)),
     ...toPages(entries.cinemas, "kina", "daily", 0.6),
     ...toPages(entries.cities, "miasta", "daily", 0.6),
     ...toPages(genres, "gatunki", "weekly", 0.5),

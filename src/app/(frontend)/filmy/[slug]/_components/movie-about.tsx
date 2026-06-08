@@ -1,13 +1,37 @@
 import React from "react";
 import Link from "next/link";
-import { IMovie } from "@/interfaces/IMovies";
+import { IMovie, IMoviePerson } from "@/interfaces/IMovies";
 import { cn, formatDatePL, formatDuration, formatNames } from "@/lib/utils";
 import { pluralPl } from "@/lib/seo";
 
 interface CreditItem {
   label: string;
-  value: string;
+  value: React.ReactNode;
 }
+
+// Directors carry a slug, so render each as a link to its page; other people
+// (scriptwriters, cast) stay plain text. Falls back to a plain name when a
+// director has no slug yet.
+const renderPeopleLinks = (
+  people?: IMoviePerson[] | null
+): React.ReactNode => {
+  if (!people || people.length === 0) return null;
+  return people.map((person, index) => (
+    <React.Fragment key={person.id ?? person.name}>
+      {index > 0 && ", "}
+      {person.slug ? (
+        <Link
+          href={`/rezyserzy/${person.slug}`}
+          className="border-b border-white/25 hover:border-white pb-0.5 transition-colors"
+        >
+          {person.name}
+        </Link>
+      ) : (
+        person.name
+      )}
+    </React.Fragment>
+  ));
+};
 
 interface AboutCellProps {
   label: string;
@@ -36,16 +60,16 @@ interface MovieAboutProps {
 }
 
 const MovieAbout: React.FC<MovieAboutProps> = ({ movie }) => {
-  const directors = formatNames(movie.directors);
+  const directorNodes = renderPeopleLinks(movie.directors);
   const scriptwriters = formatNames(movie.scriptwriters ?? movie.screenwriters);
   const actors = formatNames(movie.actors);
   const countries = formatNames(movie.countries ?? movie.countryOfOrigin);
   const premierePL = formatDatePL(movie.polishPremiereDate);
 
   const credits: CreditItem[] = [
-    { label: "Reżyseria", value: directors ?? "" },
-    { label: "Scenariusz", value: scriptwriters ?? "" },
-  ].filter((i) => i.value.trim() !== "");
+    ...(directorNodes ? [{ label: "Reżyseria", value: directorNodes }] : []),
+    ...(scriptwriters ? [{ label: "Scenariusz", value: scriptwriters }] : []),
+  ];
 
   const meta: CreditItem[] = [
     { label: "Rok produkcji", value: movie.productionYear?.toString() ?? "" },

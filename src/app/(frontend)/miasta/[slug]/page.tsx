@@ -12,6 +12,7 @@ import {
   formatPlDate,
   pluralPl,
 } from "@/lib/seo";
+import { cityFallbackIntro } from "@/lib/listing-copy";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
@@ -151,19 +152,15 @@ const CityPage = async ({ params }: CityPageProps) => {
         ) : (
           cinemasCount > 0 && (
             // Generated intro keeps description-less city pages from being
-            // thin content - unique copy via the live cinema count.
+            // thin content - unique copy via the live cinema count and the
+            // nearest upcoming titles.
             <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
-              {wPrep(cityForCopy) === "we" ? "We" : "W"}&nbsp;{cityForCopy}{" "}
-              {pluralPl(cinemasCount, "działa", "działają", "działa")}{" "}
-              {cinemasCount}{" "}
-              {pluralPl(
+              {cityFallbackIntro(
+                wPrep(cityForCopy) === "we" ? "We" : "W",
+                cityForCopy,
                 cinemasCount,
-                "kino studyjne",
-                "kina studyjne",
-                "kin studyjnych"
+                screenings
               )}
-              . Sprawdź nadchodzące seanse specjalne, retrospektywy
-              i&nbsp;klasykę filmową na dużym ekranie.
             </p>
           )
         )}
