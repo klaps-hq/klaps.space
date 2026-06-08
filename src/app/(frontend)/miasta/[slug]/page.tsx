@@ -19,6 +19,11 @@ import SectionLoader from "@/components/ui/section-loader";
 import Footer from "../../(home)/_components/footer";
 import CityRepertoire from "./_components/city-repertoire";
 
+// Polish locative preposition: "we" before a w-/f- consonant cluster
+// (we Wrocławiu, we Włocławku, we Fromborku), otherwise "w" (w Krakowie).
+const wPrep = (locative: string): "w" | "we" =>
+  /^[wWfF][bcćdfghjklłmnńprsśtwzźż]/.test(locative) ? "we" : "w";
+
 // ISR: cached HTML revalidated every 5 minutes. The repertoire filters
 // (genres, dates, search) are applied client-side in CityRepertoire,
 // so this page never reads searchParams and stays statically cacheable.
@@ -134,8 +139,10 @@ const CityPage = async ({ params }: CityPageProps) => {
             Województwo {city.voivodeship}
           </p>
         )}
-        <PageHeading variant="detail" className="max-w-[18ch]">
-          {city.name}
+        {/* H1 carries the target keyword ("kina studyjne w [miasto]") rather
+            than a bare city name, with the correct w/we preposition. */}
+        <PageHeading variant="detail" className="max-w-[20ch]">
+          Kina studyjne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
         </PageHeading>
         {city.description ? (
           <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
@@ -146,7 +153,7 @@ const CityPage = async ({ params }: CityPageProps) => {
             // Generated intro keeps description-less city pages from being
             // thin content - unique copy via the live cinema count.
             <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
-              W&nbsp;{cityForCopy}{" "}
+              {wPrep(cityForCopy) === "we" ? "We" : "W"}&nbsp;{cityForCopy}{" "}
               {pluralPl(cinemasCount, "działa", "działają", "działa")}{" "}
               {cinemasCount}{" "}
               {pluralPl(
@@ -171,7 +178,7 @@ const CityPage = async ({ params }: CityPageProps) => {
       {cinemas.length > 0 && (
         <section className="px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-12 md:pb-16">
           <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
-            Kina w&nbsp;{cityForCopy}
+            Kina {wPrep(cityForCopy)}&nbsp;{cityForCopy}
           </h2>
           {/* Borders live on the cards (not the container) so lines end with
               the last card instead of running across empty grid columns.
