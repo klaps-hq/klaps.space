@@ -13,9 +13,12 @@ interface OgImageOptions {
   posterUrl?: string | null;
 }
 
-// Width the poster claims in the poster-dominant movie layout, leaving
-// ~530px for the text column on the right.
-const POSTER_WIDTH = 540;
+// The poster sits as a framed card inside a left panel rather than bleeding
+// full-height: the panel sets the column width, the card keeps a true 2:3
+// movie-poster ratio so it never looks cropped or oversized.
+const POSTER_PANEL_WIDTH = 400;
+const POSTER_CARD_WIDTH = 288;
+const POSTER_CARD_HEIGHT = 432; // 2:3 ratio
 
 // Sized so text stays legible when scaled down to small link embeds
 // (Discord/Slack/Messenger render OG images at roughly 440px wide).
@@ -23,10 +26,10 @@ const POSTER_WIDTH = 540;
 // longest word from clipping; full width otherwise.
 const getTitleSize = (title: string, hasPoster: boolean): number => {
   if (hasPoster) {
-    if (title.length > 24) return 56;
-    if (title.length > 16) return 68;
-    if (title.length > 10) return 80;
-    return 92;
+    if (title.length > 24) return 60;
+    if (title.length > 16) return 72;
+    if (title.length > 10) return 84;
+    return 96;
   }
   if (title.length > 24) return 72;
   if (title.length > 14) return 96;
@@ -52,113 +55,124 @@ export async function buildOgImage({
   // text sits at the bottom of the full-width canvas.
   const bodyJustify = hasPoster ? "center" : "flex-end";
 
-  const infoColumn = (
+  // Top and bottom bars span the full width so the logo and the footer line
+  // always sit flush to the left edge, regardless of the poster.
+  const headerBar = (
     <div
       style={{
         display: "flex",
-        flex: 1,
-        minWidth: 0,
-        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "space-between",
+        height: 92,
+        padding: `0 ${padX}px`,
+        borderBottom: HAIRLINE,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          height: 92,
-          padding: `0 ${padX}px`,
-          borderBottom: HAIRLINE,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <svg width="34" height="24" viewBox="0 0 28 20">
-            <polygon points="0,8 28,0 28,20 0,12" fill="#ffffff" />
-          </svg>
-          <span
-            style={{
-              fontSize: 36,
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-            }}
-          >
-            klaps
-          </span>
-        </div>
-        {eyebrow && (
-          <span
-            style={{
-              fontSize: hasPoster ? 18 : 20,
-              textTransform: "uppercase",
-              letterSpacing: "0.3em",
-              color: "rgba(255,255,255,0.45)",
-            }}
-          >
-            {eyebrow}
-          </span>
-        )}
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          flex: 1,
-          minHeight: 0,
-          flexDirection: "column",
-          justifyContent: bodyJustify,
-          padding: `48px ${padX}px`,
-        }}
-      >
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <svg width="34" height="24" viewBox="0 0 28 20">
+          <polygon points="0,8 28,0 28,20 0,12" fill="#ffffff" />
+        </svg>
         <span
           style={{
-            fontSize: titleSize,
+            fontSize: 36,
             fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "-0.03em",
-            lineHeight: 0.95,
+            letterSpacing: "-0.02em",
           }}
         >
-          {title}
+          klaps
         </span>
-        {subtitle && (
-          <span
-            style={{
-              marginTop: 24,
-              fontSize: hasPoster ? 30 : 34,
-              color: "rgba(255,255,255,0.6)",
-              lineHeight: 1.35,
-              maxWidth: 980,
-            }}
-          >
-            {subtitle}
-          </span>
-        )}
       </div>
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          height: 72,
-          padding: `0 ${padX}px`,
-          borderTop: HAIRLINE,
-        }}
-      >
+      {eyebrow && (
         <span
           style={{
-            fontSize: 19,
+            fontSize: hasPoster ? 18 : 20,
             textTransform: "uppercase",
             letterSpacing: "0.3em",
             color: "rgba(255,255,255,0.45)",
           }}
         >
-          klaps.space
+          {eyebrow}
         </span>
-        <span style={{ fontSize: 28, color: "rgba(255,255,255,0.45)" }}>
-          →
+      )}
+    </div>
+  );
+
+  const footerBar = (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        height: 72,
+        padding: `0 ${padX}px`,
+        borderTop: HAIRLINE,
+      }}
+    >
+      <span
+        style={{
+          fontSize: 19,
+          textTransform: "uppercase",
+          letterSpacing: "0.3em",
+          color: "rgba(255,255,255,0.45)",
+        }}
+      >
+        klaps.space
+      </span>
+      {/* Inline lucide "arrow-right" path: Satori rasterizes inline SVG but
+          does not reliably render the lucide-react component, so the icon is
+          hand-inlined with an explicit stroke color (no currentColor). */}
+      <svg
+        width="30"
+        height="30"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="rgba(255,255,255,0.45)"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M5 12h14" />
+        <path d="m12 5 7 7-7 7" />
+      </svg>
+    </div>
+  );
+
+  const textBody = (
+    <div
+      style={{
+        display: "flex",
+        flex: 1,
+        minWidth: 0,
+        minHeight: 0,
+        flexDirection: "column",
+        justifyContent: bodyJustify,
+        padding: `48px ${padX}px`,
+      }}
+    >
+      <span
+        style={{
+          fontSize: titleSize,
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: "-0.03em",
+          lineHeight: 0.95,
+        }}
+      >
+        {title}
+      </span>
+      {subtitle && (
+        <span
+          style={{
+            marginTop: 24,
+            fontSize: hasPoster ? 30 : 34,
+            color: "rgba(255,255,255,0.6)",
+            lineHeight: 1.35,
+            maxWidth: 980,
+          }}
+        >
+          {subtitle}
         </span>
-      </div>
+      )}
     </div>
   );
 
@@ -169,27 +183,42 @@ export async function buildOgImage({
           width: "100%",
           height: "100%",
           display: "flex",
+          flexDirection: "column",
           backgroundColor: "#000000",
           color: "#ffffff",
           fontFamily: "Inter",
         }}
       >
-        {posterUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={posterUrl}
-            alt=""
-            width={POSTER_WIDTH}
-            height={630}
-            style={{
-              width: POSTER_WIDTH,
-              height: 630,
-              objectFit: "cover",
-              borderRight: HAIRLINE,
-            }}
-          />
-        )}
-        {infoColumn}
+        {headerBar}
+        <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+          {posterUrl && (
+            <div
+              style={{
+                display: "flex",
+                width: POSTER_PANEL_WIDTH,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRight: HAIRLINE,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={posterUrl}
+                alt=""
+                width={POSTER_CARD_WIDTH}
+                height={POSTER_CARD_HEIGHT}
+                style={{
+                  width: POSTER_CARD_WIDTH,
+                  height: POSTER_CARD_HEIGHT,
+                  objectFit: "cover",
+                  border: HAIRLINE,
+                }}
+              />
+            </div>
+          )}
+          {textBody}
+        </div>
+        {footerBar}
       </div>
     ),
     {

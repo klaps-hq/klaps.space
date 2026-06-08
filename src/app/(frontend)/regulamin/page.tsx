@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
@@ -247,31 +248,27 @@ const TermsPage = () => {
         <div className="mt-8 md:mt-10 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 max-w-[60ch]">
           <Link
             href="/polityka-prywatnosci"
-            className="group flex items-baseline justify-between gap-4 p-5 md:p-6 bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
+            className="group flex items-center justify-between gap-4 p-5 md:p-6 bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
           >
             <span className="text-lg md:text-xl text-white -tracking-[0.01em]">
               Polityka prywatności
             </span>
-            <span
+            <ArrowRight
               aria-hidden="true"
-              className="text-white/40 group-hover:text-white transition-transform group-hover:translate-x-1"
-            >
-              →
-            </span>
+              className="size-5 shrink-0 text-white/40 group-hover:text-white transition-transform group-hover:translate-x-1"
+            />
           </Link>
           <Link
             href="/kontakt"
-            className="group flex items-baseline justify-between gap-4 p-5 md:p-6 bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
+            className="group flex items-center justify-between gap-4 p-5 md:p-6 bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
           >
             <span className="text-lg md:text-xl text-white -tracking-[0.01em]">
               Kontakt
             </span>
-            <span
+            <ArrowRight
               aria-hidden="true"
-              className="text-white/40 group-hover:text-white transition-transform group-hover:translate-x-1"
-            >
-              →
-            </span>
+              className="size-5 shrink-0 text-white/40 group-hover:text-white transition-transform group-hover:translate-x-1"
+            />
           </Link>
         </div>
       </section>

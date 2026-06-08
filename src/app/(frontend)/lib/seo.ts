@@ -50,6 +50,19 @@ export const newestUpdatedAtIso = (
   return newest > 0 ? new Date(newest).toISOString() : undefined;
 };
 
+/**
+ * Trim free text (e.g. a bio) to a SERP-friendly length at a word boundary,
+ * adding an ellipsis. Used to derive meta descriptions from longer copy.
+ */
+export const clampText = (text: string, max = 160): string => {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (normalized.length <= max) return normalized;
+  const cut = normalized.slice(0, max - 1);
+  const lastSpace = cut.lastIndexOf(" ");
+  const trimmed = lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut;
+  return `${trimmed.trimEnd()}…`;
+};
+
 /** Date in Polish long form, e.g. "7 czerwca 2026". Used for the visible
  * "repertoire updated" note that mirrors dateModified in JSON-LD. */
 export const formatPlDate = (date: Date): string =>

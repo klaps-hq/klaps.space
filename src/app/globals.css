@@ -104,7 +104,10 @@
     background-color: black;
     @apply text-foreground;
   }
-  @media (pointer: fine) {
+  /* Hide the native cursor only where the custom cursor actually renders
+     (fine pointer + md and up). Below md the custom cursor is hidden, so the
+     native one must stay visible - including in responsive emulation. */
+  @media (pointer: fine) and (min-width: 768px) {
     *,
     *::before,
     *::after {

@@ -28,7 +28,7 @@ const WilhelmEgg: React.FC = () => {
     >
       <svg
         viewBox="0 0 28 20"
-        className="w-[16vw] h-auto text-white block"
+        className="w-[13vw] md:w-[16vw] h-auto text-white block"
         fill="currentColor"
         aria-hidden="true"
       >

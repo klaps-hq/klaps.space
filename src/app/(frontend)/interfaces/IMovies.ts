@@ -9,6 +9,8 @@ export interface IGenre {
 export interface IMoviePerson {
   id?: number;
   sourceId?: number;
+  /** Director slug for linking to /rezyserzy/[slug]; absent for cast/crew. */
+  slug?: string;
   name: string;
   url?: string;
 }
