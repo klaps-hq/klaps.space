@@ -32,6 +32,24 @@ export const pluralPl = (
   return many;
 };
 
+/**
+ * Newest parsable `updatedAt` from a list, as an ISO string, or undefined.
+ * Backs JSON-LD `dateModified` so the freshness signal reflects a real data
+ * change instead of render time. Undefined (field omitted) is better than a
+ * fabricated date when nothing carries a timestamp.
+ */
+export const newestUpdatedAtIso = (
+  items: ReadonlyArray<{ updatedAt?: string | null }>
+): string | undefined => {
+  let newest = 0;
+  for (const item of items) {
+    if (!item.updatedAt) continue;
+    const time = new Date(item.updatedAt).getTime();
+    if (!Number.isNaN(time) && time > newest) newest = time;
+  }
+  return newest > 0 ? new Date(newest).toISOString() : undefined;
+};
+
 /** Date in Polish long form, e.g. "7 czerwca 2026". Used for the visible
  * "repertoire updated" note that mirrors dateModified in JSON-LD. */
 export const formatPlDate = (date: Date): string =>

@@ -3,6 +3,7 @@
 import React, { useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { Play } from "lucide-react";
 import { IMovie } from "@/interfaces/IMovies";
 import { tmdbImageUrl } from "@/lib/tmdb";
 import { formatDuration, getYouTubeEmbedUrl } from "@/lib/utils";
@@ -164,12 +165,10 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
                 }}
                 className="group mt-4 inline-flex w-fit items-center gap-3 border border-white/30 hover:border-white hover:bg-white/[0.06] px-6 md:px-8 py-3 md:py-3.5 text-[11px] md:text-xs uppercase tracking-[0.28em] text-white transition-colors"
               >
-                <span
+                <Play
                   aria-hidden="true"
-                  className="text-[9px] leading-none transition-transform group-hover:scale-110"
-                >
-                  ▶
-                </span>
+                  className="size-3 fill-current transition-transform group-hover:scale-110"
+                />
                 Zwiastun
               </motion.button>
             )}

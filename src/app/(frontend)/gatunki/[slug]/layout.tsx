@@ -1,6 +1,7 @@
 import { getGenreBySlug } from "@/lib/genres";
 import { getMovies } from "@/lib/movies";
 import { SITE_URL } from "@/lib/site-config";
+import { newestUpdatedAtIso } from "@/lib/seo";
 import { IGenre, IMovieSummary } from "@/interfaces/IMovies";
 import JsonLd from "@/components/common/json-ld";
 
@@ -15,9 +16,12 @@ const buildGenreJsonLd = (genre: IGenre, movies: readonly IMovieSummary[]) => ({
   name: `${genre.name} - Filmy`,
   url: `${SITE_URL}/gatunki/${genre.slug}`,
   description: `Filmy z gatunku ${genre.name.toLowerCase()} dostępne w serwisie Klaps.`,
-  // Freshness signal for AI Overviews: render time equals the moment
-  // the movie data was last refreshed (ISR).
-  dateModified: new Date().toISOString(),
+  // Freshness signal for AI Overviews: newest movie `updatedAt` in the set,
+  // i.e. a real data change. Omitted when no movie carries a timestamp,
+  // which beats fabricating render time.
+  ...(newestUpdatedAtIso(movies) && {
+    dateModified: newestUpdatedAtIso(movies),
+  }),
   mainEntity: {
     "@type": "ItemList",
     numberOfItems: movies.length,
