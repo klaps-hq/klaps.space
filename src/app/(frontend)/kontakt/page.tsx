@@ -6,6 +6,7 @@ import {
   FaThreads,
   FaXTwitter,
 } from "react-icons/fa6";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
@@ -78,17 +79,15 @@ const ContactPage = () => {
           <div className="lg:col-span-8">
             <a
               href={`mailto:${CONTACT_EMAIL}`}
-              className="group inline-flex items-baseline gap-4 md:gap-6"
+              className="group inline-flex items-center gap-4 md:gap-6"
             >
               <span className="text-2xl md:text-4xl lg:text-5xl font-medium text-white -tracking-[0.02em] break-all">
                 {CONTACT_EMAIL}
               </span>
-              <span
+              <ArrowUpRight
                 aria-hidden="true"
-                className="shrink-0 text-2xl md:text-3xl text-white/40 group-hover:text-white transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
-              >
-                ↗
-              </span>
+                className="size-7 md:size-8 shrink-0 text-white/40 group-hover:text-white transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
+              />
             </a>
           </div>
         </div>
@@ -159,12 +158,10 @@ const ContactPage = () => {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <social.Icon size={18} aria-hidden />
-                    <span
+                    <ArrowUpRight
                       aria-hidden="true"
-                      className="text-white/40 group-hover:text-white transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                    >
-                      ↗
-                    </span>
+                      className="size-[18px] shrink-0 text-white/40 group-hover:text-white transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    />
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <span className="text-lg md:text-xl font-medium text-white -tracking-[0.01em]">
@@ -193,12 +190,10 @@ const ContactPage = () => {
           className="group mt-10 md:mt-12 inline-flex items-center gap-4 text-xs md:text-sm uppercase tracking-[0.28em] text-white border border-white/25 hover:border-white hover:bg-white/[0.04] px-8 md:px-10 py-4 md:py-5 transition-colors"
         >
           Zobacz repertuar
-          <span
+          <ArrowRight
             aria-hidden="true"
-            className="transition-transform group-hover:translate-x-1"
-          >
-            →
-          </span>
+            className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
+          />
         </Link>
       </section>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   motion,
@@ -13,14 +13,7 @@ import {
 } from "framer-motion";
 import { cn } from "@/lib/utils";
 import MobileNav from "./mobile-nav";
-
-const NAV_LINKS = [
-  { href: "/seanse", label: "Seanse" },
-  { href: "/gatunki", label: "Gatunki" },
-  { href: "/kina", label: "Kina" },
-  { href: "/miasta", label: "Miasta" },
-  { href: "/mapa-kin", label: "Mapa" },
-];
+import { NAV_LINKS } from "./nav-links";
 
 // Scroll distance (px) over which the header morphs from a transparent
 // full-width bar into the floating glass capsule.
@@ -53,6 +46,18 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ overlay = false }) => {
   const reducedMotion = useReducedMotion();
   const { scrollY } = useScroll();
   const progress = useMorphProgress(scrollY);
+
+  // Below md the header stays full-width: the floating-capsule inset (side
+  // margins + radius) would look cramped, so it morphs to a plain solid bar.
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMobile(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   // Overlay visibility: reveal on scroll-up past the threshold, hide on
   // scroll-down so it never fights the listing's own sticky filter bar.
@@ -109,19 +114,22 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ overlay = false }) => {
     >
       <motion.div
         style={{
-          y,
-          marginLeft: marginX,
-          marginRight: marginX,
-          borderRadius,
+          y: isMobile ? 0 : y,
+          marginLeft: isMobile ? 0 : marginX,
+          marginRight: isMobile ? 0 : marginX,
+          borderRadius: isMobile ? 0 : borderRadius,
           backgroundColor,
           borderColor,
           backdropFilter,
           WebkitBackdropFilter: backdropFilter,
           boxShadow,
         }}
-        className="flex items-center justify-between gap-8 border px-6 md:px-10 lg:px-12 py-5"
+        className="flex items-center justify-between gap-8 border-x-0 border-b md:border px-6 md:px-10 lg:px-12 py-5"
       >
-        <motion.div style={{ scale: logoScale }} className="origin-left shrink-0">
+        <motion.div
+          style={{ scale: isMobile ? 1 : logoScale }}
+          className="origin-left shrink-0"
+        >
           <Link
             href="/"
             aria-label="Klaps, strona główna"

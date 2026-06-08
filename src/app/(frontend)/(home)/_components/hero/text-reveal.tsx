@@ -36,25 +36,51 @@ interface TitleRevealProps {
   className?: string;
 }
 
+// Polish typography: single-letter prepositions/conjunctions must not be
+// left dangling at the end of a line. Group such a word with the one that
+// follows so they never break apart.
+const isOrphanWord = (word: string): boolean => word.replace(/\W/g, "").length === 1;
+
+// Bundle each orphan word together with the next word into one group; every
+// other word is its own group. Groups are what may wrap; words inside a group
+// stay on the same line.
+const groupOrphanWords = (words: string[]): string[][] => {
+  const groups: string[][] = [];
+  for (let i = 0; i < words.length; i += 1) {
+    if (isOrphanWord(words[i]) && i < words.length - 1) {
+      groups.push([words[i], words[i + 1]]);
+      i += 1;
+    } else {
+      groups.push([words[i]]);
+    }
+  }
+  return groups;
+};
+
 export const TitleReveal: React.FC<TitleRevealProps> = ({
   text,
   className,
 }) => {
-  const words = text.split(" ");
+  const groups = groupOrphanWords(text.split(" "));
   return (
     // h2, not h1 - the movie title is random per visit, so the stable
     // sr-only h1 in the hero carries the page's main heading instead.
     <motion.h2 className={className} variants={wordRevealContainer}>
-      {words.map((word, i) => (
-        // Top padding + matching negative margin keep the slide-up mask
-        // from clipping tall diacritics (Ś, Ć, Ó) without shifting layout.
-        <span
-          key={`${word}-${i}`}
-          className="inline-block overflow-hidden pt-[0.2em] -mt-[0.2em] pb-[0.08em] mr-[0.25em] align-bottom"
-        >
-          <motion.span className="inline-block" variants={wordRevealItem}>
-            {word}
-          </motion.span>
+      {groups.map((group, gIdx) => (
+        // whitespace-nowrap keeps a grouped orphan glued to its neighbour.
+        <span key={gIdx} className="inline-block whitespace-nowrap">
+          {group.map((word, i) => (
+            // Top padding + matching negative margin keep the slide-up mask
+            // from clipping tall diacritics (Ś, Ć, Ó) without shifting layout.
+            <span
+              key={`${word}-${i}`}
+              className="inline-block overflow-hidden pt-[0.2em] -mt-[0.2em] pb-[0.08em] mr-[0.25em] align-bottom"
+            >
+              <motion.span className="inline-block" variants={wordRevealItem}>
+                {word}
+              </motion.span>
+            </span>
+          ))}
         </span>
       ))}
     </motion.h2>

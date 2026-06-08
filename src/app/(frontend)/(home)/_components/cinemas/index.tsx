@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { getCinemas } from "@/lib/cinemas";
 
 const TOP_CITIES_LIMIT = 8;
@@ -91,27 +92,23 @@ const Cinemas = async () => {
       <div className="px-6 md:px-12 lg:px-16 pb-12 md:pb-16 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
         <Link
           href="/mapa-kin"
-          className="group inline-flex items-center gap-4 text-xs md:text-sm uppercase tracking-[0.28em] text-black bg-white hover:bg-white/90 px-8 md:px-10 py-4 md:py-5 transition-colors"
+          className="group inline-flex w-full sm:w-auto items-center justify-center gap-4 text-xs md:text-sm uppercase tracking-[0.28em] text-black bg-white hover:bg-white/90 px-8 md:px-10 py-4 md:py-5 transition-colors"
         >
           Otwórz mapę
-          <span
+          <ArrowRight
             aria-hidden="true"
-            className="transition-transform group-hover:translate-x-1"
-          >
-            →
-          </span>
+            className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
+          />
         </Link>
         <Link
           href="/kina"
-          className="group inline-flex items-center gap-4 text-xs md:text-sm uppercase tracking-[0.28em] text-white border border-white/25 hover:border-white hover:bg-white/[0.04] px-8 md:px-10 py-4 md:py-5 transition-colors"
+          className="group inline-flex w-full sm:w-auto items-center justify-center gap-4 text-xs md:text-sm uppercase tracking-[0.28em] text-white border border-white/25 hover:border-white hover:bg-white/[0.04] px-8 md:px-10 py-4 md:py-5 transition-colors"
         >
           Wszystkie kina
-          <span
+          <ArrowRight
             aria-hidden="true"
-            className="transition-transform group-hover:translate-x-1"
-          >
-            →
-          </span>
+            className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
+          />
         </Link>
       </div>
     </section>

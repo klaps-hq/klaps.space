@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
@@ -171,8 +172,8 @@ const AboutPage = () => {
           zajmuje. Jeśli wyświetlany jest przez jeden wieczór w&nbsp;trzech
           kinach w&nbsp;Polsce, wtedy właśnie Klaps jest potrzebny.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
-          <ul className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
+          <ul className="lg:col-span-4 flex flex-col gap-3">
             {SCOPE_INCLUDED.map((item) => (
               <li
                 key={item}
@@ -185,7 +186,7 @@ const AboutPage = () => {
               </li>
             ))}
           </ul>
-          <ul className="flex flex-col gap-3">
+          <ul className="lg:col-span-8 flex flex-col gap-3">
             {SCOPE_EXCLUDED.map((item) => (
               <li
                 key={item}
@@ -307,12 +308,10 @@ const AboutPage = () => {
                     <span className="text-xl md:text-2xl font-medium text-white -tracking-[0.01em]">
                       {repo.label}
                     </span>
-                    <span
+                    <ArrowUpRight
                       aria-hidden="true"
-                      className="text-white/40 group-hover:text-white transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                    >
-                      ↗
-                    </span>
+                      className="size-5 md:size-6 shrink-0 text-white/40 group-hover:text-white transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    />
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] uppercase tracking-[0.25em] text-white/40">
@@ -339,12 +338,10 @@ const AboutPage = () => {
           className="group mt-12 md:mt-16 inline-flex items-center gap-4 text-xs md:text-sm uppercase tracking-[0.28em] text-white border border-white/25 hover:border-white hover:bg-white/[0.04] px-8 md:px-10 py-4 md:py-5 transition-colors"
         >
           Zobacz repertuar
-          <span
+          <ArrowRight
             aria-hidden="true"
-            className="transition-transform group-hover:translate-x-1"
-          >
-            →
-          </span>
+            className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
+          />
         </Link>
       </section>
 

@@ -20,7 +20,10 @@ function PaginationContent({
   return (
     <ul
       data-slot="pagination-content"
-      className={cn("flex flex-row items-center gap-5 md:gap-6", className)}
+      className={cn(
+        "flex flex-row flex-wrap items-center justify-center gap-5 md:gap-6",
+        className,
+      )}
       {...props}
     />
   );
@@ -44,7 +47,7 @@ function PaginationLink({
       data-slot="pagination-link"
       data-active={isActive}
       className={cn(
-        "inline-flex items-baseline justify-center text-sm md:text-base tabular-nums tracking-tight transition-colors duration-200 cursor-pointer pb-1 border-b",
+        "inline-flex items-baseline justify-center text-lg md:text-xl tabular-nums tracking-tight transition-colors duration-200 cursor-pointer pb-1 border-b",
         isActive
           ? "text-white border-white"
           : "text-white/40 border-transparent hover:text-white hover:border-white/40",
@@ -69,7 +72,7 @@ function PaginationPrevious({
       )}
       {...props}
     >
-      <ChevronLeftIcon className="size-5" />
+      <ChevronLeftIcon className="size-6" />
     </a>
   );
 }
@@ -88,7 +91,7 @@ function PaginationNext({
       )}
       {...props}
     >
-      <ChevronRightIcon className="size-5" />
+      <ChevronRightIcon className="size-6" />
     </a>
   );
 }
@@ -101,7 +104,7 @@ function PaginationEllipsis({
     <span
       data-slot="pagination-ellipsis"
       className={cn(
-        "inline-flex items-baseline justify-center text-white/25 text-sm",
+        "inline-flex items-baseline justify-center text-white/25 text-lg md:text-xl",
         className,
       )}
       {...props}

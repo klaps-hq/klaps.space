@@ -96,6 +96,7 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
     { url: `${SITE_URL}/mapa-kin`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/miasta`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/gatunki`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/rezyserzy`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${SITE_URL}/o-projekcie`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/kontakt`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/faq`, changeFrequency: "monthly", priority: 0.3 },
@@ -126,6 +127,9 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
     ...toPages(entries.cinemas, "kina", "daily", 0.6),
     ...toPages(entries.cities, "miasta", "daily", 0.6),
     ...toPages(genres, "gatunki", "weekly", 0.5),
+    // Directors arrive pre-filtered by the API (only those above the
+    // indexing threshold), so no noindex cross-check is needed here.
+    ...toPages(entries.directors ?? [], "rezyserzy", "weekly", 0.5),
   ];
 
   return Array.from(new Map(allPages.map((item) => [item.url, item])).values());

@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
 import { Metadata } from "next";
+import { ArrowUpRight } from "lucide-react";
 import { getCinemaPageData, getCinemaBySlug, getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
 import { getScreenings } from "@/lib/screenings";
@@ -161,9 +162,13 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                       href={cinema.sourceUrl}
                       target="_blank"
                       rel="noreferrer noopener nofollow"
-                      className="text-white/70 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
+                      className="group inline-flex items-center gap-1 text-white/70 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
                     >
-                      Strona kina ↗
+                      Strona kina
+                      <ArrowUpRight
+                        aria-hidden="true"
+                        className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      />
                     </Link>
                   </>
                 )}

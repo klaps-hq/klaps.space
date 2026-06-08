@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface EmptyStateCta {
@@ -28,12 +29,10 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   const ctaContent = cta && (
     <>
       {cta.label}
-      <span
+      <ArrowRight
         aria-hidden="true"
-        className="transition-transform group-hover:translate-x-1"
-      >
-        →
-      </span>
+        className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
+      />
     </>
   );
 

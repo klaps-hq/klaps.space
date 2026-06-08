@@ -1399,18 +1399,23 @@ function MapClusterLayer<
   useEffect(() => {
     if (!isLoaded || !map) return;
 
-    // Cluster click handler - zoom into cluster
-    const handleClusterClick = async (
-      e: MapLibreGL.MapMouseEvent & {
-        features?: MapLibreGL.MapGeoJSONFeature[];
-      }
-    ) => {
-      const features = map.queryRenderedFeatures(e.point, {
-        layers: [clusterLayerId],
-      });
-      if (!features.length) return;
+    // Touch targets are tiny (a few px), so a precise tap on the rendered
+    // circle is unreliable on phones. Query a padded box around the tap
+    // point instead; the padding is larger for coarse pointers (fingers).
+    const isCoarsePointer =
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches;
+    const hitPad = isCoarsePointer ? 16 : 5;
+    const paddedBox = (
+      point: MapLibreGL.Point
+    ): [MapLibreGL.PointLike, MapLibreGL.PointLike] => [
+      [point.x - hitPad, point.y - hitPad],
+      [point.x + hitPad, point.y + hitPad],
+    ];
 
-      const feature = features[0];
+    const expandCluster = async (
+      feature: MapLibreGL.MapGeoJSONFeature
+    ): Promise<void> => {
       const clusterId = feature.properties?.cluster_id as number;
       const pointCount = feature.properties?.point_count as number;
       const coordinates = (feature.geometry as GeoJSON.Point).coordinates as [
@@ -1424,35 +1429,50 @@ function MapClusterLayer<
         // Default behavior: zoom to cluster expansion zoom
         const source = map.getSource(sourceId) as MapLibreGL.GeoJSONSource;
         const zoom = await source.getClusterExpansionZoom(clusterId);
-        map.easeTo({
-          center: coordinates,
-          zoom,
-        });
+        map.easeTo({ center: coordinates, zoom });
       }
     };
 
-    // Unclustered point click handler
-    const handlePointClick = (
-      e: MapLibreGL.MapMouseEvent & {
-        features?: MapLibreGL.MapGeoJSONFeature[];
-      }
-    ) => {
-      if (!onPointClick || !e.features?.length) return;
+    const selectPoint = (
+      feature: MapLibreGL.MapGeoJSONFeature,
+      lng: number
+    ): void => {
+      if (!onPointClick) return;
 
-      const feature = e.features[0];
       const coordinates = (
         feature.geometry as GeoJSON.Point
       ).coordinates.slice() as [number, number];
 
       // Handle world copies
-      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+      while (Math.abs(lng - coordinates[0]) > 180) {
+        coordinates[0] += lng > coordinates[0] ? 360 : -360;
       }
 
       onPointClick(
         feature as unknown as GeoJSON.Feature<GeoJSON.Point, P>,
         coordinates
       );
+    };
+
+    // Single map-level handler with tap tolerance. Clusters win over points
+    // when both fall inside the box, matching the visual stacking order.
+    const handleMapClick = (e: MapLibreGL.MapMouseEvent) => {
+      const box = paddedBox(e.point);
+
+      const clusters = map.queryRenderedFeatures(box, {
+        layers: [clusterLayerId],
+      });
+      if (clusters.length) {
+        void expandCluster(clusters[0]);
+        return;
+      }
+
+      const points = map.queryRenderedFeatures(box, {
+        layers: [unclusteredLayerId],
+      });
+      if (points.length) {
+        selectPoint(points[0], e.lngLat.lng);
+      }
     };
 
     // Cursor style handlers
@@ -1471,16 +1491,14 @@ function MapClusterLayer<
       map.getCanvas().style.cursor = "";
     };
 
-    map.on("click", clusterLayerId, handleClusterClick);
-    map.on("click", unclusteredLayerId, handlePointClick);
+    map.on("click", handleMapClick);
     map.on("mouseenter", clusterLayerId, handleMouseEnterCluster);
     map.on("mouseleave", clusterLayerId, handleMouseLeaveCluster);
     map.on("mouseenter", unclusteredLayerId, handleMouseEnterPoint);
     map.on("mouseleave", unclusteredLayerId, handleMouseLeavePoint);
 
     return () => {
-      map.off("click", clusterLayerId, handleClusterClick);
-      map.off("click", unclusteredLayerId, handlePointClick);
+      map.off("click", handleMapClick);
       map.off("mouseenter", clusterLayerId, handleMouseEnterCluster);
       map.off("mouseleave", clusterLayerId, handleMouseLeaveCluster);
       map.off("mouseenter", unclusteredLayerId, handleMouseEnterPoint);

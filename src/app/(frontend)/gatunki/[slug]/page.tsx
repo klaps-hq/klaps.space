@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
 import { Metadata } from "next";
+import { ArrowRight } from "lucide-react";
 import { getGenrePageData, getGenres } from "@/lib/genres";
 import { getMovies } from "@/lib/movies";
 import { getScreenings } from "@/lib/screenings";
@@ -142,15 +143,13 @@ const GenrePage = async ({ params }: GenrePageProps) => {
             </h2>
             <Link
               href="/gatunki"
-              className="group inline-flex items-baseline gap-2 text-[10px] md:text-xs uppercase tracking-[0.28em] text-white/55 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
+              className="group inline-flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.28em] text-white/55 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
             >
               Wszystkie gatunki
-              <span
+              <ArrowRight
                 aria-hidden="true"
-                className="transition-transform group-hover:translate-x-1"
-              >
-                →
-              </span>
+                className="size-3.5 shrink-0 transition-transform group-hover:translate-x-1"
+              />
             </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 border-t border-l border-white/10">

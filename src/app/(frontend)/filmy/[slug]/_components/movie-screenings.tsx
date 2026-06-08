@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { IScreening } from "@/interfaces/IScreenings";
 import CityField from "@/app/(home)/_components/screenings/city-field";
 import AddToCalendarButton from "@/components/common/add-to-calendar-button";
@@ -248,31 +249,27 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
         <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
           <Link
             href="/seanse"
-            className="group inline-flex items-baseline gap-2.5 text-[11px] md:text-xs uppercase tracking-[0.25em] text-white"
+            className="group inline-flex items-center gap-2.5 text-[11px] md:text-xs uppercase tracking-[0.25em] text-white"
           >
             <span className="underline underline-offset-4 decoration-white/30 group-hover:decoration-white transition-colors">
               Pełny repertuar
             </span>
-            <span
+            <ArrowRight
               aria-hidden="true"
-              className="transition-transform group-hover:translate-x-1"
-            >
-              →
-            </span>
+              className="size-3.5 shrink-0 transition-transform group-hover:translate-x-1"
+            />
           </Link>
           <Link
             href="/kina"
-            className="group inline-flex items-baseline gap-2.5 text-[11px] md:text-xs uppercase tracking-[0.25em] text-white/70 hover:text-white transition-colors"
+            className="group inline-flex items-center gap-2.5 text-[11px] md:text-xs uppercase tracking-[0.25em] text-white/70 hover:text-white transition-colors"
           >
             <span className="underline underline-offset-4 decoration-white/20 group-hover:decoration-white transition-colors">
               Kina studyjne
             </span>
-            <span
+            <ArrowRight
               aria-hidden="true"
-              className="transition-transform group-hover:translate-x-1"
-            >
-              →
-            </span>
+              className="size-3.5 shrink-0 transition-transform group-hover:translate-x-1"
+            />
           </Link>
         </div>
       </div>
@@ -318,27 +315,29 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pb-5 border-b border-white/10">
-        {availableDates.map((date) => {
-          const active = activeDate === date;
-          return (
-            <button
-              key={date}
-              type="button"
-              onClick={() => setSelectedDate(date)}
-              className={cn(
-                "shrink-0 pb-1 text-[11px] uppercase tracking-wider border-b transition-colors whitespace-nowrap",
-                active
-                  ? "text-white border-white"
-                  : "text-white/55 border-transparent hover:text-white hover:border-white/40"
-              )}
-            >
-              {formatFullDateLabel(date)}
-            </button>
-          );
-        })}
-        <div className="ml-auto">
-          <CityField />
+      <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-4 md:gap-x-6 md:gap-y-3 pb-5 border-b border-white/10">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          {availableDates.map((date) => {
+            const active = activeDate === date;
+            return (
+              <button
+                key={date}
+                type="button"
+                onClick={() => setSelectedDate(date)}
+                className={cn(
+                  "shrink-0 pb-1 text-[11px] uppercase tracking-wider border-b transition-colors whitespace-nowrap",
+                  active
+                    ? "text-white border-white"
+                    : "text-white/55 border-transparent hover:text-white hover:border-white/40"
+                )}
+              >
+                {formatFullDateLabel(date)}
+              </button>
+            );
+          })}
+        </div>
+        <div className="md:ml-auto">
+          <CityField className="w-full md:w-auto" />
         </div>
       </div>
 
