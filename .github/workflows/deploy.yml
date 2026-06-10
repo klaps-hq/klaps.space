@@ -66,7 +66,7 @@ jobs:
     needs: [setup, build-and-push]
     environment: ${{ needs.setup.outputs.environment }}
     env:
-      DEPLOY_DIR: ${{ secrets.DEPLOY_DIR }}/frontend/${{ needs.setup.outputs.env_suffix }}
+      DEPLOY_DIR: ${{ secrets.PROJECT_DIR || secrets.DEPLOY_DIR }}/frontend/${{ needs.setup.outputs.env_suffix }}
       IMAGE_TAG: ${{ needs.setup.outputs.image_tag }}
       ENV_SUFFIX: ${{ needs.setup.outputs.env_suffix }}
       DOMAIN: ${{ secrets.DOMAIN }}
