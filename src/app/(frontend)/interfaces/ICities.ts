@@ -13,6 +13,13 @@ export interface ICity {
   updatedAt?: string | null;
 }
 
+/**
+ * Minimal city shape for the global CityProvider. It is serialized into the
+ * RSC payload of every page, so heavy fields (description prose, slugs,
+ * counters) must stay out of it.
+ */
+export type ICityOption = Pick<ICity, "id" | "name" | "voivodeship">;
+
 export interface ICityDetails extends ICity {
   city: ICity;
   screenings: IScreeningGroup[] | PaginatedResponse<IScreeningGroup>;
