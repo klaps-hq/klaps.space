@@ -22,7 +22,7 @@ const CityStats: React.FC<CityStatsProps> = ({
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className="flex flex-col gap-1 border-l-4 border-l-blood-red pl-4"
+          className="flex flex-col gap-1 border-l-4 border-l-white pl-4"
         >
           <dt className="text-neutral-500 text-sm uppercase tracking-widest">
             {stat.label}

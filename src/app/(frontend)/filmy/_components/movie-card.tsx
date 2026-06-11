@@ -33,7 +33,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
       <div className="relative">
         <Link
           href={`/filmy/${movie.slug}`}
-          className="block overflow-hidden border border-white/10 transition-transform duration-300 group-hover:scale-[1.02] w-full aspect-2/3 focus-visible:outline focus-visible:ring-2 focus-visible:ring-blood-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          className="block overflow-hidden border border-white/10 transition-transform duration-300 group-hover:scale-[1.02] w-full aspect-2/3 focus-visible:outline focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
           <MoviePoster
             posterUrl={movie.posterUrl ?? ""}
@@ -52,7 +52,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
         <h3 className="text-lg font-semibold uppercase tracking-wide">
           <Link
             href={`/filmy/${movie.slug}`}
-            className="text-white hover:text-blood-red transition-colors line-clamp-2 focus-visible:outline focus-visible:ring-2 focus-visible:ring-blood-red focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            className="text-white hover:text-white/70 transition-colors line-clamp-2 focus-visible:outline focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             {movie.title}
           </Link>

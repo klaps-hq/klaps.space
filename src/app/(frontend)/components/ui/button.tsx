@@ -12,9 +12,9 @@ const buttonVariants = cva(
         default:
           "rounded-md bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         primary:
-          "rounded-none bg-blood-red text-white font-semibold uppercase tracking-[0.2em] shadow-[0_0_0_0_rgba(220,19,1,0)] hover:bg-blood-red/90 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(220,19,1,0.75)]",
+          "rounded-none bg-white text-black font-semibold uppercase tracking-[0.2em] shadow-[0_0_0_0_rgba(255,255,255,0)] hover:bg-white/90 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(255,255,255,0.45)]",
         secondary:
-          "rounded-none border-2 border-blood-red bg-transparent text-white font-semibold uppercase tracking-[0.2em] hover:bg-blood-red hover:text-white hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(220,19,1,0.6)]",
+          "rounded-none border-2 border-white bg-transparent text-white font-semibold uppercase tracking-[0.2em] hover:bg-white hover:text-black hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(255,255,255,0.35)]",
         destructive:
           "rounded-md bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
@@ -24,7 +24,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         tag: "rounded-none bg-white/5 text-white/80 uppercase tracking-wider border border-white/20 hover:bg-white/10 hover:text-white hover:border-white/40",
         "tag-active":
-          "rounded-none bg-blood-red/15 text-blood-red uppercase tracking-wider border border-blood-red/50",
+          "rounded-none bg-white text-black uppercase tracking-wider border border-white",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
