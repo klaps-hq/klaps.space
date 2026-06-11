@@ -1,6 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import { getCinemas } from "@/lib/cinemas";
+import { ICinemaGroup } from "@/interfaces/ICinema";
+import { SITE_URL } from "@/lib/site-config";
+import JsonLd from "@/components/common/json-ld";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, {
   PageHeadingMuted,
@@ -23,6 +26,32 @@ const formatPlural = (
   return forms[2];
 };
 
+const buildCinemasJsonLd = (cinemaGroups: readonly ICinemaGroup[]) => {
+  const cinemas = cinemaGroups.flatMap((group) => group.cinemas);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Kina studyjne w Polsce",
+    url: `${SITE_URL}/kina`,
+    description:
+      "Pełna lista kin studyjnych i niezależnych w Polsce wraz z repertuarem seansów specjalnych.",
+    // Freshness signal for AI Overviews: render time equals the moment
+    // the cinema data was last refreshed (ISR).
+    dateModified: new Date().toISOString(),
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: cinemas.length,
+      itemListElement: cinemas.map((cinema, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${SITE_URL}/kina/${cinema.slug}`,
+        name: cinema.name,
+      })),
+    },
+  };
+};
+
 const CinemasPage = async () => {
   const { data: cinemaGroups } = await getCinemas({ limit: 1000 });
   const sortedGroups = [...cinemaGroups].sort((a, b) =>
@@ -36,6 +65,9 @@ const CinemasPage = async () => {
 
   return (
     <main className="bg-black text-white min-h-screen">
+      {sortedGroups.length > 0 && (
+        <JsonLd data={buildCinemasJsonLd(sortedGroups)} />
+      )}
       <SiteHeader />
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-6">

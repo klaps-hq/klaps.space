@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getCities } from "@/lib/cities";
 import { formatVoivodeship } from "@/lib/voivodeships";
 import { ICity } from "@/interfaces/ICities";
+import { SITE_URL } from "@/lib/site-config";
+import JsonLd from "@/components/common/json-ld";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, {
   PageHeadingMuted,
@@ -36,6 +38,28 @@ const groupByVoivodeship = (cities: ICity[]): [string, ICity[]][] => {
   });
 };
 
+const buildCitiesJsonLd = (cities: readonly ICity[]) => ({
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Kina studyjne w miastach Polski",
+  url: `${SITE_URL}/miasta`,
+  description:
+    "Miasta w Polsce z kinami studyjnymi i repertuarem seansów specjalnych.",
+  // Freshness signal for AI Overviews: render time equals the moment
+  // the city data was last refreshed (ISR).
+  dateModified: new Date().toISOString(),
+  mainEntity: {
+    "@type": "ItemList",
+    numberOfItems: cities.length,
+    itemListElement: cities.map((city, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${SITE_URL}/miasta/${city.slug}`,
+      name: city.name,
+    })),
+  },
+});
+
 const CitiesPage = async () => {
   const cities = await getCities();
   const voivodeshipGroups = groupByVoivodeship(cities);
@@ -44,6 +68,7 @@ const CitiesPage = async () => {
 
   return (
     <main className="bg-black text-white min-h-screen">
+      {cities.length > 0 && <JsonLd data={buildCitiesJsonLd(cities)} />}
       <SiteHeader />
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-6">

@@ -1,37 +1,8 @@
 import { Metadata } from "next";
-import JsonLd from "@/components/common/json-ld";
-import { getCinemas } from "@/lib/cinemas";
 import { SITE_URL } from "@/lib/site-config";
-import { ICinemaGroup } from "@/interfaces/ICinema";
 
-const buildCitiesJsonLd = (cinemaGroups: readonly ICinemaGroup[]) => {
-  // Only cities with cinemas - empty city pages are noindexed.
-  const cities = cinemaGroups
-    .filter((group) => group.cinemas.length > 0)
-    .map((group) => group.city);
-
-  return {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Kina studyjne w miastach Polski",
-    url: `${SITE_URL}/miasta`,
-    description:
-      "Miasta w Polsce z kinami studyjnymi i repertuarem seansów specjalnych.",
-    // Freshness signal for AI Overviews: render time equals the moment
-    // the city data was last refreshed (ISR).
-    dateModified: new Date().toISOString(),
-    mainEntity: {
-      "@type": "ItemList",
-      numberOfItems: cities.length,
-      itemListElement: cities.map((city, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        url: `${SITE_URL}/miasta/${city.slug}`,
-        name: city.name,
-      })),
-    },
-  };
-};
+// The CollectionPage JSON-LD lives in page.tsx: a layout would embed the
+// full city ItemList into the payload of every /miasta/[slug] page.
 
 export const metadata: Metadata = {
   title: "Kina studyjne w miastach Polski",
@@ -54,20 +25,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function CitiesLayout({
+export default function CitiesLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // getCinemas falls back to an empty list on API errors.
-  const { data: cinemaGroups } = await getCinemas();
-
-  return (
-    <>
-      {cinemaGroups.length > 0 && (
-        <JsonLd data={buildCitiesJsonLd(cinemaGroups)} />
-      )}
-      {children}
-    </>
-  );
+  return children;
 }
