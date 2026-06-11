@@ -52,7 +52,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
                 ) : (
                   <Link
                     href={item.href ?? "/"}
-                    className="max-w-[220px] truncate text-white/45 transition-colors duration-300 hover:text-white/85 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blood-red/80 md:max-w-[320px]"
+                    className="max-w-[220px] truncate text-white/45 transition-colors duration-300 hover:text-white/85 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/80 md:max-w-[320px]"
                     tabIndex={0}
                     aria-label={`Przejdź do ${item.name}`}
                   >

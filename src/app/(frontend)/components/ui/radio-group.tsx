@@ -27,7 +27,7 @@ const radioGroupItemVariants = cva(
       variant: {
         default:
           "border-input text-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 aspect-square size-4 shrink-0 rounded-full border shadow-xs transition-[color,box-shadow] focus-visible:ring-[3px]",
-        tag: "rounded-none bg-white/5 text-white/80 uppercase tracking-wider border border-white/20 hover:bg-white/10 hover:text-white hover:border-white/40 data-[state=checked]:bg-blood-red/15 data-[state=checked]:text-blood-red data-[state=checked]:border-blood-red/50 data-[state=checked]:cursor-default",
+        tag: "rounded-none bg-white/5 text-white/80 uppercase tracking-wider border border-white/20 hover:bg-white/10 hover:text-white hover:border-white/40 data-[state=checked]:bg-white data-[state=checked]:text-black data-[state=checked]:border-white data-[state=checked]:cursor-default",
       },
       size: {
         default: "",
