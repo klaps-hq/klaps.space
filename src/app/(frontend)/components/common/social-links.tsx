@@ -28,7 +28,6 @@ const SOCIAL_ITEMS: SocialItem[] = [
     id: "x",
     label: "X",
     href: SOCIAL_LINKS.x,
-    showLabel: false,
     Icon: FaXTwitter,
   },
   {
@@ -58,17 +57,16 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
   iconSize = 13,
 }) => {
   return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)}>
+    <div className={cn("flex flex-wrap items-center gap-x-6 gap-y-3", className)}>
       {SOCIAL_ITEMS.map(({ id, label, href, showLabel = true, Icon }) => (
         <a
           key={id}
           href={href}
           target="_blank"
-          rel="noopener noreferrer nofollow"
+          rel="noopener noreferrer"
           aria-label={`Klaps na ${label}`}
           className={cn(
-            "inline-flex h-8 items-center border border-white/15 bg-white/2 text-[10px] uppercase tracking-[0.16em] text-white/65 transition-all hover:border-blood-red/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blood-red focus-visible:ring-offset-2",
-            showLabel ? "gap-2 px-3" : "px-2.5",
+            "inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-white/55 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2",
             focusRingOffsetClassName,
             linkClassName
           )}
