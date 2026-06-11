@@ -43,9 +43,11 @@ export const generateMetadata = async ({
   const totalPages = Math.max(1, Math.ceil(directors.length / PAGE_SIZE));
   const currentPage = Math.min(parsePageParam(page), totalPages);
 
+  // The paginated variant drops part of the base title so the whole thing
+  // (with the "- Klaps" template suffix) stays under ~60 chars in SERPs.
   const title =
     currentPage >= 2
-      ? `Reżyserzy - filmy i seanse w kinach studyjnych (strona ${currentPage})`
+      ? `Reżyserzy w kinach studyjnych (strona ${currentPage})`
       : "Reżyserzy - filmy i seanse w kinach studyjnych";
   const { canonical, pagination } = buildPaginationMeta(
     url,
@@ -111,7 +113,10 @@ const DirectorsPage = async ({ searchParams }: DirectorsPageProps) => {
 
   return (
     <main className="bg-black text-white min-h-screen">
-      {withRepertoire.length > 0 && (
+      {/* The ItemList describes directors with an active repertoire, which
+          surface on page 1; deeper pages would pair it with content it does
+          not describe, so they skip the CollectionPage JSON-LD. */}
+      {currentPage === 1 && withRepertoire.length > 0 && (
         <JsonLd data={buildDirectorsJsonLd(withRepertoire)} />
       )}
       <SiteHeader />

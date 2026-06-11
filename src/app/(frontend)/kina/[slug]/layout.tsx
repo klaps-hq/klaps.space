@@ -53,6 +53,7 @@ const buildCinemaScreeningEvents = (
           title: group.movie.title,
           slug: group.movie.slug,
           duration: group.movie.duration,
+          posterUrl: group.movie.posterUrl,
         },
         cinema: {
           name: cinema.name,
