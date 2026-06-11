@@ -60,7 +60,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cities = await getCities();
+  // CityProvider is a client component, so whatever it receives lands in
+  // the RSC payload of every page. Strip cities down to the fields the
+  // city picker needs; the full ICity (description prose etc.) would add
+  // hundreds of kB to each prerendered page.
+  const cities = (await getCities()).map(({ id, name, voivodeship }) => ({
+    id,
+    name,
+    voivodeship,
+  }));
 
   return (
     <html lang="pl">

@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ICity } from "@/interfaces/ICities";
+import { ICityOption } from "@/interfaces/ICities";
 import {
   PREFERRED_CITY_KEY,
   PREFERRED_VOIVODESHIP_KEY,
@@ -54,7 +54,7 @@ interface CityContextValue {
     options?: SetLocationOptions
   ) => void;
   options: CityOption[];
-  cities: ICity[];
+  cities: ICityOption[];
 }
 
 const CityContext = createContext<CityContextValue | null>(null);
@@ -69,13 +69,13 @@ export const usePreferredCity = (): CityContextValue => {
 
 interface CityProviderProps {
   children: ReactNode;
-  cities: ICity[];
+  cities: ICityOption[];
 }
 
 const HYDRATION_SUBSCRIBE = () => () => {};
 
 const resolveInitialLocation = (
-  cities: ICity[],
+  cities: ICityOption[],
   pathname: string
 ): LocationState => {
   if (typeof window === "undefined") {

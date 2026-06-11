@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { Popover as PopoverPrimitive } from "radix-ui";
-import { ICity } from "@/interfaces/ICities";
+import { ICityOption } from "@/interfaces/ICities";
 import { usePreferredCity } from "@/contexts/city-context";
 import { formatVoivodeship } from "@/lib/voivodeships";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,7 @@ interface CityFieldProps {
 
 interface VoivodeshipGroup {
   name: string;
-  cities: ICity[];
+  cities: ICityOption[];
 }
 
 const OPTION_BUTTON_CLASS =
@@ -74,7 +74,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
   const hasSelection = isHydrated && (cityId !== null || voivodeship !== null);
 
   const voivodeshipGroups = useMemo<VoivodeshipGroup[]>(() => {
-    const map = new Map<string, ICity[]>();
+    const map = new Map<string, ICityOption[]>();
     for (const city of cities) {
       // Cities without a voivodeship stay reachable through search
       // and the "Wszystkie miasta" state.
@@ -132,7 +132,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
     resetView();
   };
 
-  const renderCityOption = (city: ICity) => (
+  const renderCityOption = (city: ICityOption) => (
     <button
       key={city.id}
       type="button"
@@ -201,7 +201,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
                   setQuery("");
                   inputRef.current?.focus();
                 }}
-                aria-label="Wyczyść wyszukiwanie"
+                aria-label="WyczyĹ›Ä‡ wyszukiwanie"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
               >
                 <X className="size-3.5" />
@@ -217,7 +217,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
             {searchResults !== null ? (
               searchResults.length === 0 ? (
                 <div className="px-4 py-6 text-center text-[11px] text-white/40 uppercase tracking-wider">
-                  Brak wyników
+                  Brak wynikĂłw
                 </div>
               ) : (
                 searchResults.map(renderCityOption)
@@ -230,7 +230,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
                   className="flex w-full items-center gap-2 text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-white/45 hover:text-white border-b border-white/10 transition-colors"
                 >
                   <ChevronLeft className="size-3.5 shrink-0" aria-hidden="true" />
-                  Województwa
+                  WojewĂłdztwa
                 </button>
                 <button
                   type="button"
@@ -292,7 +292,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
                 onClick={() => selectCity(null)}
                 className="w-full h-8 text-[10px] uppercase tracking-[0.2em] border border-white/20 text-white/70 hover:text-white hover:border-white/50 transition-colors"
               >
-                Wyczyść
+                WyczyĹ›Ä‡
               </button>
             </div>
           )}
