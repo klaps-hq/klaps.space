@@ -1,8 +1,6 @@
-import { Metadata } from "next";
 import JsonLd from "@/components/common/json-ld";
 import { getDirectors } from "@/lib/directors";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH } from "@/lib/seo";
 import { IDirector } from "@/interfaces/IDirectors";
 
 // Only directors with an active repertoire are worth surfacing in the
@@ -26,22 +24,8 @@ const buildDirectorsJsonLd = (directors: readonly IDirector[]) => ({
   },
 });
 
-export const metadata: Metadata = {
-  title: "Reżyserzy - filmy i seanse w kinach studyjnych",
-  description:
-    "Przeglądaj reżyserów, których kino wraca na duży ekran w polskich kinach studyjnych. Retrospektywy, klasyka filmowa i seanse specjalne.",
-  alternates: {
-    canonical: `${SITE_URL}/rezyserzy`,
-  },
-  openGraph: {
-    ...BASE_OPEN_GRAPH,
-    type: "website",
-    title: "Reżyserzy - kino autorskie w kinach studyjnych",
-    description:
-      "Reżyserzy, których filmy wracają na duży ekran. Seanse specjalne w kinach studyjnych w Polsce.",
-    url: `${SITE_URL}/rezyserzy`,
-  },
-};
+// Metadata lives in page.tsx (generateMetadata): pagination needs
+// searchParams, which layouts cannot access.
 
 export default async function DirectorsLayout({
   children,

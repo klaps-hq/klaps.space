@@ -1,13 +1,59 @@
 import React from "react";
+import { Metadata } from "next";
 import { getDirectors } from "@/lib/directors";
 import { IDirector } from "@/interfaces/IDirectors";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
+import { SITE_URL } from "@/lib/site-config";
+import { BASE_OPEN_GRAPH } from "@/lib/seo";
 import Footer from "../(home)/_components/footer";
 import DirectorsBrowser from "./_components/directors-browser";
 
 export const revalidate = 300;
+
+const PAGE_SIZE = 40;
+
+interface DirectorsSearchParams {
+  page?: string;
+}
+
+interface DirectorsPageProps {
+  searchParams: Promise<DirectorsSearchParams>;
+}
+
+export const generateMetadata = async ({
+  searchParams,
+}: DirectorsPageProps): Promise<Metadata> => {
+  const { page } = await searchParams;
+  const description =
+    "Przeglądaj reżyserów, których kino wraca na duży ekran w polskich kinach studyjnych. Retrospektywy, klasyka filmowa i seanse specjalne.";
+  const url = `${SITE_URL}/rezyserzy`;
+
+  // Plain pagination stays indexable: unique title + self-canonical,
+  // so the deeper parts of the listing keep their crawl path.
+  const pageNumber = Number(page);
+  const isPaginated = Number.isInteger(pageNumber) && pageNumber >= 2;
+
+  const title = isPaginated
+    ? `Reżyserzy - filmy i seanse w kinach studyjnych (strona ${pageNumber})`
+    : "Reżyserzy - filmy i seanse w kinach studyjnych";
+  const canonical = isPaginated ? `${url}?page=${pageNumber}` : url;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      ...BASE_OPEN_GRAPH,
+      type: "website",
+      title,
+      description:
+        "Reżyserzy, których filmy wracają na duży ekran. Seanse specjalne w kinach studyjnych w Polsce.",
+      url: canonical,
+    },
+  };
+};
 
 // Directors with the most upcoming screenings lead; those without surface
 // further down, ordered by filmography size then name.
@@ -16,9 +62,16 @@ const byRelevance = (a: IDirector, b: IDirector): number =>
   b.moviesCount - a.moviesCount ||
   a.name.localeCompare(b.name, "pl");
 
-const DirectorsPage = async () => {
+const DirectorsPage = async ({ searchParams }: DirectorsPageProps) => {
+  const { page } = await searchParams;
   const { data: directors } = await getDirectors();
   const sorted = [...directors].sort(byRelevance);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const parsedPage = Number(page);
+  const requestedPage =
+    Number.isInteger(parsedPage) && parsedPage >= 1 ? parsedPage : 1;
+  const currentPage = Math.min(requestedPage, totalPages);
 
   return (
     <main className="bg-black text-white min-h-screen">
@@ -40,7 +93,12 @@ const DirectorsPage = async () => {
         </p>
       </div>
 
-      <DirectorsBrowser directors={sorted} />
+      <DirectorsBrowser
+        directors={sorted}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={PAGE_SIZE}
+      />
 
       <Footer />
     </main>

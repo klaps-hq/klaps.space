@@ -5,19 +5,34 @@ import { Search, X } from "lucide-react";
 import { IDirector } from "@/interfaces/IDirectors";
 import { cn } from "@/lib/utils";
 import EmptyState from "@/components/common/empty-state";
+import PaginatedNav from "@/components/common/paginated-nav";
 import DirectorCard from "./director-card";
 
 interface DirectorsBrowserProps {
   /** Pre-sorted server-side (directors with upcoming screenings first). */
   directors: IDirector[];
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
 }
 
-const DirectorsBrowser: React.FC<DirectorsBrowserProps> = ({ directors }) => {
+const buildPageHref = (page: number): string =>
+  page <= 1 ? "/rezyserzy" : `/rezyserzy?page=${page}`;
+
+const DirectorsBrowser: React.FC<DirectorsBrowserProps> = ({
+  directors,
+  currentPage,
+  totalPages,
+  pageSize,
+}) => {
   const [query, setQuery] = useState("");
   const [onlyUpcoming, setOnlyUpcoming] = useState(false);
 
   // Name search and the "upcoming only" toggle run client-side over the full
-  // list, so neither triggers an extra request.
+  // list, so neither triggers an extra request. While either is active the
+  // URL-based pagination is suspended and all matches show at once.
+  const isFiltering = query.trim().length > 0 || onlyUpcoming;
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return directors.filter((director) => {
@@ -26,6 +41,14 @@ const DirectorsBrowser: React.FC<DirectorsBrowserProps> = ({ directors }) => {
       return true;
     });
   }, [directors, query, onlyUpcoming]);
+
+  const visible = useMemo(
+    () =>
+      isFiltering
+        ? filtered
+        : filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filtered, isFiltering, currentPage, pageSize]
+  );
 
   const upcomingCount = useMemo(
     () => directors.filter((d) => d.upcomingScreeningsCount > 0).length,
@@ -84,7 +107,7 @@ const DirectorsBrowser: React.FC<DirectorsBrowserProps> = ({ directors }) => {
         />
       </div>
 
-      {filtered.length === 0 ? (
+      {visible.length === 0 ? (
         <EmptyState
           description={
             <>
@@ -95,9 +118,19 @@ const DirectorsBrowser: React.FC<DirectorsBrowserProps> = ({ directors }) => {
         />
       ) : (
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 gap-x-3 gap-y-7 md:gap-x-4 md:gap-y-9">
-          {filtered.map((director) => (
+          {visible.map((director) => (
             <DirectorCard key={director.id} director={director} />
           ))}
+        </div>
+      )}
+
+      {!isFiltering && totalPages > 1 && (
+        <div className="mt-16 md:mt-20">
+          <PaginatedNav
+            currentPage={currentPage}
+            totalPages={totalPages}
+            buildHref={buildPageHref}
+          />
         </div>
       )}
     </section>
