@@ -102,3 +102,34 @@ export const hasFilterParams = (
   keys.some((key) =>
     isNonEmptyParam((params as Record<string, unknown>)[key])
   );
+
+/** Page number from a `?page=` param: a positive integer, anything else is 1. */
+export const parsePageParam = (raw: string | undefined): number => {
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed >= 1 ? parsed : 1;
+};
+
+/**
+ * Canonical and rel prev/next links for a paginated listing. Page 1 lives
+ * on the clean URL (no `?page=1` duplicate). Callers pass the clamped page
+ * number, so the canonical always points at a page that actually renders.
+ */
+export const buildPaginationMeta = (
+  baseUrl: string,
+  currentPage: number,
+  totalPages: number
+): {
+  canonical: string;
+  pagination: { previous?: string; next?: string };
+} => {
+  const pageUrl = (page: number): string =>
+    page <= 1 ? baseUrl : `${baseUrl}?page=${page}`;
+
+  return {
+    canonical: pageUrl(currentPage),
+    pagination: {
+      previous: currentPage > 1 ? pageUrl(currentPage - 1) : undefined,
+      next: currentPage < totalPages ? pageUrl(currentPage + 1) : undefined,
+    },
+  };
+};
