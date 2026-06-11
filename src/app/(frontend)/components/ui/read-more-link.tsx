@@ -18,7 +18,7 @@ const LinkWithArrow: React.FC<LinkWithArrowProps> = ({
     <Link
       href={href}
       className={cn(
-        "group inline-flex items-center gap-2 text-neutral-400 text-sm uppercase tracking-widest transition-[color,transform] duration-300 hover:text-blood-red hover:-translate-y-0.5 focus-visible:text-blood-red focus-visible:outline-none",
+        "group inline-flex items-center gap-2 text-neutral-400 text-sm uppercase tracking-widest transition-[color,transform] duration-300 hover:text-white hover:-translate-y-0.5 focus-visible:text-white focus-visible:outline-none",
         className
       )}
     >

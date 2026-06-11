@@ -13,7 +13,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
 }) => {
   return (
     <h2 className="flex flex-col gap-1 max-w-fit">
-      <span className="text-blood-red text-sm uppercase tracking-widest">
+      <span className="text-white/60 text-sm uppercase tracking-widest">
         {prefix}
       </span>
 
