@@ -17,7 +17,7 @@ const ScreeningSummary: React.FC<ScreeningSummaryProps> = ({
   return (
     <div className="flex items-center gap-3 text-xs text-white/50 mt-1">
       <span className="flex items-center gap-1">
-        <Clock className="size-3 text-blood-red" aria-hidden="true" />
+        <Clock className="size-3 text-white/50" aria-hidden="true" />
         <span>
           {screeningsCount} {screeningsCount === 1 ? "seans" : "seansów"}
         </span>
@@ -25,7 +25,7 @@ const ScreeningSummary: React.FC<ScreeningSummaryProps> = ({
       
       {cinemasCount > 1 && (
         <span className="flex items-center gap-1">
-          <Ticket className="size-3 text-blood-red" aria-hidden="true" />
+          <Ticket className="size-3 text-white/50" aria-hidden="true" />
           <span>
             {cinemasCount} {cinemasCount === 1 ? "kino" : "kin"}
           </span>

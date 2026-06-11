@@ -56,7 +56,7 @@ const ScreeningsGenreTags: React.FC<ScreeningsGenreTagsProps> = ({
         <button
           type="button"
           onClick={handleToggle}
-          className="inline-flex items-center gap-2 self-start px-3 py-1.5 text-xs uppercase tracking-widest text-white/70 hover:text-blood-red border border-white/15 hover:border-blood-red/50 transition-colors cursor-pointer mt-1"
+          className="inline-flex items-center gap-2 self-start px-3 py-1.5 text-xs uppercase tracking-widest text-white/70 hover:text-white border border-white/15 hover:border-white/50 transition-colors cursor-pointer mt-1"
         >
           {isExpanded ? (
             <>

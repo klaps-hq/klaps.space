@@ -47,7 +47,7 @@ const MovieMeta: React.FC<MovieMetaProps> = ({
             <React.Fragment key={genre.id}>
               <Link
                 href={buildGenreHref(genre)}
-                className="hover:text-blood-red transition-colors duration-200"
+                className="hover:text-white transition-colors duration-200"
               >
                 {genre.name}
               </Link>
