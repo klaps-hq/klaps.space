@@ -1,27 +1,8 @@
 import { Metadata } from "next";
-import JsonLd from "@/components/common/json-ld";
-import { getGenres } from "@/lib/genres";
 import { SITE_URL } from "@/lib/site-config";
-import { IGenre } from "@/interfaces/IMovies";
 
-const buildGenresJsonLd = (genres: readonly IGenre[]) => ({
-  "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  name: "Gatunki filmowe",
-  url: `${SITE_URL}/gatunki`,
-  description:
-    "Gatunki filmowe w seansach specjalnych kin studyjnych w Polsce.",
-  mainEntity: {
-    "@type": "ItemList",
-    numberOfItems: genres.length,
-    itemListElement: genres.map((genre, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      url: `${SITE_URL}/gatunki/${genre.slug}`,
-      name: genre.name,
-    })),
-  },
-});
+// The CollectionPage JSON-LD lives in page.tsx: a layout would embed the
+// full genre ItemList into the payload of every /gatunki/[slug] page.
 
 export const metadata: Metadata = {
   title: "Gatunki filmowe - klasyka i retrospektywy w kinach",
@@ -38,22 +19,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function GenresLayout({
+export default function GenresLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let genres: IGenre[] = [];
-  try {
-    genres = await getGenres();
-  } catch {
-    // JSON-LD is an enhancement - render the page without it on API errors.
-  }
-
-  return (
-    <>
-      {genres.length > 0 && <JsonLd data={buildGenresJsonLd(genres)} />}
-      {children}
-    </>
-  );
+  return children;
 }

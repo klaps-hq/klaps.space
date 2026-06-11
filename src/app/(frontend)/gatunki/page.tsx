@@ -1,6 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import { getGenres } from "@/lib/genres";
+import { IGenre } from "@/interfaces/IMovies";
+import { SITE_URL } from "@/lib/site-config";
+import JsonLd from "@/components/common/json-ld";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, {
   PageHeadingMuted,
@@ -11,6 +14,25 @@ import Footer from "../(home)/_components/footer";
 
 export const revalidate = 300;
 
+const buildGenresJsonLd = (genres: readonly IGenre[]) => ({
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Gatunki filmowe",
+  url: `${SITE_URL}/gatunki`,
+  description:
+    "Gatunki filmowe w seansach specjalnych kin studyjnych w Polsce.",
+  mainEntity: {
+    "@type": "ItemList",
+    numberOfItems: genres.length,
+    itemListElement: genres.map((genre, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${SITE_URL}/gatunki/${genre.slug}`,
+      name: genre.name,
+    })),
+  },
+});
+
 const GenresPage = async () => {
   const genres = await getGenres();
   const sortedGenres = [...genres].sort((a, b) =>
@@ -19,6 +41,9 @@ const GenresPage = async () => {
 
   return (
     <main className="bg-black text-white min-h-screen">
+      {sortedGenres.length > 0 && (
+        <JsonLd data={buildGenresJsonLd(sortedGenres)} />
+      )}
       <SiteHeader />
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-6">
