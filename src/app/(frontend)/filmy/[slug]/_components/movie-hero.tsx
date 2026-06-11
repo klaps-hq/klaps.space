@@ -2,7 +2,6 @@
 
 import React, { useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Play } from "lucide-react";
 import { IMovie } from "@/interfaces/IMovies";
@@ -137,36 +136,8 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
                 {movie.titleOriginal}
               </motion.span>
             )}
-            {movie.directors && movie.directors.length > 0 && (
-              <motion.span
-                variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-                  },
-                }}
-                className="text-xs md:text-sm uppercase tracking-[0.25em] text-white/65"
-              >
-                <span className="text-white/45">Reżyseria</span>{" "}
-                {movie.directors.map((person, index) => (
-                  <React.Fragment key={person.id ?? person.name}>
-                    {index > 0 && ", "}
-                    {person.slug ? (
-                      <Link
-                        href={`/rezyserzy/${person.slug}`}
-                        className="border-b border-white/30 hover:border-white transition-colors"
-                      >
-                        {person.name}
-                      </Link>
-                    ) : (
-                      person.name
-                    )}
-                  </React.Fragment>
-                ))}
-              </motion.span>
-            )}
+            {/* Directors live in the "Informacje" credits below the fold,
+                so the hero skips them to avoid the duplicate. */}
             {movie.description && (
               <motion.p
                 variants={{
