@@ -7,7 +7,11 @@ import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import JsonLd from "@/components/common/json-ld";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH } from "@/lib/seo";
+import {
+  BASE_OPEN_GRAPH,
+  buildPaginationMeta,
+  parsePageParam,
+} from "@/lib/seo";
 import Footer from "../(home)/_components/footer";
 import DirectorsBrowser from "./_components/directors-browser";
 
@@ -31,20 +35,31 @@ export const generateMetadata = async ({
     "Przeglądaj reżyserów, których kino wraca na duży ekran w polskich kinach studyjnych. Retrospektywy, klasyka filmowa i seanse specjalne.";
   const url = `${SITE_URL}/rezyserzy`;
 
-  // Plain pagination stays indexable: unique title + self-canonical,
-  // so the deeper parts of the listing keep their crawl path.
-  const pageNumber = Number(page);
-  const isPaginated = Number.isInteger(pageNumber) && pageNumber >= 2;
+  // Plain pagination stays indexable: unique title, self-canonical and
+  // rel prev/next, so the deeper parts of the listing keep their crawl
+  // path. getDirectors() is deduplicated against the page render's call
+  // by Next's fetch memoization.
+  const { data: directors } = await getDirectors();
+  const totalPages = Math.max(1, Math.ceil(directors.length / PAGE_SIZE));
+  const currentPage = Math.min(parsePageParam(page), totalPages);
 
-  const title = isPaginated
-    ? `Reżyserzy - filmy i seanse w kinach studyjnych (strona ${pageNumber})`
-    : "Reżyserzy - filmy i seanse w kinach studyjnych";
-  const canonical = isPaginated ? `${url}?page=${pageNumber}` : url;
+  // The paginated variant drops part of the base title so the whole thing
+  // (with the "- Klaps" template suffix) stays under ~60 chars in SERPs.
+  const title =
+    currentPage >= 2
+      ? `Reżyserzy w kinach studyjnych (strona ${currentPage})`
+      : "Reżyserzy - filmy i seanse w kinach studyjnych";
+  const { canonical, pagination } = buildPaginationMeta(
+    url,
+    currentPage,
+    totalPages
+  );
 
   return {
     title,
     description,
     alternates: { canonical },
+    pagination,
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
@@ -90,10 +105,7 @@ const DirectorsPage = async ({ searchParams }: DirectorsPageProps) => {
   const sorted = [...directors].sort(byRelevance);
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
-  const parsedPage = Number(page);
-  const requestedPage =
-    Number.isInteger(parsedPage) && parsedPage >= 1 ? parsedPage : 1;
-  const currentPage = Math.min(requestedPage, totalPages);
+  const currentPage = Math.min(parsePageParam(page), totalPages);
 
   const withRepertoire = sorted.filter(
     (director) => director.upcomingScreeningsCount > 0
@@ -101,7 +113,10 @@ const DirectorsPage = async ({ searchParams }: DirectorsPageProps) => {
 
   return (
     <main className="bg-black text-white min-h-screen">
-      {withRepertoire.length > 0 && (
+      {/* The ItemList describes directors with an active repertoire, which
+          surface on page 1; deeper pages would pair it with content it does
+          not describe, so they skip the CollectionPage JSON-LD. */}
+      {currentPage === 1 && withRepertoire.length > 0 && (
         <JsonLd data={buildDirectorsJsonLd(withRepertoire)} />
       )}
       <SiteHeader />

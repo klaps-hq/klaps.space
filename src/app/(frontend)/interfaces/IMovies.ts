@@ -37,6 +37,9 @@ export interface IMovieHero extends IMovieSummary {
   description: string | null;
   backdropUrl: string | null;
   videoUrl: string | null;
+  /** Sent only by endpoints that load the directors relation
+   * (e.g. /screenings/random-screening for the home hero). */
+  directors?: IMoviePerson[] | null;
 }
 
 export interface IMovieRatingScore {

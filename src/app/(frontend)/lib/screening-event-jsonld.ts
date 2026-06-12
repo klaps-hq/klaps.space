@@ -1,4 +1,5 @@
 import { SITE_URL } from "./site-config";
+import { resolveTmdbPhotoUrl } from "./tmdb";
 
 // Shared ScreeningEvent JSON-LD builder for the movie and cinema layouts.
 // The movie page emits one event per screening across cinemas; the cinema
@@ -9,6 +10,7 @@ export interface ScreeningEventMovie {
   title: string;
   slug: string;
   duration: number | null;
+  posterUrl: string | null;
 }
 
 export interface ScreeningEventCinema {
@@ -58,6 +60,9 @@ const buildEvent = (
     "@context": "https://schema.org",
     "@type": "ScreeningEvent",
     name: `${movie.title} - seans w ${cinema.name}, ${cinema.cityName}`,
+    // image and description are recommended fields for Event rich results;
+    // without them Search Console reports warnings on every event.
+    description: `Seans filmu ${movie.title} w kinie ${cinema.name} w ${cinema.cityName}. Szczegóły pokazu i pełny repertuar na klaps.space.`,
     startDate: dateTime,
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
@@ -74,6 +79,11 @@ const buildEvent = (
       url: `${SITE_URL}/filmy/${movie.slug}`,
     },
   };
+
+  const image = resolveTmdbPhotoUrl(movie.posterUrl, "w780");
+  if (image) {
+    event.image = image;
+  }
 
   if (movie.duration) {
     event.endDate = new Date(
