@@ -9,6 +9,10 @@ interface HeroParallaxProps {
   // Portrait poster shown on mobile, where the wide backdrop would crop to an
   // unflattering center strip. Falls back to the backdrop when absent.
   posterSrc?: string | null;
+  // Tiny base64 previews (lib/blur.ts) shown instantly while the full
+  // images stream in; without them the placeholder stays empty.
+  backdropBlurDataUrl?: string | null;
+  posterBlurDataUrl?: string | null;
   alt: string;
   children: React.ReactNode;
 }
@@ -16,6 +20,8 @@ interface HeroParallaxProps {
 const HeroParallax: React.FC<HeroParallaxProps> = ({
   backdropSrc,
   posterSrc,
+  backdropBlurDataUrl,
+  posterBlurDataUrl,
   alt,
   children,
 }) => {
@@ -52,7 +58,8 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
                 alt={alt}
                 fill
                 sizes="100vw"
-                quality={65}
+                placeholder={posterBlurDataUrl ? "blur" : "empty"}
+                blurDataURL={posterBlurDataUrl ?? undefined}
                 className="object-cover md:hidden"
                 priority
               />
@@ -62,7 +69,8 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
                 alt={alt}
                 fill
                 sizes="100vw"
-                quality={60}
+                placeholder={backdropBlurDataUrl ? "blur" : "empty"}
+                blurDataURL={backdropBlurDataUrl ?? undefined}
                 className="object-cover hidden md:block"
                 priority
               />
@@ -73,7 +81,8 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
               alt={alt}
               fill
               sizes="100vw"
-              quality={60}
+              placeholder={backdropBlurDataUrl ? "blur" : "empty"}
+              blurDataURL={backdropBlurDataUrl ?? undefined}
               className="object-cover"
               priority
             />

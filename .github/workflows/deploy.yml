@@ -59,6 +59,7 @@ jobs:
           push: true
           build-args: |
             NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
+            NEXT_PUBLIC_TMDB_IMAGE_BASE_URL=${{ vars.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL }}
             API_URL=${{ secrets.API_URL }}
             MAINTENANCE_MODE=${{ secrets.MAINTENANCE_MODE }}
           secrets: |
@@ -111,6 +112,14 @@ jobs:
             INDEXNOW_KEY=${{ secrets.INDEXNOW_KEY }}
             DOMAIN=${{ env.DOMAIN }}
             MAINTENANCE_MODE=${{ secrets.MAINTENANCE_MODE }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            PAYLOAD_SECRET=${{ secrets.PAYLOAD_SECRET }}
+            S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}
+            S3_PUBLIC_URL=${{ secrets.S3_PUBLIC_URL }}
+            S3_BUCKET=${{ secrets.S3_BUCKET }}
+            S3_ACCESS_KEY_ID=${{ secrets.S3_ACCESS_KEY_ID }}
+            S3_SECRET_ACCESS_KEY=${{ secrets.S3_SECRET_ACCESS_KEY }}
+            S3_REGION=${{ secrets.S3_REGION }}
             ENVEOF
 
             # GHCR_USER must be the account that owns GHCR_PAT.

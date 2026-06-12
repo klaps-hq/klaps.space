@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
 import { Play } from "lucide-react";
 import { IRandomScreening } from "@/interfaces/IScreenings";
-import { tmdbImageUrl } from "@/lib/tmdb";
+import { tmdbImageSrc } from "@/lib/tmdb";
 import { formatDuration, getYouTubeEmbedUrl } from "@/lib/utils";
 import TrailerModal from "@/components/common/trailer-modal";
 import MobileNav from "@/components/common/mobile-nav";
@@ -15,6 +15,10 @@ import { CharsReveal, TitleReveal } from "./text-reveal";
 
 interface HeroProps {
   screening: IRandomScreening | null;
+  // Precomputed on the server (lib/blur.ts); instant blurred preview
+  // while the full-size hero images load.
+  backdropBlurDataUrl?: string | null;
+  posterBlurDataUrl?: string | null;
 }
 
 const CTA_PRIMARY = "ZOBACZ SEANSE";
@@ -124,7 +128,11 @@ const hasCompleteHeroData = (screening: IRandomScreening): boolean =>
       screening.movie.backdropUrl
   );
 
-const Hero: React.FC<HeroProps> = ({ screening }) => {
+const Hero: React.FC<HeroProps> = ({
+  screening,
+  backdropBlurDataUrl,
+  posterBlurDataUrl,
+}) => {
   const [trailerOpen, setTrailerOpen] = useState(false);
 
   if (!screening || !hasCompleteHeroData(screening)) {
@@ -148,16 +156,22 @@ const Hero: React.FC<HeroProps> = ({ screening }) => {
       <h1 className="sr-only">
         Seanse specjalne i stare filmy w kinach studyjnych w Polsce
       </h1>
-      {/* w1280 instead of original: TMDB originals are multi-MB and slow
-          down the optimizer fetch; the backdrop sits under a heavy
-          gradient + grain so the smaller source is indistinguishable. */}
+      {/* "original" source: the optimizer downscales it to the viewport,
+          so the client payload stays small while the image is sharp on
+          large screens (w1280 upscaled looked soft). Originals are served
+          by the scraper-populated MinIO mirror, not the TMDB CDN. */}
       <HeroParallax
-        backdropSrc={tmdbImageUrl(screening.movie.backdropUrl ?? "", "w1280")}
+        backdropSrc={tmdbImageSrc(
+          screening.movie.backdropUrl ?? "",
+          "original"
+        )}
         posterSrc={
           screening.movie.posterUrl
-            ? tmdbImageUrl(screening.movie.posterUrl, "w780")
+            ? tmdbImageSrc(screening.movie.posterUrl, "w780")
             : null
         }
+        backdropBlurDataUrl={backdropBlurDataUrl}
+        posterBlurDataUrl={posterBlurDataUrl}
         alt={screening.movie.title}
       >
         <HeroNav />

@@ -8,6 +8,7 @@ import ScreeningsLoader from "./_components/screenings/loader";
 import Genres from "./_components/genres";
 import Cinemas from "./_components/cinemas";
 import { getRandomScreening } from "@/lib/screenings";
+import { getTmdbBlurDataUrl } from "@/lib/blur";
 import { NOINDEX_FOLLOW, hasFilterParams } from "@/lib/seo";
 
 export const revalidate = 300;
@@ -41,12 +42,25 @@ const HomePage = async ({ searchParams }: HomePageProps) => {
   const params = await searchParams;
   const randomScreening = await getRandomScreening().catch(() => null);
 
+  // Blur placeholders render with the cached HTML, so the hero never
+  // flashes a black frame while the backdrop streams in.
+  const [backdropBlurDataUrl, posterBlurDataUrl] = randomScreening
+    ? await Promise.all([
+        getTmdbBlurDataUrl(randomScreening.movie.backdropUrl, "backdrop"),
+        getTmdbBlurDataUrl(randomScreening.movie.posterUrl, "poster"),
+      ])
+    : [null, null];
+
   return (
     <>
       {/* Hidden at the top (the hero carries its own nav), revealed as a
           floating glass bar while scrolling back up. */}
       <SiteHeader overlay />
-      <Hero screening={randomScreening} />
+      <Hero
+        screening={randomScreening}
+        backdropBlurDataUrl={backdropBlurDataUrl}
+        posterBlurDataUrl={posterBlurDataUrl}
+      />
       <Suspense fallback={<ScreeningsLoader />}>
         <Screenings searchParams={params} />
       </Suspense>
