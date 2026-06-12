@@ -12,4 +12,5 @@ export const NAV_LINKS: NavLink[] = [
   { href: "/kina", label: "Kina" },
   { href: "/miasta", label: "Miasta" },
   { href: "/mapa-kin", label: "Mapa" },
+  { href: "/blog", label: "Blog" },
 ];

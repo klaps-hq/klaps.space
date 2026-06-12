@@ -6,6 +6,7 @@ import { getSitemapEntries } from "@/lib/sitemap-entries";
 import { getScreenings } from "@/lib/screenings";
 import { getMovies, getMoviePosterMap } from "@/lib/movies";
 import { getGenres } from "@/lib/genres";
+import { getPostsPage, getPublishedPosts } from "@/lib/posts";
 import { ISitemapEntry } from "@/interfaces/ISitemap";
 
 export const revalidate = 3600;
@@ -104,12 +105,41 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
     { url: `${SITE_URL}/miasta`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/gatunki`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/rezyserzy`, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${SITE_URL}/blog`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${SITE_URL}/o-projekcie`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/kontakt`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/faq`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/regulamin`, changeFrequency: "monthly", priority: 0.2 },
     { url: `${SITE_URL}/polityka-prywatnosci`, changeFrequency: "monthly", priority: 0.2 },
   ];
+
+  // Blog posts come from Payload, not the repertoire API, so they get their
+  // own resilience: on a database hiccup the sitemap just ships without them.
+  const blogPages: MetadataRoute.Sitemap = (
+    await getPublishedPosts().catch(() => [])
+  ).flatMap((post) =>
+    post.slug
+      ? [
+          {
+            url: `${SITE_URL}/blog/${post.slug}`,
+            lastModified: toLastModified(post.updatedAt),
+            changeFrequency: "monthly" as const,
+            priority: 0.6,
+          },
+        ]
+      : []
+  );
+
+  // Paginated blog archive (/blog/strona/2..N); page 1 is /blog itself.
+  const blogArchivePages: MetadataRoute.Sitemap = await getPostsPage(1)
+    .then(({ totalPages }) =>
+      Array.from({ length: Math.max(totalPages - 1, 0) }, (_, index) => ({
+        url: `${SITE_URL}/blog/strona/${index + 2}`,
+        changeFrequency: "weekly" as const,
+        priority: 0.4,
+      }))
+    )
+    .catch(() => []);
 
   // One request covers every dynamic resource. On failure serve the static
   // pages only - an incomplete sitemap beats a 500, but log it loudly.
@@ -118,7 +148,7 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
     entries = await getSitemapEntries();
   } catch (error) {
     console.error("Sitemap: failed to fetch /sitemap from API:", error);
-    return staticPages;
+    return [...staticPages, ...blogPages, ...blogArchivePages];
   }
 
   // Cities arrive pre-filtered by the API (only those with cinemas);
@@ -140,6 +170,8 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
     // Directors arrive pre-filtered by the API (only those above the
     // indexing threshold), so no noindex cross-check is needed here.
     ...toPages(entries.directors ?? [], "rezyserzy", "weekly", 0.5),
+    ...blogPages,
+    ...blogArchivePages,
   ];
 
   return Array.from(new Map(allPages.map((item) => [item.url, item])).values());

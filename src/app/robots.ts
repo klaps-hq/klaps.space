@@ -20,7 +20,7 @@ const AI_CRAWLERS = [
 
 const PRODUCTION_URL = "https://klaps.space";
 
-const DISALLOWED_PATHS = ["/api/", "/maintenance"];
+const DISALLOWED_PATHS = ["/api/", "/admin/", "/maintenance"];
 
 const robots = (): MetadataRoute.Robots => {
   // Guard non-production deployments (preview/staging with a different

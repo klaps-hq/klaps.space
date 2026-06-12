@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
-import "./globals.css";
+import "../globals.css";
 import JsonLd from "@/components/common/json-ld";
 import SmoothScroll from "@/components/common/smooth-scroll";
 import CustomCursor from "@/components/common/custom-cursor";
@@ -88,6 +88,14 @@ export default async function RootLayout({
         />
         <meta name="apple-mobile-web-app-title" content="Klaps" />
         <link rel="manifest" href="/site.webmanifest" />
+        {/* Plain link tag instead of metadata alternates.types: pages set
+            alternates.canonical, which would shadow a layout-level value. */}
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Blog Klaps"
+          href="/blog/feed.xml"
+        />
         {process.env.GA_MEASUREMENT_ID && (
           <>
             <Script
