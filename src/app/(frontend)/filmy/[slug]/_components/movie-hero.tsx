@@ -6,16 +6,22 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Play } from "lucide-react";
 import { IMovie } from "@/interfaces/IMovies";
-import { tmdbImageUrl } from "@/lib/tmdb";
+import { tmdbImageSrc } from "@/lib/tmdb";
 import { formatDuration, getYouTubeEmbedUrl } from "@/lib/utils";
 import TrailerModal from "@/components/common/trailer-modal";
 import { PAGE_HEADING_CLASSES } from "@/components/ui/page-heading";
 
 interface MovieHeroProps {
   movie: IMovie;
+  // Precomputed on the server (lib/blur.ts); instant blurred preview
+  // while the full-size backdrop loads.
+  backdropBlurDataUrl?: string | null;
 }
 
-const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
+const MovieHero: React.FC<MovieHeroProps> = ({
+  movie,
+  backdropBlurDataUrl,
+}) => {
   const ref = useRef<HTMLElement>(null);
   const [trailerOpen, setTrailerOpen] = useState(false);
   const embedUrl = movie.videoUrl ? getYouTubeEmbedUrl(movie.videoUrl) : null;
@@ -45,15 +51,18 @@ const MovieHero: React.FC<MovieHeroProps> = ({ movie }) => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* w1280 instead of original: TMDB originals are multi-MB and
-                slow down the optimizer fetch; the backdrop sits under a
-                heavy gradient + grain so the smaller source is fine. */}
+            {/* "original" source: the optimizer downscales it to the
+                viewport, so the client payload stays small while the image
+                is sharp on large screens (w1280 upscaled looked soft).
+                Originals are served by the scraper-populated MinIO mirror,
+                not the TMDB CDN. */}
             <Image
-              src={tmdbImageUrl(movie.backdropUrl, "w1280")}
+              src={tmdbImageSrc(movie.backdropUrl, "original")}
               alt={movie.title}
               fill
               sizes="100vw"
-              quality={60}
+              placeholder={backdropBlurDataUrl ? "blur" : "empty"}
+              blurDataURL={backdropBlurDataUrl ?? undefined}
               className="object-cover"
               priority
             />

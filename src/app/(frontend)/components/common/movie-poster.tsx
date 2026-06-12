@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import NoMoviePoster from "./no-movie-poster";
-import { tmdbImageUrl } from "@/lib/tmdb";
+import { tmdbImageSrc } from "@/lib/tmdb";
 
 interface MoviePosterProps {
   posterUrl: string;
@@ -34,7 +34,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 
   return (
     <Image
-      src={tmdbImageUrl(posterUrl)}
+      src={tmdbImageSrc(posterUrl)}
       alt={`Plakat filmu: ${title}`}
       width={width}
       height={height}

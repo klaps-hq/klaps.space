@@ -39,9 +39,15 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    // 60 is used for hero backdrops, which sit under heavy gradient
-    // overlays, so the lower quality is invisible but saves bytes.
-    qualities: [60, 75],
+    qualities: [75],
+    // TMDB files are content-addressed and immutable, so optimized
+    // variants can be cached for a year instead of the short default.
+    // After a redeploy wipes this cache, origin re-fetches hit the local
+    // MinIO mirror (NEXT_PUBLIC_TMDB_IMAGE_BASE_URL), not the TMDB CDN.
+    minimumCacheTTL: 31536000,
+    // Default list minus 3840: full-bleed heroes sit under gradient and
+    // grain overlays, so 4K variants add bytes with no visible gain.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     remotePatterns: [
       {
         protocol: "https",
