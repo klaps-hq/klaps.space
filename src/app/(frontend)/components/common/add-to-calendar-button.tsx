@@ -17,7 +17,7 @@ const DEFAULT_DURATION_MINUTES = 120;
 const isAppleDevice = (): boolean =>
   /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent);
 
-export interface CalendarEventOption {
+interface CalendarEventOption {
   /** Menu label when there is more than one option, e.g. "20:00 · 15.06". */
   label: string;
   /** Event start as an ISO date-time string. */

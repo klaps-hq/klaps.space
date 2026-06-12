@@ -6,7 +6,7 @@ import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
 import { SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH } from "@/lib/seo";
-import { getPostsPage } from "@/lib/posts";
+import { getCover, getPostsPage } from "@/lib/posts";
 import type { Post } from "@/payload-types";
 import Footer from "../(home)/_components/footer";
 import PostListItem from "./_components/post-list-item";
@@ -38,12 +38,29 @@ const buildBlogJsonLd = (posts: readonly Post[]) => ({
   url: `${SITE_URL}/blog`,
   description: DESCRIPTION,
   inLanguage: "pl-PL",
-  blogPost: posts.map((post) => ({
-    "@type": "BlogPosting",
-    headline: post.title,
-    url: `${SITE_URL}/blog/${post.slug}`,
-    ...(post.publishedAt ? { datePublished: post.publishedAt } : {}),
-  })),
+  blogPost: posts.map((post) => {
+    const cover = getCover(post);
+    // Local storage yields relative URLs (/media/...), the S3 adapter
+    // yields absolute ones; only prefix the former.
+    const coverUrl = cover?.url
+      ? cover.url.startsWith("http")
+        ? cover.url
+        : `${SITE_URL}${cover.url}`
+      : null;
+    return {
+      "@type": "BlogPosting",
+      headline: post.title,
+      url: `${SITE_URL}/blog/${post.slug}`,
+      ...(post.publishedAt ? { datePublished: post.publishedAt } : {}),
+      ...(coverUrl ? { image: coverUrl } : {}),
+      // Summary references still need author for valid Article markup;
+      // mirrors the Person/Organization fallback on the post page.
+      author:
+        typeof post.author === "object" && post.author?.name
+          ? { "@type": "Person", name: post.author.name }
+          : { "@type": "Organization", name: "Klaps", url: SITE_URL },
+    };
+  }),
 });
 
 const BlogPage = async () => {

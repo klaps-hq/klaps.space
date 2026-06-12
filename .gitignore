@@ -46,3 +46,9 @@ CLAUDE.md
 .playwright-mcp
 # payload media uploads (local dev; production uses a volume or object storage)
 /public/media
+
+# local working files (drafts, captures, notes)
+/drafts/
+/screenshots/
+/docs/
+/scripts/capture_screenshot.py

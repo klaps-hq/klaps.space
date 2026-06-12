@@ -1,5 +1,5 @@
 import { SITE_URL } from "./site-config";
-import { resolveTmdbPhotoUrl } from "./tmdb";
+import { tmdbPhotoSrc } from "./tmdb";
 
 // Shared ScreeningEvent JSON-LD builder for the movie and cinema layouts.
 // The movie page emits one event per screening across cinemas; the cinema
@@ -29,7 +29,7 @@ export interface ScreeningEventData {
 }
 
 // Keep the events payload reasonable - soonest screenings first.
-export const MAX_JSONLD_EVENTS = 50;
+const MAX_JSONLD_EVENTS = 50;
 
 const buildEvent = (
   data: ScreeningEventData,
@@ -80,7 +80,9 @@ const buildEvent = (
     },
   };
 
-  const image = resolveTmdbPhotoUrl(movie.posterUrl, "w780");
+  // Same mirror-aware resolver as the Movie block: hotlinking the TMDB CDN
+  // here would bypass the MinIO mirror and diverge from the visible images.
+  const image = tmdbPhotoSrc(movie.posterUrl, "w780");
   if (image) {
     event.image = image;
   }

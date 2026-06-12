@@ -87,7 +87,7 @@ export const TitleReveal: React.FC<TitleRevealProps> = ({
   );
 };
 
-export interface CharsRevealSegment {
+interface CharsRevealSegment {
   text: string;
   href?: string;
 }

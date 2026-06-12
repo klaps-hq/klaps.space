@@ -133,7 +133,7 @@ const MoviePage = async ({ params }: MoviePageProps) => {
         <Breadcrumbs
           items={[
             { name: "Seanse", href: "/seanse" },
-            { name: movie.title },
+            { name: movie.title, href: `/filmy/${movie.slug}` },
           ]}
         />
       </div>

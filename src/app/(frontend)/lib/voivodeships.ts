@@ -3,7 +3,7 @@
  * mirroring the values stored by the API and accepted by its
  * ?voivodeship= query param.
  */
-export const VOIVODESHIPS = [
+const VOIVODESHIPS = [
   "dolnośląskie",
   "kujawsko-pomorskie",
   "lubelskie",

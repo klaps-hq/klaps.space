@@ -1,10 +1,5 @@
 import { permanentRedirect } from "next/navigation";
-import {
-  IMovie,
-  IMovieSummary,
-  IMultiCityMovie,
-  PaginatedResponse,
-} from "@/interfaces/IMovies";
+import { IMovie, IMovieSummary, PaginatedResponse } from "@/interfaces/IMovies";
 import { IScreening } from "@/interfaces/IScreenings";
 import { apiFetch, fetchOrNotFound } from "./client";
 import { getMovieScreenings } from "./screenings";
@@ -16,16 +11,6 @@ interface GetMoviesParams {
   search?: string | null;
   genreId?: string | null;
 }
-
-export const getMultiCityMovies = async (): Promise<IMultiCityMovie[]> => {
-  try {
-    const movies = await apiFetch<IMultiCityMovie[]>("/movies/multi-city");
-    return movies;
-  } catch (error) {
-    console.warn("Falling back to empty multi-city movies list:", error);
-    return [];
-  }
-};
 
 export const getMovies = async (
   params: GetMoviesParams = {}
@@ -85,11 +70,6 @@ export const getMoviePosterMap = async (): Promise<Map<string, string>> => {
   } while (page <= totalPages && page <= MAX_POSTER_PAGES);
 
   return posters;
-};
-
-export const getMovieById = async (id: number): Promise<IMovie> => {
-  const movie = await apiFetch<IMovie>(`/movies/${id}`);
-  return movie;
 };
 
 export const getMovieBySlug = async (slug: string): Promise<IMovie> => {

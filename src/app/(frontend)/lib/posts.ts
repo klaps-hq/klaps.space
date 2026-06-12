@@ -10,7 +10,7 @@ import type { Media, Post } from "@/payload-types";
 const POSTS_LIMIT = 100;
 
 /** Listing page size: enough rows to feel like an archive, light to render. */
-export const POSTS_PER_PAGE = 10;
+const POSTS_PER_PAGE = 10;
 
 export interface PostsPage {
   posts: Post[];
@@ -30,6 +30,20 @@ export const getPostsPage = async (page: number): Promise<PostsPage> => {
     page,
   });
   return { posts: docs, totalPages };
+};
+
+/** Newest published posts for teaser sections (e.g. the homepage). */
+export const getLatestPosts = async (limit: number): Promise<Post[]> => {
+  const payload = await getPayload({ config });
+  const { docs } = await payload.find({
+    collection: "posts",
+    draft: false,
+    overrideAccess: false,
+    sort: "-publishedAt",
+    depth: 1,
+    limit,
+  });
+  return docs;
 };
 
 export const getPublishedPosts = async (): Promise<Post[]> => {

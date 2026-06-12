@@ -88,7 +88,18 @@ const buildPostJsonLd = (post: Post) => {
     inLanguage: "pl-PL",
     ...(post.publishedAt ? { datePublished: post.publishedAt } : {}),
     dateModified: post.updatedAt,
-    ...(coverUrl ? { image: coverUrl } : {}),
+    // ImageObject with dimensions (when Payload measured them) instead of
+    // a bare URL: preferred by Google for Article rich results.
+    ...(coverUrl
+      ? {
+          image: {
+            "@type": "ImageObject",
+            url: coverUrl,
+            ...(cover?.width ? { width: cover.width } : {}),
+            ...(cover?.height ? { height: cover.height } : {}),
+          },
+        }
+      : {}),
     author,
     publisher: {
       "@type": "Organization",
