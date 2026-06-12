@@ -148,6 +148,8 @@ const Hero: React.FC<HeroProps> = ({
     day: "2-digit",
     month: "long",
   }).format(screeningDate);
+  // Older API responses may omit the field, so default to no credit line.
+  const directors = screening.movie.directors ?? [];
 
   return (
     <section className="h-screen w-full bg-black flex items-center justify-center p-4 md:p-8">
@@ -226,6 +228,33 @@ const Hero: React.FC<HeroProps> = ({
                       .map((g) => g.name)
                       .join(" / ")}
                   </span>
+                )}
+                {directors.length > 0 && (
+                  <>
+                    {(screening.movie.duration ||
+                      screening.movie.productionYear ||
+                      screening.movie.genres.length > 0) && (
+                      <span>&middot;</span>
+                    )}
+                    <span className="uppercase tracking-wider">
+                      Reż.{" "}
+                      {directors.map((person, index) => (
+                        <React.Fragment key={person.id ?? person.name}>
+                          {index > 0 && ", "}
+                          {person.slug ? (
+                            <Link
+                              href={`/rezyserzy/${person.slug}`}
+                              className="border-b border-white/30 hover:border-white hover:text-white transition-colors"
+                            >
+                              {person.name}
+                            </Link>
+                          ) : (
+                            person.name
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </span>
+                  </>
                 )}
               </motion.div>
             </div>
