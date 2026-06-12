@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import FilterBar from "./filter-bar";
 import ScreeningsGrid from "./screenings-grid";
+import ScreeningsGridSkeleton from "./grid-skeleton";
 import SectionHeader from "./section-header";
 
 interface ScreeningsSectionProps {
@@ -23,6 +24,11 @@ interface ScreeningsSectionProps {
   dateFrom: string | null;
   dateTo: string | null;
   search: string | null;
+  // First load: no data yet, show the grid skeleton instead of the
+  // (misleading) empty state.
+  isLoading: boolean;
+  // Refetch with stale data on screen: dim the grid like URL transitions do.
+  isUpdating: boolean;
 }
 
 const ScreeningsSectionInner: React.FC<ScreeningsSectionProps> = ({
@@ -34,6 +40,8 @@ const ScreeningsSectionInner: React.FC<ScreeningsSectionProps> = ({
   dateFrom,
   dateTo,
   search,
+  isLoading,
+  isUpdating,
 }) => {
   const { isPending } = useScreeningsTransition();
 
@@ -51,19 +59,23 @@ const ScreeningsSectionInner: React.FC<ScreeningsSectionProps> = ({
       <div
         className={cn(
           "px-6 md:px-12 lg:px-16 py-12 md:py-20 transition-opacity duration-200",
-          isPending && "opacity-50 pointer-events-none"
+          (isPending || isUpdating) && !isLoading && "opacity-50 pointer-events-none"
         )}
       >
-        <ScreeningsGrid
-          screenings={screenings}
-          genres={genres}
-          selectedGenreIds={selectedGenreIds}
-          dateFrom={dateFrom}
-          dateTo={dateTo}
-          search={search}
-        />
+        {isLoading ? (
+          <ScreeningsGridSkeleton />
+        ) : (
+          <ScreeningsGrid
+            screenings={screenings}
+            genres={genres}
+            selectedGenreIds={selectedGenreIds}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            search={search}
+          />
+        )}
 
-        {hasMore && screenings.length > 0 && (
+        {!isLoading && hasMore && screenings.length > 0 && (
           <div className="mt-16 md:mt-24 flex justify-center">
             <Link
               href={seeAllHref}
