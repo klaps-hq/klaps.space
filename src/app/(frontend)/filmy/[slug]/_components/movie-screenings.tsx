@@ -10,7 +10,7 @@ import ShareButton from "@/components/common/share-button";
 import { usePreferredCity } from "@/contexts/city-context";
 import { groupScreeningsByCinema } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
-import { formatDateLabel, cn } from "@/lib/utils";
+import { formatDateLabel, cn, WARSAW_TZ } from "@/lib/utils";
 import { voivodeshipLocative } from "@/lib/voivodeships";
 
 interface MovieScreeningsProps {
@@ -30,6 +30,7 @@ const formatFullDateLabel = (dateStr: string): string => {
     const date = new Date(dateStr).toLocaleDateString("pl-PL", {
       day: "2-digit",
       month: "2-digit",
+      timeZone: WARSAW_TZ,
     });
     return `${base} · ${date}`;
   }
@@ -40,6 +41,7 @@ const formatShortDate = (dateStr: string): string =>
   new Date(dateStr).toLocaleDateString("pl-PL", {
     day: "2-digit",
     month: "2-digit",
+    timeZone: WARSAW_TZ,
   });
 
 // We do not sell tickets or broker reservations, so the time is plain
@@ -71,6 +73,7 @@ const formatShareDate = (dateStr: string): string =>
     weekday: "short",
     day: "2-digit",
     month: "2-digit",
+    timeZone: WARSAW_TZ,
   });
 
 const CinemaRow: React.FC<CinemaRowProps> = ({

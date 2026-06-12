@@ -62,6 +62,7 @@ export const formatPlDate = (date: Date): string =>
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: "Europe/Warsaw",
   }).format(date);
 
 /** Query params that change the visible result set on listing pages. */
