@@ -67,12 +67,12 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
       ref={ref}
       className="relative w-full h-full rounded-2xl overflow-hidden isolate [clip-path:inset(0_round_1rem)]"
     >
-      <motion.div
-        className="absolute inset-0"
-        initial={{ opacity: 0, scale: 1.08 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      >
+      {/* No JS-driven entrance on the artwork: the hero image is the LCP
+          element, and a framer initial opacity-0 keeps it invisible until
+          hydration, which costs seconds of LCP on throttled mobile. The
+          blur placeholder already provides the "appearing" feel; text and
+          nav reveals (framer) stay untouched. */}
+      <div className="absolute inset-0">
         <motion.div
           className="absolute inset-0"
           style={{ y: imageY, scale: imageScale }}
@@ -104,12 +104,18 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
               />
             )}
             {/* Raw img on purpose: props come from getImageProps, so the
-                optimizer pipeline still applies (alt included via spread). */}
+                optimizer pipeline still applies (alt included via spread).
+                Explicit fetchPriority: getImageProps does not forward it,
+                and Lighthouse flags the LCP image without the hint. */}
             {/* eslint-disable-next-line jsx-a11y/alt-text */}
-            <img {...backdropProps} className="object-cover" />
+            <img
+              {...backdropProps}
+              fetchPriority="high"
+              className="object-cover"
+            />
           </picture>
         </motion.div>
-      </motion.div>
+      </div>
 
       <div className="pointer-events-none absolute inset-0 opacity-[0.08] mix-blend-soft-light">
         <svg
