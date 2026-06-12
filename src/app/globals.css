@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Bungee&family=Bungee+Shade&family=Limelight&family=Monoton&family=Oswald:wght@200..700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -30,12 +29,6 @@
 
   --shadow-vhs-tape: 0 0 10px 0 rgb(255 255 255 / 0.5);
   --shadow-vhs-box: 8px 12px 24px rgb(0 0 0 / 0.35);
-
-  --font-limelight: "Limelight", sans-serif;
-  --font-bungee: "Bungee", sans-serif;
-  --font-bungee-shade: "Bungee Shade", sans-serif;
-  --font-monoton: "Monoton", sans-serif;
-  --font-oswald: "Oswald", sans-serif;
 }
 
 :root {
@@ -83,37 +76,6 @@
   .maplibregl-popup-tip {
     @apply hidden!;
   }
-}
-
-.limelight-regular {
-  font-family: "Limelight", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.bungee-regular {
-  font-family: "Bungee", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.monoton-regular {
-  font-family: "Monoton", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.bungee-shade-regular {
-  font-family: "Bungee Shade", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.oswald-regular {
-  font-family: "Oswald", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
 }
 
 @keyframes marquee {

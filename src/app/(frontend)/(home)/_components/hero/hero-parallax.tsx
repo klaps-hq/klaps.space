@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import Image from "next/image";
+import { getImageProps } from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 interface HeroParallaxProps {
@@ -16,6 +16,10 @@ interface HeroParallaxProps {
   alt: string;
   children: React.ReactNode;
 }
+
+// Tailwind md breakpoint: below it the portrait poster renders, above it
+// the landscape backdrop. Must stay in sync with the blur divs below.
+const MOBILE_MEDIA = "(max-width: 767px)";
 
 const HeroParallax: React.FC<HeroParallaxProps> = ({
   backdropSrc,
@@ -35,6 +39,29 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
   const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "-15%"]);
 
+  // A single <picture> instead of two CSS-toggled next/image instances:
+  // with two priority images the browser downloads both variants on every
+  // device (the hidden one included), which doubles the LCP-critical
+  // payload. <source media> makes it fetch exactly one.
+  // priority: the hero art is the LCP element; without it getImageProps
+  // emits loading="lazy".
+  const { props: backdropProps } = getImageProps({
+    src: backdropSrc,
+    alt,
+    fill: true,
+    sizes: "100vw",
+    priority: true,
+  });
+  const posterImageProps = posterSrc
+    ? getImageProps({
+        src: posterSrc,
+        alt,
+        fill: true,
+        sizes: "100vw",
+        priority: true,
+      }).props
+    : null;
+
   return (
     <div
       ref={ref}
@@ -50,43 +77,37 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
           className="absolute inset-0"
           style={{ y: imageY, scale: imageScale }}
         >
-          {posterSrc ? (
-            <>
-              {/* Mobile: portrait poster fills the tall viewport cleanly. */}
-              <Image
-                src={posterSrc}
-                alt={alt}
-                fill
-                sizes="100vw"
-                placeholder={posterBlurDataUrl ? "blur" : "empty"}
-                blurDataURL={posterBlurDataUrl ?? undefined}
-                className="object-cover md:hidden"
-                priority
-              />
-              {/* Desktop: cinematic landscape backdrop. */}
-              <Image
-                src={backdropSrc}
-                alt={alt}
-                fill
-                sizes="100vw"
-                placeholder={backdropBlurDataUrl ? "blur" : "empty"}
-                blurDataURL={backdropBlurDataUrl ?? undefined}
-                className="object-cover hidden md:block"
-                priority
-              />
-            </>
-          ) : (
-            <Image
-              src={backdropSrc}
-              alt={alt}
-              fill
-              sizes="100vw"
-              placeholder={backdropBlurDataUrl ? "blur" : "empty"}
-              blurDataURL={backdropBlurDataUrl ?? undefined}
-              className="object-cover"
-              priority
+          {/* Blur previews live behind the <img> so each breakpoint gets its
+              own placeholder (a single img can only carry one blur style). */}
+          {posterImageProps && posterBlurDataUrl && (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-cover bg-center md:hidden"
+              style={{ backgroundImage: `url(${posterBlurDataUrl})` }}
             />
           )}
+          {backdropBlurDataUrl && (
+            <div
+              aria-hidden="true"
+              className={`absolute inset-0 bg-cover bg-center ${
+                posterImageProps ? "hidden md:block" : ""
+              }`}
+              style={{ backgroundImage: `url(${backdropBlurDataUrl})` }}
+            />
+          )}
+          <picture>
+            {posterImageProps && (
+              <source
+                media={MOBILE_MEDIA}
+                srcSet={posterImageProps.srcSet}
+                sizes="100vw"
+              />
+            )}
+            {/* Raw img on purpose: props come from getImageProps, so the
+                optimizer pipeline still applies (alt included via spread). */}
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
+            <img {...backdropProps} className="object-cover" />
+          </picture>
         </motion.div>
       </motion.div>
 
