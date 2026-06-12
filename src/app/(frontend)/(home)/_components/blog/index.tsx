@@ -38,7 +38,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
               className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-white/30 text-[10px] uppercase tracking-[0.25em]">
+            <div className="absolute inset-0 flex items-center justify-center text-white/50 text-[10px] uppercase tracking-[0.25em]">
               Bez okładki
             </div>
           )}
@@ -47,7 +47,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
           {post.publishedAt && (
             <time
               dateTime={post.publishedAt}
-              className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/45"
+              className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/50"
             >
               {formatPlDate(new Date(post.publishedAt))}
             </time>

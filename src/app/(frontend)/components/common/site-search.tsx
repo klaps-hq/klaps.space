@@ -131,7 +131,7 @@ const SiteSearch: React.FC<SiteSearchProps> = ({ mode, className }) => {
           }}
           placeholder={MODE_COPY[mode].placeholder}
           aria-label={MODE_COPY[mode].ariaLabel}
-          className="ml-3 flex-1 min-w-0 bg-transparent text-[12px] tracking-wide text-white placeholder:text-white/40 outline-none"
+          className="ml-3 flex-1 min-w-0 bg-transparent text-[12px] tracking-wide text-white placeholder:text-white/50 outline-none"
         />
         {query.length > 0 && (
           <button
@@ -148,7 +148,7 @@ const SiteSearch: React.FC<SiteSearchProps> = ({ mode, className }) => {
       {showDropdown && (
         <div className="absolute left-0 right-0 top-full mt-2 max-h-[50vh] overflow-y-auto bg-black border border-white/10 py-2 z-50">
           {items.length === 0 && (
-            <p className="px-4 py-3 text-[12px] text-white/45">
+            <p className="px-4 py-3 text-[12px] text-white/50">
               {isLoading ? "Szukam..." : "Brak wyników."}
             </p>
           )}
@@ -181,7 +181,7 @@ const SiteSearch: React.FC<SiteSearchProps> = ({ mode, className }) => {
                     <span className="block text-sm text-white/70 group-hover:text-white transition-colors">
                       {cinema.name}
                     </span>
-                    <span className="block text-[10px] uppercase tracking-[0.22em] text-white/35">
+                    <span className="block text-[10px] uppercase tracking-[0.22em] text-white/50">
                       {cinema.city.name}
                     </span>
                   </Link>

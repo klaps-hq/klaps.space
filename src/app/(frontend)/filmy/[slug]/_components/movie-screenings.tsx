@@ -50,7 +50,7 @@ const ScreeningTime: React.FC<ScreeningTimeProps> = ({ screening }) => {
       <span className="text-2xl md:text-3xl font-semibold tabular-nums -tracking-[0.01em] text-white/80">
         {screening.time}
       </span>
-      <span className="text-[10px] uppercase tracking-[0.2em] tabular-nums text-white/35">
+      <span className="text-[10px] uppercase tracking-[0.2em] tabular-nums text-white/50">
         {formatShortDate(screening.date)}
       </span>
     </span>
@@ -118,7 +118,7 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
         >
           {first.cinema.name}
         </Link>
-        <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/45">
+        <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/50">
           <Link
             href={`/miasta/${first.cinema.city.slug}`}
             className="hover:text-white underline-offset-4 hover:underline transition-colors"

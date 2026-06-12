@@ -88,7 +88,7 @@ const GenreField: React.FC<GenreFieldProps> = ({ genres, className }) => {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Szukaj gatunku..."
               aria-label="Szukaj gatunku"
-              className="w-full h-11 pl-11 pr-9 bg-transparent text-white text-[12px] tracking-wide placeholder:text-white/40 outline-none"
+              className="w-full h-11 pl-11 pr-9 bg-transparent text-white text-[12px] tracking-wide placeholder:text-white/50 outline-none"
             />
             {query.length > 0 && (
               <button
@@ -110,7 +110,7 @@ const GenreField: React.FC<GenreFieldProps> = ({ genres, className }) => {
             className="max-h-72 overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.25)_transparent] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20"
           >
             {filtered.length === 0 ? (
-              <div className="px-4 py-6 text-center text-[11px] text-white/40 uppercase tracking-wider">
+              <div className="px-4 py-6 text-center text-[11px] text-white/50 uppercase tracking-wider">
                 Brak wyników
               </div>
             ) : (

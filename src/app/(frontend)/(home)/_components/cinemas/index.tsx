@@ -63,7 +63,7 @@ const Cinemas = async () => {
                 <h3 className="text-2xl md:text-3xl lg:text-[2rem] font-bold uppercase -tracking-[0.02em] text-white truncate">
                   {group.city.name}
                 </h3>
-                <span className="text-[10px] uppercase tracking-[0.3em] text-white/35 tabular-nums">
+                <span className="text-[10px] uppercase tracking-[0.3em] text-white/50 tabular-nums">
                   {group.cinemas.length}
                 </span>
               </Link>
@@ -79,7 +79,7 @@ const Cinemas = async () => {
                   </li>
                 ))}
                 {group.cinemas.length > CINEMAS_PER_CITY && (
-                  <li className="mt-1 text-[10px] uppercase tracking-[0.25em] text-white/30">
+                  <li className="mt-1 text-[10px] uppercase tracking-[0.25em] text-white/50">
                     +{group.cinemas.length - CINEMAS_PER_CITY} więcej
                   </li>
                 )}

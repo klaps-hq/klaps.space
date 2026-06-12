@@ -37,7 +37,7 @@ const DirectorCard: React.FC<DirectorCardProps> = ({ director }) => {
           {name}
         </h3>
         {(moviesCount > 0 || hasUpcoming) && (
-          <p className="text-[9px] md:text-[10px] uppercase tracking-[0.16em] text-white/40 truncate">
+          <p className="text-[9px] md:text-[10px] uppercase tracking-[0.16em] text-white/50 truncate">
             {moviesCount > 0 && (
               <span>
                 {moviesCount} {pluralPl(moviesCount, "film", "filmy", "filmów")}

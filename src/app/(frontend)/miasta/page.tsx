@@ -106,7 +106,7 @@ const CitiesPage = async () => {
                   <h2 className="text-xl md:text-2xl lg:text-3xl font-bold uppercase -tracking-[0.02em] text-white">
                     {formatVoivodeship(voivodeship)}
                   </h2>
-                  <span className="text-[10px] uppercase tracking-[0.3em] text-white/35 tabular-nums">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-white/50 tabular-nums">
                     {citiesInGroup.length}
                   </span>
                 </div>

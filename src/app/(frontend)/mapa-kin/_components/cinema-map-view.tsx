@@ -116,7 +116,7 @@ const CinemaMapView: React.FC<CinemaMapViewProps> = ({ cinemas }) => {
               className="group block hover:bg-white/[0.03] transition-colors"
             >
               <div className="px-5 pt-5 pb-4 border-b border-white/10">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-white/40 mb-2">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-white/50 mb-2">
                   Kino
                 </p>
                 <h3 className="text-white text-base md:text-lg font-medium uppercase -tracking-[0.02em] leading-tight">

@@ -123,7 +123,7 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="mb-4 md:mb-5 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/45">
+            <p className="mb-4 md:mb-5 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/50">
               Reżyser
             </p>
             <PageHeading variant="detail" className="max-w-[20ch]">

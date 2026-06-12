@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
             <div key={column.heading} className="flex flex-col gap-4 md:gap-5">
               {/* Plain span: nav column labels would pollute the document
                   outline as headings. */}
-              <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-white/40">
+              <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-white/50">
                 {column.heading}
               </span>
               <ul className="flex flex-col gap-2 md:gap-3">
@@ -66,7 +66,7 @@ const Footer: React.FC = () => {
 
         <div className="mb-8 flex flex-col gap-6 md:gap-8">
           <SocialLinks className="shrink-0" />
-          <p className="max-w-[64ch] text-xs md:text-sm text-white/45 leading-relaxed">
+          <p className="max-w-[64ch] text-xs md:text-sm text-white/50 leading-relaxed">
             Klaps to ogólnopolski przewodnik po seansach specjalnych, klasyce
             filmowej i&nbsp;retrospektywach w&nbsp;kinach studyjnych. Repertuar,
             filmy i&nbsp;kina w&nbsp;jednym miejscu, bezpłatnie i&nbsp;bez
@@ -107,7 +107,7 @@ const Footer: React.FC = () => {
         </Link>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center gap-2 px-6 md:px-12 lg:px-16 pt-8 md:pt-4 pb-6 text-center sm:text-left text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-white/40">
+      <div className="flex flex-col sm:flex-row items-center gap-2 px-6 md:px-12 lg:px-16 pt-8 md:pt-4 pb-6 text-center sm:text-left text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-white/50">
         <a
           href="https://www.themoviedb.org/"
           target="_blank"
