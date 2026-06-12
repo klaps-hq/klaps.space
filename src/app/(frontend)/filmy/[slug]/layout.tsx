@@ -1,6 +1,6 @@
 import { getMovieBySlug } from "@/lib/movies";
 import { getMovieScreenings } from "@/lib/screenings";
-import { tmdbImageUrl } from "@/lib/tmdb";
+import { tmdbImageSrc } from "@/lib/tmdb";
 import { SITE_URL } from "@/lib/site-config";
 import { buildScreeningEventsJsonLd } from "@/lib/screening-event-jsonld";
 import { IMovie } from "@/interfaces/IMovies";
@@ -34,7 +34,7 @@ const buildMovieJsonLd = (movie: IMovie) => {
   }
 
   if (movie.posterUrl) {
-    jsonLd.image = tmdbImageUrl(movie.posterUrl, "w780");
+    jsonLd.image = tmdbImageSrc(movie.posterUrl, "w780");
   }
 
   if (movie.directors?.length) {

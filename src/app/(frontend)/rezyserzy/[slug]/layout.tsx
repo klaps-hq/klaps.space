@@ -1,7 +1,7 @@
 import { getDirectorBySlug, getMoviesByDirector } from "@/lib/directors";
 import { SITE_URL } from "@/lib/site-config";
 import { newestUpdatedAtIso } from "@/lib/seo";
-import { resolveTmdbPhotoUrl } from "@/lib/tmdb";
+import { tmdbPhotoSrc } from "@/lib/tmdb";
 import { IDirector } from "@/interfaces/IDirectors";
 import { IMovieSummary } from "@/interfaces/IMovies";
 import JsonLd from "@/components/common/json-ld";
@@ -15,7 +15,7 @@ const buildDirectorJsonLd = (
   director: IDirector,
   movies: readonly IMovieSummary[]
 ) => {
-  const image = resolveTmdbPhotoUrl(director.photoUrl, "w500");
+  const image = tmdbPhotoSrc(director.photoUrl, "w500");
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Person",
