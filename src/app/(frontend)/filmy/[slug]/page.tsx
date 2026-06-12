@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { getMoviePageData, getMovieBySlug, getMovies } from "@/lib/movies";
-import { getTmdbBlurDataUrl } from "@/lib/blur";
 import { getMovieScreenings, getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
@@ -108,12 +107,9 @@ export const generateMetadata = async ({
 const MoviePage = async ({ params }: MoviePageProps) => {
   const { slug } = await params;
   const { movie, screenings } = await getMoviePageData(slug);
-  // Instant blurred preview baked into the cached HTML while the
-  // full-size backdrop streams in.
-  const backdropBlurDataUrl = await getTmdbBlurDataUrl(
-    movie.backdropUrl,
-    "backdrop"
-  );
+  // Instant blurred preview baked into the cached HTML while the full-size
+  // backdrop streams in; precomputed by the scraper, served by the API.
+  const backdropBlurDataUrl = movie.backdropBlurDataUrl ?? null;
 
   // Internal linking: up to 6 movies sharing the primary genre.
   const primaryGenre = movie.genres[0];
