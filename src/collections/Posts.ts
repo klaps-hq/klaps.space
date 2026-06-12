@@ -10,6 +10,7 @@ import {
 import { authenticated, authenticatedOrPublished } from "../access/authenticated";
 import { slugField } from "../fields/slug";
 import { pingIndexNow } from "./hooks/ping-indexnow";
+import { revalidateDeletedPost, revalidatePost } from "./hooks/revalidate-post";
 
 export const Posts: CollectionConfig = {
   slug: "posts",
@@ -28,7 +29,10 @@ export const Posts: CollectionConfig = {
     defaultColumns: ["title", "slug", "_status", "publishedAt"],
   },
   hooks: {
-    afterChange: [pingIndexNow],
+    // Revalidate first so search engines pinged by IndexNow fetch the
+    // already refreshed pages.
+    afterChange: [revalidatePost, pingIndexNow],
+    afterDelete: [revalidateDeletedPost],
   },
   versions: {
     drafts: {
