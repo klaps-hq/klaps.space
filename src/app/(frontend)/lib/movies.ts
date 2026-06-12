@@ -8,7 +8,7 @@ import {
 import { IScreening } from "@/interfaces/IScreenings";
 import { apiFetch, fetchOrNotFound } from "./client";
 import { getMovieScreenings } from "./screenings";
-import { tmdbImageUrl } from "./tmdb";
+import { tmdbImageSrc } from "./tmdb";
 
 interface GetMoviesParams {
   page?: number;
@@ -58,8 +58,10 @@ export const getMovies = async (
 // 5000 movies, comfortably above the real catalogue.
 const MAX_POSTER_PAGES = 50;
 
+// tmdbImageSrc returns absolute URLs (mirror when configured, TMDB CDN
+// otherwise) and passes non-TMDB absolute values through untouched.
 const toAbsolutePosterUrl = (posterUrl: string): string =>
-  posterUrl.startsWith("http") ? posterUrl : tmdbImageUrl(posterUrl, "w780");
+  tmdbImageSrc(posterUrl, "w780");
 
 /**
  * slug -> absolute poster URL for every movie that has one. Backs the

@@ -1,6 +1,6 @@
 import { getDirectorBySlug } from "@/lib/directors";
 import { buildOgImage, OG_SIZE } from "@/lib/og-image";
-import { resolveTmdbPhotoUrl } from "@/lib/tmdb";
+import { tmdbPhotoSrc } from "@/lib/tmdb";
 
 export const size = OG_SIZE;
 export const contentType = "image/png";
@@ -18,6 +18,6 @@ export default async function OgImage({ params }: OgImageProps) {
     eyebrow: "Reżyser",
     title: director.name,
     subtitle: "Filmy i seanse w kinach studyjnych",
-    posterUrl: resolveTmdbPhotoUrl(director.photoUrl, "w500"),
+    posterUrl: tmdbPhotoSrc(director.photoUrl, "w500"),
   });
 }

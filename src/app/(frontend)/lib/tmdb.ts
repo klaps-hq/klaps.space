@@ -19,9 +19,10 @@ export type TmdbImageSize =
   | "original";
 
 /**
- * Absolute TMDB CDN URL. Use for consumers that need a URL resolvable
- * independently of our infrastructure: sitemap images, JSON-LD, OG image
- * fetches. For rendering through next/image prefer tmdbImageSrc.
+ * Absolute TMDB CDN URL. Internal building block for tmdbImageSrc and
+ * resolveTmdbPhotoUrl; all rendering and SEO consumers (next/image,
+ * JSON-LD, sitemap, OG images) should use tmdbImageSrc/tmdbPhotoSrc, which
+ * point at the mirror when one is configured.
  */
 export function tmdbImageUrl(
   path: string,
