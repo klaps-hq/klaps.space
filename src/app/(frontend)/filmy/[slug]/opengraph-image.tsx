@@ -1,5 +1,5 @@
 import { getMovieBySlug } from "@/lib/movies";
-import { tmdbImageUrl } from "@/lib/tmdb";
+import { tmdbImageSrc } from "@/lib/tmdb";
 import { formatDuration, formatNames } from "@/lib/utils";
 import { buildOgImage, OG_SIZE } from "@/lib/og-image";
 
@@ -28,6 +28,6 @@ export default async function OgImage({ params }: OgImageProps) {
     eyebrow: "Seanse w kinach",
     title: movie.title,
     subtitle,
-    posterUrl: movie.posterUrl ? tmdbImageUrl(movie.posterUrl, "w780") : null,
+    posterUrl: movie.posterUrl ? tmdbImageSrc(movie.posterUrl, "w780") : null,
   });
 }
