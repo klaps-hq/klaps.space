@@ -104,7 +104,7 @@ const GenrePage = async ({ params }: GenrePageProps) => {
         <Breadcrumbs
           items={[
             { name: "Gatunki", href: "/gatunki" },
-            { name: genre.name },
+            { name: genre.name, href: `/gatunki/${genre.slug}` },
           ]}
         />
       </div>

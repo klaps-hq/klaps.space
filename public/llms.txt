@@ -1,0 +1,26 @@
+# Klaps
+
+> Klaps to niezależny, ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych w Polsce. Repertuar, filmy i kina w jednym miejscu, bezpłatnie i bez rejestracji. Serwis nie sprzedaje biletów, jest informatorem.
+
+Kino studyjne to kino o profilu artystycznym, które obok premier pokazuje przede wszystkim klasykę filmową, kino autorskie i dokumenty. Klaps agreguje repertuar takich kin z całej Polski oraz wybrane seanse specjalne organizowane przez kina sieciowe.
+
+## Repertuar
+
+- [Seanse](https://klaps.space/seanse): aktualny repertuar kin studyjnych w całej Polsce, z filtrami miasta, daty i gatunku
+- [Kina](https://klaps.space/kina): pełna lista kin studyjnych i niezależnych w Polsce
+- [Miasta](https://klaps.space/miasta): repertuar kin studyjnych w poszczególnych miastach
+- [Gatunki](https://klaps.space/gatunki): filmy pokazywane w kinach studyjnych według gatunku
+- [Reżyserzy](https://klaps.space/rezyserzy): seanse i retrospektywy według reżysera
+- [Mapa kin](https://klaps.space/mapa-kin): interaktywna mapa kin studyjnych w Polsce
+
+## Informacje
+
+- [O projekcie](https://klaps.space/o-projekcie): czym jest Klaps, manifest i zakres serwisu
+- [FAQ](https://klaps.space/faq): definicje kina studyjnego, seansu specjalnego i retrospektywy oraz zasady działania serwisu
+- [Blog](https://klaps.space/blog): artykuły o kinie studyjnym, klasyce filmowej i kulturze kinowej
+
+## Optional
+
+- [Kontakt](https://klaps.space/kontakt): formularz kontaktowy
+- [Regulamin](https://klaps.space/regulamin): zasady korzystania z serwisu
+- [Polityka prywatności](https://klaps.space/polityka-prywatnosci): informacje o danych i statystykach

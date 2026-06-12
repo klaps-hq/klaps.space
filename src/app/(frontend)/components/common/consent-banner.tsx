@@ -63,11 +63,13 @@ const ConsentBanner: React.FC = () => {
       aria-label="Zgoda na pliki cookie"
       className="fixed bottom-0 left-0 right-0 z-[80] border-t border-white/15 bg-black/95 backdrop-blur-md"
     >
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 md:px-12 lg:px-16 py-5">
+      {/* Compact on mobile: the banner overlays the bottom of the
+          100vh hero, where the primary CTA sits on small screens. */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-6 md:px-12 lg:px-16 py-4 sm:py-5">
         <p className="text-xs md:text-sm text-white/65 leading-relaxed max-w-[70ch] text-pretty">
           Używamy anonimowych statystyk (Google&nbsp;Analytics), żeby
           rozumieć, jak&nbsp;działa serwis.
-          <br />
+          <br className="hidden sm:block" />{" "}
           Dane zbieramy tylko za&nbsp;Twoją&nbsp;zgodą.{" "}
           <Link
             href="/polityka-prywatnosci"

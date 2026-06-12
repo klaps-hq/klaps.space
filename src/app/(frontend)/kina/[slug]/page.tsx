@@ -132,7 +132,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
         <Breadcrumbs
           items={[
             { name: "Kina", href: "/kina" },
-            { name: cinema.name },
+            { name: cinema.name, href: `/kina/${cinema.slug}` },
           ]}
         />
       </div>

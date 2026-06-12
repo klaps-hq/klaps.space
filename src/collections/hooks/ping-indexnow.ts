@@ -17,7 +17,12 @@ export const pingIndexNow: CollectionAfterChangeHook<Post> = async ({
   req,
 }) => {
   const key = process.env.INDEXNOW_KEY;
-  if (!key || SITE_URL !== PRODUCTION_URL) return doc;
+  if (SITE_URL !== PRODUCTION_URL) return doc;
+  if (!key) {
+    // A silent no-op would hide a misconfigured production deployment.
+    req.payload.logger.warn("IndexNow ping skipped: INDEXNOW_KEY is not set");
+    return doc;
+  }
   if (doc._status !== "published" || !doc.slug) return doc;
 
   const body = {

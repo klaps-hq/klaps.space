@@ -21,7 +21,10 @@ interface HeroProps {
   posterBlurDataUrl?: string | null;
 }
 
-const CTA_PRIMARY = "ZOBACZ SEANSE";
+// Two CTAs: the fallback points at the full listing, the showcase hero
+// points at the featured movie page, so each label matches its target.
+const CTA_ALL_SCREENINGS = "ZOBACZ SEANSE";
+const CTA_MOVIE = "ZOBACZ FILM";
 
 // Short entrance animations - the hero title is the LCP element,
 // so long delays directly hurt Core Web Vitals.
@@ -103,14 +106,14 @@ const HeroFallback: React.FC = () => (
             variants={contentItemVariants}
             className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[0.95]"
           >
-            Seanse specjalne i klasyka filmowa w kinach studyjnych
+            Seanse specjalne i stare filmy w kinach studyjnych w Polsce
           </motion.h1>
           <motion.div variants={contentItemVariants} className="self-start">
             <Link
               href="/seanse"
               className="text-base text-white border-b border-white/50 pb-0.5 hover:border-white transition-colors"
             >
-              {CTA_PRIMARY}
+              {CTA_ALL_SCREENINGS}
             </Link>
           </motion.div>
         </div>
@@ -274,7 +277,7 @@ const Hero: React.FC<HeroProps> = ({
                   href={`/filmy/${screening.movie.slug}`}
                   className="text-base text-white border-b border-white/50 pb-0.5 hover:border-white transition-colors"
                 >
-                  {CTA_PRIMARY}
+                  {CTA_MOVIE}
                 </Link>
                 {embedUrl && (
                   <button
