@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import JsonLd from "@/components/common/json-ld";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
@@ -22,6 +22,15 @@ interface HomeScreeningsData {
 interface ScreeningsProps {
   genres: IGenre[];
 }
+
+// The hero is exactly 100vh, so the section's top edge touches the fold and
+// any non-negative rootMargin fires the observer already at page load,
+// putting the work right back into the Lighthouse TBT window. The negative
+// bottom margin requires the section to be 120px inside the viewport, which
+// only happens after scrolling (or immediately in Googlebot's very tall
+// rendering viewport). Real users get an earlier trigger from the first
+// scroll event below.
+const FETCH_ROOT_MARGIN = "0px 0px -120px 0px";
 
 const parseGenreIds = (raw: string): number[] =>
   raw
@@ -74,10 +83,46 @@ const Screenings: React.FC<ScreeningsProps> = ({ genres }) => {
     data: HomeScreeningsData;
   } | null>(null);
 
+  // Defer the data fetch until the user scrolls near the section: the grid
+  // sits below the 100vh hero, so loading it during the initial page load
+  // only adds main-thread work (TBT) and poster downloads nobody sees yet.
+  // Googlebot renders with a very tall viewport, so it still triggers this.
+  const rootRef = useRef<HTMLDivElement>(null);
+  // Lazy initializer doubles as the no-IntersectionObserver fallback:
+  // without the API the fetch starts immediately.
+  const [isNear, setIsNear] = useState(
+    () => typeof IntersectionObserver === "undefined"
+  );
+
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node || isNear) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setIsNear(true);
+        }
+      },
+      { rootMargin: FETCH_ROOT_MARGIN }
+    );
+    observer.observe(node);
+
+    // First scroll = intent to reach the section right below the fold;
+    // start fetching before the observer threshold is met.
+    const onScroll = () => setIsNear(true);
+    window.addEventListener("scroll", onScroll, { passive: true, once: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [isNear]);
+
   useEffect(() => {
     // Wait for hydration so the first request already carries the stored
     // city preference instead of fetching twice.
-    if (!isHydrated) return;
+    if (!isHydrated || !isNear) return;
 
     const controller = new AbortController();
 
@@ -98,14 +143,16 @@ const Screenings: React.FC<ScreeningsProps> = ({ genres }) => {
       });
 
     return () => controller.abort();
-  }, [isHydrated, query]);
+  }, [isHydrated, isNear, query]);
 
   const data = loaded?.data ?? null;
   const isFetching = loaded === null || loaded.query !== query;
   const screenings = data?.screenings ?? [];
 
   return (
-    <>
+    // Layout-neutral wrapper: the IntersectionObserver target for the
+    // scroll-proximity fetch trigger.
+    <div ref={rootRef}>
       {/* ItemList ties the homepage to the listed movie pages, so crawlers
           see the repertoire as structured data, not just a grid of links.
           Injected client-side; Google reads JSON-LD from rendered HTML. */}
@@ -135,7 +182,7 @@ const Screenings: React.FC<ScreeningsProps> = ({ genres }) => {
         isLoading={data === null}
         isUpdating={isFetching}
       />
-    </>
+    </div>
   );
 };
 
