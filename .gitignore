@@ -44,3 +44,5 @@ yarn-error.log*
 next-env.d.ts
 CLAUDE.md
 .playwright-mcp
+# payload media uploads (local dev; production uses a volume or object storage)
+/public/media

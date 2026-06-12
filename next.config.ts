@@ -55,6 +55,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        // MinIO media served over HTTPS via Traefik
+        protocol: "https",
+        hostname: "media.klaps.space",
+      },
     ],
   },
 };
