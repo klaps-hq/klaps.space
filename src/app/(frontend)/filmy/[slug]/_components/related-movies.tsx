@@ -28,7 +28,7 @@ const RelatedMovies: React.FC<RelatedMoviesProps> = ({ movies }) => {
                 className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-white/30 text-[10px] uppercase tracking-[0.25em]">
+              <div className="absolute inset-0 flex items-center justify-center text-white/50 text-[10px] uppercase tracking-[0.25em]">
                 Bez plakatu
               </div>
             )}
@@ -38,7 +38,7 @@ const RelatedMovies: React.FC<RelatedMoviesProps> = ({ movies }) => {
               {movie.title}
             </h3>
             {(movie.productionYear || movie.genres.length > 0) && (
-              <div className="text-[11px] md:text-xs uppercase tracking-[0.18em] text-white/45 truncate">
+              <div className="text-[11px] md:text-xs uppercase tracking-[0.18em] text-white/50 truncate">
                 {movie.productionYear && <span>{movie.productionYear}</span>}
                 {movie.productionYear && movie.genres.length > 0 && (
                   <span aria-hidden="true"> · </span>

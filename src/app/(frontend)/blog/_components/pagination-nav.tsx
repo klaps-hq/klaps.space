@@ -11,7 +11,7 @@ const pageHref = (page: number): string =>
   page === 1 ? "/blog" : `/blog/strona/${page}`;
 
 const edgeLinkClass =
-  "text-xs uppercase tracking-[0.2em] text-white/45 hover:text-white transition-colors";
+  "text-xs uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors";
 const edgePlaceholderClass =
   "text-xs uppercase tracking-[0.2em] text-white/15 select-none";
 
@@ -50,7 +50,7 @@ const PaginationNav = ({ currentPage, totalPages }: PaginationNavProps) => {
             <li key={page}>
               <Link
                 href={pageHref(page)}
-                className="text-sm text-white/45 hover:text-white transition-colors"
+                className="text-sm text-white/50 hover:text-white transition-colors"
               >
                 {page}
               </Link>

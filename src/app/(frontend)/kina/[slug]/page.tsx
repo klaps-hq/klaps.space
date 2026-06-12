@@ -143,7 +143,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
             <PageHeading variant="detail" className="max-w-[20ch]">
               {cinema.name}
             </PageHeading>
-            <div className="mt-4 md:mt-5 flex flex-col gap-1.5 text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/45">
+            <div className="mt-4 md:mt-5 flex flex-col gap-1.5 text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
               {cinema.street && <span>{cinema.street}</span>}
               <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span>

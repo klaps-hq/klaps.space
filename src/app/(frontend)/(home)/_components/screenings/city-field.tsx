@@ -192,7 +192,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Szukaj miasta..."
               aria-label="Szukaj miasta"
-              className="w-full h-11 pl-11 pr-9 bg-transparent text-white text-[12px] tracking-wide placeholder:text-white/40 outline-none"
+              className="w-full h-11 pl-11 pr-9 bg-transparent text-white text-[12px] tracking-wide placeholder:text-white/50 outline-none"
             />
             {query.length > 0 && (
               <button
@@ -216,7 +216,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
           >
             {searchResults !== null ? (
               searchResults.length === 0 ? (
-                <div className="px-4 py-6 text-center text-[11px] text-white/40 uppercase tracking-wider">
+                <div className="px-4 py-6 text-center text-[11px] text-white/50 uppercase tracking-wider">
                   Brak wynikĂłw
                 </div>
               ) : (
@@ -227,7 +227,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
                 <button
                   type="button"
                   onClick={() => setActiveVoivodeship(null)}
-                  className="flex w-full items-center gap-2 text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-white/45 hover:text-white border-b border-white/10 transition-colors"
+                  className="flex w-full items-center gap-2 text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white border-b border-white/10 transition-colors"
                 >
                   <ChevronLeft className="size-3.5 shrink-0" aria-hidden="true" />
                   WojewĂłdztwa
@@ -271,7 +271,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
                       <span className="truncate">
                         {formatVoivodeship(group.name)}
                       </span>
-                      <span className="text-white/35 tabular-nums">
+                      <span className="text-white/50 tabular-nums">
                         {group.cities.length}
                       </span>
                     </span>

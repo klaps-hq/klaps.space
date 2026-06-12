@@ -48,7 +48,7 @@ const AboutCell: React.FC<AboutCellProps> = ({ label, children, className }) => 
       className
     )}
   >
-    <span className="text-[10px] uppercase tracking-[0.25em] text-white/40">
+    <span className="text-[10px] uppercase tracking-[0.25em] text-white/50">
       {label}
     </span>
     {children}
@@ -106,8 +106,8 @@ const MovieAbout: React.FC<MovieAboutProps> = ({ movie }) => {
                     minimumFractionDigits: 1,
                     maximumFractionDigits: 1,
                   })}
-                  <span className="text-white/40"> / 10</span>
-                  <span className="ml-3 text-xs md:text-sm text-white/45 tracking-normal">
+                  <span className="text-white/50"> / 10</span>
+                  <span className="ml-3 text-xs md:text-sm text-white/50 tracking-normal">
                     {userRating.votes.toLocaleString("pl-PL")}{" "}
                     {pluralPl(userRating.votes, "głos", "głosy", "głosów")}
                   </span>

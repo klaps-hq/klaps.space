@@ -29,7 +29,7 @@ const SearchField: React.FC<SearchFieldProps> = ({ className }) => {
         onChange={(e) => handleSearchChange(e.target.value)}
         placeholder="Szukaj filmu po tytule..."
         aria-label="Szukaj filmu"
-        className="ml-3 flex-1 min-w-0 bg-transparent text-[12px] tracking-wide text-white placeholder:text-white/40 outline-none"
+        className="ml-3 flex-1 min-w-0 bg-transparent text-[12px] tracking-wide text-white placeholder:text-white/50 outline-none"
       />
       {searchQuery.length > 0 && (
         <button

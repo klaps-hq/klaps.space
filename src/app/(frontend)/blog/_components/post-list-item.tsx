@@ -22,7 +22,7 @@ const PostListItem = ({ post }: PostListItemProps) => {
           {post.publishedAt && (
             <time
               dateTime={post.publishedAt}
-              className="text-xs uppercase tracking-[0.2em] text-white/45"
+              className="text-xs uppercase tracking-[0.2em] text-white/50"
             >
               {formatPlDate(new Date(post.publishedAt))}
             </time>

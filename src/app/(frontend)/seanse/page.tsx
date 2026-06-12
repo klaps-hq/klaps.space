@@ -275,7 +275,7 @@ const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
           .
         </p>
         {/* Visible freshness signal, mirrors dateModified in JSON-LD. */}
-        <p className="mt-5 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/35">
+        <p className="mt-5 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
           Repertuar zaktualizowano: {formatPlDate(lastUpdated)}
         </p>
       </header>

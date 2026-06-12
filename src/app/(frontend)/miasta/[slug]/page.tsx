@@ -136,7 +136,7 @@ const CityPage = async ({ params }: CityPageProps) => {
         {city.voivodeship && (
           // Canonical lowercase name reads correctly after "województwo"
           // (both nominative); CSS uppercases it visually.
-          <p className="mb-4 md:mb-5 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/45">
+          <p className="mb-4 md:mb-5 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/50">
             Województwo {city.voivodeship}
           </p>
         )}
@@ -166,7 +166,7 @@ const CityPage = async ({ params }: CityPageProps) => {
         )}
         {cinemasCount > 0 && (
           // Visible freshness signal: newest screening updatedAt for this city.
-          <p className="mt-5 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/35">
+          <p className="mt-5 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
             Repertuar zaktualizowano: {formatPlDate(lastUpdated ?? new Date())}
           </p>
         )}
@@ -192,7 +192,7 @@ const CityPage = async ({ params }: CityPageProps) => {
                   {cinema.name}
                 </span>
                 {cinema.street && (
-                  <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/35">
+                  <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
                     {cinema.street}
                   </span>
                 )}

@@ -140,7 +140,7 @@ const PostPage = async ({ params }: PostPageProps) => {
             {post.publishedAt && (
               <time
                 dateTime={post.publishedAt}
-                className="text-xs uppercase tracking-[0.2em] text-white/45"
+                className="text-xs uppercase tracking-[0.2em] text-white/50"
               >
                 {formatPlDate(new Date(post.publishedAt))}
               </time>
@@ -166,7 +166,7 @@ const PostPage = async ({ params }: PostPageProps) => {
                 />
               </div>
               {cover.caption && (
-                <figcaption className="mt-3 text-sm text-white/40">
+                <figcaption className="mt-3 text-sm text-white/50">
                   {cover.caption}
                 </figcaption>
               )}

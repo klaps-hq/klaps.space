@@ -35,7 +35,7 @@ const SectionLoader: React.FC<SectionLoaderProps> = ({ label, className }) => (
       />
     </svg>
     {label && (
-      <p className="text-[10px] uppercase tracking-[0.3em] text-white/40">
+      <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">
         {label}
       </p>
     )}

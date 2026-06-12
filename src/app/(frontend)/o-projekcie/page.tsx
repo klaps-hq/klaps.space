@@ -210,7 +210,7 @@ const AboutPage = () => {
             {SCOPE_EXCLUDED.map((item) => (
               <li
                 key={item}
-                className="flex items-baseline gap-3 text-base md:text-lg text-white/40 leading-snug"
+                className="flex items-baseline gap-3 text-base md:text-lg text-white/50 leading-snug"
               >
                 <span aria-hidden="true" className="shrink-0 text-white/25">
                   −
@@ -290,7 +290,7 @@ const AboutPage = () => {
                 key={item}
                 className="group flex items-baseline gap-5 md:gap-8 border-t border-white/10 last:border-b py-5 md:py-7"
               >
-                <span className="shrink-0 text-xs md:text-sm tabular-nums text-white/30 leading-none">
+                <span className="shrink-0 text-xs md:text-sm tabular-nums text-white/50 leading-none">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <span className="max-w-[42ch] text-lg md:text-2xl text-white/80 group-hover:text-white -tracking-[0.01em] leading-snug transition-colors">
@@ -334,7 +334,7 @@ const AboutPage = () => {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] uppercase tracking-[0.25em] text-white/40">
+                    <span className="text-[10px] uppercase tracking-[0.25em] text-white/50">
                       {repo.stack}
                     </span>
                     <span className="text-sm md:text-base text-white/70 break-all">

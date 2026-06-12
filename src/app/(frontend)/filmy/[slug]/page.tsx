@@ -190,7 +190,7 @@ const MoviePage = async ({ params }: MoviePageProps) => {
                 Podobne filmy
               </h2>
               {primaryGenre && (
-                <p className="mt-4 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/40">
+                <p className="mt-4 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
                   Gatunek: {primaryGenre.name}
                 </p>
               )}
