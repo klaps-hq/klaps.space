@@ -1,4 +1,4 @@
-export const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
+const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
 
 // Public MinIO mirror populated by the scraper (single writer), e.g.
 // https://media.klaps.space/<bucket>/tmdb. Baked in at build time; when
@@ -24,10 +24,7 @@ export type TmdbImageSize =
  * JSON-LD, sitemap, OG images) should use tmdbImageSrc/tmdbPhotoSrc, which
  * point at the mirror when one is configured.
  */
-export function tmdbImageUrl(
-  path: string,
-  size: TmdbImageSize = "w500"
-): string {
+function tmdbImageUrl(path: string, size: TmdbImageSize = "w500"): string {
   return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
 }
 
@@ -54,7 +51,7 @@ export function tmdbImageSrc(
  * ("/abc.jpg"). next/image only whitelists image.tmdb.org, so values from
  * any other host return null and the caller falls back to a placeholder.
  */
-export function resolveTmdbPhotoUrl(
+function resolveTmdbPhotoUrl(
   photoUrl: string | null | undefined,
   size: TmdbImageSize = "w342"
 ): string | null {

@@ -8,7 +8,7 @@ const getApiBaseUrl = (): string => {
   return API_URL;
 };
 
-export class ApiNotFoundError extends Error {
+class ApiNotFoundError extends Error {
   constructor(path: string) {
     super(`Resource not found: ${path}`);
     this.name = "ApiNotFoundError";

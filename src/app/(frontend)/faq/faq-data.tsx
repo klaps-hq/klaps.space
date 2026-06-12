@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { CONTACT_EMAIL, SOCIAL_LINKS } from "@/constants";
 
-export interface FaqQuestion {
+interface FaqQuestion {
   q: string;
   /** Answer rendered on the page (with links). */
   a: React.ReactNode;

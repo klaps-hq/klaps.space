@@ -1,4 +1,4 @@
-export type DirectorRole = "director" | "actor" | "screenwriter";
+type DirectorRole = "director" | "actor" | "screenwriter";
 
 export interface IDirector {
   id: number;
