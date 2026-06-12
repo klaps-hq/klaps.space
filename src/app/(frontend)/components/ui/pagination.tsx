@@ -50,7 +50,7 @@ function PaginationLink({
         "inline-flex items-baseline justify-center text-lg md:text-xl tabular-nums tracking-tight transition-colors duration-200 cursor-pointer pb-1 border-b",
         isActive
           ? "text-white border-white"
-          : "text-white/40 border-transparent hover:text-white hover:border-white/40",
+          : "text-white/50 border-transparent hover:text-white hover:border-white/40",
         className,
       )}
       {...props}
@@ -109,7 +109,10 @@ function PaginationEllipsis({
       )}
       {...props}
     >
-      ···
+      {/* aria-hidden keeps the dots out of the contrast audit: they are
+          decorative (the sr-only label carries the meaning), so they can
+          stay dimmer than the AA threshold for text. */}
+      <span aria-hidden="true">···</span>
       <span className="sr-only">Więcej stron</span>
     </span>
   );

@@ -70,7 +70,7 @@ const DirectorsBrowser: React.FC<DirectorsBrowserProps> = ({
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Szukaj reżysera po nazwisku..."
               aria-label="Szukaj reżysera"
-              className="ml-3 flex-1 min-w-0 bg-transparent text-[12px] tracking-wide text-white placeholder:text-white/40 outline-none"
+              className="ml-3 flex-1 min-w-0 bg-transparent text-[12px] tracking-wide text-white placeholder:text-white/50 outline-none"
             />
             {query.length > 0 && (
               <button
@@ -97,7 +97,7 @@ const DirectorsBrowser: React.FC<DirectorsBrowserProps> = ({
               )}
             >
               Tylko z&nbsp;nadchodzącymi seansami
-              <span className="text-white/40">{upcomingCount}</span>
+              <span className="text-white/50">{upcomingCount}</span>
             </button>
           )}
         </div>

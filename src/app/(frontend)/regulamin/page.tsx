@@ -227,7 +227,7 @@ const TermsPage = () => {
         >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 md:gap-y-12 gap-x-6 lg:gap-x-8">
             <div className="lg:col-span-4">
-              <span className="block text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/35 tabular-nums leading-none mb-3 md:mb-4">
+              <span className="block text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/50 tabular-nums leading-none mb-3 md:mb-4">
                 § {i + 1}
               </span>
               <h2 className="text-3xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] text-white font-medium">
@@ -242,7 +242,7 @@ const TermsPage = () => {
       ))}
 
       <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-20 md:pt-28 pb-24 md:pb-32">
-        <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40">
+        <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/50">
           Dokumenty powiązane
         </p>
         <div className="mt-8 md:mt-10 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 max-w-[60ch]">

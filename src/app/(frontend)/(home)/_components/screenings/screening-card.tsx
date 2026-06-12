@@ -32,7 +32,7 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({ group }) => {
             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-white/30 text-[10px] uppercase tracking-[0.25em]">
+          <div className="absolute inset-0 flex items-center justify-center text-white/50 text-[10px] uppercase tracking-[0.25em]">
             Bez plakatu
           </div>
         )}
@@ -43,7 +43,7 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({ group }) => {
           {movie.title}
         </h3>
         {(movie.productionYear || movie.genres.length > 0) && (
-          <div className="text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-white/45 truncate">
+          <div className="text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-white/50 truncate">
             {movie.productionYear && <span>{movie.productionYear}</span>}
             {movie.productionYear && movie.genres.length > 0 && (
               <span aria-hidden="true"> · </span>
@@ -66,13 +66,13 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({ group }) => {
               </span>
               <span className="text-white/80">{s.time}</span>
             </span>
-            <span className="text-white/40 truncate max-w-[55%] text-right shrink-0">
+            <span className="text-white/50 truncate max-w-[55%] text-right shrink-0">
               {s.cinema.city.name}
             </span>
           </div>
         ))}
         {remaining > 0 && (
-          <div className="text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-white/40 mt-0.5">
+          <div className="text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-white/50 mt-0.5">
             +{remaining} więcej
           </div>
         )}

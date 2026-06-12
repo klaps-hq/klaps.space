@@ -24,7 +24,7 @@ export default function MaintenancePage() {
 
       <section className="flex-1 flex items-center px-6 md:px-12 lg:px-16 py-16 md:py-24">
         <div>
-          <p className="mb-6 md:mb-8 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/40">
+          <p className="mb-6 md:mb-8 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/50">
             Przerwa techniczna
           </p>
           <PageHeading variant="display">
@@ -39,7 +39,7 @@ export default function MaintenancePage() {
         </div>
       </section>
 
-      <footer className="px-6 md:px-12 lg:px-16 pb-8 md:pb-10 flex items-center justify-between gap-4 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/30">
+      <footer className="px-6 md:px-12 lg:px-16 pb-8 md:pb-10 flex items-center justify-between gap-4 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/50">
         <span className="inline-flex items-center gap-2.5">
           <span
             aria-hidden="true"
