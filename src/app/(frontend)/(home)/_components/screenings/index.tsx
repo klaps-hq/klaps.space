@@ -1,112 +1,141 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import JsonLd from "@/components/common/json-ld";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
-import { PaginatedResponse } from "@/interfaces/IMovies";
-import { getPaginatedScreenings } from "@/lib/screenings";
-import { getGenres } from "@/lib/genres";
-import { getPreferredLocation } from "@/lib/get-preferred-city";
+import { IGenre } from "@/interfaces/IMovies";
+import { usePreferredCity } from "@/contexts/city-context";
+import { SITE_URL } from "@/lib/site-config";
 import ScreeningsSection from "./screenings-section";
 
-const HOMEPAGE_LIMIT = 30;
+// Client-side data loading on purpose: reading searchParams or cookies in a
+// server component would make the whole homepage dynamic, and the slow
+// document TTFB was the main mobile LCP bottleneck. The static (ISR) shell
+// ships instantly; this section then fetches /api/screenings in the browser.
 
-interface ScreeningsSearchParams {
-  city?: string;
-  voivodeship?: string;
-  genres?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  search?: string;
+interface HomeScreeningsData {
+  screenings: IScreeningGroup[];
+  hasMore: boolean;
 }
 
 interface ScreeningsProps {
-  searchParams: ScreeningsSearchParams;
+  genres: IGenre[];
 }
 
-const buildSeeAllHref = (searchParams: ScreeningsSearchParams): string => {
-  const params = new URLSearchParams();
-  if (searchParams.city) params.set("city", searchParams.city);
-  if (searchParams.voivodeship)
-    params.set("voivodeship", searchParams.voivodeship);
-  if (searchParams.genres) params.set("genres", searchParams.genres);
-  if (searchParams.dateFrom) params.set("dateFrom", searchParams.dateFrom);
-  if (searchParams.dateTo) params.set("dateTo", searchParams.dateTo);
-  if (searchParams.search) params.set("search", searchParams.search);
-  const qs = params.toString();
-  return qs ? `/seanse?${qs}` : "/seanse";
-};
-
-const parseGenreIds = (raw: string | undefined): string[] => {
-  if (!raw) return [];
-  return raw
+const parseGenreIds = (raw: string): number[] =>
+  raw
     .split(",")
     .map((v) => v.trim())
-    .filter((v) => v.length > 0 && /^\d+$/.test(v));
-};
+    .filter((v) => v.length > 0 && /^\d+$/.test(v))
+    .map(Number);
 
-const mergeScreeningGroups = (
-  groups: IScreeningGroup[][]
-): IScreeningGroup[] => {
-  const byMovieId = new Map<number, IScreeningGroup>();
-  for (const list of groups) {
-    for (const group of list) {
-      if (!byMovieId.has(group.movie.id)) {
-        byMovieId.set(group.movie.id, group);
-      }
-    }
-  }
-  return Array.from(byMovieId.values());
-};
+const Screenings: React.FC<ScreeningsProps> = ({ genres }) => {
+  const searchParams = useSearchParams();
+  const {
+    cityId: preferredCityId,
+    voivodeship: preferredVoivodeship,
+    isHydrated,
+  } = usePreferredCity();
 
-const unwrapResponse = (
-  response: IScreeningGroup[] | PaginatedResponse<IScreeningGroup>
-): IScreeningGroup[] =>
-  Array.isArray(response) ? response : [...response.data];
+  // URL params win over the stored preference, mirroring the resolution
+  // order of the old server-side getPreferredLocation. The preference is
+  // applied only after hydration so the first render matches the SSR HTML.
+  const urlCity = searchParams.get("city");
+  const urlVoivodeship = searchParams.get("voivodeship");
+  const city =
+    urlCity ??
+    (isHydrated && preferredCityId !== null ? String(preferredCityId) : null);
+  const voivodeship = city
+    ? null
+    : (urlVoivodeship ?? (isHydrated ? preferredVoivodeship : null));
 
-const Screenings = async ({ searchParams }: ScreeningsProps) => {
-  const { cityId, voivodeship } = await getPreferredLocation(searchParams);
-  const genreIds = parseGenreIds(searchParams.genres);
+  const genresParam = searchParams.get("genres") ?? "";
+  const dateFrom = searchParams.get("dateFrom");
+  const dateTo = searchParams.get("dateTo");
+  const search = searchParams.get("search");
 
-  const sharedFilters = {
-    cityId,
-    voivodeship,
-    dateFrom: searchParams.dateFrom,
-    dateTo: searchParams.dateTo,
-    search: searchParams.search,
-  };
+  const query = useMemo(() => {
+    const params = new URLSearchParams();
+    if (city) params.set("city", city);
+    else if (voivodeship) params.set("voivodeship", voivodeship);
+    if (genresParam) params.set("genres", genresParam);
+    if (dateFrom) params.set("dateFrom", dateFrom);
+    if (dateTo) params.set("dateTo", dateTo);
+    if (search) params.set("search", search);
+    return params.toString();
+  }, [city, voivodeship, genresParam, dateFrom, dateTo, search]);
 
-  const screeningsPromise =
-    genreIds.length > 1
-      ? Promise.all(
-          genreIds.map((id) =>
-            getPaginatedScreenings({ ...sharedFilters, genreId: id }).then(
-              unwrapResponse
-            )
-          )
-        ).then(mergeScreeningGroups)
-      : getPaginatedScreenings({
-          ...sharedFilters,
-          genreId: genreIds[0],
-        }).then(unwrapResponse);
+  // Stored together with the query that produced it: "fetch in flight" is
+  // then derived (loaded.query !== query) instead of a setState call at the
+  // start of the effect, which the React Compiler lint rejects.
+  const [loaded, setLoaded] = useState<{
+    query: string;
+    data: HomeScreeningsData;
+  } | null>(null);
 
-  const [allScreenings, genres] = await Promise.all([
-    screeningsPromise,
-    getGenres(),
-  ]);
+  useEffect(() => {
+    // Wait for hydration so the first request already carries the stored
+    // city preference instead of fetching twice.
+    if (!isHydrated) return;
 
-  const total = allScreenings.length;
-  const screenings = allScreenings.slice(0, HOMEPAGE_LIMIT);
-  const hasMore = total > screenings.length;
+    const controller = new AbortController();
+
+    fetch(query ? `/api/screenings?${query}` : "/api/screenings", {
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<HomeScreeningsData>;
+      })
+      .then((result) => {
+        setLoaded({ query, data: result });
+      })
+      .catch((error) => {
+        if (controller.signal.aborted) return;
+        console.warn("Falling back to empty home screenings:", error);
+        setLoaded({ query, data: { screenings: [], hasMore: false } });
+      });
+
+    return () => controller.abort();
+  }, [isHydrated, query]);
+
+  const data = loaded?.data ?? null;
+  const isFetching = loaded === null || loaded.query !== query;
+  const screenings = data?.screenings ?? [];
 
   return (
-    <ScreeningsSection
-      screenings={screenings}
-      genres={genres}
-      seeAllHref={buildSeeAllHref(searchParams)}
-      hasMore={hasMore}
-      selectedGenreIds={genreIds.map(Number)}
-      dateFrom={searchParams.dateFrom ?? null}
-      dateTo={searchParams.dateTo ?? null}
-      search={searchParams.search ?? null}
-    />
+    <>
+      {/* ItemList ties the homepage to the listed movie pages, so crawlers
+          see the repertoire as structured data, not just a grid of links.
+          Injected client-side; Google reads JSON-LD from rendered HTML. */}
+      {screenings.length > 0 && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            itemListElement: screenings.map((group, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              name: group.movie.title,
+              url: `${SITE_URL}/filmy/${group.movie.slug}`,
+            })),
+          }}
+        />
+      )}
+      <ScreeningsSection
+        screenings={screenings}
+        genres={genres}
+        seeAllHref={query ? `/seanse?${query}` : "/seanse"}
+        hasMore={data?.hasMore ?? false}
+        selectedGenreIds={parseGenreIds(genresParam)}
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+        search={search}
+        isLoading={data === null}
+        isUpdating={isFetching}
+      />
+    </>
   );
 };
 
