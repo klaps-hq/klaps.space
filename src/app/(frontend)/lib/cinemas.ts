@@ -50,11 +50,6 @@ export const getCinemas = async (
   }
 };
 
-export const getCinemaById = async (id: string): Promise<ICinema> => {
-  const cinema = await apiFetch<ICinema>(`/cinemas/${id}`);
-  return cinema;
-};
-
 export const getCinemaBySlug = async (slug: string): Promise<ICinema> => {
   // fetchOrNotFound: an unknown slug must yield a 404, not a 500
   // (this is called directly from generateMetadata).

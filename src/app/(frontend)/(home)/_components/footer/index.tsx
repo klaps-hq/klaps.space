@@ -43,9 +43,11 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-3 gap-6 md:gap-12 lg:gap-24 mb-16 md:mb-24">
           {NAV_COLUMNS.map((column) => (
             <div key={column.heading} className="flex flex-col gap-4 md:gap-5">
-              <h3 className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-white/40">
+              {/* Plain span: nav column labels would pollute the document
+                  outline as headings. */}
+              <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-white/40">
                 {column.heading}
-              </h3>
+              </span>
               <ul className="flex flex-col gap-2 md:gap-3">
                 {column.links.map((link) => (
                   <li key={link.href}>
@@ -62,14 +64,14 @@ const Footer: React.FC = () => {
           ))}
         </div>
 
-        <div className="mb-8 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        <div className="mb-8 flex flex-col gap-6 md:gap-8">
+          <SocialLinks className="shrink-0" />
           <p className="max-w-[64ch] text-xs md:text-sm text-white/45 leading-relaxed">
             Klaps to ogólnopolski przewodnik po seansach specjalnych, klasyce
             filmowej i&nbsp;retrospektywach w&nbsp;kinach studyjnych. Repertuar,
             filmy i&nbsp;kina w&nbsp;jednym miejscu, bezpłatnie i&nbsp;bez
             rejestracji.
           </p>
-          <SocialLinks className="shrink-0" />
         </div>
 
         <div className="flex items-center justify-between gap-4 pt-8 border-t border-white/10 text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/50">
@@ -98,9 +100,10 @@ const Footer: React.FC = () => {
           aria-label="Klaps, strona główna"
           className="block"
         >
-          <h2 className="text-[20vw] md:text-[24vw] leading-[0.78] font-bold uppercase text-white -tracking-[0.04em] whitespace-nowrap">
+          {/* Decorative wordmark, not a heading: keeps the outline clean. */}
+          <span className="block text-[20vw] md:text-[24vw] leading-[0.78] font-bold uppercase text-white -tracking-[0.04em] whitespace-nowrap">
             Klaps
-          </h2>
+          </span>
         </Link>
       </div>
 

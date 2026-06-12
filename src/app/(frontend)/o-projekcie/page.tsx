@@ -4,6 +4,8 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
+import JsonLd from "@/components/common/json-ld";
+import { SITE_URL } from "@/lib/site-config";
 import Footer from "../(home)/_components/footer";
 
 interface ManifestoItem {
@@ -100,6 +102,24 @@ const REPOS: RepoItem[] = [
 const AboutPage = () => {
   return (
     <main className="bg-black text-white min-h-screen">
+      {/* AboutPage ties this page to the Organization entity; the page
+          carries the most citable "czym jest Klaps" prose on the site. */}
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          name: "O projekcie Klaps",
+          url: `${SITE_URL}/o-projekcie`,
+          description:
+            "Czym jest Klaps: niezależny, ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych.",
+          inLanguage: "pl-PL",
+          about: {
+            "@type": "Organization",
+            name: "Klaps",
+            url: SITE_URL,
+          },
+        }}
+      />
       <SiteHeader />
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-4">

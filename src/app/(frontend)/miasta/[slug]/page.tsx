@@ -127,7 +127,7 @@ const CityPage = async ({ params }: CityPageProps) => {
         <Breadcrumbs
           items={[
             { name: "Miasta", href: "/miasta" },
-            { name: city.name },
+            { name: city.name, href: `/miasta/${city.slug}` },
           ]}
         />
       </div>

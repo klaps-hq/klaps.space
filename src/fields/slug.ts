@@ -3,7 +3,7 @@ import type { FieldHook, TextField } from "payload";
 // Lowercases, strips Polish diacritics and collapses everything else into
 // single hyphens. NFD decomposition covers most diacritics, but "ł" has no
 // combining-mark decomposition so it needs an explicit mapping.
-export const formatSlug = (value: string): string =>
+const formatSlug = (value: string): string =>
   value
     .toLowerCase()
     .replace(/ł/g, "l")

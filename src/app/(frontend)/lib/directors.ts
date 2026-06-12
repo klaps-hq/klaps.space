@@ -117,27 +117,3 @@ export const getScreeningsByDirector = async (
     return [];
   }
 };
-
-/**
- * Newest screening `updatedAt` in the director's set - backs the visible
- * "Repertuar zaktualizowano" label and JSON-LD dateModified. Returns null
- * when nothing matches or the request fails.
- */
-export const getDirectorScreeningsLastUpdated = async (
-  directorId: number
-): Promise<Date | null> => {
-  try {
-    const response = await apiFetch<{ updatedAt: string | null }>(
-      "/screenings/last-updated",
-      { params: { directorId: directorId.toString() } }
-    );
-
-    return response.updatedAt ? new Date(response.updatedAt) : null;
-  } catch (error) {
-    console.warn(
-      "Falling back to null director screenings last-updated:",
-      error
-    );
-    return null;
-  }
-};

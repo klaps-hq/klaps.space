@@ -6,6 +6,8 @@ import Screenings from "./_components/screenings";
 import ScreeningsLoader from "./_components/screenings/loader";
 import Genres from "./_components/genres";
 import Cinemas from "./_components/cinemas";
+import Blog from "./_components/blog";
+import About from "./_components/about";
 import { getRandomScreening } from "@/lib/screenings";
 import { getGenres } from "@/lib/genres";
 
@@ -46,6 +48,8 @@ const HomePage = async () => {
       </Suspense>
       <Genres />
       <Cinemas />
+      <Blog />
+      <About />
       <Footer />
     </>
   );

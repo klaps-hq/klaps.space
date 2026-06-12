@@ -1,17 +1,9 @@
-import { IGenre } from "@/interfaces/IMovies";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-export const formatGenres = (genres: IGenre[], max: number = 2) => {
-  return genres
-    .slice(0, max)
-    .map((genre) => genre.name)
-    .join("/");
-};
 
 export const formatDuration = (duration: number | null): string => {
   if (!duration) return "";
@@ -20,12 +12,6 @@ export const formatDuration = (duration: number | null): string => {
   const minutes = duration % 60;
 
   return `${hours}h ${minutes}m`;
-};
-
-export const createDateByDaysIncrement = (days: number) => {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  return getDateString(date);
 };
 
 export const formatDatePL = (dateStr: string | null): string => {
@@ -37,8 +23,6 @@ export const formatDatePL = (dateStr: string | null): string => {
     year: "numeric",
   });
 };
-
-export const getTodayDatePL = () => formatDatePL(new Date().toISOString());
 
 export const formatNames = (
   entities: { name: string }[] | null | undefined
@@ -53,13 +37,13 @@ export const formatNames = (
 export const getDateString = (date: Date) =>
   date.toISOString().split("T")[0] ?? "";
 
-export const isToday = (dateStr: string) => {
+const isToday = (dateStr: string) => {
   const d = new Date(dateStr);
   const today = new Date();
   return getDateString(d) === getDateString(today);
 };
 
-export const isTomorrow = (dateStr: string) => {
+const isTomorrow = (dateStr: string) => {
   const d = new Date(dateStr);
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -77,11 +61,6 @@ export const formatDateLabel = (dateStr: string) => {
     month: "2-digit",
   });
   return `${day} ${date}`;
-};
-
-export const truncateText = (text: string, maxLength: number) => {
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength).trim() + "…";
 };
 
 export function getYouTubeEmbedUrl(url: string): string | null {

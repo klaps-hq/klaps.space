@@ -15,7 +15,7 @@ export interface IMoviePerson {
   url?: string;
 }
 
-export interface IMovieCountry {
+interface IMovieCountry {
   id?: number;
   name: string;
   countryCode?: string;
@@ -46,12 +46,12 @@ export interface IMovieHero extends IMovieSummary {
   directors?: IMoviePerson[] | null;
 }
 
-export interface IMovieRatingScore {
+interface IMovieRatingScore {
   score: number;
   votes: number;
 }
 
-export interface IMovieRatings {
+interface IMovieRatings {
   users: IMovieRatingScore | null;
   critics: IMovieRatingScore | null;
 }

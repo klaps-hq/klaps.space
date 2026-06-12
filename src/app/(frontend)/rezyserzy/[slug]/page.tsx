@@ -99,7 +99,7 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
         <Breadcrumbs
           items={[
             { name: "Reżyserzy", href: "/rezyserzy" },
-            { name: director.name },
+            { name: director.name, href: `/rezyserzy/${director.slug}` },
           ]}
         />
       </div>
