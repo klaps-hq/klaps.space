@@ -78,6 +78,7 @@ const buildMovieScreeningEvents = (movie: IMovie, screenings: IScreening[]) =>
         title: movie.title,
         slug: movie.slug,
         duration: movie.duration,
+        posterUrl: movie.posterUrl,
       },
       cinema: {
         name: screening.cinema.name,

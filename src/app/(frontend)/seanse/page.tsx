@@ -20,8 +20,10 @@ import { SITE_URL } from "@/lib/site-config";
 import {
   BASE_OPEN_GRAPH,
   NOINDEX_FOLLOW,
+  buildPaginationMeta,
   formatPlDate,
   hasFilterParams,
+  parsePageParam,
 } from "@/lib/seo";
 import ScreeningsPageSection from "./_components/screenings-page-section";
 import ScreeningsPageLoader from "./_components/screenings-page-loader";
@@ -62,20 +64,34 @@ export const generateMetadata = async ({
     };
   }
 
-  // Plain pagination stays indexable: unique title + self-canonical,
-  // so the deeper parts of the listing keep their crawl path.
-  const pageNumber = Number(queryParams.page);
-  const isPaginated = Number.isInteger(pageNumber) && pageNumber >= 2;
+  // Plain pagination stays indexable: unique title, self-canonical and
+  // rel prev/next, so the deeper parts of the listing keep their crawl
+  // path. The fetch mirrors the listing's no-filter call, so Next's fetch
+  // memoization deduplicates it against the page render.
+  const { cityId, voivodeship } = await getPreferredLocation(queryParams);
+  const allScreenings = unwrapResponse(
+    await getPaginatedScreenings({ cityId, voivodeship })
+  );
+  const totalPages = Math.max(1, Math.ceil(allScreenings.length / PAGE_SIZE));
+  const currentPage = Math.min(parsePageParam(queryParams.page), totalPages);
 
-  const title = isPaginated
-    ? `Seanse specjalne w kinach studyjnych - repertuar (strona ${pageNumber})`
-    : "Seanse specjalne w kinach studyjnych - repertuar";
-  const canonical = isPaginated ? `${url}?page=${pageNumber}` : url;
+  // The paginated variant drops part of the base title so the whole thing
+  // (with the "- Klaps" template suffix) stays under ~60 chars in SERPs.
+  const title =
+    currentPage >= 2
+      ? `Seanse specjalne - repertuar (strona ${currentPage})`
+      : "Seanse specjalne w kinach studyjnych - repertuar";
+  const { canonical, pagination } = buildPaginationMeta(
+    url,
+    currentPage,
+    totalPages
+  );
 
   return {
     title,
     description,
     alternates: { canonical },
+    pagination,
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
@@ -121,7 +137,7 @@ const unwrapResponse = (
 const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
   const { cityId, voivodeship } = await getPreferredLocation(params);
   const genreIds = parseGenreIds(params.genres);
-  const requestedPage = Math.max(1, Number(params.page || "1"));
+  const requestedPage = parsePageParam(params.page);
 
   const sharedFilters = {
     cityId,
@@ -163,7 +179,11 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
   return (
     <>
       <JsonLd
-        data={buildScreeningsJsonLd(screenings, lastUpdated ?? new Date())}
+        data={buildScreeningsJsonLd(
+          screenings,
+          lastUpdated ?? new Date(),
+          currentPage
+        )}
       />
       <ScreeningsPageSection
         screenings={screenings}
@@ -185,12 +205,21 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
 // repertoire data was last added (freshness signal for AI Overviews).
 const buildScreeningsJsonLd = (
   screenings: IScreeningGroup[],
-  dateModified: Date
+  dateModified: Date,
+  currentPage: number
 ) => ({
   "@context": "https://schema.org",
   "@type": "CollectionPage",
-  name: "Seanse specjalne w kinach studyjnych - repertuar",
-  url: `${SITE_URL}/seanse`,
+  // Name and url mirror the page's title and canonical, so the structured
+  // data describes the paginated URL it is embedded on, not page 1.
+  name:
+    currentPage >= 2
+      ? `Seanse specjalne - repertuar (strona ${currentPage})`
+      : "Seanse specjalne w kinach studyjnych - repertuar",
+  url:
+    currentPage >= 2
+      ? `${SITE_URL}/seanse?page=${currentPage}`
+      : `${SITE_URL}/seanse`,
   description:
     "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce.",
   dateModified: dateModified.toISOString(),
