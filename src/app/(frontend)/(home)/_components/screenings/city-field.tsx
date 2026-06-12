@@ -201,7 +201,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
                   setQuery("");
                   inputRef.current?.focus();
                 }}
-                aria-label="WyczyĹ›Ä‡ wyszukiwanie"
+                aria-label="Wyczyść wyszukiwanie"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
               >
                 <X className="size-3.5" />
@@ -217,7 +217,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
             {searchResults !== null ? (
               searchResults.length === 0 ? (
                 <div className="px-4 py-6 text-center text-[11px] text-white/50 uppercase tracking-wider">
-                  Brak wynikĂłw
+                  Brak wyników
                 </div>
               ) : (
                 searchResults.map(renderCityOption)
@@ -230,7 +230,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
                   className="flex w-full items-center gap-2 text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white border-b border-white/10 transition-colors"
                 >
                   <ChevronLeft className="size-3.5 shrink-0" aria-hidden="true" />
-                  WojewĂłdztwa
+                  Województwa
                 </button>
                 <button
                   type="button"
@@ -292,7 +292,7 @@ const CityField: React.FC<CityFieldProps> = ({ className }) => {
                 onClick={() => selectCity(null)}
                 className="w-full h-8 text-[10px] uppercase tracking-[0.2em] border border-white/20 text-white/70 hover:text-white hover:border-white/50 transition-colors"
               >
-                WyczyĹ›Ä‡
+                Wyczyść
               </button>
             </div>
           )}

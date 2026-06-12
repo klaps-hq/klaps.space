@@ -72,6 +72,11 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // AVIF first: 30-40% smaller than WebP at the same visual quality.
+    // Encoding is slower, but each variant is generated once and then
+    // cached for a year (minimumCacheTTL below), so only the first
+    // request after a deploy pays the cost.
+    formats: ["image/avif", "image/webp"],
     qualities: [75],
     // TMDB files are content-addressed and immutable, so optimized
     // variants can be cached for a year instead of the short default.

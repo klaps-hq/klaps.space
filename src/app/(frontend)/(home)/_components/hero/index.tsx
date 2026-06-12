@@ -6,7 +6,7 @@ import { motion, type Variants } from "framer-motion";
 import { Play } from "lucide-react";
 import { IRandomScreening } from "@/interfaces/IScreenings";
 import { tmdbImageSrc } from "@/lib/tmdb";
-import { formatDuration, getYouTubeEmbedUrl } from "@/lib/utils";
+import { formatDuration, getYouTubeEmbedUrl, WARSAW_TZ } from "@/lib/utils";
 import TrailerModal from "@/components/common/trailer-modal";
 import MobileNav from "@/components/common/mobile-nav";
 import { NAV_LINKS } from "@/components/common/nav-links";
@@ -147,9 +147,12 @@ const Hero: React.FC<HeroProps> = ({
     : null;
 
   const screeningDate = new Date(screening.screening.dateTime);
+  // Explicit timeZone: this runs on the server (UTC) and again in the
+  // visitor's browser, and a zone-dependent result breaks hydration.
   const formattedDate = new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "long",
+    timeZone: WARSAW_TZ,
   }).format(screeningDate);
   // Older API responses may omit the field, so default to no credit line.
   const directors = screening.movie.directors ?? [];
