@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { getMoviePageData, getMovieBySlug, getMovies } from "@/lib/movies";
+import { getTmdbBlurDataUrl } from "@/lib/blur";
 import { getMovieScreenings, getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
@@ -107,6 +108,12 @@ export const generateMetadata = async ({
 const MoviePage = async ({ params }: MoviePageProps) => {
   const { slug } = await params;
   const { movie, screenings } = await getMoviePageData(slug);
+  // Instant blurred preview baked into the cached HTML while the
+  // full-size backdrop streams in.
+  const backdropBlurDataUrl = await getTmdbBlurDataUrl(
+    movie.backdropUrl,
+    "backdrop"
+  );
 
   // Internal linking: up to 6 movies sharing the primary genre.
   const primaryGenre = movie.genres[0];
@@ -123,7 +130,7 @@ const MoviePage = async ({ params }: MoviePageProps) => {
       <SiteHeader />
 
       <div className="-mt-20">
-        <MovieHero movie={movie} />
+        <MovieHero movie={movie} backdropBlurDataUrl={backdropBlurDataUrl} />
       </div>
 
       <div className="px-6 md:px-12 lg:px-16 py-5 md:py-6">

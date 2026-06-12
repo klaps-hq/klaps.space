@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { resolveTmdbPhotoUrl } from "@/lib/tmdb";
+import { tmdbPhotoSrc } from "@/lib/tmdb";
 
 interface DirectorPhotoProps {
   photoUrl: string | null;
@@ -36,7 +36,7 @@ const DirectorPhoto: React.FC<DirectorPhotoProps> = ({
   priority = false,
 }) => {
   const [isError, setIsError] = useState(false);
-  const src = resolveTmdbPhotoUrl(photoUrl, "w342");
+  const src = tmdbPhotoSrc(photoUrl, "w342");
 
   if (!src || isError) {
     return (
