@@ -11,6 +11,7 @@ import { usePreferredCity } from "@/contexts/city-context";
 import { groupScreeningsByCinema } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { formatDateLabel, cn, WARSAW_TZ } from "@/lib/utils";
+import { wallTimeToInstant } from "@/lib/warsaw-time";
 import { voivodeshipLocative } from "@/lib/voivodeships";
 
 interface MovieScreeningsProps {
@@ -103,7 +104,9 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
   const movieUrl = `${SITE_URL}/filmy/${movieSlug}`;
   const calendarOptions = sorted.map((screening) => ({
     label: `${screening.time} · ${formatShortDate(screening.date)}`,
-    start: screening.dateTime,
+    // Calendar exports need a real instant; the API's dateTime is Warsaw
+    // wall time with a misleading "Z" and would land 1-2 h late as UTC.
+    start: wallTimeToInstant(screening.dateTime).toISOString(),
     uid: `screening-${screening.id}@klaps.space`,
     fileName: `${movieSlug}-${screening.date}-${screening.time.replace(":", "")}.ics`,
     description: [
@@ -122,9 +125,10 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
           {first.cinema.name}
         </Link>
         <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/50">
+          {/* py/-my widen the ~12px text to a usable tap target. */}
           <Link
             href={`/miasta/${first.cinema.city.slug}`}
-            className="hover:text-white underline-offset-4 hover:underline transition-colors"
+            className="inline-block py-2.5 -my-2.5 hover:text-white underline-offset-4 hover:underline transition-colors"
           >
             {first.cinema.city.name}
           </Link>
@@ -328,6 +332,9 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
                 type="button"
                 onClick={() => setSelectedDate(date)}
                 className={cn(
+                  // The before: overlay widens the ~22px tab to a 44px tap
+                  // target without moving the underline or the layout.
+                  "relative before:absolute before:-inset-x-2 before:-inset-y-3 before:content-['']",
                   "shrink-0 pb-1 text-[11px] uppercase tracking-wider border-b transition-colors whitespace-nowrap",
                   active
                     ? "text-white border-white"

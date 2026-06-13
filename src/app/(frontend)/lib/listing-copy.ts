@@ -107,10 +107,12 @@ export const cityFallbackIntro = (
 ): string => {
   // Bind the preposition explicitly: bindOrphans only catches single letters,
   // so "We" (two letters) would otherwise keep a breaking space.
+  // "kino z seansami specjalnymi", not "kino studyjne": city listings mix
+  // studio cinemas with multiplexes that host special screenings.
   const first =
     `${prepCap}${NBSP}${cityLocative} ` +
     `${pluralPl(cinemasCount, "działa", "działają", "działa")} ${cinemasCount} ` +
-    `${pluralPl(cinemasCount, "kino studyjne", "kina studyjne", "kin studyjnych")}.`;
+    `${pluralPl(cinemasCount, "kino z seansami specjalnymi", "kina z seansami specjalnymi", "kin z seansami specjalnymi")}.`;
 
   const titles = uniqueTitles(groups, 3);
   const second =

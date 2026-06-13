@@ -52,11 +52,17 @@ export const generateMetadata = async ({
     .map((a) => a.name)
     .join(", ");
 
-  // Real screening counts in the description improve SERP CTR and uniqueness.
+  // Real screening counts and city names in the description improve SERP
+  // CTR and uniqueness. Cities stay in the nominative inside parentheses
+  // (no preposition, so no declension needed).
+  const cityNames = [
+    ...new Set(screenings.map((s) => s.cinema.city.name)),
+  ].slice(0, 2);
+  const citiesPart = cityNames.length > 0 ? ` (m.in. ${cityNames.join(", ")})` : "";
   const screeningsSuffix =
     screeningsCount > 0
-      ? `Sprawdź ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")} w kinach studyjnych.`
-      : "Sprawdź seanse w kinach studyjnych.";
+      ? `Sprawdź ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")} w kinach${citiesPart} - daty i godziny.`
+      : "Sprawdź, gdzie i kiedy grają ten film w kinach.";
 
   const metaLine = [
     genreNames,
@@ -77,7 +83,9 @@ export const generateMetadata = async ({
     ? `${excerpt} ${screeningsSuffix}`
     : fallbackDescription;
 
-  const title = `${movie.title} (${movie.productionYear}) - seanse w kinach`;
+  // "gdzie i kiedy" mirrors the dominant query pattern for film titles
+  // ("[tytuł] kiedy w kinie"), which is what this page actually answers.
+  const title = `${movie.title} (${movie.productionYear}) - seanse: gdzie i kiedy w kinie`;
   const url = `${SITE_URL}/filmy/${movie.slug}`;
 
   // Movies without upcoming screenings are thin TMDB duplicates - keep

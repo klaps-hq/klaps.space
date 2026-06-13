@@ -7,6 +7,7 @@ import { Play } from "lucide-react";
 import { IRandomScreening } from "@/interfaces/IScreenings";
 import { tmdbImageSrc } from "@/lib/tmdb";
 import { formatDuration, getYouTubeEmbedUrl, WARSAW_TZ } from "@/lib/utils";
+import { wallTimeToInstant } from "@/lib/warsaw-time";
 import TrailerModal from "@/components/common/trailer-modal";
 import MobileNav from "@/components/common/mobile-nav";
 import { NAV_LINKS } from "@/components/common/nav-links";
@@ -78,10 +79,12 @@ const HeroNav: React.FC = () => (
     </Link>
     <div className="hidden md:flex items-center gap-6 lg:gap-8 text-sm text-white/80">
       {NAV_LINKS.map((link) => (
+        // py/-my widen the ~20px text links to a 44px hit area without
+        // moving anything visually.
         <Link
           key={link.href}
           href={link.href}
-          className="hover:text-white transition-colors"
+          className="py-3 -my-3 hover:text-white transition-colors"
         >
           {link.label}
         </Link>
@@ -146,7 +149,10 @@ const Hero: React.FC<HeroProps> = ({
     ? getYouTubeEmbedUrl(screening.movie.videoUrl)
     : null;
 
-  const screeningDate = new Date(screening.screening.dateTime);
+  // The API's dateTime is Warsaw wall time with a misleading "Z";
+  // resolve the real instant first or late-evening screenings would
+  // render with the next day's date.
+  const screeningDate = wallTimeToInstant(screening.screening.dateTime);
   // Explicit timeZone: this runs on the server (UTC) and again in the
   // visitor's browser, and a zone-dependent result breaks hydration.
   const formattedDate = new Intl.DateTimeFormat("pl-PL", {

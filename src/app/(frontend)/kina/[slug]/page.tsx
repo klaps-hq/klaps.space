@@ -83,7 +83,10 @@ export const generateMetadata = async ({
 
   // Locative city name ("w Krakowie", not "w Kraków") for natural phrasing.
   const cityName = cinema.city.nameDeclinated ?? cinema.city.name;
-  const title = `${cinema.name} - kino studyjne w ${cityName}`;
+  // "repertuar seansów specjalnych", not "kino studyjne": the catalog
+  // includes multiplexes, and GSC queries follow the "kino X repertuar"
+  // pattern, so the title carries that keyword instead.
+  const title = `${cinema.name} - repertuar seansów specjalnych w ${cityName}`;
   const description = buildCinemaDescription(
     cinema.name,
     cityName,
@@ -158,10 +161,14 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                 {cinema.sourceUrl && (
                   <>
                     <span aria-hidden="true">·</span>
+                    {/* Followed link with referrer: an editorial link to the
+                        cinema's official site is a trust signal, and the
+                        referrer lets cinemas notice klaps.space in their
+                        analytics (groundwork for reciprocal links). */}
                     <Link
                       href={cinema.sourceUrl}
                       target="_blank"
-                      rel="noreferrer noopener nofollow"
+                      rel="noopener"
                       className="group inline-flex items-center gap-1 text-white/70 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
                     >
                       Strona kina
@@ -182,9 +189,9 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
               // Generated intro keeps description-less cinema pages from
               // being thin content.
               <p className="mt-8 md:mt-10 max-w-[60ch] text-base md:text-lg text-white/65 leading-relaxed">
-                {cinema.name} to kino studyjne w&nbsp;{cityForCopy}. Sprawdź
-                aktualny repertuar seansów specjalnych, retrospektyw
-                i&nbsp;klasyki filmowej na dużym ekranie.
+                {cinema.name} to kino w&nbsp;{cityForCopy}, w&nbsp;którym
+                odbywają się seanse specjalne. Sprawdź aktualny repertuar
+                pokazów, retrospektyw i&nbsp;klasyki filmowej na dużym ekranie.
               </p>
             )}
           </div>
@@ -197,13 +204,17 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
         </div>
       </header>
 
-      <CinemaRepertoire
-        cinemaName={cinema.name}
-        citySlug={cinema.city.slug}
-        cityForCopy={cityForCopy}
-        screenings={screenings}
-        genres={allGenres}
-      />
+      {/* Suspense: useSearchParams() in the client repertoire needs a
+          boundary during static prerender (CSR bailout). */}
+      <Suspense fallback={<SectionLoader label="Ładowanie repertuaru" />}>
+        <CinemaRepertoire
+          cinemaName={cinema.name}
+          citySlug={cinema.city.slug}
+          cityForCopy={cityForCopy}
+          screenings={screenings}
+          genres={allGenres}
+        />
+      </Suspense>
     </>
   );
 };
@@ -214,9 +225,12 @@ const CinemaPage = async ({ params }: CinemaPageProps) => {
   return (
     <main className="bg-black text-white min-h-screen">
       <SiteHeader />
-      <Suspense fallback={<SectionLoader label="Ładowanie kina" />}>
-        <CinemaPageContent slug={slug} />
-      </Suspense>
+      {/* No Suspense around the page content: on a cold render (first hit
+          after a deploy) the streamed shell would carry only the loader,
+          so crawlers that read raw HTML would see no h1, breadcrumbs or
+          JSON-LD. Blocking on data is fine here because ISR serves cached
+          HTML for every later request. */}
+      <CinemaPageContent slug={slug} />
       <Footer />
     </main>
   );

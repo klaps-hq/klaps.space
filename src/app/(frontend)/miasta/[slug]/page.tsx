@@ -63,15 +63,18 @@ export const generateMetadata = async ({
     0
   );
 
-  const title = `Kina studyjne w ${city.nameDeclinated} - repertuar seansów specjalnych`;
+  // "Kina i seanse specjalne", not "Kina studyjne": the listing mixes
+  // studio cinemas with multiplexes that host special screenings, and a
+  // "studyjne" headline over Cinema City rows reads as inaccurate.
+  const title = `Kina i seanse specjalne w ${city.nameDeclinated} - repertuar`;
   const counts =
     screeningsCount > 0
       ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}`
-      : `${cinemasCount} ${pluralPl(cinemasCount, "kino studyjne", "kina studyjne", "kin studyjnych")}`;
+      : `${cinemasCount} ${pluralPl(cinemasCount, "kino z seansami specjalnymi", "kina z seansami specjalnymi", "kin z seansami specjalnymi")}`;
   const description =
     cinemasCount > 0
-      ? `${counts} w ${city.nameDeclinated}. Seanse specjalne, klasyka filmowa i retrospektywy - sprawdź aktualny repertuar kin.`
-      : `Kina studyjne i niezależne w ${city.nameDeclinated}. Aktualne seanse specjalne, klasyka filmowa i retrospektywy.`;
+      ? `${counts} w ${city.nameDeclinated}. Seanse specjalne, klasyka filmowa i retrospektywy w kinach studyjnych i sieciowych - sprawdź aktualny repertuar.`
+      : `Kina i seanse specjalne w ${city.nameDeclinated}. Aktualna klasyka filmowa, retrospektywy i pokazy specjalne.`;
   const url = `${SITE_URL}/miasta/${city.slug}`;
 
   // A city without cinemas is thin content; keep it out of the index.
@@ -140,10 +143,12 @@ const CityPage = async ({ params }: CityPageProps) => {
             Województwo {city.voivodeship}
           </p>
         )}
-        {/* H1 carries the target keyword ("kina studyjne w [miasto]") rather
-            than a bare city name, with the correct w/we preposition. */}
+        {/* H1 carries the target keyword ("seanse specjalne w [miasto]")
+            rather than a bare city name, with the correct w/we preposition.
+            "Kina i seanse specjalne" instead of "Kina studyjne": the list
+            below includes multiplexes hosting special screenings. */}
         <PageHeading variant="detail" className="max-w-[20ch]">
-          Kina studyjne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+          Kina i&nbsp;seanse specjalne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
         </PageHeading>
         {city.description ? (
           <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
