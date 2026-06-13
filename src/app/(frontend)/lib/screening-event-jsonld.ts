@@ -1,5 +1,6 @@
 import { SITE_URL } from "./site-config";
 import { tmdbPhotoSrc } from "./tmdb";
+import { wallTimeToInstant, wallTimeToWarsawIso } from "./warsaw-time";
 
 // Shared ScreeningEvent JSON-LD builder for the movie and cinema layouts.
 // The movie page emits one event per screening across cinemas; the cinema
@@ -30,6 +31,12 @@ export interface ScreeningEventData {
 
 // Keep the events payload reasonable - soonest screenings first.
 const MAX_JSONLD_EVENTS = 50;
+
+// Stable per-event URL fragment: Google prefers a unique url per event,
+// and all events on a page would otherwise share the page URL, which
+// risks them being deduplicated into one.
+const eventFragment = (cinemaSlug: string, dateTime: string): string =>
+  `#seans-${cinemaSlug}-${dateTime.slice(0, 16).replace(/[T:]/g, "-")}`;
 
 const buildEvent = (
   data: ScreeningEventData,
@@ -63,10 +70,12 @@ const buildEvent = (
     // image and description are recommended fields for Event rich results;
     // without them Search Console reports warnings on every event.
     description: `Seans filmu ${movie.title} w kinie ${cinema.name} w ${cinema.cityName}. Szczegóły pokazu i pełny repertuar na klaps.space.`,
-    startDate: dateTime,
+    // The API's dateTime is Warsaw wall time with a misleading "Z";
+    // keep the displayed hour and attach the real offset (see warsaw-time).
+    startDate: wallTimeToWarsawIso(dateTime),
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    url: pageUrl,
+    url: `${pageUrl}${eventFragment(cinema.slug, dateTime)}`,
     location,
     organizer: {
       "@type": "Organization",
@@ -88,9 +97,10 @@ const buildEvent = (
   }
 
   if (movie.duration) {
-    event.endDate = new Date(
-      new Date(dateTime).getTime() + movie.duration * 60 * 1000
-    ).toISOString();
+    // Adding minutes to the pseudo instant keeps it in wall-time space.
+    event.endDate = wallTimeToWarsawIso(
+      new Date(new Date(dateTime).getTime() + movie.duration * 60 * 1000)
+    );
   }
 
   return event;
@@ -105,8 +115,10 @@ export const buildScreeningEventsJsonLd = (
 
   return items
     .filter(({ dateTime }) => {
-      const start = new Date(dateTime).getTime();
-      return !Number.isNaN(start) && start >= now;
+      if (Number.isNaN(new Date(dateTime).getTime())) return false;
+      // Compare real instants - the raw pseudo instant runs ahead of UTC
+      // by the offset, which would keep already-started events for 1-2 h.
+      return wallTimeToInstant(dateTime).getTime() >= now;
     })
     .sort((a, b) => a.dateTime.localeCompare(b.dateTime))
     .slice(0, MAX_JSONLD_EVENTS)

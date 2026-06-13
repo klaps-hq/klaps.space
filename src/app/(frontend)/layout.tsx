@@ -98,9 +98,13 @@ export default async function RootLayout({
         />
         {process.env.GA_MEASUREMENT_ID && (
           <>
+            {/* lazyOnload (browser idle) instead of afterInteractive: the
+                180 KB gtag.js otherwise gets a head preload that competes
+                with the LCP hero image and hydration chunks. Events fired
+                before it loads queue safely on the dataLayer stub below. */}
             <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GA_MEASUREMENT_ID}`}
-              strategy="afterInteractive"
+              strategy="lazyOnload"
             />
             <Script id="google-analytics" strategy="afterInteractive">
               {`
@@ -122,7 +126,7 @@ export default async function RootLayout({
           <Script
             src="https://analytics.ahrefs.com/analytics.js"
             data-key={process.env.AHREFS_ANALYTICS_KEY}
-            strategy="afterInteractive"
+            strategy="lazyOnload"
           />
         )}
       </head>

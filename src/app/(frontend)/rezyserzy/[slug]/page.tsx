@@ -176,9 +176,11 @@ const DirectorPage = async ({ params }: DirectorPageProps) => {
   return (
     <main className="bg-black text-white min-h-screen">
       <SiteHeader />
-      <Suspense fallback={<SectionLoader label="Ładowanie reżysera" />}>
-        <DirectorPageContent slug={slug} />
-      </Suspense>
+      {/* No Suspense around the page content: on a cold render the
+          streamed shell would carry only the loader, so crawlers that
+          read raw HTML would see no h1 or breadcrumbs. The inner
+          repertoire boundary above stays (useSearchParams bailout). */}
+      <DirectorPageContent slug={slug} />
       <Footer />
     </main>
   );

@@ -3,7 +3,6 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { RichText } from "@payloadcms/richtext-lexical/react";
 import SiteHeader from "@/components/common/site-header";
 import JsonLd from "@/components/common/json-ld";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
@@ -11,6 +10,7 @@ import { SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH, clampText, formatPlDate } from "@/lib/seo";
 import { getCover, getPostBySlug, getPublishedPosts } from "@/lib/posts";
 import type { Post } from "@/payload-types";
+import RichText from "../_components/rich-text";
 import Footer from "../../(home)/_components/footer";
 
 // ISR: posts change only on publish, so a 5 minute window keeps pages
@@ -54,7 +54,7 @@ export const generateMetadata = async ({
       description,
       url,
       ...(post.publishedAt ? { publishedTime: post.publishedAt } : {}),
-      modifiedTime: post.updatedAt,
+      modifiedTime: clampModified(post),
     },
     twitter: {
       card: "summary_large_image",
@@ -62,6 +62,16 @@ export const generateMetadata = async ({
       description,
     },
   };
+};
+
+// Payload's updatedAt can predate a scheduled/post-dated publishedAt,
+// and "modified before published" is a contradictory freshness signal.
+const clampModified = (post: Post): string => {
+  const published = post.publishedAt ? Date.parse(post.publishedAt) : NaN;
+  const updated = Date.parse(post.updatedAt);
+  return !Number.isNaN(published) && updated < published
+    ? (post.publishedAt as string)
+    : post.updatedAt;
 };
 
 const buildPostJsonLd = (post: Post) => {
@@ -87,7 +97,7 @@ const buildPostJsonLd = (post: Post) => {
     mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
     inLanguage: "pl-PL",
     ...(post.publishedAt ? { datePublished: post.publishedAt } : {}),
-    dateModified: post.updatedAt,
+    dateModified: clampModified(post),
     // ImageObject with dimensions (when Payload measured them) instead of
     // a bare URL: preferred by Google for Article rich results.
     ...(coverUrl

@@ -6,6 +6,10 @@ export interface ICinemaSummary {
   name: string;
   street: string | null;
   city: ICity;
+  // Optional: present when the API includes coordinates; consumed by
+  // ScreeningEvent JSON-LD (location.geo) on movie pages.
+  latitude?: number | null;
+  longitude?: number | null;
   updatedAt?: string | null;
 }
 

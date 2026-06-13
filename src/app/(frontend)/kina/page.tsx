@@ -26,8 +26,19 @@ const formatPlural = (
   return forms[2];
 };
 
+// Serializing all ~500 cinemas inflates the page with ~50 KB of JSON-LD;
+// a capped list keeps the signal with a fraction of the payload.
+const MAX_JSONLD_CINEMAS = 100;
+
 const buildCinemasJsonLd = (cinemaGroups: readonly ICinemaGroup[]) => {
   const cinemas = cinemaGroups.flatMap((group) => group.cinemas);
+
+  // Newest cinema updatedAt, i.e. a real data change rather than render
+  // time (ISR re-renders every 5 min, which would fake freshness).
+  const newestUpdatedAt = cinemas.reduce<string | null>((newest, cinema) => {
+    const updatedAt = cinema.updatedAt ?? null;
+    return updatedAt && (!newest || updatedAt > newest) ? updatedAt : newest;
+  }, null);
 
   return {
     "@context": "https://schema.org",
@@ -36,18 +47,19 @@ const buildCinemasJsonLd = (cinemaGroups: readonly ICinemaGroup[]) => {
     url: `${SITE_URL}/kina`,
     description:
       "Pełna lista kin studyjnych i niezależnych w Polsce wraz z repertuarem seansów specjalnych.",
-    // Freshness signal for AI Overviews: render time equals the moment
-    // the cinema data was last refreshed (ISR).
-    dateModified: new Date().toISOString(),
+    ...(newestUpdatedAt && { dateModified: newestUpdatedAt }),
     mainEntity: {
       "@type": "ItemList",
+      // The full count, even though the listed elements are capped.
       numberOfItems: cinemas.length,
-      itemListElement: cinemas.map((cinema, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        url: `${SITE_URL}/kina/${cinema.slug}`,
-        name: cinema.name,
-      })),
+      itemListElement: cinemas
+        .slice(0, MAX_JSONLD_CINEMAS)
+        .map((cinema, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: `${SITE_URL}/kina/${cinema.slug}`,
+          name: cinema.name,
+        })),
     },
   };
 };
