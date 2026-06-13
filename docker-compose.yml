@@ -12,6 +12,10 @@ services:
       - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}.entrypoints=websecure"
       - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}.tls.certresolver=leresolver"
+      # Traefik negotiates zstd/brotli/gzip per Accept-Encoding; Next has
+      # compress disabled (next.config.ts) so responses arrive plain here.
+      - "traefik.http.middlewares.klaps-compress-${ENV_SUFFIX:-prod}.compress=true"
+      - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}.middlewares=klaps-compress-${ENV_SUFFIX:-prod}"
       - "traefik.http.services.klaps-frontend-${ENV_SUFFIX:-prod}.loadbalancer.server.port=3000"
       - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}-www.rule=Host(`www.${DOMAIN}`)"
       - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}-www.entrypoints=websecure"
