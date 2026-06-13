@@ -71,25 +71,28 @@ const ConsentBanner: React.FC = () => {
           rozumieć, jak&nbsp;działa serwis.
           <br className="hidden sm:block" />{" "}
           Dane zbieramy tylko za&nbsp;Twoją&nbsp;zgodą.{" "}
+          {/* py/-my widen the tap target without moving anything visually. */}
           <Link
             href="/polityka-prywatnosci"
-            className="whitespace-nowrap text-white/85 underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors"
+            className="inline-block py-2 -my-2 whitespace-nowrap text-white/85 underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors"
           >
             Polityka prywatności
           </Link>
         </p>
         <div className="flex items-center gap-3 shrink-0">
+          {/* min-h-11 = 44px minimum tap target (WCAG); the first
+              interaction on every visit should not need precise aim. */}
           <button
             type="button"
             onClick={() => handleChoice("denied")}
-            className="px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] text-white/55 hover:text-white transition-colors"
+            className="inline-flex items-center justify-center min-h-11 px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] text-white/55 hover:text-white transition-colors"
           >
             Odrzucam
           </button>
           <button
             type="button"
             onClick={() => handleChoice("granted")}
-            className="px-6 py-2.5 text-[11px] uppercase tracking-[0.2em] text-black bg-white hover:bg-white/85 transition-colors"
+            className="inline-flex items-center justify-center min-h-11 px-6 py-2.5 text-[11px] uppercase tracking-[0.2em] text-black bg-white hover:bg-white/85 transition-colors"
           >
             Akceptuję
           </button>

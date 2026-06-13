@@ -153,10 +153,12 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ overlay = false }) => {
           className="hidden md:flex items-center gap-6 lg:gap-8 text-sm text-white/80"
         >
           {NAV_LINKS.map((link) => (
+            // py/-my widen the ~20px text links to a 44px hit area
+            // without moving anything visually.
             <Link
               key={link.href}
               href={link.href}
-              className="hover:text-white transition-colors"
+              className="py-3 -my-3 hover:text-white transition-colors"
             >
               {link.label}
             </Link>

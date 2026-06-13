@@ -65,7 +65,8 @@ const ShareButton: React.FC<ShareButtonProps> = ({
         onClick={handleShare}
         aria-label={`Udostępnij: ${title}`}
         className={cn(
-          "inline-flex items-center gap-2 py-2 text-[10px] uppercase tracking-[0.2em] text-white/70 hover:text-white transition-colors",
+          // min-h-11 = 44px tap target for the mobile action column.
+          "inline-flex items-center min-h-11 gap-2 py-2 text-[10px] uppercase tracking-[0.2em] text-white/70 hover:text-white transition-colors",
           copied && "text-white",
           className
         )}
@@ -90,7 +91,9 @@ const ShareButton: React.FC<ShareButtonProps> = ({
         aria-label={`Udostępnij: ${title}`}
         title={copied ? "Skopiowano link" : "Udostępnij"}
         className={cn(
-          "p-2 -m-2 text-white/40 hover:text-white transition-colors",
+          // p-3.5/-m-3.5 around the 16px icon = 44px tap target with no
+          // visual change.
+          "p-3.5 -m-3.5 text-white/40 hover:text-white transition-colors",
           copied && "text-white",
           className
         )}
