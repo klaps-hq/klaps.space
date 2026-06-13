@@ -29,6 +29,11 @@ const CSP_REPORT_ONLY = [
 const nextConfig: NextConfig = {
   output: "standalone",
   reactCompiler: true,
+  // Compression moved to Traefik (compress middleware): it can serve
+  // brotli/zstd, while the built-in Node pipeline only does gzip. With
+  // this enabled Traefik would pass the already-gzipped body through
+  // and never get the chance to apply the better encodings.
+  compress: false,
   // Do not advertise the framework/CMS stack in response headers.
   poweredByHeader: false,
   async redirects() {
