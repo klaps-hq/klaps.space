@@ -134,13 +134,12 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
   const hasCoordinates = cinema.latitude !== null && cinema.longitude !== null;
   const cityForCopy = cinema.city.nameDeclinated ?? cinema.city.name;
 
-  // Outbound links in the header: the cinema's own site (preferred) and its
-  // Filmweb listing. Followed links with a referrer are a trust signal and
-  // let cinemas notice klaps.space in their analytics.
-  const externalLinks = [
-    cinema.website && { href: cinema.website, label: "Strona kina" },
-    cinema.filmwebUrl && { href: cinema.filmwebUrl, label: "Filmweb" },
-  ].filter(Boolean) as { href: string; label: string }[];
+  // Outbound link in the header: the cinema's own website only. A followed
+  // link with a referrer is a trust signal and lets cinemas notice
+  // klaps.space in their analytics. Filmweb is intentionally NOT shown.
+  const externalLinks = (
+    cinema.website ? [{ href: cinema.website, label: "Strona kina" }] : []
+  ) as { href: string; label: string }[];
 
   return (
     <>
