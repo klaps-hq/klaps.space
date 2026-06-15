@@ -22,7 +22,10 @@ export interface ICinema {
   description: string | null;
   latitude: number | null;
   longitude: number | null;
-  sourceUrl: string;
+  // The cinema's listing on Filmweb (the catalog's source).
+  filmwebUrl: string;
+  // The cinema's own official website; null when unknown.
+  website: string | null;
 }
 
 export interface ICinemaGroup {

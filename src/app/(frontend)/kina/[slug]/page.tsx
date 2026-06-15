@@ -38,6 +38,11 @@ export const generateStaticParams = async (): Promise<{ slug: string }[]> => {
 
 const MAX_DESCRIPTION_LENGTH = 160;
 
+// Shared style for the small outbound links in the cinema header (official
+// site, Filmweb): subtle until hover, with a nudging arrow.
+const CINEMA_LINK_CLASS =
+  "group inline-flex items-center gap-1 text-white/70 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5";
+
 // Live repertoire counts and an example title make every cinema's
 // description unique, which improves SERP CTR and avoids the
 // boilerplate-description pattern across 500+ cinema pages.
@@ -129,6 +134,14 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
   const hasCoordinates = cinema.latitude !== null && cinema.longitude !== null;
   const cityForCopy = cinema.city.nameDeclinated ?? cinema.city.name;
 
+  // Outbound links in the header: the cinema's own site (preferred) and its
+  // Filmweb listing. Followed links with a referrer are a trust signal and
+  // let cinemas notice klaps.space in their analytics.
+  const externalLinks = [
+    cinema.website && { href: cinema.website, label: "Strona kina" },
+    cinema.filmwebUrl && { href: cinema.filmwebUrl, label: "Filmweb" },
+  ].filter(Boolean) as { href: string; label: string }[];
+
   return (
     <>
       <div className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-4">
@@ -158,27 +171,23 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                   </Link>
                   {cinema.city.voivodeship && <>, {cinema.city.voivodeship}</>}
                 </span>
-                {cinema.sourceUrl && (
-                  <>
+                {externalLinks.map((link) => (
+                  <React.Fragment key={link.href}>
                     <span aria-hidden="true">·</span>
-                    {/* Followed link with referrer: an editorial link to the
-                        cinema's official site is a trust signal, and the
-                        referrer lets cinemas notice klaps.space in their
-                        analytics (groundwork for reciprocal links). */}
                     <Link
-                      href={cinema.sourceUrl}
+                      href={link.href}
                       target="_blank"
                       rel="noopener"
-                      className="group inline-flex items-center gap-1 text-white/70 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
+                      className={CINEMA_LINK_CLASS}
                     >
-                      Strona kina
+                      {link.label}
                       <ArrowUpRight
                         aria-hidden="true"
                         className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                       />
                     </Link>
-                  </>
-                )}
+                  </React.Fragment>
+                ))}
               </span>
             </div>
             {cinema.description ? (
