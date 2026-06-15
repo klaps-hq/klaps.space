@@ -46,9 +46,19 @@ const HomePage = async () => {
       <Suspense fallback={<ScreeningsLoader />}>
         <Screenings genres={genres} />
       </Suspense>
-      <Genres />
-      <Cinemas />
-      <Blog />
+      {/* Each below-the-fold section streams on its own so a slow data fetch
+          (e.g. the cinemas list) never blocks the hero shell or the others.
+          The page is statically prerendered, so crawlers still get the fully
+          baked HTML; the boundaries only matter on dev/revalidation renders. */}
+      <Suspense fallback={null}>
+        <Genres />
+      </Suspense>
+      <Suspense fallback={null}>
+        <Cinemas />
+      </Suspense>
+      <Suspense fallback={null}>
+        <Blog />
+      </Suspense>
       <About />
       <Footer />
     </>
