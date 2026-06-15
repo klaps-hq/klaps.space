@@ -170,16 +170,16 @@ const Hero: React.FC<HeroProps> = ({
       <h1 className="sr-only">
         Seanse specjalne i stare filmy w kinach studyjnych w Polsce
       </h1>
-      {/* "w1280" source (not "original"): the hero is the LCP element, and
-          making the optimizer fetch+transcode a multi-MB original on a cache
-          miss (the hero rotates per revalidation) noticeably delayed the
-          image behind its blur placeholder. w1280 keeps the on-demand
-          transcode cheap and the optimizer still downscales it to the
-          viewport. Served by the scraper-populated MinIO mirror, not TMDB. */}
+      {/* "original" is mandatory here, not a quality choice: the MinIO
+          mirror is populated by the scraper and only holds the *original*
+          backdrop, so any other size (e.g. w1280) 404s and the hero shows
+          just the blur. The optimizer still downscales the original to the
+          viewport, so the client payload stays small. Served by the
+          scraper-populated MinIO mirror, not the TMDB CDN. */}
       <HeroParallax
         backdropSrc={tmdbImageSrc(
           screening.movie.backdropUrl ?? "",
-          "w1280"
+          "original"
         )}
         posterSrc={
           screening.movie.posterUrl
