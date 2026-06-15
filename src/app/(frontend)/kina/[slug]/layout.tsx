@@ -33,13 +33,10 @@ const buildCinemaJsonLd = (cinema: ICinema) => {
     };
   }
 
-  // Tie the cinema entity to its presence elsewhere: its own website first,
-  // then the Filmweb listing the catalog is built from.
-  const sameAs = [cinema.website, cinema.filmwebUrl].filter(
-    (url): url is string => Boolean(url)
-  );
-  if (sameAs.length > 0) {
-    jsonLd.sameAs = sameAs;
+  // Reference only the cinema's own official website. Filmweb is
+  // intentionally not exposed anywhere on the cinema page.
+  if (cinema.website) {
+    jsonLd.sameAs = cinema.website;
   }
 
   return jsonLd;

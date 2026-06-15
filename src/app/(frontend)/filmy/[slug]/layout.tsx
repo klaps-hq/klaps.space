@@ -64,9 +64,7 @@ const buildMovieJsonLd = (movie: IMovie) => {
     };
   }
 
-  if (movie.filmwebUrl) {
-    jsonLd.sameAs = [movie.filmwebUrl];
-  }
+  // Filmweb is intentionally not referenced anywhere on the site.
 
   return jsonLd;
 };
