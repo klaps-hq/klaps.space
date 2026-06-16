@@ -1,4 +1,4 @@
-import { getCinemaBySlug } from "@/lib/cinemas";
+import { getCinemaBySlug, cinemaRepertoireDateTo } from "@/lib/cinemas";
 import { getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { buildScreeningEventsJsonLd } from "@/lib/screening-event-jsonld";
@@ -82,6 +82,7 @@ export default async function CinemaLayout({
   // to [] internally, so a screenings hiccup never breaks the layout.
   const screeningGroups = await getScreenings({
     cinemaId: cinema.id.toString(),
+    dateTo: cinemaRepertoireDateTo(),
   });
 
   const events = buildCinemaScreeningEvents(cinema, screeningGroups);
