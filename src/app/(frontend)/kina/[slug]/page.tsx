@@ -2,7 +2,12 @@ import React, { Suspense } from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { ArrowUpRight } from "lucide-react";
-import { getCinemaPageData, getCinemaBySlug, getCinemas } from "@/lib/cinemas";
+import {
+  getCinemaPageData,
+  getCinemaBySlug,
+  getCinemas,
+  cinemaRepertoireDateTo,
+} from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
 import { getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
@@ -84,6 +89,7 @@ export const generateMetadata = async ({
   // Same call as the page body: deduped by the fetch cache.
   const screeningGroups = await getScreenings({
     cinemaId: cinema.id.toString(),
+    dateTo: cinemaRepertoireDateTo(),
   }).catch(() => []);
 
   // Locative city name ("w Krakowie", not "w Kraków") for natural phrasing.
@@ -129,6 +135,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
   // client-side based on the URL params.
   const screenings = await getScreenings({
     cinemaId: cinema.id.toString(),
+    dateTo: cinemaRepertoireDateTo(),
   });
 
   const hasCoordinates = cinema.latitude !== null && cinema.longitude !== null;

@@ -108,6 +108,13 @@ interface CinemaPageFilters {
   search?: string | null;
 }
 
+// Cinema detail pages show the venue's full upcoming programme, not just the
+// default 30-day window: partner cinemas submit schedules months ahead (e.g.
+// summer retrospectives), and the cinema page is where all of it belongs.
+// Listings and the homepage keep the 30-day default.
+export const cinemaRepertoireDateTo = (): string =>
+  new Date(Date.now() + 365 * 86_400_000).toISOString().slice(0, 10);
+
 export const getCinemaPageData = async (
   slug: string,
   filters: CinemaPageFilters = {}
