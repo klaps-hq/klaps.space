@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { getImageProps } from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 
 interface HeroParallaxProps {
   backdropSrc: string;
@@ -30,6 +30,7 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
   children,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -78,42 +79,66 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
           style={{ y: imageY, scale: imageScale }}
         >
           {/* Blur previews live behind the <img> so each breakpoint gets its
-              own placeholder (a single img can only carry one blur style). */}
+              own placeholder (a single img can only carry one blur style).
+              blur + scale turns the tiny base64 preview into a smooth wash
+              instead of an upscaled pixel grid; scale-125 pushes the soft
+              edges of the filter past the (overflow-hidden) frame. */}
           {posterImageProps && posterBlurDataUrl && (
             <div
               aria-hidden="true"
-              className="absolute inset-0 bg-cover bg-center md:hidden"
+              className="absolute inset-0 bg-cover bg-center blur-2xl scale-125 md:hidden"
               style={{ backgroundImage: `url(${posterBlurDataUrl})` }}
             />
           )}
           {backdropBlurDataUrl && (
             <div
               aria-hidden="true"
-              className={`absolute inset-0 bg-cover bg-center ${
+              className={`absolute inset-0 bg-cover bg-center blur-2xl scale-125 ${
                 posterImageProps ? "hidden md:block" : ""
               }`}
               style={{ backgroundImage: `url(${backdropBlurDataUrl})` }}
             />
           )}
-          <picture>
-            {posterImageProps && (
-              <source
-                media={MOBILE_MEDIA}
-                srcSet={posterImageProps.srcSet}
-                sizes="100vw"
+          {/* Slow, continuous ken-burns drift on the artwork. It starts at
+              scale 1 (no opacity:0 / no initial), so the LCP hero image is
+              painted at full size from the first frame; the motion only adds
+              a gentle zoom afterwards. Skipped for prefers-reduced-motion. */}
+          <motion.div
+            className="absolute inset-0"
+            animate={
+              prefersReducedMotion ? undefined : { scale: [1, 1.08], y: ["0%", "-2.5%"] }
+            }
+            transition={
+              prefersReducedMotion
+                ? undefined
+                : {
+                    duration: 24,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                  }
+            }
+          >
+            <picture>
+              {posterImageProps && (
+                <source
+                  media={MOBILE_MEDIA}
+                  srcSet={posterImageProps.srcSet}
+                  sizes="100vw"
+                />
+              )}
+              {/* Raw img on purpose: props come from getImageProps, so the
+                  optimizer pipeline still applies (alt included via spread).
+                  Explicit fetchPriority: getImageProps does not forward it,
+                  and Lighthouse flags the LCP image without the hint. */}
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
+              <img
+                {...backdropProps}
+                fetchPriority="high"
+                className="object-cover"
               />
-            )}
-            {/* Raw img on purpose: props come from getImageProps, so the
-                optimizer pipeline still applies (alt included via spread).
-                Explicit fetchPriority: getImageProps does not forward it,
-                and Lighthouse flags the LCP image without the hint. */}
-            {/* eslint-disable-next-line jsx-a11y/alt-text */}
-            <img
-              {...backdropProps}
-              fetchPriority="high"
-              className="object-cover"
-            />
-          </picture>
+            </picture>
+          </motion.div>
         </motion.div>
       </div>
 
