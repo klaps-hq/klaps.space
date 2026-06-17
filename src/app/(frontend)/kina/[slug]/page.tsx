@@ -180,7 +180,12 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                 {externalLinks.map((link) => (
                   <React.Fragment key={link.href}>
                     <span aria-hidden="true">·</span>
-                    <Link
+                    {/* Plain <a> (not next/link) for an outbound absolute URL:
+                        the Link component adds prefetch/onClick handling meant
+                        for internal routes. rel keeps "noopener" only - the
+                        referrer is intentional so cinemas see klaps.space in
+                        their analytics (see externalLinks comment above). */}
+                    <a
                       href={link.href}
                       target="_blank"
                       rel="noopener"
@@ -191,7 +196,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                         aria-hidden="true"
                         className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                       />
-                    </Link>
+                    </a>
                   </React.Fragment>
                 ))}
               </span>

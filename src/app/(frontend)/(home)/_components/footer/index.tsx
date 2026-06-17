@@ -23,6 +23,7 @@ const NAV_COLUMNS = [
       { label: "O projekcie", href: "/o-projekcie" },
       { label: "FAQ", href: "/faq" },
       { label: "Kontakt", href: "/kontakt" },
+      { label: "Mapa witryny", href: "/mapa-witryny" },
     ],
   },
   {
