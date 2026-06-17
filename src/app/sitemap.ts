@@ -96,26 +96,32 @@ const filterNonEmptyGenres = async (
   }
 };
 
-const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: SITE_URL, changeFrequency: "daily", priority: 1 },
-    { url: `${SITE_URL}/seanse`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${SITE_URL}/kina`, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${SITE_URL}/mapa-kin`, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${SITE_URL}/miasta`, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${SITE_URL}/gatunki`, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${SITE_URL}/rezyserzy`, changeFrequency: "weekly", priority: 0.6 },
-    { url: `${SITE_URL}/blog`, changeFrequency: "weekly", priority: 0.6 },
-    { url: `${SITE_URL}/o-projekcie`, changeFrequency: "monthly", priority: 0.3 },
-    { url: `${SITE_URL}/kontakt`, changeFrequency: "monthly", priority: 0.3 },
-    { url: `${SITE_URL}/faq`, changeFrequency: "monthly", priority: 0.3 },
-    { url: `${SITE_URL}/regulamin`, changeFrequency: "monthly", priority: 0.2 },
-    { url: `${SITE_URL}/polityka-prywatnosci`, changeFrequency: "monthly", priority: 0.2 },
-  ];
+// A slug collision would otherwise emit the same <url> twice within a
+// sub-sitemap; keep the last occurrence.
+const dedupeByUrl = (pages: MetadataRoute.Sitemap): MetadataRoute.Sitemap =>
+  Array.from(new Map(pages.map((item) => [item.url, item])).values());
 
-  // Blog posts come from Payload, not the repertoire API, so they get their
-  // own resilience: on a database hiccup the sitemap just ships without them.
-  const blogPages: MetadataRoute.Sitemap = (
+const staticPages: MetadataRoute.Sitemap = [
+  { url: SITE_URL, changeFrequency: "daily", priority: 1 },
+  { url: `${SITE_URL}/seanse`, changeFrequency: "daily", priority: 0.9 },
+  { url: `${SITE_URL}/kina`, changeFrequency: "weekly", priority: 0.8 },
+  { url: `${SITE_URL}/mapa-kin`, changeFrequency: "weekly", priority: 0.7 },
+  { url: `${SITE_URL}/miasta`, changeFrequency: "weekly", priority: 0.7 },
+  { url: `${SITE_URL}/gatunki`, changeFrequency: "weekly", priority: 0.7 },
+  { url: `${SITE_URL}/rezyserzy`, changeFrequency: "weekly", priority: 0.6 },
+  { url: `${SITE_URL}/blog`, changeFrequency: "weekly", priority: 0.6 },
+  { url: `${SITE_URL}/mapa-witryny`, changeFrequency: "monthly", priority: 0.3 },
+  { url: `${SITE_URL}/o-projekcie`, changeFrequency: "monthly", priority: 0.3 },
+  { url: `${SITE_URL}/kontakt`, changeFrequency: "monthly", priority: 0.3 },
+  { url: `${SITE_URL}/faq`, changeFrequency: "monthly", priority: 0.3 },
+  { url: `${SITE_URL}/regulamin`, changeFrequency: "monthly", priority: 0.2 },
+  { url: `${SITE_URL}/polityka-prywatnosci`, changeFrequency: "monthly", priority: 0.2 },
+];
+
+// Blog posts come from Payload, not the repertoire API, so they get their
+// own resilience: on a database hiccup the sub-sitemap just ships empty.
+const buildBlogPages = async (): Promise<MetadataRoute.Sitemap> => {
+  const postPages: MetadataRoute.Sitemap = (
     await getPublishedPosts().catch(() => [])
   ).flatMap((post) =>
     post.slug
@@ -131,7 +137,7 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   );
 
   // Paginated blog archive (/blog/strona/2..N); page 1 is /blog itself.
-  const blogArchivePages: MetadataRoute.Sitemap = await getPostsPage(1)
+  const archivePages: MetadataRoute.Sitemap = await getPostsPage(1)
     .then(({ totalPages }) =>
       Array.from({ length: Math.max(totalPages - 1, 0) }, (_, index) => ({
         url: `${SITE_URL}/blog/strona/${index + 2}`,
@@ -141,40 +147,89 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
     )
     .catch(() => []);
 
-  // One request covers every dynamic resource. On failure serve the static
-  // pages only - an incomplete sitemap beats a 500, but log it loudly.
+  return [...postPages, ...archivePages];
+};
+
+// One sub-sitemap per resource type. Splitting the formerly flat sitemap
+// into a sitemap index (Next serves it at /sitemap.xml, sub-sitemaps at
+// /sitemap/[id].xml) makes GSC coverage diagnosable per page type. See KLA-7.
+const SITEMAP_IDS = [
+  "static",
+  "filmy",
+  "kina",
+  "miasta",
+  "gatunki",
+  "rezyserzy",
+  "blog",
+] as const;
+type SitemapId = (typeof SITEMAP_IDS)[number];
+
+export async function generateSitemaps(): Promise<{ id: SitemapId }[]> {
+  return SITEMAP_IDS.map((id) => ({ id }));
+}
+
+// As of Next 16 the id is passed as a Promise that resolves to a string.
+const sitemap = async ({
+  id,
+}: {
+  id: Promise<string>;
+}): Promise<MetadataRoute.Sitemap> => {
+  const sitemapId = (await id) as SitemapId;
+
+  if (sitemapId === "static") {
+    return staticPages;
+  }
+
+  if (sitemapId === "blog") {
+    return dedupeByUrl(await buildBlogPages());
+  }
+
+  // The repertoire-backed types share one upstream call. On failure each
+  // sub-sitemap ships empty rather than 500ing the whole index; the static
+  // and blog sub-sitemaps stay unaffected because they don't reach here.
   let entries;
   try {
     entries = await getSitemapEntries();
   } catch (error) {
-    console.error("Sitemap: failed to fetch /sitemap from API:", error);
-    return [...staticPages, ...blogPages, ...blogArchivePages];
+    console.error(
+      `Sitemap[${sitemapId}]: failed to fetch /sitemap from API:`,
+      error
+    );
+    return [];
   }
 
-  // Cities arrive pre-filtered by the API (only those with cinemas);
-  // movies and genres are cross-checked here against their noindex rules.
-  // Poster URLs ride along for the movie image sitemap; on failure the map is
-  // empty and movie entries simply ship without an <image:image>.
-  const [movies, genres, posters] = await Promise.all([
-    filterMoviesWithScreenings(entries.movies),
-    filterNonEmptyGenres(entries.genres),
-    getMoviePosterMap().catch(() => new Map<string, string>()),
-  ]);
-
-  const allPages = [
-    ...staticPages,
-    ...toPages(movies, "filmy", "daily", 0.7, (slug) => posters.get(slug)),
-    ...toPages(entries.cinemas, "kina", "daily", 0.6),
-    ...toPages(entries.cities, "miasta", "daily", 0.6),
-    ...toPages(genres, "gatunki", "weekly", 0.5),
-    // Directors arrive pre-filtered by the API (only those above the
-    // indexing threshold), so no noindex cross-check is needed here.
-    ...toPages(entries.directors ?? [], "rezyserzy", "weekly", 0.5),
-    ...blogPages,
-    ...blogArchivePages,
-  ];
-
-  return Array.from(new Map(allPages.map((item) => [item.url, item])).values());
+  switch (sitemapId) {
+    case "filmy": {
+      // Cross-checked against the screenings feed (noindex guard); poster
+      // URLs ride along as <image:image>. On a poster-map failure movie
+      // entries simply ship without an image.
+      const [movies, posters] = await Promise.all([
+        filterMoviesWithScreenings(entries.movies),
+        getMoviePosterMap().catch(() => new Map<string, string>()),
+      ]);
+      return dedupeByUrl(
+        toPages(movies, "filmy", "daily", 0.7, (slug) => posters.get(slug))
+      );
+    }
+    case "kina":
+      // Cinemas arrive pre-filtered by the API.
+      return dedupeByUrl(toPages(entries.cinemas, "kina", "daily", 0.6));
+    case "miasta":
+      // Cities arrive pre-filtered by the API (only those with cinemas).
+      return dedupeByUrl(toPages(entries.cities, "miasta", "daily", 0.6));
+    case "gatunki": {
+      const genres = await filterNonEmptyGenres(entries.genres);
+      return dedupeByUrl(toPages(genres, "gatunki", "weekly", 0.5));
+    }
+    case "rezyserzy":
+      // Directors arrive pre-filtered by the API (only those above the
+      // indexing threshold), so no noindex cross-check is needed here.
+      return dedupeByUrl(
+        toPages(entries.directors ?? [], "rezyserzy", "weekly", 0.5)
+      );
+    default:
+      return [];
+  }
 };
 
 export default sitemap;
