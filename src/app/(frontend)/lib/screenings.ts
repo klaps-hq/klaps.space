@@ -3,7 +3,7 @@ import {
   IScreeningGroup,
   IRandomScreening,
 } from "@/interfaces/IScreenings";
-import { PaginatedResponse } from "@/interfaces/IMovies";
+import { IMovie, PaginatedResponse } from "@/interfaces/IMovies";
 import { apiFetch } from "./client";
 
 interface GetScreeningsParams {
@@ -142,17 +142,148 @@ export const getScreeningsLastUpdated = async (
   }
 };
 
-export const getRandomScreening = async (): Promise<IRandomScreening> => {
-  const screening = await apiFetch<IRandomScreening>(
-    "/screenings/random-screening"
-  );
+// Default screening groups shown on the homepage before any filter is
+// applied. Matches what /api/screenings returns for an empty query so the
+// server-rendered first screen and any client refetch stay identical.
+export const HOME_SCREENINGS_LIMIT = 30;
 
-  if (!screening) {
-    throw new Error("No screening found");
+interface HomeScreeningsFilters {
+  cityId?: string;
+  // The API prioritizes city over voivodeship - pass at most one.
+  voivodeship?: string;
+  // Already-validated numeric id strings.
+  genreIds?: string[];
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+}
+
+export interface HomeScreeningsResult {
+  screenings: IScreeningGroup[];
+  hasMore: boolean;
+}
+
+const unwrapScreeningsResponse = (
+  response: IScreeningGroup[] | PaginatedResponse<IScreeningGroup>
+): IScreeningGroup[] =>
+  Array.isArray(response) ? response : [...response.data];
+
+// Multi-genre selection: the upstream API accepts a single genreId, so we
+// fetch per genre and dedupe by movie, keeping the first occurrence.
+const mergeScreeningGroups = (
+  groups: IScreeningGroup[][]
+): IScreeningGroup[] => {
+  const byMovieId = new Map<number, IScreeningGroup>();
+  for (const list of groups) {
+    for (const group of list) {
+      if (!byMovieId.has(group.movie.id)) {
+        byMovieId.set(group.movie.id, group);
+      }
+    }
   }
-
-  return screening;
+  return Array.from(byMovieId.values());
 };
+
+/**
+ * The homepage screenings grid (default and filtered). Shared by the
+ * server-rendered initial render and the /api/screenings client refetch so
+ * both always produce the same set; the default (no filters) variant is
+ * baked into the statically cached homepage HTML.
+ */
+export const fetchHomeScreenings = async (
+  filters: HomeScreeningsFilters = {}
+): Promise<HomeScreeningsResult> => {
+  const {
+    cityId,
+    voivodeship,
+    genreIds = [],
+    dateFrom,
+    dateTo,
+    search,
+  } = filters;
+  const sharedFilters = { cityId, voivodeship, dateFrom, dateTo, search };
+
+  const allScreenings =
+    genreIds.length > 1
+      ? await Promise.all(
+          genreIds.map((id) =>
+            getPaginatedScreenings({ ...sharedFilters, genreId: id }).then(
+              unwrapScreeningsResponse
+            )
+          )
+        ).then(mergeScreeningGroups)
+      : await getPaginatedScreenings({
+          ...sharedFilters,
+          genreId: genreIds[0],
+        }).then(unwrapScreeningsResponse);
+
+  const screenings = allScreenings.slice(0, HOME_SCREENINGS_LIMIT);
+  return {
+    screenings,
+    hasMore: allScreenings.length > screenings.length,
+  };
+};
+
+// Home hero rotates only across this many upcoming screenings. A fully
+// random backdrop on every revalidation would force the image optimizer to
+// re-encode a cold (and, for big originals, slow) variant each time; a small
+// stable pool keeps those few variants warm in the optimizer cache instead.
+const HERO_POOL_SIZE = 10;
+const HERO_ROTATION_WINDOW_MS = 5 * 60 * 1000;
+
+/**
+ * Featured screening for the home hero, picked from a small stable pool of
+ * upcoming screenings instead of a fully random one (see HERO_POOL_SIZE).
+ * Returns null when the pool is empty or the movie detail fetch fails, in
+ * which case the hero falls back to its generic variant.
+ */
+export const getFeaturedHeroScreening =
+  async (): Promise<IRandomScreening | null> => {
+    const pool = (await getScreenings()).slice(0, HERO_POOL_SIZE);
+    if (pool.length === 0) {
+      return null;
+    }
+
+    // Deterministic per revalidation window: the homepage is ISR, so this
+    // runs at build/revalidation only (never per request), and stepping the
+    // index by the same ~5 min cadence as `revalidate` walks the pool one
+    // backdrop at a time.
+    const index =
+      Math.floor(Date.now() / HERO_ROTATION_WINDOW_MS) % pool.length;
+    const group = pool[index];
+    const screening = group.screenings[0];
+    if (!screening) {
+      return null;
+    }
+
+    try {
+      // Direct apiFetch (not getMovieBySlug) to avoid a screenings <-> movies
+      // import cycle and the notFound() control-flow; the pool only holds
+      // movies that already have screenings, so this fetch normally succeeds.
+      const movie = await apiFetch<IMovie>(`/movies/${group.movie.slug}`);
+      return {
+        movie: {
+          id: movie.id,
+          slug: movie.slug,
+          title: movie.title,
+          titleOriginal: movie.titleOriginal,
+          productionYear: movie.productionYear,
+          duration: movie.duration,
+          posterUrl: movie.posterUrl,
+          genres: movie.genres,
+          description: movie.description,
+          backdropUrl: movie.backdropUrl,
+          posterBlurDataUrl: movie.posterBlurDataUrl,
+          backdropBlurDataUrl: movie.backdropBlurDataUrl,
+          videoUrl: movie.videoUrl,
+          directors: movie.directors,
+        },
+        screening,
+      };
+    } catch {
+      return null;
+    }
+  };
 
 export const groupScreeningsByCinema = (
   screenings: IScreening[]
