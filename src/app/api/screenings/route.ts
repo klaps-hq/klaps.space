@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { IScreeningGroup } from "@/interfaces/IScreenings";
-import { PaginatedResponse } from "@/interfaces/IMovies";
-import { getPaginatedScreenings } from "@/lib/screenings";
+import {
+  fetchHomeScreenings,
+  HomeScreeningsResult,
+} from "@/lib/screenings";
 import { isVoivodeship } from "@/lib/voivodeships";
 
 // Proxy for the homepage screenings section - the upstream URL and API key
-// must stay server-side, while the section fetches from the client so the
-// homepage HTML itself can be statically cached (ISR).
-const HOMEPAGE_LIMIT = 30;
+// must stay server-side, while the section refetches from the client (for
+// active filters / the preferred city) so the homepage HTML itself can be
+// statically cached (ISR). The default, unfiltered set is server-rendered
+// straight into that cached HTML and never hits this route.
 const MAX_GENRE_IDS = 10;
 const MAX_SEARCH_LENGTH = 100;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-
-interface HomeScreeningsResponse {
-  screenings: IScreeningGroup[];
-  hasMore: boolean;
-}
 
 const parseGenreIds = (raw: string): string[] =>
   raw
@@ -23,25 +20,6 @@ const parseGenreIds = (raw: string): string[] =>
     .map((v) => v.trim())
     .filter((v) => v.length > 0 && /^\d+$/.test(v))
     .slice(0, MAX_GENRE_IDS);
-
-const mergeScreeningGroups = (
-  groups: IScreeningGroup[][]
-): IScreeningGroup[] => {
-  const byMovieId = new Map<number, IScreeningGroup>();
-  for (const list of groups) {
-    for (const group of list) {
-      if (!byMovieId.has(group.movie.id)) {
-        byMovieId.set(group.movie.id, group);
-      }
-    }
-  }
-  return Array.from(byMovieId.values());
-};
-
-const unwrapResponse = (
-  response: IScreeningGroup[] | PaginatedResponse<IScreeningGroup>
-): IScreeningGroup[] =>
-  Array.isArray(response) ? response : [...response.data];
 
 const validDate = (value: string | null): string | undefined =>
   value && DATE_PATTERN.test(value) ? value : undefined;
@@ -59,36 +37,14 @@ export async function GET(request: NextRequest) {
   const search =
     params.get("search")?.trim().slice(0, MAX_SEARCH_LENGTH) || undefined;
 
-  const sharedFilters = {
+  const body: HomeScreeningsResult = await fetchHomeScreenings({
     cityId,
     voivodeship,
+    genreIds,
     dateFrom: validDate(params.get("dateFrom")),
     dateTo: validDate(params.get("dateTo")),
     search,
-  };
-
-  // Multi-genre selection: the upstream API accepts a single genreId, so
-  // fetch per genre and dedupe by movie (mirrors the old server section).
-  const allScreenings =
-    genreIds.length > 1
-      ? await Promise.all(
-          genreIds.map((id) =>
-            getPaginatedScreenings({ ...sharedFilters, genreId: id }).then(
-              unwrapResponse
-            )
-          )
-        ).then(mergeScreeningGroups)
-      : await getPaginatedScreenings({
-          ...sharedFilters,
-          genreId: genreIds[0],
-        }).then(unwrapResponse);
-
-  const screenings = allScreenings.slice(0, HOMEPAGE_LIMIT);
-
-  const body: HomeScreeningsResponse = {
-    screenings,
-    hasMore: allScreenings.length > screenings.length,
-  };
+  });
 
   return NextResponse.json(body, {
     // Short shared cache: repertoire data upstream revalidates every 5

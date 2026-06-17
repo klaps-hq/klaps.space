@@ -77,11 +77,14 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    // AVIF first: 30-40% smaller than WebP at the same visual quality.
-    // Encoding is slower, but each variant is generated once and then
-    // cached for a year (minimumCacheTTL below), so only the first
-    // request after a deploy pays the cost.
-    formats: ["image/avif", "image/webp"],
+    // WebP only, on purpose (no AVIF for now): the heroes feed the optimizer
+    // a full-size TMDB "original" (the MinIO mirror holds no smaller size),
+    // and AVIF-encoding that large a source on a cold cache is slow enough to
+    // dominate hero LCP. WebP encodes far faster for a ~30% byte penalty,
+    // which is the better trade while the source stays this big. Re-add
+    // "image/avif" once the scraper mirrors a hero-sized (~1920px) variant
+    // and the heroes stop requesting "original".
+    formats: ["image/webp"],
     qualities: [75],
     // TMDB files are content-addressed and immutable, so optimized
     // variants can be cached for a year instead of the short default.

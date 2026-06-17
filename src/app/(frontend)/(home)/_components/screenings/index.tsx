@@ -21,6 +21,11 @@ interface HomeScreeningsData {
 
 interface ScreeningsProps {
   genres: IGenre[];
+  // Default, unfiltered screenings rendered on the server into the static
+  // homepage HTML. They seed the grid so the common (no-filter, no stored
+  // city) view needs no client fetch at all.
+  initialScreenings: IScreeningGroup[];
+  initialHasMore: boolean;
 }
 
 // The hero is exactly 100vh, so the section's top edge touches the fold and
@@ -39,7 +44,11 @@ const parseGenreIds = (raw: string): number[] =>
     .filter((v) => v.length > 0 && /^\d+$/.test(v))
     .map(Number);
 
-const Screenings: React.FC<ScreeningsProps> = ({ genres }) => {
+const Screenings: React.FC<ScreeningsProps> = ({
+  genres,
+  initialScreenings,
+  initialHasMore,
+}) => {
   const searchParams = useSearchParams();
   const {
     cityId: preferredCityId,
@@ -77,11 +86,16 @@ const Screenings: React.FC<ScreeningsProps> = ({ genres }) => {
 
   // Stored together with the query that produced it: "fetch in flight" is
   // then derived (loaded.query !== query) instead of a setState call at the
-  // start of the effect, which the React Compiler lint rejects.
+  // start of the effect, which the React Compiler lint rejects. Seeded with
+  // the server-rendered default (empty query) so the unfiltered view never
+  // refetches; a non-empty query (filters / stored city) supersedes it.
   const [loaded, setLoaded] = useState<{
     query: string;
     data: HomeScreeningsData;
-  } | null>(null);
+  } | null>(() => ({
+    query: "",
+    data: { screenings: initialScreenings, hasMore: initialHasMore },
+  }));
 
   // Defer the data fetch until the user scrolls near the section: the grid
   // sits below the 100vh hero, so loading it during the initial page load
@@ -123,6 +137,10 @@ const Screenings: React.FC<ScreeningsProps> = ({ genres }) => {
     // Wait for hydration so the first request already carries the stored
     // city preference instead of fetching twice.
     if (!isHydrated || !isNear) return;
+    // Already have the result for this exact query (e.g. the server-seeded
+    // default), so there is nothing to fetch. Guards against the seeded
+    // empty-query view and re-running after setLoaded resolves it.
+    if (loaded?.query === query) return;
 
     const controller = new AbortController();
 
@@ -143,7 +161,7 @@ const Screenings: React.FC<ScreeningsProps> = ({ genres }) => {
       });
 
     return () => controller.abort();
-  }, [isHydrated, isNear, query]);
+  }, [isHydrated, isNear, query, loaded]);
 
   const data = loaded?.data ?? null;
   const isFetching = loaded === null || loaded.query !== query;
