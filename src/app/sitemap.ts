@@ -2,7 +2,11 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site-config";
 // Note: the helper lives in sitemap-entries.ts because a file named
 // sitemap.ts anywhere under app/ would register as a metadata route.
-import { getSitemapEntries } from "@/lib/sitemap-entries";
+import {
+  getSitemapEntries,
+  SITEMAP_IDS,
+  type SitemapId,
+} from "@/lib/sitemap-entries";
 import { getScreenings } from "@/lib/screenings";
 import { getMovies, getMoviePosterMap } from "@/lib/movies";
 import { getGenres } from "@/lib/genres";
@@ -150,20 +154,10 @@ const buildBlogPages = async (): Promise<MetadataRoute.Sitemap> => {
   return [...postPages, ...archivePages];
 };
 
-// One sub-sitemap per resource type. Splitting the formerly flat sitemap
-// into a sitemap index (Next serves it at /sitemap.xml, sub-sitemaps at
-// /sitemap/[id].xml) makes GSC coverage diagnosable per page type. See KLA-7.
-const SITEMAP_IDS = [
-  "static",
-  "filmy",
-  "kina",
-  "miasta",
-  "gatunki",
-  "rezyserzy",
-  "blog",
-] as const;
-type SitemapId = (typeof SITEMAP_IDS)[number];
-
+// One sub-sitemap per resource type (SITEMAP_IDS lives in the shared lib so
+// the /sitemap.xml index route can list the same set). Next serves each
+// sub-sitemap at /sitemap/[id].xml but does NOT generate the index itself;
+// that is hand-rolled in app/sitemap.xml/route.ts. See KLA-7.
 export async function generateSitemaps(): Promise<{ id: SitemapId }[]> {
   return SITEMAP_IDS.map((id) => ({ id }));
 }
