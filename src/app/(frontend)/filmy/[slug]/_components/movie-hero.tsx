@@ -46,9 +46,6 @@ const MovieHero: React.FC<MovieHeroProps> = ({
           <motion.div
             className="absolute inset-0"
             style={{ y: imageY, scale: imageScale }}
-            initial={{ opacity: 0, scale: 1.06 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
             {/* "original" source: the optimizer downscales it to the
                 viewport, so the client payload stays small while the image
@@ -92,98 +89,57 @@ const MovieHero: React.FC<MovieHeroProps> = ({
           className="absolute inset-0 z-[4] flex flex-col justify-end px-6 md:px-12 lg:px-16 pb-12 md:pb-16"
           style={{ y: contentY }}
         >
-          <motion.div
-            className="flex flex-col gap-5 md:gap-6 max-w-3xl"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              // Short delays - the h1 below is the LCP element.
-              visible: { transition: { staggerChildren: 0.06, delayChildren: 0.15 } },
-            }}
-          >
+          {/* Entrance reveals are pure CSS (globals.css .kx-*) so the hero
+              text is server-rendered and visible without JS; only the scroll
+              parallax above stays on framer. */}
+          <div className="flex flex-col gap-5 md:gap-6 max-w-3xl">
             {metaParts.length > 0 && (
-              <motion.span
-                variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-                  },
-                }}
-                className="text-xs md:text-sm uppercase tracking-[0.3em] text-white/65"
+              <span
+                className="kx-fade-up text-xs md:text-sm uppercase tracking-[0.3em] text-white/65"
+                style={{ animationDelay: "150ms" }}
               >
                 {metaParts.join(" · ")}
-              </motion.span>
+              </span>
             )}
-            <motion.h1
-              variants={{
-                hidden: { opacity: 0, y: 24 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-                },
-              }}
-              className={PAGE_HEADING_CLASSES.detail}
+            <h1
+              className={`kx-fade-up ${PAGE_HEADING_CLASSES.detail}`}
+              style={{ animationDelay: "200ms" }}
             >
               {movie.title}
-            </motion.h1>
+            </h1>
             {movie.titleOriginal && movie.titleOriginal !== movie.title && (
-              <motion.span
-                variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-                  },
-                }}
-                className="text-base md:text-xl text-white/55 italic font-light"
+              <span
+                className="kx-fade-up text-base md:text-xl text-white/55 italic font-light"
+                style={{ animationDelay: "250ms" }}
               >
                 {movie.titleOriginal}
-              </motion.span>
+              </span>
             )}
             {/* Directors live in the "Informacje" credits below the fold,
                 so the hero skips them to avoid the duplicate. */}
             {movie.description && (
-              <motion.p
-                variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-                  },
-                }}
-                className="text-base md:text-lg text-white/85 leading-relaxed font-light max-w-2xl mt-2 line-clamp-4 md:line-clamp-none"
+              <p
+                className="kx-fade-up text-base md:text-lg text-white/85 leading-relaxed font-light max-w-2xl mt-2 line-clamp-4 md:line-clamp-none"
+                style={{ animationDelay: "300ms" }}
               >
                 {movie.description}
-              </motion.p>
+              </p>
             )}
             {embedUrl && (
-              <motion.button
+              <button
                 type="button"
                 onClick={() => setTrailerOpen(true)}
-                variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-                  },
-                }}
-                className="group mt-4 inline-flex w-fit items-center gap-3 border border-white/30 hover:border-white hover:bg-white/[0.06] px-6 md:px-8 py-3 md:py-3.5 text-[11px] md:text-xs uppercase tracking-[0.28em] text-white transition-colors"
+                className="kx-fade-up group mt-4 inline-flex w-fit items-center gap-3 border border-white/30 hover:border-white hover:bg-white/[0.06] px-6 md:px-8 py-3 md:py-3.5 text-[11px] md:text-xs uppercase tracking-[0.28em] text-white transition-colors"
+                style={{ animationDelay: "350ms" }}
               >
                 <Play
                   aria-hidden="true"
                   className="size-3 fill-current transition-transform group-hover:scale-110"
                 />
                 Zwiastun
-              </motion.button>
+              </button>
             )}
-          </motion.div>
+          </div>
         </motion.div>
       </div>
 
