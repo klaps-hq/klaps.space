@@ -47,6 +47,17 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      // generateSitemaps (app/sitemap.ts) serves sub-sitemaps at
+      // /sitemap/[id].xml but emits no index, so the conventional
+      // /sitemap.xml would 404. Serve the hand-rolled index there.
+      {
+        source: "/sitemap.xml",
+        destination: "/sitemap-index",
+      },
+    ];
+  },
   async headers() {
     // HSTS only on production. Preview/staging deployments are left off the
     // policy so a non-HTTPS host can never get pinned in a browser. The
