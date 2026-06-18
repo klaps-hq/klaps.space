@@ -4,6 +4,7 @@ import React from "react";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
 import { formatDateLabel, formatDatePL } from "@/lib/utils";
+import EmptyState from "@/components/common/empty-state";
 import ScreeningCard from "./screening-card";
 import ScreeningsEmptyState from "./empty-state";
 
@@ -14,6 +15,11 @@ interface ScreeningsGridProps {
   dateFrom: string | null;
   dateTo: string | null;
   search: string | null;
+  // The default grid is server-rendered; its empty state must stay
+  // hook-free (a hook-based "clear filters" CTA would call useSearchParams
+  // outside a Suspense boundary and break the static prerender). Only the
+  // client-side filtered grid sets this to get the interactive empty state.
+  interactive?: boolean;
 }
 
 const buildDateLabel = (
@@ -47,8 +53,26 @@ const ScreeningsGrid: React.FC<ScreeningsGridProps> = ({
   dateFrom,
   dateTo,
   search,
+  interactive = false,
 }) => {
   if (screenings.length === 0) {
+    // Server-rendered default view: a static, hook-free empty state so the
+    // page can be prerendered. (At build time the upstream data is empty, so
+    // this branch is what renders into the static HTML.)
+    if (!interactive) {
+      return (
+        <EmptyState
+          title="Chwilowa przerwa."
+          description={
+            <>
+              Repertuar jest w&nbsp;trakcie aktualizacji. Kina studyjne dodają
+              seanse na bieżąco, zajrzyj ponownie wkrótce.
+            </>
+          }
+          cta={{ label: "Przeglądaj kina", href: "/kina" }}
+        />
+      );
+    }
     return (
       <ScreeningsEmptyState
         genresLabel={buildGenresLabel(selectedGenreIds, genres)}
