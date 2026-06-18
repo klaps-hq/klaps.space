@@ -78,6 +78,67 @@
   }
 }
 
+/* Entrance reveals in pure CSS. The element is visible by default (no JS,
+   no animation support, or reduced motion), so the markup is fully
+   server-rendered and readable without executing JS - the animation only
+   plays when motion is allowed. framer-motion would instead bake inline
+   opacity:0 into the SSR HTML, hiding the content until hydration. Per-item
+   stagger is set via an inline animation-delay where needed. */
+@keyframes kx-rise {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes kx-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kx-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes kx-fade-down {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .kx-rise {
+    animation: kx-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .kx-fade {
+    animation: kx-fade 0.25s ease both;
+  }
+  .kx-fade-up {
+    animation: kx-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .kx-fade-down {
+    animation: kx-fade-down 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);

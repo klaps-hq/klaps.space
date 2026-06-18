@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { motion, type Variants } from "framer-motion";
 import { Play } from "lucide-react";
 import { IRandomScreening } from "@/interfaces/IScreenings";
 import { tmdbImageSrc } from "@/lib/tmdb";
@@ -27,43 +26,11 @@ interface HeroProps {
 const CTA_ALL_SCREENINGS = "ZOBACZ SEANSE";
 const CTA_MOVIE = "ZOBACZ FILM";
 
-// Short entrance animations - the hero title is the LCP element,
-// so long delays directly hurt Core Web Vitals.
-const navVariants: Variants = {
-  hidden: { opacity: 0, y: -16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] },
-  },
-};
-
-const contentContainerVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const contentItemVariants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-  },
-};
-
+// Entrance reveals are pure CSS (globals.css .kx-*): the hero text renders
+// visible in the SSR HTML and stays visible without JS, while still animating
+// in when motion is allowed. Stagger is a small per-item animation-delay.
 const HeroNav: React.FC = () => (
-  <motion.nav
-    className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 md:px-12 lg:px-16 py-6"
-    variants={navVariants}
-    initial="hidden"
-    animate="visible"
-  >
+  <nav className="kx-fade-down absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 md:px-12 lg:px-16 py-6">
     <Link href="/" className="flex items-center gap-2.5 text-white">
       <svg
         viewBox="0 0 28 20"
@@ -91,36 +58,31 @@ const HeroNav: React.FC = () => (
       ))}
     </div>
     <MobileNav links={NAV_LINKS} />
-  </motion.nav>
+  </nav>
 );
 
 const HeroFallback: React.FC = () => (
   <section className="h-screen w-full bg-black flex items-center justify-center p-4 md:p-8">
     <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white/[0.03]">
       <HeroNav />
-      <motion.div
-        className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 lg:p-16"
-        variants={contentContainerVariants}
-        initial="hidden"
-        animate="visible"
-      >
+      <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 lg:p-16">
         <div className="flex flex-col gap-6 max-w-4xl">
-          <motion.h1
-            variants={contentItemVariants}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[0.95]"
-          >
+          <h1 className="kx-fade-up text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[0.95]">
             Seanse specjalne i stare filmy w kinach studyjnych w Polsce
-          </motion.h1>
-          <motion.div variants={contentItemVariants} className="self-start">
+          </h1>
+          <div
+            className="kx-fade-up self-start"
+            style={{ animationDelay: "100ms" }}
+          >
             <Link
               href="/seanse"
               className="text-base text-white border-b border-white/50 pb-0.5 hover:border-white transition-colors"
             >
               {CTA_ALL_SCREENINGS}
             </Link>
-          </motion.div>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   </section>
 );
@@ -192,12 +154,7 @@ const Hero: React.FC<HeroProps> = ({
       >
         <HeroNav />
 
-        <motion.div
-          className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 lg:p-16"
-          variants={contentContainerVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 lg:p-16">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-12">
             <div className="flex flex-col gap-6 md:flex-1 md:min-w-0">
               <CharsReveal
@@ -221,9 +178,9 @@ const Hero: React.FC<HeroProps> = ({
                 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[0.95]"
               />
 
-              <motion.div
-                variants={contentItemVariants}
-                className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/60"
+              <div
+                className="kx-fade-up flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/60"
+                style={{ animationDelay: "250ms" }}
               >
                 {screening.movie.duration && (
                   <span>{formatDuration(screening.movie.duration)}</span>
@@ -270,19 +227,19 @@ const Hero: React.FC<HeroProps> = ({
                     </span>
                   </>
                 )}
-              </motion.div>
+              </div>
             </div>
 
             <div className="flex flex-col gap-5 md:w-xl md:shrink-0">
-              <motion.p
-                variants={contentItemVariants}
-                className="text-base md:text-lg text-white/85 font-light line-clamp-4"
+              <p
+                className="kx-fade-up text-base md:text-lg text-white/85 font-light line-clamp-4"
+                style={{ animationDelay: "300ms" }}
               >
                 {screening.movie.description}
-              </motion.p>
-              <motion.div
-                variants={contentItemVariants}
-                className="flex flex-wrap items-center gap-x-8 gap-y-3 self-start"
+              </p>
+              <div
+                className="kx-fade-up flex flex-wrap items-center gap-x-8 gap-y-3 self-start"
+                style={{ animationDelay: "350ms" }}
               >
                 <Link
                   href={`/filmy/${screening.movie.slug}`}
@@ -303,10 +260,10 @@ const Hero: React.FC<HeroProps> = ({
                     Zwiastun
                   </button>
                 )}
-              </motion.div>
+              </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </HeroParallax>
 
       {embedUrl && (
