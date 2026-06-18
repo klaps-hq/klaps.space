@@ -98,6 +98,7 @@ const HomeScreeningsInner: React.FC<HomeScreeningsProps> = ({
             dateFrom={override.dateFrom}
             dateTo={override.dateTo}
             search={override.search}
+            interactive
           />
         )}
 
