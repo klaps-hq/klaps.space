@@ -1,15 +1,17 @@
 import { Suspense } from "react";
 import SiteHeader from "@/components/common/site-header";
+import JsonLd from "@/components/common/json-ld";
 import Hero from "./_components/hero";
 import Footer from "./_components/footer";
-import Screenings from "./_components/screenings";
-import ScreeningsLoader from "./_components/screenings/loader";
+import HomeScreenings from "./_components/screenings";
+import ScreeningsGrid from "./_components/screenings/screenings-grid";
 import Genres from "./_components/genres";
 import Cinemas from "./_components/cinemas";
 import Blog from "./_components/blog";
 import About from "./_components/about";
 import { getFeaturedHeroScreening, fetchHomeScreenings } from "@/lib/screenings";
 import { getGenres } from "@/lib/genres";
+import { SITE_URL } from "@/lib/site-config";
 
 // The homepage is static (ISR): no searchParams or cookies are read on the
 // server, so the HTML shell (hero = LCP) is served from cache instead of
@@ -33,6 +35,23 @@ const HomePage = async () => {
   const backdropBlurDataUrl = heroScreening?.movie.backdropBlurDataUrl ?? null;
   const posterBlurDataUrl = heroScreening?.movie.posterBlurDataUrl ?? null;
 
+  // ItemList for the default repertoire, server-rendered into the static
+  // HTML so crawlers read it without executing JS. Filtered (?query) views
+  // are noindex, so they keep this default markup.
+  const screeningsItemList =
+    homeScreenings.screenings.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          itemListElement: homeScreenings.screenings.map((group, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: group.movie.title,
+            url: `${SITE_URL}/filmy/${group.movie.slug}`,
+          })),
+        }
+      : null;
+
   return (
     <>
       {/* Hidden at the top (the hero carries its own nav), revealed as a
@@ -43,18 +62,27 @@ const HomePage = async () => {
         backdropBlurDataUrl={backdropBlurDataUrl}
         posterBlurDataUrl={posterBlurDataUrl}
       />
-      {/* Suspense boundary: Screenings reads useSearchParams, which opts
-          the client tree below this boundary out of static prerendering.
-          The default screenings are server-rendered here so the grid is in
-          the cached HTML; the client only refetches for active filters or
-          the stored preferred city. */}
-      <Suspense fallback={<ScreeningsLoader />}>
-        <Screenings
+      {/* The default screenings grid is rendered on the server (passed as
+          children) so it lives in the static HTML, crawlable without JS.
+          The interactive filter controls read useSearchParams inside their
+          own Suspense island in HomeScreenings; the client only swaps the
+          grid for active filters or the stored preferred city. */}
+      {screeningsItemList && <JsonLd data={screeningsItemList} />}
+      <HomeScreenings
+        genres={genres}
+        hasMore={homeScreenings.hasMore}
+        hasDefaultResults={homeScreenings.screenings.length > 0}
+        seeAllHref="/seanse"
+      >
+        <ScreeningsGrid
+          screenings={homeScreenings.screenings}
           genres={genres}
-          initialScreenings={homeScreenings.screenings}
-          initialHasMore={homeScreenings.hasMore}
+          selectedGenreIds={[]}
+          dateFrom={null}
+          dateTo={null}
+          search={null}
         />
-      </Suspense>
+      </HomeScreenings>
       {/* Each below-the-fold section streams on its own so a slow data fetch
           (e.g. the cinemas list) never blocks the hero shell or the others.
           The page is statically prerendered, so crawlers still get the fully
