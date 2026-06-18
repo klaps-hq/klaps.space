@@ -12,7 +12,9 @@ import type { Post } from "@/payload-types";
 const revalidatePostPaths = (slug: string | null | undefined) => {
   revalidatePath("/blog");
   revalidatePath("/blog/feed.xml");
-  revalidatePath("/sitemap.xml");
+  // Blog posts live in the per-type sub-sitemap, not the /sitemap.xml index
+  // (the index is a static list of sub-sitemaps and never changes content).
+  revalidatePath("/sitemap/blog.xml");
   if (slug) revalidatePath(`/blog/${slug}`);
 };
 
