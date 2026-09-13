@@ -51,6 +51,9 @@ const CinemaCards: React.FC<CinemaCardsProps> = ({ cinemas }) => (
   </div>
 );
 
+// Roughly what a SERP renders before truncating.
+const MAX_TITLE_LENGTH = 60;
+
 // Polish locative preposition: "we" before a w-/f- consonant cluster
 // (we Wrocławiu, we Włocławku, we Fromborku), otherwise "w" (w Krakowie).
 const wPrep = (locative: string): "w" | "we" =>
@@ -102,7 +105,15 @@ export const generateMetadata = async ({
   // "we Wrocławiu", not "w Wrocławiu": the same locative preposition rule the
   // H1 already applies, now also in the title and description.
   const prep = wPrep(city.nameDeclinated ?? city.name);
-  const title = `Kina studyjne ${prep} ${city.nameDeclinated} - repertuar i seanse specjalne`;
+  // Long city names ("Międzyrzeczu Podlaskim") push the full form past the
+  // ~60 chars a SERP renders, so the suffix degrades instead of being
+  // truncated mid-phrase. The target keyword stays first either way.
+  const titleBase = `Kina studyjne ${prep} ${city.nameDeclinated}`;
+  const titleFull = `${titleBase} - repertuar i seanse specjalne`;
+  const title =
+    titleFull.length <= MAX_TITLE_LENGTH
+      ? titleFull
+      : `${titleBase} - repertuar`;
   const counts =
     screeningsCount > 0
       ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}`
