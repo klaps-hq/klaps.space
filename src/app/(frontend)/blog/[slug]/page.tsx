@@ -9,6 +9,7 @@ import Breadcrumbs from "@/components/ui/breadcrumbs";
 import { SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH, clampText, formatPlDate } from "@/lib/seo";
 import { getCover, getPostBySlug, getPublishedPosts } from "@/lib/posts";
+import { resolveScreeningBlocks } from "@/lib/post-screening-blocks";
 import type { Post } from "@/payload-types";
 import RichText from "../_components/rich-text";
 import Footer from "../../(home)/_components/footer";
@@ -130,6 +131,11 @@ const PostPage = async ({ params }: PostPageProps) => {
 
   const cover = getCover(post);
 
+  // Resolved here rather than inside the converter: Lexical's JSX
+  // converters are synchronous, so the showtimes would otherwise have to be
+  // fetched after hydration and would not reach the server HTML.
+  const screeningsByBlockId = await resolveScreeningBlocks(post.content);
+
   return (
     <main className="bg-black text-white min-h-screen">
       <JsonLd data={buildPostJsonLd(post)} />
@@ -197,7 +203,10 @@ const PostPage = async ({ params }: PostPageProps) => {
               [&_li]:mt-2
               [&_hr]:my-10 [&_hr]:border-white/10"
           >
-            <RichText data={post.content} />
+            <RichText
+              data={post.content}
+              screeningsByBlockId={screeningsByBlockId}
+            />
           </div>
 
           <footer className="mt-14 border-t border-white/10 pt-8">

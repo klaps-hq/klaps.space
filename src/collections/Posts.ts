@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import {
+  BlocksFeature,
   FixedToolbarFeature,
   HeadingFeature,
   HorizontalRuleFeature,
@@ -8,6 +9,7 @@ import {
 } from "@payloadcms/richtext-lexical";
 
 import { authenticated, authenticatedOrPublished } from "../access/authenticated";
+import { ScreeningsBlock } from "../blocks/screenings-block";
 import { slugField } from "../fields/slug";
 import { pingIndexNow } from "./hooks/ping-indexnow";
 import { revalidateDeletedPost, revalidatePost } from "./hooks/revalidate-post";
@@ -80,8 +82,9 @@ export const Posts: CollectionConfig = {
           HorizontalRuleFeature(),
           FixedToolbarFeature(),
           InlineToolbarFeature(),
-          // Custom blocks (e.g. embedded screenings pulled from the
-          // repertoire API) plug in here via BlocksFeature as they are built.
+          // Live repertoire embedded mid-article. Resolved server-side by
+          // the post page, so the showtimes land in the HTML.
+          BlocksFeature({ blocks: [ScreeningsBlock] }),
         ],
       }),
     },
