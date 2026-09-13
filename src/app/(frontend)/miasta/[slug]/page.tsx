@@ -99,15 +99,18 @@ export const generateMetadata = async ({
   // The listing also holds multiplexes hosting special screenings, so the
   // second half of the title covers them and the page body keeps them under
   // their own heading rather than under the "studyjne" one.
-  const title = `Kina studyjne w ${city.nameDeclinated} - repertuar i seanse specjalne`;
+  // "we Wrocławiu", not "w Wrocławiu": the same locative preposition rule the
+  // H1 already applies, now also in the title and description.
+  const prep = wPrep(city.nameDeclinated ?? city.name);
+  const title = `Kina studyjne ${prep} ${city.nameDeclinated} - repertuar i seanse specjalne`;
   const counts =
     screeningsCount > 0
       ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}`
       : `${cinemasCount} ${pluralPl(cinemasCount, "kino z seansami specjalnymi", "kina z seansami specjalnymi", "kin z seansami specjalnymi")}`;
   const description =
     cinemasCount > 0
-      ? `${counts} w ${city.nameDeclinated}. Seanse specjalne, klasyka filmowa i retrospektywy w kinach studyjnych i sieciowych - sprawdź aktualny repertuar.`
-      : `Kina i seanse specjalne w ${city.nameDeclinated}. Aktualna klasyka filmowa, retrospektywy i pokazy specjalne.`;
+      ? `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne, klasyka filmowa i retrospektywy w kinach studyjnych i sieciowych - sprawdź aktualny repertuar.`
+      : `Kina i seanse specjalne ${prep} ${city.nameDeclinated}. Aktualna klasyka filmowa, retrospektywy i pokazy specjalne.`;
   const url = `${SITE_URL}/miasta/${city.slug}`;
 
   // A city without cinemas is thin content; keep it out of the index.
