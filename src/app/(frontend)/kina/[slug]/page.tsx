@@ -104,8 +104,11 @@ export const generateMetadata = async ({
   // adds for those venues is the special-screenings programme, so the title
   // targets that. Independent cinemas keep the repertoire phrasing, which
   // is what people search for them.
+  // Both variants keep the venue name first and the city in the locative
+  // after "w", so the chain wording stays grammatical ("w Katowicach", never
+  // "Cinema City Silesia, Katowicach").
   const title = isChainCinema(cinema.name)
-    ? `Seanse specjalne i klasyka w ${cinema.name}, ${cityName}`
+    ? `${cinema.name} - seanse specjalne i klasyka w ${cityName}`
     : `${cinema.name} - repertuar seansów specjalnych w ${cityName}`;
   const description = buildCinemaDescription(
     cinema.name,
