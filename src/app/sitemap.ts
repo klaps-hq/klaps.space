@@ -19,6 +19,23 @@ const sanitizeSlug = (slug: string | null | undefined) => slug?.trim() ?? "";
 const isValidSlug = (slug: string) =>
   slug.length > 0 && !slug.includes("/") && !slug.includes("?") && !slug.includes("#");
 
+/**
+ * Date of the last deploy that changed what these templates render.
+ *
+ * `updatedAt` from the API tracks when a cinema's or city's *data* changed,
+ * which is the right signal most of the time. It is the wrong one after a
+ * template change: the September 2026 release moved the repertoire into the
+ * server HTML on ~900 pages, so their content genuinely changed while their
+ * API timestamps still read June. Left alone, the only freshness signal
+ * Google reads when fetching the sitemap says nothing happened.
+ *
+ * Bump this ONLY when a release changes what the listing templates output,
+ * and never to a future date. Pages whose data is newer keep their own
+ * timestamp, so this raises a floor rather than flattening every entry onto
+ * one date, which is the pattern that gets a sitemap distrusted.
+ */
+const TEMPLATE_CHANGED_AT = new Date("2026-09-13T00:00:00.000Z");
+
 // Omit lastModified entirely when the API didn't send a parsable date -
 // an inaccurate value is worse for crawlers than none at all.
 const toLastModified = (
@@ -28,6 +45,11 @@ const toLastModified = (
   const date = new Date(updatedAt);
   return Number.isNaN(date.getTime()) ? undefined : date;
 };
+
+// Raises an entry's date to the template floor without ever lowering it or
+// inventing one where the API gave none.
+const withTemplateFloor = (date: Date | undefined): Date | undefined =>
+  date && date < TEMPLATE_CHANGED_AT ? TEMPLATE_CHANGED_AT : date;
 
 const toPages = (
   entries: ISitemapEntry[],
@@ -41,7 +63,7 @@ const toPages = (
   entries
     .map((entry) => ({
       slug: sanitizeSlug(entry.slug),
-      lastModified: toLastModified(entry.updatedAt),
+      lastModified: withTemplateFloor(toLastModified(entry.updatedAt)),
     }))
     .filter(({ slug }) => isValidSlug(slug))
     .map(({ slug, lastModified }) => {
