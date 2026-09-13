@@ -46,6 +46,25 @@ export function tmdbImageSrc(
 }
 
 /**
+ * TMDB CDN URL to retry with when the mirror fails to serve an image. The
+ * scraper only mirrors newly added movies, so files can be missing from the
+ * bucket; rather than dropping to a placeholder, renderers fall back to the
+ * origin. Returns null when no mirror is configured (the display URL already
+ * points at the CDN, so a retry would refetch the same broken source) or
+ * when the value is a non-TMDB absolute URL.
+ */
+export function tmdbCdnFallbackSrc(
+  path: string,
+  size: TmdbImageSize = "w500"
+): string | null {
+  if (IMAGE_BASE_URL === TMDB_IMAGE_BASE_URL) return null;
+  if (path.startsWith("http")) {
+    return path.startsWith(`${TMDB_IMAGE_BASE_URL}/`) ? path : null;
+  }
+  return tmdbImageUrl(path, size);
+}
+
+/**
  * Resolve a person/poster image into a usable absolute URL.
  * Directors come from TMDB, so photoUrl is normally a profile path
  * ("/abc.jpg"). next/image only whitelists image.tmdb.org, so values from
@@ -72,4 +91,14 @@ export function tmdbPhotoSrc(
   const resolved = resolveTmdbPhotoUrl(photoUrl, size);
   if (!resolved) return null;
   return tmdbImageSrc(resolved, size);
+}
+
+/** tmdbCdnFallbackSrc for person photos: same validation, CDN target. */
+export function tmdbPhotoCdnFallbackSrc(
+  photoUrl: string | null | undefined,
+  size: TmdbImageSize = "w342"
+): string | null {
+  const resolved = resolveTmdbPhotoUrl(photoUrl, size);
+  if (!resolved) return null;
+  return tmdbCdnFallbackSrc(resolved, size);
 }

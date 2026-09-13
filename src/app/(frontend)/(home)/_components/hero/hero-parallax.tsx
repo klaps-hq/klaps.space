@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { getImageProps } from "next/image";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 
@@ -9,6 +9,11 @@ interface HeroParallaxProps {
   // Portrait poster shown on mobile, where the wide backdrop would crop to an
   // unflattering center strip. Falls back to the backdrop when absent.
   posterSrc?: string | null;
+  // TMDB CDN equivalents, used once the mirror answers with an error: the
+  // scraper mirrors newly added movies only, so files can be missing and the
+  // hero would otherwise sit on its blur placeholder alone.
+  backdropFallbackSrc?: string | null;
+  posterFallbackSrc?: string | null;
   // Tiny base64 previews (lib/blur.ts) shown instantly while the full
   // images stream in; without them the placeholder stays empty.
   backdropBlurDataUrl?: string | null;
@@ -24,12 +29,20 @@ const MOBILE_MEDIA = "(max-width: 767px)";
 const HeroParallax: React.FC<HeroParallaxProps> = ({
   backdropSrc,
   posterSrc,
+  backdropFallbackSrc,
+  posterFallbackSrc,
   backdropBlurDataUrl,
   posterBlurDataUrl,
   alt,
   children,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const [useFallback, setUseFallback] = useState(false);
+  const hasFallback = Boolean(backdropFallbackSrc || posterFallbackSrc);
+  const backdrop =
+    useFallback && backdropFallbackSrc ? backdropFallbackSrc : backdropSrc;
+  const poster =
+    useFallback && posterFallbackSrc ? posterFallbackSrc : posterSrc;
   const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -47,15 +60,15 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
   // priority: the hero art is the LCP element; without it getImageProps
   // emits loading="lazy".
   const { props: backdropProps } = getImageProps({
-    src: backdropSrc,
+    src: backdrop,
     alt,
     fill: true,
     sizes: "100vw",
     priority: true,
   });
-  const posterImageProps = posterSrc
+  const posterImageProps = poster
     ? getImageProps({
-        src: posterSrc,
+        src: poster,
         alt,
         fill: true,
         sizes: "100vw",
@@ -119,7 +132,10 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
                   }
             }
           >
-            <picture>
+            {/* Keyed on both sources: swapping to the CDN has to remount the
+                whole <picture>, otherwise the browser keeps the <source> it
+                already resolved and the mobile poster never retries. */}
+            <picture key={`${backdrop}|${poster ?? ""}`}>
               {posterImageProps && (
                 <source
                   media={MOBILE_MEDIA}
@@ -136,6 +152,9 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
                 {...backdropProps}
                 fetchPriority="high"
                 className="object-cover"
+                onError={() => {
+                  if (!useFallback && hasFallback) setUseFallback(true);
+                }}
               />
             </picture>
           </motion.div>

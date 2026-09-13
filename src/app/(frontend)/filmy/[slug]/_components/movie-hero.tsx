@@ -5,7 +5,7 @@ import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Play } from "lucide-react";
 import { IMovie } from "@/interfaces/IMovies";
-import { tmdbImageSrc } from "@/lib/tmdb";
+import { tmdbCdnFallbackSrc, tmdbImageSrc } from "@/lib/tmdb";
 import { formatDuration, getYouTubeEmbedUrl } from "@/lib/utils";
 import TrailerModal from "@/components/common/trailer-modal";
 import { PAGE_HEADING_CLASSES } from "@/components/ui/page-heading";
@@ -25,6 +25,17 @@ const MovieHero: React.FC<MovieHeroProps> = ({
   const [trailerOpen, setTrailerOpen] = useState(false);
   const embedUrl = movie.videoUrl ? getYouTubeEmbedUrl(movie.videoUrl) : null;
 
+  // Backdrops can be missing from the mirror; retry on the TMDB CDN before
+  // leaving the hero on bare black.
+  const [useBackdropCdn, setUseBackdropCdn] = useState(false);
+  const backdropCdnSrc = movie.backdropUrl
+    ? tmdbCdnFallbackSrc(movie.backdropUrl, "original")
+    : null;
+  const backdropSrc =
+    useBackdropCdn || !movie.backdropUrl
+      ? backdropCdnSrc
+      : tmdbImageSrc(movie.backdropUrl, "original");
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -42,7 +53,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({
   return (
     <section ref={ref} className="relative w-full bg-black overflow-hidden">
       <div className="relative h-[85vh] min-h-[640px]">
-        {movie.backdropUrl && (
+        {backdropSrc && (
           <motion.div
             className="absolute inset-0"
             style={{ y: imageY, scale: imageScale }}
@@ -53,7 +64,8 @@ const MovieHero: React.FC<MovieHeroProps> = ({
                 Originals are served by the scraper-populated MinIO mirror,
                 not the TMDB CDN. */}
             <Image
-              src={tmdbImageSrc(movie.backdropUrl, "original")}
+              key={backdropSrc}
+              src={backdropSrc}
               alt={movie.title}
               fill
               sizes="100vw"
@@ -61,6 +73,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({
               blurDataURL={backdropBlurDataUrl ?? undefined}
               className="object-cover"
               priority
+              onError={() => setUseBackdropCdn(true)}
             />
           </motion.div>
         )}

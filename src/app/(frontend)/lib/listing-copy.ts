@@ -64,6 +64,23 @@ const distinctCities = (groups: IScreeningGroup[], max: number): string[] => {
 const totalCityCount = (groups: IScreeningGroup[]): number =>
   distinctCities(groups, Number.MAX_SAFE_INTEGER).length;
 
+// Most frequent genre names across the groups, lowercased for use inside a
+// sentence. Ties keep the order they first appeared in.
+const topGenres = (groups: IScreeningGroup[], max: number): string[] => {
+  const counts = new Map<string, number>();
+  for (const group of groups) {
+    for (const genre of group.movie.genres ?? []) {
+      const name = genre.name?.trim().toLowerCase();
+      if (!name) continue;
+      counts.set(name, (counts.get(name) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, max)
+    .map(([name]) => name);
+};
+
 /** Fallback intro for /gatunki/[slug] without an editorial description. */
 export const genreFallbackIntro = (
   genreNameLower: string,
@@ -123,6 +140,58 @@ export const cityFallbackIntro = (
         `filmową na dużym ekranie.`;
 
   return bindOrphans(`${first} ${second}`);
+};
+
+/**
+ * Fallback intro for /kina/[slug] without an editorial description.
+ *
+ * The largest page group on the site (500+), so a single boilerplate
+ * sentence differing only by name and city reads to a crawler as duplicate
+ * content. This builds from what the page already fetched: live counts, the
+ * nearest titles, the dominant genres and the venue type.
+ */
+export const cinemaFallbackIntro = (
+  cinemaName: string,
+  cityLocative: string,
+  isChain: boolean,
+  groups: IScreeningGroup[]
+): string => {
+  const kind = isChain ? "kino sieciowe" : "kino studyjne";
+  const moviesCount = groups.length;
+
+  if (moviesCount === 0) {
+    return bindOrphans(
+      `${cinemaName} to ${kind} w ${cityLocative}. Nie ma tu teraz ` +
+        `zapowiedzianych seansów specjalnych - repertuar uzupełniamy na ` +
+        `bieżąco, więc zajrzyj ponownie albo sprawdź inne kina w okolicy.`
+    );
+  }
+
+  const screeningsCount = groups.reduce(
+    (sum, group) => sum + group.screenings.length,
+    0
+  );
+  const titles = uniqueTitles(groups, 3);
+  const genres = topGenres(groups, 2);
+
+  const first =
+    `${cinemaName} to ${kind} w ${cityLocative}, w którego repertuarze ` +
+    `${pluralPl(moviesCount, "jest", "są", "jest")} ${moviesCount} ` +
+    `${pluralPl(moviesCount, "film", "filmy", "filmów")} i ` +
+    `${screeningsCount} ` +
+    `${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}.`;
+
+  const second =
+    titles.length > 0
+      ? `Najbliżej na ekranie ${joinPl(titles)}.`
+      : `Sprawdź najbliższe pokazy specjalne.`;
+
+  const third =
+    genres.length > 0
+      ? `W programie przeważają gatunki takie jak ${joinPl(genres)}.`
+      : `W programie retrospektywy, klasyka filmowa i pokazy specjalne.`;
+
+  return bindOrphans(`${first} ${second} ${third}`);
 };
 
 /** Fallback intro for /rezyserzy/[slug] without an editorial bio. */

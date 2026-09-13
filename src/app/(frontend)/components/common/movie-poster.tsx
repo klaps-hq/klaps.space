@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import NoMoviePoster from "./no-movie-poster";
-import { tmdbImageSrc } from "@/lib/tmdb";
+import { tmdbCdnFallbackSrc, tmdbImageSrc } from "@/lib/tmdb";
 
 interface MoviePosterProps {
   posterUrl: string;
@@ -17,6 +17,9 @@ interface MoviePosterProps {
   priority?: boolean;
 }
 
+/** Which source the next render attempt uses. */
+type PosterSource = "mirror" | "cdn" | "none";
+
 const MoviePoster: React.FC<MoviePosterProps> = ({
   posterUrl,
   title = "Plakat filmu",
@@ -26,15 +29,28 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
   sizes,
   priority = false,
 }) => {
-  const [isError, setIsError] = useState(false);
+  // Degrade in two steps: the mirror first, the TMDB CDN when the bucket has
+  // no such file, and the placeholder only once both are gone. Mirror gaps
+  // are common enough (the scraper mirrors newly added movies only) that
+  // dropping straight to a placeholder loses posters that do exist.
+  const [source, setSource] = useState<PosterSource>("mirror");
 
-  if (isError || !posterUrl) {
-    return <NoMoviePoster width={width} height={height} />;
+  const cdnSrc = posterUrl ? tmdbCdnFallbackSrc(posterUrl) : null;
+  const src =
+    source === "mirror" && posterUrl
+      ? tmdbImageSrc(posterUrl)
+      : source === "cdn"
+        ? cdnSrc
+        : null;
+
+  if (!src) {
+    return <NoMoviePoster />;
   }
 
   return (
     <Image
-      src={tmdbImageSrc(posterUrl)}
+      key={src}
+      src={src}
       alt={`Plakat filmu: ${title}`}
       width={width}
       height={height}
@@ -42,7 +58,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
       priority={priority}
       className={className}
       onError={() => {
-        setIsError(true);
+        setSource(source === "mirror" && cdnSrc ? "cdn" : "none");
       }}
     />
   );
