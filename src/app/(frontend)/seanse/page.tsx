@@ -27,6 +27,7 @@ import {
 } from "@/lib/seo";
 import ScreeningsPageSection from "./_components/screenings-page-section";
 import ScreeningsPageLoader from "./_components/screenings-page-loader";
+import ScreeningTypesSection from "./_components/screening-types-section";
 
 export const revalidate = 300;
 
@@ -280,9 +281,17 @@ const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
         </p>
       </header>
 
+      {/* The listing had no heading of its own, which left the page without
+          a single H2. */}
+      <h2 className="px-6 md:px-12 lg:px-16 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] text-white font-medium max-w-[26ch]">
+        Najbliższe seanse w&nbsp;kinach studyjnych
+      </h2>
+
       <Suspense fallback={<ScreeningsPageLoader />}>
         <ScreeningsListing params={params} />
       </Suspense>
+
+      <ScreeningTypesSection />
 
       <Footer />
     </main>
