@@ -8,6 +8,9 @@ import EmptyState from "@/components/common/empty-state";
 import ScreeningCard from "./screening-card";
 import ScreeningsEmptyState from "./empty-state";
 
+// Roughly the first row across breakpoints; see RepertoireGrid.
+const PRIORITY_POSTERS = 6;
+
 interface ScreeningsGridProps {
   screenings: IScreeningGroup[];
   genres: IGenre[];
@@ -84,8 +87,12 @@ const ScreeningsGrid: React.FC<ScreeningsGridProps> = ({
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-12">
-      {screenings.map((group) => (
-        <ScreeningCard key={group.movie.id} group={group} />
+      {screenings.map((group, index) => (
+        <ScreeningCard
+          key={group.movie.id}
+          group={group}
+          priority={index < PRIORITY_POSTERS}
+        />
       ))}
     </div>
   );

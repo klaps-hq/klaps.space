@@ -40,19 +40,39 @@ type PaginationLinkProps = {
 function PaginationLink({
   className,
   isActive,
+  href,
   ...props
 }: PaginationLinkProps) {
+  const classes = cn(
+    "inline-flex items-baseline justify-center text-lg md:text-xl tabular-nums tracking-tight transition-colors duration-200 cursor-pointer pb-1 border-b",
+    isActive
+      ? "text-white border-white"
+      : "text-white/50 border-transparent hover:text-white hover:border-white/40",
+    className,
+  );
+
+  // A disabled control (prev on page 1, next on the last page) passes no
+  // href. An <a> without one is not a link: Lighthouse flags it under
+  // "links are not crawlable" and assistive tech announces a dead element,
+  // so render a span instead.
+  if (!href) {
+    return (
+      <span
+        data-slot="pagination-link"
+        data-active={isActive}
+        aria-disabled="true"
+        className={classes}
+        {...props}
+      />
+    );
+  }
+
   return (
     <a
       data-slot="pagination-link"
       data-active={isActive}
-      className={cn(
-        "inline-flex items-baseline justify-center text-lg md:text-xl tabular-nums tracking-tight transition-colors duration-200 cursor-pointer pb-1 border-b",
-        isActive
-          ? "text-white border-white"
-          : "text-white/50 border-transparent hover:text-white hover:border-white/40",
-        className,
-      )}
+      href={href}
+      className={classes}
       {...props}
     />
   );

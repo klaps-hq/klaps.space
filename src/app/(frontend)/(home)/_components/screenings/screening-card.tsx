@@ -8,9 +8,16 @@ import { formatDateLabel } from "@/lib/utils";
 
 interface ScreeningCardProps {
   group: IScreeningGroup;
+  // Set on the few cards above the fold: their poster is the LCP element,
+  // and Next marks priority images eager with fetchpriority=high so the
+  // browser stops discovering them only after layout.
+  priority?: boolean;
 }
 
-const ScreeningCard: React.FC<ScreeningCardProps> = ({ group }) => {
+const ScreeningCard: React.FC<ScreeningCardProps> = ({
+  group,
+  priority = false,
+}) => {
   const { movie, screenings, summary } = group;
   const upcoming = screenings.slice(0, 2);
   const remaining = Math.max(0, summary.screeningsCount - upcoming.length);
@@ -29,6 +36,7 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({ group }) => {
             width={400}
             height={600}
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 17vw, 10vw"
+            priority={priority}
             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
           />
         ) : (
