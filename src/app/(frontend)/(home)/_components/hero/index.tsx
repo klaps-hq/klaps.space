@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Play } from "lucide-react";
 import { IRandomScreening } from "@/interfaces/IScreenings";
-import { tmdbImageSrc } from "@/lib/tmdb";
+import { tmdbCdnFallbackSrc, tmdbImageSrc } from "@/lib/tmdb";
 import { formatDuration, getYouTubeEmbedUrl, WARSAW_TZ } from "@/lib/utils";
 import { wallTimeToInstant } from "@/lib/warsaw-time";
 import TrailerModal from "@/components/common/trailer-modal";
@@ -143,9 +143,19 @@ const Hero: React.FC<HeroProps> = ({
           screening.movie.backdropUrl ?? "",
           "original"
         )}
+        backdropFallbackSrc={
+          screening.movie.backdropUrl
+            ? tmdbCdnFallbackSrc(screening.movie.backdropUrl, "original")
+            : null
+        }
         posterSrc={
           screening.movie.posterUrl
             ? tmdbImageSrc(screening.movie.posterUrl, "w780")
+            : null
+        }
+        posterFallbackSrc={
+          screening.movie.posterUrl
+            ? tmdbCdnFallbackSrc(screening.movie.posterUrl, "w780")
             : null
         }
         backdropBlurDataUrl={backdropBlurDataUrl}
