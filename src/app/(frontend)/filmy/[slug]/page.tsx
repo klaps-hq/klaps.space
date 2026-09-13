@@ -2,7 +2,15 @@ import { Metadata } from "next";
 import { getMoviePageData, getMovieBySlug, getMovies } from "@/lib/movies";
 import { getMovieScreenings, getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
+import {
+  BASE_OPEN_GRAPH,
+  NOINDEX_FOLLOW,
+  clampText,
+  pluralPl,
+} from "@/lib/seo";
+
+// Google truncates snippets past roughly this length.
+const MAX_DESCRIPTION_LENGTH = 160;
 import Footer from "@/app/(home)/_components/footer";
 import SiteHeader from "@/components/common/site-header";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
@@ -73,15 +81,20 @@ export const generateMetadata = async ({
     .join(", ");
   const fallbackDescription = `${movie.title} (${movie.productionYear})${metaLine ? ` - ${metaLine}` : ""}. ${screeningsSuffix}`;
 
-  // Truncate at a word boundary so the snippet never ends mid-word.
+  // Budget the excerpt against the suffix instead of a fixed 120 chars:
+  // the suffix carries the unique part (counts, cities), so it is the half
+  // worth keeping whole, and the pair has to land under the SERP snippet
+  // limit or Google truncates it mid-sentence.
+  const excerptBudget = MAX_DESCRIPTION_LENGTH - screeningsSuffix.length - 1;
   const excerpt =
-    movie.description && movie.description.length > 120
-      ? `${movie.description.slice(0, 120).replace(/\s+\S*$/, "")}…`
-      : movie.description;
+    movie.description && excerptBudget > 40
+      ? clampText(movie.description, excerptBudget)
+      : null;
 
-  const description = excerpt
-    ? `${excerpt} ${screeningsSuffix}`
-    : fallbackDescription;
+  const description = clampText(
+    excerpt ? `${excerpt} ${screeningsSuffix}` : fallbackDescription,
+    MAX_DESCRIPTION_LENGTH
+  );
 
   // "gdzie i kiedy" mirrors the dominant query pattern for film titles
   // ("[tytuł] kiedy w kinie"), which is what this page actually answers.
