@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
@@ -11,9 +11,10 @@ import { genreFallbackIntro } from "@/lib/listing-copy";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
-import SectionLoader from "@/components/ui/section-loader";
+import EmptyState from "@/components/common/empty-state";
+import RepertoireSection from "@/components/common/repertoire-section";
+import RepertoireGrid from "@/components/common/repertoire-grid";
 import Footer from "../../(home)/_components/footer";
-import GenreRepertoire from "./_components/genre-repertoire";
 
 // ISR: cached HTML revalidated every 5 minutes. The repertoire filters
 // (city, dates, search) are applied client-side in GenreRepertoire,
@@ -124,15 +125,45 @@ const GenrePage = async ({ params }: GenrePageProps) => {
         )}
       </header>
 
-      {/* Suspense: useSearchParams() in the client repertoire needs a
-          boundary during static prerender (CSR bailout). */}
-      <Suspense fallback={<SectionLoader label="Ładowanie repertuaru" />}>
-        <GenreRepertoire
-          genreNameLower={genreNameLower}
+      {/* The repertoire grid is rendered here on the server (passed as
+          children) so it lives in the static HTML, crawlable without JS.
+          Only the filter controls read useSearchParams, inside their own
+          Suspense island in RepertoireSection. */}
+      <RepertoireSection
+        screenings={screenings}
+        genres={allGenres}
+        hideGenres
+        usePreferredLocation
+        className="px-6 md:px-12 lg:px-16 pb-20 md:pb-28"
+        emptyState={
+          <EmptyState
+            description={
+              <>
+                Brak seansów z&nbsp;gatunku {genreNameLower} pasujących do
+                wybranych filtrów. Spróbuj zmienić zakres dat, miasto lub
+                frazę.
+              </>
+            }
+            cta={{ href: "/gatunki", label: "Inne gatunki" }}
+          />
+        }
+      >
+        <RepertoireGrid
           screenings={screenings}
-          genres={allGenres}
+          emptyState={
+            <EmptyState
+              description={
+                <>
+                  Nie ma teraz zapowiedzianych seansów z&nbsp;gatunku{" "}
+                  {genreNameLower}. Repertuar uzupełniamy na bieżąco, zajrzyj
+                  ponownie wkrótce.
+                </>
+              }
+              cta={{ href: "/gatunki", label: "Inne gatunki" }}
+            />
+          }
         />
-      </Suspense>
+      </RepertoireSection>
 
       {relatedGenres.length > 0 && (
         <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">

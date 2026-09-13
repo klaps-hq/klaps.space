@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { getCityBySlug } from "@/lib/cities";
@@ -13,12 +13,43 @@ import {
   pluralPl,
 } from "@/lib/seo";
 import { cityFallbackIntro } from "@/lib/listing-copy";
+import { splitByChain } from "@/lib/cinema-chains";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
-import SectionLoader from "@/components/ui/section-loader";
+import EmptyState from "@/components/common/empty-state";
+import RepertoireSection from "@/components/common/repertoire-section";
+import RepertoireGrid from "@/components/common/repertoire-grid";
 import Footer from "../../(home)/_components/footer";
-import CityRepertoire from "./_components/city-repertoire";
+
+interface CinemaCardsProps {
+  cinemas: { id: number; slug: string; name: string; street: string | null }[];
+}
+
+// Borders live on the cards (not the container) so lines end with the last
+// card instead of running across empty grid columns. Negative margins
+// collapse the doubled inner borders; opaque #1a1a1a (white/10 on black)
+// keeps overlaps from brightening.
+const CinemaCards: React.FC<CinemaCardsProps> = ({ cinemas }) => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-px pl-px">
+    {cinemas.map((cinema) => (
+      <Link
+        key={cinema.id}
+        href={`/kina/${cinema.slug}`}
+        className="group bg-black hover:bg-white/[0.04] transition-colors border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1"
+      >
+        <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
+          {cinema.name}
+        </span>
+        {cinema.street && (
+          <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
+            {cinema.street}
+          </span>
+        )}
+      </Link>
+    ))}
+  </div>
+);
 
 // Polish locative preposition: "we" before a w-/f- consonant cluster
 // (we Wrocławiu, we Włocławku, we Fromborku), otherwise "w" (w Krakowie).
@@ -63,10 +94,12 @@ export const generateMetadata = async ({
     0
   );
 
-  // "Kina i seanse specjalne", not "Kina studyjne": the listing mixes
-  // studio cinemas with multiplexes that host special screenings, and a
-  // "studyjne" headline over Cinema City rows reads as inaccurate.
-  const title = `Kina i seanse specjalne w ${city.nameDeclinated} - repertuar`;
+  // Leads with "Kina studyjne": that is the phrase with demand in GSC
+  // ("kino studyjne [miasto]") and the one this site is actually about.
+  // The listing also holds multiplexes hosting special screenings, so the
+  // second half of the title covers them and the page body keeps them under
+  // their own heading rather than under the "studyjne" one.
+  const title = `Kina studyjne w ${city.nameDeclinated} - repertuar i seanse specjalne`;
   const counts =
     screeningsCount > 0
       ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}`
@@ -121,6 +154,8 @@ const CityPage = async ({ params }: CityPageProps) => {
     .sort((a, b) => a.name.localeCompare(b.name, "pl"));
   const cinemasCount = cinemas.length;
   const cityForCopy = city.nameDeclinated ?? city.name;
+  const { independent: independentCinemas, chain: chainCinemas } =
+    splitByChain(cinemas);
 
   return (
     <main className="bg-black text-white min-h-screen">
@@ -143,12 +178,11 @@ const CityPage = async ({ params }: CityPageProps) => {
             Województwo {city.voivodeship}
           </p>
         )}
-        {/* H1 carries the target keyword ("seanse specjalne w [miasto]")
-            rather than a bare city name, with the correct w/we preposition.
-            "Kina i seanse specjalne" instead of "Kina studyjne": the list
-            below includes multiplexes hosting special screenings. */}
+        {/* H1 carries the target keyword ("kina studyjne w [miasto]") with
+            the correct w/we preposition. Multiplexes in the list below sit
+            under their own heading, so this one stays accurate. */}
         <PageHeading variant="detail" className="max-w-[20ch]">
-          Kina i&nbsp;seanse specjalne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+          Kina studyjne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
         </PageHeading>
         {city.description ? (
           <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
@@ -178,44 +212,73 @@ const CityPage = async ({ params }: CityPageProps) => {
       </header>
 
       {cinemas.length > 0 && (
-        <section className="px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-12 md:pb-16">
-          <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
-            Kina {wPrep(cityForCopy)}&nbsp;{cityForCopy}
-          </h2>
-          {/* Borders live on the cards (not the container) so lines end with
-              the last card instead of running across empty grid columns.
-              Negative margins collapse the doubled inner borders; opaque
-              #1a1a1a (white/10 on black) keeps overlaps from brightening. */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-px pl-px">
-            {cinemas.map((cinema) => (
-              <Link
-                key={cinema.id}
-                href={`/kina/${cinema.slug}`}
-                className="group bg-black hover:bg-white/[0.04] transition-colors border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1"
-              >
-                <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
-                  {cinema.name}
-                </span>
-                {cinema.street && (
-                  <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
-                    {cinema.street}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </div>
+        <section className="px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-12 md:pb-16 flex flex-col gap-12 md:gap-16">
+          {/* Independent venues first, under the heading people actually
+              search for ("kina studyjne w [miasto]"); chain venues keep
+              their own heading so neither label misdescribes the rows
+              underneath it. */}
+          {independentCinemas.length > 0 && (
+            <div>
+              <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
+                Kina studyjne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+              </h2>
+              <CinemaCards cinemas={independentCinemas} />
+            </div>
+          )}
+          {chainCinemas.length > 0 && (
+            <div>
+              <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
+                Seanse specjalne w&nbsp;kinach sieciowych{" "}
+                {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+              </h2>
+              <CinemaCards cinemas={chainCinemas} />
+            </div>
+          )}
         </section>
       )}
 
-      {/* Suspense: useSearchParams() in the client repertoire needs a
-          boundary during static prerender (CSR bailout). */}
-      <Suspense fallback={<SectionLoader label="Ładowanie repertuaru" />}>
-        <CityRepertoire
-          cityForCopy={cityForCopy}
+      {/* The repertoire grid is rendered here on the server (passed as
+          children) so it lives in the static HTML, crawlable without JS.
+          Only the filter controls read useSearchParams, inside their own
+          Suspense island in RepertoireSection. */}
+      <RepertoireSection
+        screenings={screenings}
+        genres={allGenres}
+        hideCity
+        className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-8 md:pt-12 pb-20 md:pb-28"
+        heading={
+          <h2 className="mb-6 md:mb-8 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
+            Co gra {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+          </h2>
+        }
+        emptyState={
+          <EmptyState
+            description={
+              <>
+                Brak seansów pasujących do wybranych filtrów w&nbsp;
+                {cityForCopy}. Spróbuj zmienić zakres dat, gatunek lub frazę.
+              </>
+            }
+            cta={{ href: "/miasta", label: "Inne miasta" }}
+          />
+        }
+      >
+        <RepertoireGrid
           screenings={screenings}
-          genres={allGenres}
+          emptyState={
+            <EmptyState
+              description={
+                <>
+                  Kina {wPrep(cityForCopy)}&nbsp;{cityForCopy} nie mają teraz
+                  zapowiedzianych seansów specjalnych. Repertuar uzupełniamy na
+                  bieżąco, zajrzyj ponownie wkrótce.
+                </>
+              }
+              cta={{ href: "/miasta", label: "Inne miasta" }}
+            />
+          }
         />
-      </Suspense>
+      </RepertoireSection>
 
       <Footer />
     </main>

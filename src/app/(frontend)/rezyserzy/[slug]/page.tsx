@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { Metadata } from "next";
 import {
   getDirectorPageData,
@@ -12,13 +12,14 @@ import { SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, clampText } from "@/lib/seo";
 import { directorFallbackIntro } from "@/lib/listing-copy";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
-import PageHeading from "@/components/ui/page-heading";
+import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
-import SectionLoader from "@/components/ui/section-loader";
 import DirectorPhoto from "@/components/common/director-photo";
 import RelatedMovies from "@/app/filmy/[slug]/_components/related-movies";
 import Footer from "../../(home)/_components/footer";
-import DirectorRepertoire from "./_components/director-repertoire";
+import EmptyState from "@/components/common/empty-state";
+import RepertoireSection from "@/components/common/repertoire-section";
+import RepertoireGrid from "@/components/common/repertoire-grid";
 
 // ISR: cached HTML revalidated every 5 minutes. The repertoire filters
 // (city, genres, dates, search) are applied client-side in
@@ -126,8 +127,16 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
             <p className="mb-4 md:mb-5 text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/50">
               Reżyser
             </p>
+            {/* The name alone competes with Wikipedia/Filmweb for a query
+                whose intent is a biography, not a screening. The muted second
+                line carries the phrase this page can actually rank for and
+                keeps the name in the nominative (API names are not
+                declined). */}
             <PageHeading variant="detail" className="max-w-[20ch]">
               {director.name}
+              <PageHeadingMuted className="mt-2 md:mt-3 text-xl md:text-3xl lg:text-4xl normal-case tracking-tight">
+                Filmy i&nbsp;seanse w&nbsp;kinach studyjnych
+              </PageHeadingMuted>
             </PageHeading>
             {director.bio ? (
               <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
@@ -142,15 +151,49 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
         </div>
       </header>
 
-      {/* Suspense: useSearchParams() in the client repertoire needs a
-          boundary during static prerender (CSR bailout). */}
-      <Suspense fallback={<SectionLoader label="Ładowanie repertuaru" />}>
-        <DirectorRepertoire
-          directorName={director.name}
+      {/* The repertoire grid is rendered here on the server (passed as
+          children) so it lives in the static HTML, crawlable without JS.
+          Only the filter controls read useSearchParams, inside their own
+          Suspense island in RepertoireSection. */}
+      <RepertoireSection
+        screenings={screenings}
+        genres={allGenres}
+        usePreferredLocation
+        className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-8 md:pt-12 pb-20 md:pb-28"
+        heading={
+          <h2 className="mb-6 md:mb-8 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
+            Repertuar - {director.name}
+          </h2>
+        }
+        emptyState={
+          <EmptyState
+            description={
+              <>
+                Brak seansów filmów w&nbsp;reżyserii {director.name} pasujących
+                do wybranych filtrów. Spróbuj zmienić zakres dat, miasto lub
+                frazę.
+              </>
+            }
+            cta={{ href: "/rezyserzy", label: "Inni reżyserzy" }}
+          />
+        }
+      >
+        <RepertoireGrid
           screenings={screenings}
-          genres={allGenres}
+          emptyState={
+            <EmptyState
+              description={
+                <>
+                  Filmy w&nbsp;reżyserii {director.name} nie mają teraz
+                  zapowiedzianych seansów. Repertuar uzupełniamy na bieżąco,
+                  zajrzyj ponownie wkrótce.
+                </>
+              }
+              cta={{ href: "/rezyserzy", label: "Inni reżyserzy" }}
+            />
+          }
         />
-      </Suspense>
+      </RepertoireSection>
 
       {movies.length > 0 && (
         <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-16 md:pb-24">

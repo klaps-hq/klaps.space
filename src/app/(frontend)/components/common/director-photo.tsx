@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { tmdbPhotoSrc } from "@/lib/tmdb";
+import { tmdbPhotoCdnFallbackSrc, tmdbPhotoSrc } from "@/lib/tmdb";
 
 interface DirectorPhotoProps {
   photoUrl: string | null;
@@ -35,8 +35,12 @@ const DirectorPhoto: React.FC<DirectorPhotoProps> = ({
   className,
   priority = false,
 }) => {
+  // Same two-step degradation as MoviePoster: mirror, then TMDB CDN, then
+  // the initials placeholder.
+  const [useCdn, setUseCdn] = useState(false);
   const [isError, setIsError] = useState(false);
-  const src = tmdbPhotoSrc(photoUrl, "w342");
+  const cdnSrc = tmdbPhotoCdnFallbackSrc(photoUrl, "w342");
+  const src = useCdn ? cdnSrc : tmdbPhotoSrc(photoUrl, "w342");
 
   if (!src || isError) {
     return (
@@ -58,6 +62,7 @@ const DirectorPhoto: React.FC<DirectorPhotoProps> = ({
 
   return (
     <Image
+      key={src}
       src={src}
       alt={`Zdjęcie: ${name}`}
       width={width}
@@ -65,7 +70,10 @@ const DirectorPhoto: React.FC<DirectorPhotoProps> = ({
       sizes={sizes}
       priority={priority}
       className={className}
-      onError={() => setIsError(true)}
+      onError={() => {
+        if (!useCdn && cdnSrc) setUseCdn(true);
+        else setIsError(true);
+      }}
     />
   );
 };

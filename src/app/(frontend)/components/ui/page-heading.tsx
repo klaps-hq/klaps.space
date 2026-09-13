@@ -37,14 +37,23 @@ const PageHeading: React.FC<PageHeadingProps> = ({
 };
 
 interface PageHeadingMutedProps {
+  className?: string;
   children: React.ReactNode;
 }
 
-/** Dimmed second title line, used with the editorial variant. */
+/**
+ * Dimmed second title line. Sized like the heading by default (editorial
+ * variant); pass className to scale it down under the larger detail variant.
+ */
 export const PageHeadingMuted: React.FC<PageHeadingMutedProps> = ({
+  className,
   children,
 }) => {
-  return <span className="block font-normal text-white/40">{children}</span>;
+  return (
+    <span className={cn("block font-normal text-white/40", className)}>
+      {children}
+    </span>
+  );
 };
 
 export default PageHeading;
