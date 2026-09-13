@@ -96,9 +96,10 @@ const buildConverters = (
     ...defaultConverters,
     upload: ({ node }) => <UploadFigure node={node} />,
     blocks: {
-      // Typed locally: `payload generate:types` cannot run in this repo
-      // (the revalidate hook's next/cache import breaks the SWC loader), so
-      // payload-types.ts has no entry for this block yet.
+      // Typed locally: `payload generate:types` starts but never writes a
+      // file in this repo, so payload-types.ts has no entry for this block.
+      // (`generate:importmap` does work, since the revalidate hook stopped
+      // importing next/cache at module load.)
       screenings: ({ node }: { node: { fields: ScreeningBlockFields } }) => {
         const fields = node.fields;
         const screenings = fields.id
