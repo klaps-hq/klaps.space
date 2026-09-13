@@ -9,6 +9,9 @@ import {
   type JSXConvertersFunction,
 } from "@payloadcms/richtext-lexical/react";
 import type { Media, Post } from "@/payload-types";
+import type { IScreeningGroup } from "@/interfaces/IScreenings";
+import type { ScreeningBlockFields } from "@/lib/post-screening-blocks";
+import PostScreeningsBlock from "./screenings-block";
 
 // The article column is capped at 70ch (~700px), so the optimizer never
 // has to serve a wider variant on desktop.
@@ -60,19 +63,68 @@ const UploadFigure: React.FC<UploadFigureProps> = ({ node }) => {
   );
 };
 
-const converters: JSXConvertersFunction<DefaultNodeTypes> = ({
-  defaultConverters,
-}) => ({
-  ...defaultConverters,
-  upload: ({ node }) => <UploadFigure node={node} />,
-});
+// Where the block's "see all" link points, per scope.
+const moreLinkFor = (
+  fields: ScreeningBlockFields
+): { href: string; label: string } => {
+  if (fields.scope === "city" && fields.citySlug) {
+    return {
+      href: `/miasta/${fields.citySlug.trim()}`,
+      label: "Wszystkie seanse w tym mieście",
+    };
+  }
+  if (fields.scope === "genre" && fields.genreSlug) {
+    return {
+      href: `/gatunki/${fields.genreSlug.trim()}`,
+      label: "Wszystkie seanse w tym gatunku",
+    };
+  }
+  return { href: "/seanse", label: "Wszystkie seanse" };
+};
 
 interface RichTextProps {
   data: Post["content"];
+  // Screenings resolved by the page, keyed by block id. Lexical converters
+  // are synchronous, so a block cannot fetch its own data here.
+  screeningsByBlockId?: Record<string, IScreeningGroup[]>;
 }
 
-const RichText: React.FC<RichTextProps> = ({ data }) => (
-  <PayloadRichText data={data} converters={converters} />
+const buildConverters = (
+  screeningsByBlockId: Record<string, IScreeningGroup[]>
+): JSXConvertersFunction<DefaultNodeTypes> =>
+  ({ defaultConverters }) => ({
+    ...defaultConverters,
+    upload: ({ node }) => <UploadFigure node={node} />,
+    blocks: {
+      // Typed locally: `payload generate:types` cannot run in this repo
+      // (the revalidate hook's next/cache import breaks the SWC loader), so
+      // payload-types.ts has no entry for this block yet.
+      screenings: ({ node }: { node: { fields: ScreeningBlockFields } }) => {
+        const fields = node.fields;
+        const screenings = fields.id
+          ? (screeningsByBlockId[fields.id] ?? [])
+          : [];
+        const { href, label } = moreLinkFor(fields);
+        return (
+          <PostScreeningsBlock
+            heading={fields.heading}
+            screenings={screenings}
+            moreHref={href}
+            moreLabel={label}
+          />
+        );
+      },
+    },
+  });
+
+const RichText: React.FC<RichTextProps> = ({
+  data,
+  screeningsByBlockId = {},
+}) => (
+  <PayloadRichText
+    data={data}
+    converters={buildConverters(screeningsByBlockId)}
+  />
 );
 
 export default RichText;
