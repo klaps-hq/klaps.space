@@ -27,7 +27,33 @@ const NOINDEX_QUERY_PREFIXES = new Set([
   "seanse",
 ]);
 
-const shouldNoindexForQueryPath = (pathname: string) => {
+// Filter params produce a narrowed duplicate of the clean listing, so those
+// variants are the ones to keep out of the index. Mirrors
+// SCREENING_FILTER_PARAM_KEYS in lib/seo.ts; kept as a literal here because
+// the proxy runs on the edge and should not pull in app code.
+const FILTER_PARAM_KEYS = [
+  "city",
+  "voivodeship",
+  "genres",
+  "dateFrom",
+  "dateTo",
+  "search",
+];
+
+const hasFilterParam = (search: string): boolean => {
+  const params = new URLSearchParams(search);
+  return FILTER_PARAM_KEYS.some((key) =>
+    params.getAll(key).some((value) => value.trim().length > 0)
+  );
+};
+
+// Only filtered variants get noindex. Plain pagination (`?page=2`) stays
+// indexable on purpose: it carries a unique title, a self-canonical and rel
+// prev/next, and it is the crawl path into the deeper listing. Tracking
+// params (utm_*, fbclid) also stay indexable and are consolidated by the
+// canonical, matching the contract documented on hasFilterParams.
+const shouldNoindexForQueryPath = (pathname: string, search: string) => {
+  if (!hasFilterParam(search)) return false;
   if (pathname === "/") return true;
   const [firstSegment] = pathname.split("/").filter(Boolean);
   return Boolean(firstSegment && NOINDEX_QUERY_PREFIXES.has(firstSegment));
@@ -106,7 +132,7 @@ export async function proxy(request: NextRequest) {
     response.headers.set(key, value);
   }
 
-  if (search && shouldNoindexForQueryPath(pathname)) {
+  if (search && shouldNoindexForQueryPath(pathname, search)) {
     response.headers.set("X-Robots-Tag", "noindex, follow");
   }
 
