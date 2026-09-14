@@ -67,7 +67,11 @@ const PostScreeningsBlock: React.FC<PostScreeningsBlockProps> = ({
   if (screenings.length === 0) return null;
 
   return (
-    <aside className="not-prose my-10 md:my-12 border-t border-b border-white/10 py-8 md:py-10">
+    // The article wrapper underlines every descendant link
+    // ([&_a]:underline on the post page). That descendant selector outranks a
+    // plain utility class here, so the override has to be important; the
+    // cards carry their own hover treatment instead.
+    <aside className="my-10 md:my-12 border-t border-b border-white/10 py-8 md:py-10 [&_a]:!no-underline">
       <div className="mb-6 flex items-end justify-between gap-6 flex-wrap">
         <h3 className="text-lg md:text-xl font-medium -tracking-[0.01em] text-white">
           {heading?.trim() || "Aktualnie w repertuarze"}
