@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 
-import { authenticated } from "../access/authenticated";
+import { authenticated, onlySelf } from "../access/authenticated";
 
 export const Users: CollectionConfig = {
   slug: "users",
@@ -18,9 +18,18 @@ export const Users: CollectionConfig = {
   },
   access: {
     create: authenticated,
-    delete: authenticated,
     read: authenticated,
-    update: authenticated,
+    // Own record only. Before API keys existed this mattered less, because
+    // reaching it meant logging in with a password. A long-lived key sitting
+    // in a deployment's env is a different exposure: without this, a leaked
+    // key could change another user's email or password, or switch on an API
+    // key for an account with more access, and own the CMS.
+    //
+    // A proper role model (admin vs editor) is the real fix and would also
+    // let create and read be scoped; tracked separately. This is the part
+    // that closes account takeover without changing how the panel is used.
+    delete: onlySelf,
+    update: onlySelf,
   },
   admin: {
     useAsTitle: "name",
