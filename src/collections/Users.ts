@@ -8,7 +8,14 @@ export const Users: CollectionConfig = {
     singular: "Użytkownik",
     plural: "Użytkownicy",
   },
-  auth: true,
+  // API keys let trusted tooling write to the CMS over REST without handling
+  // a password. A key authenticates as the user it belongs to, grants exactly
+  // that user's access and nothing more, and is revocable from their record.
+  // Prefer a dedicated service user over enabling it on a person's account,
+  // so rotating the key never locks a human out.
+  auth: {
+    useAPIKey: true,
+  },
   access: {
     create: authenticated,
     delete: authenticated,
