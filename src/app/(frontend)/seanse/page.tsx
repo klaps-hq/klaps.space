@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import JsonLd from "@/components/common/json-ld";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
@@ -74,7 +75,15 @@ export const generateMetadata = async ({
     await getPaginatedScreenings({ cityId, voivodeship })
   );
   const totalPages = Math.max(1, Math.ceil(allScreenings.length / PAGE_SIZE));
-  const currentPage = Math.min(parsePageParam(queryParams.page), totalPages);
+  const requestedPage = parsePageParam(queryParams.page);
+
+  // Out of range renders a 404 (see ScreeningsListing); say so here too, so
+  // the response never carries indexable metadata for a page that is gone.
+  if (requestedPage > totalPages) {
+    return { title: "Seanse specjalne w kinach studyjnych - repertuar", description, ...NOINDEX_FOLLOW };
+  }
+
+  const currentPage = requestedPage;
 
   // The paginated variant drops part of the base title so the whole thing
   // (with the "- Klaps" template suffix) stays under ~60 chars in SERPs.
@@ -166,7 +175,17 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
     1,
     Math.ceil(allScreenings.length / PAGE_SIZE)
   );
-  const currentPage = Math.min(requestedPage, totalPages);
+
+  // Clamping used to serve the last page's content under every ?page=N, so
+  // ?page=7 and ?page=9999 both returned 200 with the same listing. While
+  // pagination was noindexed by the proxy that stayed invisible; once it
+  // became indexable it turned into an unbounded set of duplicate URLs.
+  // Out of range is a page that does not exist, so say so.
+  if (requestedPage > totalPages) {
+    notFound();
+  }
+
+  const currentPage = requestedPage;
   const screenings = allScreenings.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE

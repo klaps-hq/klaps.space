@@ -248,41 +248,56 @@ export const getFeaturedHeroScreening =
     // runs at build/revalidation only (never per request), and stepping the
     // index by the same ~5 min cadence as `revalidate` walks the pool one
     // backdrop at a time.
-    const index =
+    const startIndex =
       Math.floor(Date.now() / HERO_ROTATION_WINDOW_MS) % pool.length;
-    const group = pool[index];
-    const screening = group.screenings[0];
-    if (!screening) {
-      return null;
+
+    // Walk the pool from the rotation index and take the first candidate the
+    // hero can actually render. Picking blind meant that whenever rotation
+    // landed on a movie without a backdrop or description - common, since the
+    // pool is just the next screenings, not curated - the hero silently
+    // dropped to its flat fallback with no image at all.
+    for (let step = 0; step < pool.length; step += 1) {
+      const group = pool[(startIndex + step) % pool.length];
+      const screening = group.screenings[0];
+      if (!screening) continue;
+
+      try {
+        // Direct apiFetch (not getMovieBySlug) to avoid a screenings <-> movies
+        // import cycle and the notFound() control-flow; the pool only holds
+        // movies that already have screenings, so this fetch normally succeeds.
+        const movie = await apiFetch<IMovie>(`/movies/${group.movie.slug}`);
+
+        // Same bar the hero itself applies, checked here so a miss moves to
+        // the next candidate instead of losing the backdrop for the whole
+        // revalidation window.
+        if (!movie.description?.trim() || !movie.backdropUrl) continue;
+
+        return {
+          movie: {
+            id: movie.id,
+            slug: movie.slug,
+            title: movie.title,
+            titleOriginal: movie.titleOriginal,
+            productionYear: movie.productionYear,
+            duration: movie.duration,
+            posterUrl: movie.posterUrl,
+            genres: movie.genres,
+            description: movie.description,
+            backdropUrl: movie.backdropUrl,
+            posterBlurDataUrl: movie.posterBlurDataUrl,
+            backdropBlurDataUrl: movie.backdropBlurDataUrl,
+            videoUrl: movie.videoUrl,
+            directors: movie.directors,
+          },
+          screening,
+        };
+      } catch {
+        continue;
+      }
     }
 
-    try {
-      // Direct apiFetch (not getMovieBySlug) to avoid a screenings <-> movies
-      // import cycle and the notFound() control-flow; the pool only holds
-      // movies that already have screenings, so this fetch normally succeeds.
-      const movie = await apiFetch<IMovie>(`/movies/${group.movie.slug}`);
-      return {
-        movie: {
-          id: movie.id,
-          slug: movie.slug,
-          title: movie.title,
-          titleOriginal: movie.titleOriginal,
-          productionYear: movie.productionYear,
-          duration: movie.duration,
-          posterUrl: movie.posterUrl,
-          genres: movie.genres,
-          description: movie.description,
-          backdropUrl: movie.backdropUrl,
-          posterBlurDataUrl: movie.posterBlurDataUrl,
-          backdropBlurDataUrl: movie.backdropBlurDataUrl,
-          videoUrl: movie.videoUrl,
-          directors: movie.directors,
-        },
-        screening,
-      };
-    } catch {
-      return null;
-    }
+    // Nothing in the pool has a usable backdrop; the hero falls back.
+    return null;
   };
 
 export const groupScreeningsByCinema = (
