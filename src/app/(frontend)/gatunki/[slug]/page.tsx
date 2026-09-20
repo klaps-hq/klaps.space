@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
 import { getGenrePageData, getGenres } from "@/lib/genres";
-import { getMovies } from "@/lib/movies";
 import { getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
@@ -41,21 +40,32 @@ export const generateMetadata = async ({
   const { slug } = await params;
   const genre = await getGenrePageData(slug);
 
-  const { meta } = await getMovies({
+  // This page renders upcoming screenings and nothing else, so the count
+  // that drives both the description and the index decision has to come from
+  // the screenings feed rather than the movie catalogue. Counting catalogue
+  // entries kept genres whose films are not playing anywhere - /gatunki/western,
+  // zero screenings and 151 words of boilerplate - indexable and in the
+  // sitemap. Next's fetch memoization deduplicates this against the identical
+  // call in the page render below.
+  const screeningGroups = await getScreenings({
     genreId: genre.id.toString(),
-    limit: 1,
   });
-  const moviesCount = meta.total;
+  const moviesCount = screeningGroups.length;
+  const screeningsCount = screeningGroups.reduce(
+    (sum, group) => sum + group.screenings.length,
+    0
+  );
 
   const genreLower = genre.name.toLowerCase();
   const title = `${genre.name} - filmy w kinach studyjnych`;
   const description =
     moviesCount > 0
-      ? `${moviesCount} ${pluralPl(moviesCount, "film", "filmy", "filmów")} z gatunku ${genreLower} w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy - ${genreLower} na dużym ekranie.`
+      ? `${moviesCount} ${pluralPl(moviesCount, "film", "filmy", "filmów")} i ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")} z gatunku ${genreLower} w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy - ${genreLower} na dużym ekranie.`
       : `Filmy z gatunku ${genreLower} dostępne w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy.`;
   const url = `${SITE_URL}/gatunki/${genre.slug}`;
 
-  // A genre with no movies is thin content; keep it out of the index.
+  // A genre nobody is screening right now renders an empty grid; that is
+  // thin content, so keep it out of the index until it has something to show.
   // Query-param duplicates (filters) are handled by the canonical alone.
   const noindex = moviesCount === 0;
 

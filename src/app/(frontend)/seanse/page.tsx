@@ -77,7 +77,7 @@ export const generateMetadata = async ({
   const totalPages = Math.max(1, Math.ceil(allScreenings.length / PAGE_SIZE));
   const requestedPage = parsePageParam(queryParams.page);
 
-  // Out of range renders a 404 (see ScreeningsListing); say so here too, so
+  // Out of range renders a 404 (see ScreeningsPage); say so here too, so
   // the response never carries indexable metadata for a page that is gone.
   if (requestedPage > totalPages) {
     return { title: "Seanse specjalne w kinach studyjnych - repertuar", description, ...NOINDEX_FOLLOW };
@@ -176,11 +176,16 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
     Math.ceil(allScreenings.length / PAGE_SIZE)
   );
 
+  // Backstop for filtered views, whose page count only becomes known here.
+  // The indexable (unfiltered) case is already guarded in ScreeningsPage,
+  // which is the only place notFound() can still set a 404 status - by the
+  // time this runs the shell has been flushed. Filtered views are noindex,
+  // so the soft 404 they get instead costs nothing.
+  //
   // Clamping used to serve the last page's content under every ?page=N, so
   // ?page=7 and ?page=9999 both returned 200 with the same listing. While
   // pagination was noindexed by the proxy that stayed invisible; once it
   // became indexable it turned into an unbounded set of duplicate URLs.
-  // Out of range is a page that does not exist, so say so.
   if (requestedPage > totalPages) {
     notFound();
   }
@@ -257,6 +262,26 @@ const buildScreeningsJsonLd = (
 
 const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
   const params = await searchParams;
+
+  // The range guard has to run here, not in ScreeningsListing. notFound()
+  // inside the Suspense boundary below fires after the shell has been
+  // flushed, so the status line is already 200 and the visitor gets the
+  // not-found body under a success code - a soft 404.
+  //
+  // Only the unfiltered listing is indexable, and generateMetadata already
+  // awaits this exact call, so fetch memoization makes the guard free here.
+  // Filtered views are noindex and keep the inner notFound() as a backstop.
+  if (!hasFilterParams(params)) {
+    const { cityId, voivodeship } = await getPreferredLocation(params);
+    const totalScreenings = unwrapResponse(
+      await getPaginatedScreenings({ cityId, voivodeship })
+    ).length;
+    const totalPages = Math.max(1, Math.ceil(totalScreenings / PAGE_SIZE));
+    if (parsePageParam(params.page) > totalPages) {
+      notFound();
+    }
+  }
+
   const lastUpdated = (await getScreeningsLastUpdated()) ?? new Date();
 
   return (

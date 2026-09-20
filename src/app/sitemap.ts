@@ -8,8 +8,7 @@ import {
   type SitemapId,
 } from "@/lib/sitemap-entries";
 import { getScreenings } from "@/lib/screenings";
-import { getMovies, getMoviePosterMap } from "@/lib/movies";
-import { getGenres } from "@/lib/genres";
+import { getMoviePosterMap } from "@/lib/movies";
 import { getPostsPage, getPublishedPosts } from "@/lib/posts";
 import { ISitemapEntry } from "@/interfaces/ISitemap";
 
@@ -95,28 +94,27 @@ const filterMoviesWithScreenings = async (
   }
 };
 
-// Genre pages with zero movies are noindex - same conflict guard. When
-// every count comes back zero, assume the movies API is down and keep
-// the full list.
-const filterNonEmptyGenres = async (
+// Genre pages with no upcoming screenings are noindex - same conflict guard.
+//
+// The count has to come from the screenings feed, not the movie catalogue:
+// a genre page renders screenings and nothing else, so a genre whose films
+// exist only in the catalogue still renders an empty page. Counting
+// catalogue entries let /gatunki/western - zero screenings, 151 words of
+// boilerplate - into both the index and the sitemap.
+//
+// One screenings call covers every genre, since each group carries its
+// movie's genres. An empty feed means a backend hiccup, not zero screenings
+// nationwide, so keep the full list then instead of emptying the sitemap.
+const filterGenresWithScreenings = async (
   genres: ISitemapEntry[]
 ): Promise<ISitemapEntry[]> => {
   try {
-    const apiGenres = await getGenres();
-    const counts = await Promise.all(
-      apiGenres.map(async (genre) => {
-        const { meta } = await getMovies({
-          genreId: genre.id.toString(),
-          limit: 1,
-        });
-        return [genre.slug, meta.total] as const;
-      })
+    const groups = await getScreenings();
+    if (groups.length === 0) return genres;
+    const slugsWithScreenings = new Set(
+      groups.flatMap((group) => group.movie.genres.map((genre) => genre.slug))
     );
-    if (counts.every(([, total]) => total === 0)) return genres;
-    const nonEmptySlugs = new Set(
-      counts.filter(([, total]) => total > 0).map(([slug]) => slug)
-    );
-    return genres.filter((g) => nonEmptySlugs.has(g.slug));
+    return genres.filter((genre) => slugsWithScreenings.has(genre.slug));
   } catch {
     return genres;
   }
@@ -234,12 +232,19 @@ const sitemap = async ({
       // Cities arrive pre-filtered by the API (only those with cinemas).
       return dedupeByUrl(toPages(entries.cities, "miasta", "daily", 0.6));
     case "gatunki": {
-      const genres = await filterNonEmptyGenres(entries.genres);
+      const genres = await filterGenresWithScreenings(entries.genres);
       return dedupeByUrl(toPages(genres, "gatunki", "weekly", 0.5));
     }
     case "rezyserzy":
-      // Directors arrive pre-filtered by the API (only those above the
-      // indexing threshold), so no noindex cross-check is needed here.
+      // Directors arrive pre-filtered by the API to those above the indexing
+      // threshold. That filter reads the same `upcomingScreeningsCount` the
+      // director page no longer trusts on its own, because the field comes
+      // back too low for people who clearly have screenings - which is why
+      // Kieslowski, Kubrick and Kawalerowicz are missing here while their
+      // pages are indexable. Under-reporting only costs discovery (movie
+      // pages link to every director), so this stays as-is until the backend
+      // count is fixed; do not "correct" it by dropping the noindex
+      // cross-check on the page.
       return dedupeByUrl(
         toPages(entries.directors ?? [], "rezyserzy", "weekly", 0.5)
       );
