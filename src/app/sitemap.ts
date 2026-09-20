@@ -236,15 +236,8 @@ const sitemap = async ({
       return dedupeByUrl(toPages(genres, "gatunki", "weekly", 0.5));
     }
     case "rezyserzy":
-      // Directors arrive pre-filtered by the API to those above the indexing
-      // threshold. That filter reads the same `upcomingScreeningsCount` the
-      // director page no longer trusts on its own, because the field comes
-      // back too low for people who clearly have screenings - which is why
-      // Kieslowski, Kubrick and Kawalerowicz are missing here while their
-      // pages are indexable. Under-reporting only costs discovery (movie
-      // pages link to every director), so this stays as-is until the backend
-      // count is fixed; do not "correct" it by dropping the noindex
-      // cross-check on the page.
+      // Directors arrive pre-filtered by the API (only those above the
+      // indexing threshold), so no noindex cross-check is needed here.
       return dedupeByUrl(
         toPages(entries.directors ?? [], "rezyserzy", "weekly", 0.5)
       );
