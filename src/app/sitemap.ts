@@ -13,7 +13,22 @@ import { getPostsPage, getPublishedPosts } from "@/lib/posts";
 import type { Post } from "@/payload-types";
 import { ISitemapEntry } from "@/interfaces/ISitemap";
 
-export const revalidate = 3600;
+/**
+ * Five minutes, matching the listing pages rather than the hour a sitemap
+ * would otherwise deserve.
+ *
+ * `next build` runs without a Payload secret, so the blog sub-sitemap is
+ * always prerendered empty and shipped that way inside the image. The
+ * repertoire-backed types do not share the problem, because they read one
+ * `/sitemap` endpoint that the build can reach. At an hour, every release
+ * therefore served /sitemap/blog.xml with zero URLs until the first
+ * revalidation - and on a day with several deploys that is most of the day.
+ *
+ * Regenerating is cheap here (one upstream call plus the Payload read) and
+ * crawlers fetch these a handful of times a day, so the shorter window
+ * costs little and bounds the empty period to five minutes.
+ */
+export const revalidate = 300;
 
 const sanitizeSlug = (slug: string | null | undefined) => slug?.trim() ?? "";
 const isValidSlug = (slug: string) =>
