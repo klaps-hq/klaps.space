@@ -10,6 +10,7 @@ import {
 import { getScreenings } from "@/lib/screenings";
 import { getMoviePosterMap } from "@/lib/movies";
 import { getPostsPage, getPublishedPosts } from "@/lib/posts";
+import type { Post } from "@/payload-types";
 import { ISitemapEntry } from "@/interfaces/ISitemap";
 
 export const revalidate = 3600;
@@ -142,11 +143,33 @@ const staticPages: MetadataRoute.Sitemap = [
   { url: `${SITE_URL}/polityka-prywatnosci`, changeFrequency: "monthly", priority: 0.2 },
 ];
 
-// Blog posts come from Payload, not the repertoire API, so they get their
-// own resilience: on a database hiccup the sub-sitemap just ships empty.
+// `next build` runs without a database or a Payload secret, so every fetch
+// in here fails and the prerendered sitemap ships empty; ISR fills it in on
+// the first revalidation. That is expected and has to stay tolerated, or
+// the build cannot complete at all.
+const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+
+/**
+ * Swallows a failed fetch during the build only, and rethrows at runtime.
+ *
+ * Catching it everywhere turned a failure into a *successful* empty
+ * sub-sitemap, which Next then cached for the full hour of `revalidate`.
+ * The database is briefly unreachable right after a deploy, which is
+ * exactly when the regeneration runs, so for an hour after every release
+ * /sitemap/blog.xml told Google the blog had no URLs at all. Rethrowing
+ * makes Next keep serving the last good copy instead.
+ */
+const emptyDuringBuild = <T>(error: unknown): T[] => {
+  if (isBuildPhase) return [];
+  throw error;
+};
+
+// Blog posts come from Payload, not the repertoire API, which is why they
+// need the guard above; an empty array still ships when the fetch succeeds
+// and there genuinely are no published posts.
 const buildBlogPages = async (): Promise<MetadataRoute.Sitemap> => {
   const postPages: MetadataRoute.Sitemap = (
-    await getPublishedPosts().catch(() => [])
+    await getPublishedPosts().catch(emptyDuringBuild<Post>)
   ).flatMap((post) =>
     post.slug
       ? [
@@ -161,6 +184,7 @@ const buildBlogPages = async (): Promise<MetadataRoute.Sitemap> => {
   );
 
   // Paginated blog archive (/blog/strona/2..N); page 1 is /blog itself.
+  // Same build-only tolerance as the posts fetch above.
   const archivePages: MetadataRoute.Sitemap = await getPostsPage(1)
     .then(({ totalPages }) =>
       Array.from({ length: Math.max(totalPages - 1, 0) }, (_, index) => ({
@@ -169,7 +193,7 @@ const buildBlogPages = async (): Promise<MetadataRoute.Sitemap> => {
         priority: 0.4,
       }))
     )
-    .catch(() => []);
+    .catch(emptyDuringBuild<MetadataRoute.Sitemap[number]>);
 
   return [...postPages, ...archivePages];
 };
