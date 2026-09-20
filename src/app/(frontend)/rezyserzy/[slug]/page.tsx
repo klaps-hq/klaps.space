@@ -60,24 +60,12 @@ export const generateMetadata = async ({
   // out of the index (matches the sitemap threshold). Query-param duplicates
   // (filters) on indexable pages are handled by the canonical alone.
   //
-  // The count is taken from the screenings this page actually renders, not
-  // from the director record alone: `upcomingScreeningsCount` comes back far
-  // too low for some people, which put Kieslowski (16 films on the page),
-  // Kubrick (10), Kawalerowicz (9) and Zulawski (7) behind a noindex - the
-  // retrospective pages this site most wants indexed. The screenings call is
-  // memoized against the identical one in the page render below.
-  //
-  // Whichever source reports more wins, so a failed screenings fetch (which
-  // resolves to an empty list) can never noindex a page the record already
-  // vouches for.
-  const renderedScreeningsCount = (
-    await getScreeningsByDirector(director.id)
-  ).reduce((sum, group) => sum + group.screenings.length, 0);
-  const upcomingScreeningsCount = Math.max(
-    director.upcomingScreeningsCount,
-    renderedScreeningsCount
-  );
-  const noindex = upcomingScreeningsCount < DIRECTOR_INDEX_THRESHOLD;
+  // `upcomingScreeningsCount` is the right source here and needs no
+  // cross-check against the rendered page: this template shows two card
+  // grids - the repertoire and, below "Filmografia", the director's whole
+  // back catalogue - so counting cards measures the catalogue, not what is
+  // playing. Kieslowski renders 15 cards and has 1 film in the repertoire.
+  const noindex = director.upcomingScreeningsCount < DIRECTOR_INDEX_THRESHOLD;
 
   return {
     title,
