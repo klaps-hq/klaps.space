@@ -59,7 +59,25 @@ export const generateMetadata = async ({
   // Thin until the director has enough upcoming screenings; keep those pages
   // out of the index (matches the sitemap threshold). Query-param duplicates
   // (filters) on indexable pages are handled by the canonical alone.
-  const noindex = director.upcomingScreeningsCount < DIRECTOR_INDEX_THRESHOLD;
+  //
+  // The count is taken from the screenings this page actually renders, not
+  // from the director record alone: `upcomingScreeningsCount` comes back far
+  // too low for some people, which put Kieslowski (16 films on the page),
+  // Kubrick (10), Kawalerowicz (9) and Zulawski (7) behind a noindex - the
+  // retrospective pages this site most wants indexed. The screenings call is
+  // memoized against the identical one in the page render below.
+  //
+  // Whichever source reports more wins, so a failed screenings fetch (which
+  // resolves to an empty list) can never noindex a page the record already
+  // vouches for.
+  const renderedScreeningsCount = (
+    await getScreeningsByDirector(director.id)
+  ).reduce((sum, group) => sum + group.screenings.length, 0);
+  const upcomingScreeningsCount = Math.max(
+    director.upcomingScreeningsCount,
+    renderedScreeningsCount
+  );
+  const noindex = upcomingScreeningsCount < DIRECTOR_INDEX_THRESHOLD;
 
   return {
     title,
