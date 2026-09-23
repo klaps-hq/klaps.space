@@ -9,7 +9,7 @@ import {
   cinemaRepertoireDateTo,
 } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
-import { getScreenings } from "@/lib/screenings";
+import { getRecentScreenings, getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH, pluralPl } from "@/lib/seo";
 import { cinemaFallbackIntro } from "@/lib/listing-copy";
@@ -20,6 +20,7 @@ import SiteHeader from "@/components/common/site-header";
 import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
 import RepertoireGrid from "@/components/common/repertoire-grid";
+import RecentRepertoire from "@/components/common/recent-repertoire";
 import Footer from "../../(home)/_components/footer";
 import CinemaMapLazy from "./_components/cinema-map-lazy";
 
@@ -147,7 +148,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
   // Sibling venues give each cinema page contextual internal links: /kina is
   // the only other place linking here, and it spreads its authority across
   // 900 links, which is why parts of this page group never get crawled.
-  const [screenings, siblingResponse] = await Promise.all([
+  const [screenings, siblingResponse, recentScreenings] = await Promise.all([
     getScreenings({
       cinemaId: cinema.id.toString(),
       dateTo: cinemaRepertoireDateTo(),
@@ -155,6 +156,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
     getCinemas({ cityId: cinema.city.id.toString() }).catch(() => ({
       data: [],
     })),
+    getRecentScreenings({ cinemaId: cinema.id.toString() }),
   ]);
 
   const siblingCinemas = siblingResponse.data
@@ -298,6 +300,11 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
           }
         />
       </RepertoireSection>
+
+      <RecentRepertoire
+        heading="Ostatnio w repertuarze"
+        items={recentScreenings}
+      />
 
       {siblingCinemas.length > 0 && (
         // Contextual links out of this page: they spread crawl paths across

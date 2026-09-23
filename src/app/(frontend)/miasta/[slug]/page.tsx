@@ -4,7 +4,11 @@ import { Metadata } from "next";
 import { getCityBySlug } from "@/lib/cities";
 import { getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
-import { getScreenings, getScreeningsLastUpdated } from "@/lib/screenings";
+import {
+  getRecentScreenings,
+  getScreenings,
+  getScreeningsLastUpdated,
+} from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import {
   BASE_OPEN_GRAPH,
@@ -20,6 +24,7 @@ import SiteHeader from "@/components/common/site-header";
 import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
 import RepertoireGrid from "@/components/common/repertoire-grid";
+import RecentRepertoire from "@/components/common/recent-repertoire";
 import Footer from "../../(home)/_components/footer";
 
 interface CinemaCardsProps {
@@ -155,13 +160,19 @@ const CityPage = async ({ params }: CityPageProps) => {
 
   // Full unfiltered repertoire - CityRepertoire narrows it down
   // client-side based on the URL params.
-  const [{ data: cinemaGroups }, allGenres, screenings, lastUpdated] =
-    await Promise.all([
-      getCinemas({ cityId: city.id.toString() }),
-      getGenres(),
-      getScreenings({ cityId: city.id.toString() }),
-      getScreeningsLastUpdated({ cityId: city.id.toString() }),
-    ]);
+  const [
+    { data: cinemaGroups },
+    allGenres,
+    screenings,
+    lastUpdated,
+    recentScreenings,
+  ] = await Promise.all([
+    getCinemas({ cityId: city.id.toString() }),
+    getGenres(),
+    getScreenings({ cityId: city.id.toString() }),
+    getScreeningsLastUpdated({ cityId: city.id.toString() }),
+    getRecentScreenings({ cityId: city.id.toString() }),
+  ]);
 
   const cinemas = cinemaGroups
     .flatMap((g) => g.cinemas)
@@ -293,6 +304,15 @@ const CityPage = async ({ params }: CityPageProps) => {
           }
         />
       </RepertoireSection>
+
+      <RecentRepertoire
+        heading={
+          <>
+            Ostatnio grane {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+          </>
+        }
+        items={recentScreenings}
+      />
 
       <Footer />
     </main>
