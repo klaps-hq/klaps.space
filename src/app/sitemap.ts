@@ -48,8 +48,21 @@ const isValidSlug = (slug: string) =>
  * and never to a future date. Pages whose data is newer keep their own
  * timestamp, so this raises a floor rather than flattening every entry onto
  * one date, which is the pattern that gets a sitemap distrusted.
+ *
+ * Keyed by route prefix, because a release rarely touches every template:
+ * bumping one shared date would claim a change on pages that did not get
+ * one. `default` covers every prefix without its own entry.
  */
-const TEMPLATE_CHANGED_AT = new Date("2026-09-13T00:00:00.000Z");
+const TEMPLATE_CHANGED_AT: Record<string, Date> = {
+  default: new Date("2026-09-13T00:00:00.000Z"),
+  // "Ostatnio w repertuarze" added the venue's recent programme to every
+  // cinema and city page, most of which had no upcoming screenings to show.
+  kina: new Date("2026-09-23T00:00:00.000Z"),
+  miasta: new Date("2026-09-23T00:00:00.000Z"),
+};
+
+const templateFloorFor = (basePath: string): Date =>
+  TEMPLATE_CHANGED_AT[basePath] ?? TEMPLATE_CHANGED_AT.default;
 
 // Omit lastModified entirely when the API didn't send a parsable date -
 // an inaccurate value is worse for crawlers than none at all.
@@ -63,8 +76,10 @@ const toLastModified = (
 
 // Raises an entry's date to the template floor without ever lowering it or
 // inventing one where the API gave none.
-const withTemplateFloor = (date: Date | undefined): Date | undefined =>
-  date && date < TEMPLATE_CHANGED_AT ? TEMPLATE_CHANGED_AT : date;
+const withTemplateFloor = (
+  date: Date | undefined,
+  floor: Date
+): Date | undefined => (date && date < floor ? floor : date);
 
 const toPages = (
   entries: ISitemapEntry[],
@@ -78,7 +93,10 @@ const toPages = (
   entries
     .map((entry) => ({
       slug: sanitizeSlug(entry.slug),
-      lastModified: withTemplateFloor(toLastModified(entry.updatedAt)),
+      lastModified: withTemplateFloor(
+        toLastModified(entry.updatedAt),
+        templateFloorFor(basePath)
+      ),
     }))
     .filter(({ slug }) => isValidSlug(slug))
     .map(({ slug, lastModified }) => {

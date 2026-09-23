@@ -2,6 +2,7 @@ import {
   IScreening,
   IScreeningGroup,
   IRandomScreening,
+  IRecentScreening,
 } from "@/interfaces/IScreenings";
 import { IMovie, PaginatedResponse } from "@/interfaces/IMovies";
 import { apiFetch } from "./client";
@@ -139,6 +140,42 @@ export const getScreeningsLastUpdated = async (
   } catch (error) {
     console.warn("Falling back to null screenings last-updated:", error);
     return null;
+  }
+};
+
+interface GetRecentScreeningsParams {
+  cinemaId?: string | null;
+  cityId?: string | null;
+  days?: number;
+  limit?: number;
+}
+
+/** Look-back window of the "Ostatnio w repertuarze" section, in days. */
+export const RECENT_SCREENINGS_DAYS = 90;
+
+/**
+ * Films screened in a cinema or city during the last RECENT_SCREENINGS_DAYS
+ * days and no longer scheduled there, newest first.
+ *
+ * Returns an empty list on any failure so the section simply does not
+ * render - including during `next build`, which has no API, and on an API
+ * deployment that predates the endpoint.
+ */
+export const getRecentScreenings = async (
+  params: GetRecentScreeningsParams
+): Promise<IRecentScreening[]> => {
+  try {
+    return await apiFetch<IRecentScreening[]>("/screenings/recent", {
+      params: {
+        cinemaId: params.cinemaId ?? "",
+        cityId: params.cityId ?? "",
+        days: String(params.days ?? RECENT_SCREENINGS_DAYS),
+        limit: params.limit ? params.limit.toString() : "",
+      },
+    });
+  } catch (error) {
+    console.warn("Falling back to empty recent screenings list:", error);
+    return [];
   }
 };
 
