@@ -36,26 +36,37 @@ interface GetLastUpdatedParams {
   cinemaSlug?: string | null;
 }
 
+/**
+ * Upcoming screening groups. Throws on failure, for callers where an empty
+ * list drives a decision (see fetchRecentScreenings); same URL as
+ * getScreenings, so the two share one cached fetch.
+ */
+export const fetchScreenings = async (
+  params: GetScreeningsParams = {}
+): Promise<IScreeningGroup[]> => {
+  const response = await apiFetch<
+    IScreeningGroup[] | PaginatedResponse<IScreeningGroup>
+  >("/screenings", {
+    params: {
+      cityId: params.cityId ?? "",
+      voivodeship: params.voivodeship ?? "",
+      cinemaId: params.cinemaId ?? "",
+      genreId: params.genreId ?? "",
+      dateFrom: params.dateFrom ?? "",
+      dateTo: params.dateTo ?? "",
+      search: params.search ?? "",
+      limit: params.limit ? params.limit.toString() : "",
+    },
+  });
+
+  return Array.isArray(response) ? response : [...response.data];
+};
+
 export const getScreenings = async (
   params: GetScreeningsParams = {}
 ): Promise<IScreeningGroup[]> => {
   try {
-    const response = await apiFetch<
-      IScreeningGroup[] | PaginatedResponse<IScreeningGroup>
-    >("/screenings", {
-      params: {
-        cityId: params.cityId ?? "",
-        voivodeship: params.voivodeship ?? "",
-        cinemaId: params.cinemaId ?? "",
-        genreId: params.genreId ?? "",
-        dateFrom: params.dateFrom ?? "",
-        dateTo: params.dateTo ?? "",
-        search: params.search ?? "",
-        limit: params.limit ? params.limit.toString() : "",
-      },
-    });
-
-    return Array.isArray(response) ? response : [...response.data];
+    return await fetchScreenings(params);
   } catch (error) {
     console.warn("Falling back to empty screenings list:", error);
     return [];
@@ -155,24 +166,34 @@ export const RECENT_SCREENINGS_DAYS = 90;
 
 /**
  * Films screened in a cinema or city during the last RECENT_SCREENINGS_DAYS
- * days and no longer scheduled there, newest first.
+ * days and no longer scheduled there, newest first. Throws on failure.
  *
- * Returns an empty list on any failure so the section simply does not
- * render - including during `next build`, which has no API, and on an API
- * deployment that predates the endpoint.
+ * Use this where an empty list drives a decision, such as `noindex`: a
+ * failed call must not read as "nothing screened here". Same URL as
+ * getRecentScreenings, so the two share one cached fetch.
+ */
+export const fetchRecentScreenings = (
+  params: GetRecentScreeningsParams
+): Promise<IRecentScreening[]> =>
+  apiFetch<IRecentScreening[]>("/screenings/recent", {
+    params: {
+      cinemaId: params.cinemaId ?? "",
+      cityId: params.cityId ?? "",
+      days: String(params.days ?? RECENT_SCREENINGS_DAYS),
+      limit: params.limit ? params.limit.toString() : "",
+    },
+  });
+
+/**
+ * fetchRecentScreenings for rendering: returns an empty list on any failure
+ * so the section simply does not render - including during `next build`,
+ * which has no API, and on an API deployment that predates the endpoint.
  */
 export const getRecentScreenings = async (
   params: GetRecentScreeningsParams
 ): Promise<IRecentScreening[]> => {
   try {
-    return await apiFetch<IRecentScreening[]>("/screenings/recent", {
-      params: {
-        cinemaId: params.cinemaId ?? "",
-        cityId: params.cityId ?? "",
-        days: String(params.days ?? RECENT_SCREENINGS_DAYS),
-        limit: params.limit ? params.limit.toString() : "",
-      },
-    });
+    return await fetchRecentScreenings(params);
   } catch (error) {
     console.warn("Falling back to empty recent screenings list:", error);
     return [];

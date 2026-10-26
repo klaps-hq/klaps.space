@@ -9,9 +9,14 @@ import {
   cinemaRepertoireDateTo,
 } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
-import { getRecentScreenings, getScreenings } from "@/lib/screenings";
+import {
+  fetchRecentScreenings,
+  fetchScreenings,
+  getRecentScreenings,
+  getScreenings,
+} from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, pluralPl } from "@/lib/seo";
+import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
 import { cinemaFallbackIntro } from "@/lib/listing-copy";
 import { isChainCinema } from "@/lib/cinema-chains";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
@@ -90,11 +95,27 @@ export const generateMetadata = async ({
   const { slug } = await params;
   const cinema = await getCinemaBySlug(slug);
 
-  // Same call as the page body: deduped by the fetch cache.
-  const screeningGroups = await getScreenings({
-    cinemaId: cinema.id.toString(),
-    dateTo: cinemaRepertoireDateTo(),
-  }).catch(() => []);
+  // Same calls as the page body: deduped by the fetch cache. null means the
+  // call failed, which is not the same as "nothing to show".
+  const [upcomingGroups, recentScreenings] = await Promise.all([
+    fetchScreenings({
+      cinemaId: cinema.id.toString(),
+      dateTo: cinemaRepertoireDateTo(),
+    }).catch(() => null),
+    fetchRecentScreenings({ cinemaId: cinema.id.toString() }).catch(
+      () => null
+    ),
+  ]);
+  const screeningGroups = upcomingGroups ?? [];
+
+  // A cinema with nothing upcoming and nothing screened in the last
+  // RECENT_SCREENINGS_DAYS renders a name, an address and boilerplate.
+  // October 2026 GSC: these pages sit in "crawled, not indexed" or are
+  // never fetched at all, and dilute crawl across the ones with content.
+  // The API leaves the same venues out of the sitemap. Only a confirmed
+  // empty result counts, so an API failure never noindexes a page.
+  const noindex =
+    upcomingGroups?.length === 0 && recentScreenings?.length === 0;
 
   // Locative city name ("w Krakowie", not "w Kraków") for natural phrasing.
   const cityName = cinema.city.nameDeclinated ?? cinema.city.name;
@@ -122,7 +143,7 @@ export const generateMetadata = async ({
     title,
     description,
     // Query-param duplicates (filters) are handled by the canonical alone.
-    alternates: { canonical: url },
+    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
