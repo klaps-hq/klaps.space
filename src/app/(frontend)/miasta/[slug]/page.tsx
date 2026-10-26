@@ -59,6 +59,8 @@ const CinemaCards: React.FC<CinemaCardsProps> = ({ cinemas }) => (
 
 // Roughly what a SERP renders before truncating.
 const MAX_TITLE_LENGTH = 60;
+// Google truncates snippets past roughly this length.
+const MAX_DESCRIPTION_LENGTH = 160;
 
 // Polish locative preposition: "we" before a w-/f- consonant cluster
 // (we Wrocławiu, we Włocławku, we Fromborku), otherwise "w" (w Krakowie).
@@ -124,10 +126,17 @@ export const generateMetadata = async ({
     screeningsCount > 0
       ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}`
       : `${cinemasCount} ${pluralPl(cinemasCount, "kino z seansami specjalnymi", "kina z seansami specjalnymi", "kin z seansami specjalnymi")}`;
+  // Same degradation as the title: two-word city names ("Ostrowcu
+  // Świętokrzyskim") pushed the full form past the snippet limit on ~45
+  // pages (Ahrefs, October 2026), so Google cut it mid-sentence. The
+  // shorter tail keeps the counts and the call to action whole.
+  const descriptionFull = `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne, klasyka filmowa i retrospektywy w kinach studyjnych i sieciowych - sprawdź aktualny repertuar.`;
   const description =
-    cinemasCount > 0
-      ? `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne, klasyka filmowa i retrospektywy w kinach studyjnych i sieciowych - sprawdź aktualny repertuar.`
-      : `Kina i seanse specjalne ${prep} ${city.nameDeclinated}. Aktualna klasyka filmowa, retrospektywy i pokazy specjalne.`;
+    cinemasCount === 0
+      ? `Kina i seanse specjalne ${prep} ${city.nameDeclinated}. Aktualna klasyka filmowa, retrospektywy i pokazy specjalne.`
+      : descriptionFull.length <= MAX_DESCRIPTION_LENGTH
+        ? descriptionFull
+        : `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`;
   const url = `${SITE_URL}/miasta/${city.slug}`;
 
   // A city without cinemas is thin content; keep it out of the index. So is

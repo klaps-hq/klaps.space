@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getMoviePageData, getMovieBySlug, getMovies } from "@/lib/movies";
+import { getMoviePageData, getMovieBySlug } from "@/lib/movies";
 import { getMovieScreenings, getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import {
@@ -132,12 +132,15 @@ const MoviePage = async ({ params }: MoviePageProps) => {
   // backdrop streams in; precomputed by the scraper, served by the API.
   const backdropBlurDataUrl = movie.backdropBlurDataUrl ?? null;
 
-  // Internal linking: up to 6 movies sharing the primary genre.
+  // Internal linking: up to 6 movies sharing the primary genre, taken from
+  // the screenings feed rather than the catalogue. Catalogue picks were
+  // mostly movies without screenings, i.e. noindex pages, so this block
+  // fed crawlers an endless chain of pages Google will not index. Movies
+  // that are screening are the indexable ones, and the more useful pick.
   const primaryGenre = movie.genres[0];
   const relatedMovies = primaryGenre
-    ? (
-        await getMovies({ genreId: primaryGenre.id.toString(), limit: 7 })
-      ).data
+    ? (await getScreenings({ genreId: primaryGenre.id.toString() }))
+        .map((group) => group.movie)
         .filter((related) => related.id !== movie.id)
         .slice(0, 6)
     : [];

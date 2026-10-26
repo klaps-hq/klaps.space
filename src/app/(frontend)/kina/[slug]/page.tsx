@@ -67,7 +67,13 @@ const buildCinemaDescription = (
 ): string => {
   const moviesCount = screeningGroups.length;
   if (moviesCount === 0) {
-    return `Repertuar kina ${cinemaName} w ${cityName}: seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź, co aktualnie grają.`;
+    const full = `Repertuar kina ${cinemaName} w ${cityName}: seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź, co aktualnie grają.`;
+    // Long venue names ("Mazowiecki Teatr Muzyczny im. Jana Kiepury - Kino
+    // Praha") overran the snippet limit; drop the tail rather than let
+    // Google cut the sentence.
+    return full.length <= MAX_DESCRIPTION_LENGTH
+      ? full
+      : `Repertuar kina ${cinemaName} w ${cityName}: seanse specjalne i klasyka filmowa.`;
   }
 
   const screeningsCount = screeningGroups.reduce(
