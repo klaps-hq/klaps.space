@@ -4,6 +4,8 @@ import React from "react";
 import Link from "next/link";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import MoviePoster from "@/components/common/movie-poster";
+import { useNow } from "@/hooks/use-now";
+import { upcomingScreeningGroup } from "@/lib/screening-filters";
 import { formatDateLabel } from "@/lib/utils";
 
 interface ScreeningCardProps {
@@ -18,7 +20,14 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({
   group,
   priority = false,
 }) => {
-  const { movie, screenings, summary } = group;
+  // Cached listing HTML can outlive its showtimes (ISR serves stale pages
+  // while revalidating), so started screenings are dropped again here once
+  // the client clock is known, and a movie with nothing left disappears.
+  const now = useNow();
+  const visibleGroup = now === null ? group : upcomingScreeningGroup(group, now);
+  if (!visibleGroup) return null;
+
+  const { movie, screenings, summary } = visibleGroup;
   const upcoming = screenings.slice(0, 2);
   const remaining = Math.max(0, summary.screeningsCount - upcoming.length);
 

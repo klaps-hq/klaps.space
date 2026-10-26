@@ -97,13 +97,11 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    // WebP only, on purpose (no AVIF for now): the heroes feed the optimizer
-    // a full-size TMDB "original" (the MinIO mirror holds no smaller size),
-    // and AVIF-encoding that large a source on a cold cache is slow enough to
-    // dominate hero LCP. WebP encodes far faster for a ~30% byte penalty,
-    // which is the better trade while the source stays this big. Re-add
-    // "image/avif" once the scraper mirrors a hero-sized (~1920px) variant
-    // and the heroes stop requesting "original".
+    // WebP only, on purpose (no AVIF for now): wide-screen heroes still feed
+    // the optimizer a full-size TMDB "original", and AVIF-encoding that
+    // large a source on a cold cache is slow enough to dominate hero LCP.
+    // WebP encodes far faster for a ~30% byte penalty, which is the better
+    // trade while those sources stay this big.
     formats: ["image/webp"],
     qualities: [75],
     // TMDB files are content-addressed and immutable, so optimized
@@ -111,9 +109,13 @@ const nextConfig: NextConfig = {
     // After a redeploy wipes this cache, origin re-fetches hit the local
     // MinIO mirror (NEXT_PUBLIC_TMDB_IMAGE_BASE_URL), not the TMDB CDN.
     minimumCacheTTL: 31536000,
-    // Default list minus 3840: full-bleed heroes sit under gradient and
-    // grain overlays, so 4K variants add bytes with no visible gain.
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    // Deliberately sparse: every width is a separate optimizer variant, and
+    // on a cold cache each one costs a full fetch + resize. Fewer, coarser
+    // steps mean far more requests land on an already-encoded file. No 4K
+    // step: full-bleed heroes sit under gradient and grain overlays, so it
+    // adds bytes with no visible gain. 1200 stays within the w1280 backdrop
+    // source (lib/tmdb.ts), 1920 is the only step that reads the original.
+    deviceSizes: [640, 828, 1200, 1920],
     remotePatterns: [
       {
         protocol: "https",

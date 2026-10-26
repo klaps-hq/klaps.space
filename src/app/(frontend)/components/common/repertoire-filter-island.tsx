@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useLayoutEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
@@ -10,6 +10,7 @@ import {
   parseGenreIdsParam,
 } from "@/lib/screening-filters";
 import { isVoivodeship } from "@/lib/voivodeships";
+import { clearFilterPending } from "@/lib/filter-pending";
 import FilterBar from "../../(home)/_components/screenings/filter-bar";
 
 interface RepertoireFilterIslandProps {
@@ -81,12 +82,15 @@ const RepertoireFilterIsland: React.FC<RepertoireFilterIslandProps> = ({
     cityId !== null ||
     voivodeship !== null;
 
-  useEffect(() => {
+  // Layout effect so the filtered grid replaces the default one before the
+  // browser paints (the head script keeps it hidden until then).
+  useLayoutEffect(() => {
     // Wait for hydration so the stored location is resolved before deciding
     // whether this is the default view or a filtered one; without it the
     // server grid would flash and then be replaced.
     if (usePreferredLocation && !isHydrated) return;
 
+    clearFilterPending();
     if (!hasFilter) {
       onResult(null);
       return;

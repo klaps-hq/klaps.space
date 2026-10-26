@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useLayoutEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
 import { usePreferredCity } from "@/contexts/city-context";
+import { clearFilterPending, takeHomePrefetch } from "@/lib/filter-pending";
 import FilterBar from "./filter-bar";
 
 // Result of an active (non-default) filter query. `null` upstream means the
@@ -32,6 +33,32 @@ interface HomeScreeningsData {
   screenings: IScreeningGroup[];
   hasMore: boolean;
 }
+
+// Filtered results kept for the session, so coming back to the homepage
+// (browser back included) renders the visitor's grid synchronously instead
+// of flashing the default one while refetching. Same lifetime as the
+// /api/screenings shared cache.
+const RESULT_TTL_MS = 5 * 60 * 1000;
+const resultCache = new Map<string, { data: HomeScreeningsData; at: number }>();
+
+const readCachedResult = (query: string): HomeScreeningsData | null => {
+  const entry = resultCache.get(query);
+  if (!entry) return null;
+  if (Date.now() - entry.at > RESULT_TTL_MS) {
+    resultCache.delete(query);
+    return null;
+  }
+  return entry.data;
+};
+
+const fetchHomeScreenings = (
+  query: string,
+  signal: AbortSignal
+): Promise<HomeScreeningsData> =>
+  fetch(`/api/screenings?${query}`, { signal }).then((res) => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json() as Promise<HomeScreeningsData>;
+  });
 
 const parseGenreIds = (raw: string): number[] =>
   raw
@@ -85,7 +112,9 @@ const ScreeningsFilterController: React.FC<ScreeningsFilterControllerProps> = ({
     return params.toString();
   }, [city, voivodeship, genresParam, dateFrom, dateTo, search]);
 
-  useEffect(() => {
+  // Layout effect: a cached result (back navigation) is applied before the
+  // browser paints, so the default grid never shows in between.
+  useLayoutEffect(() => {
     // Wait for hydration so the preferred city is resolved before deciding
     // whether this is the default view or a filtered one.
     if (!isHydrated) return;
@@ -95,6 +124,7 @@ const ScreeningsFilterController: React.FC<ScreeningsFilterControllerProps> = ({
     if (query === "") {
       onUpdating(false);
       onResult(null);
+      clearFilterPending();
       return;
     }
 
@@ -108,25 +138,37 @@ const ScreeningsFilterController: React.FC<ScreeningsFilterControllerProps> = ({
       search,
     };
 
+    const cached = readCachedResult(query);
+    if (cached) {
+      onResult({ ...cached, ...filterMeta });
+      onUpdating(false);
+      clearFilterPending();
+      return;
+    }
+
     onUpdating(true);
-    fetch(`/api/screenings?${query}`, { signal: controller.signal })
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<HomeScreeningsData>;
-      })
+    // The head script may have started this exact request before hydration.
+    const request =
+      (takeHomePrefetch(query) as Promise<HomeScreeningsData> | null) ??
+      fetchHomeScreenings(query, controller.signal);
+    request
       .then((data) => {
+        if (controller.signal.aborted) return;
+        resultCache.set(query, { data, at: Date.now() });
         onResult({
           screenings: data.screenings,
           hasMore: data.hasMore,
           ...filterMeta,
         });
         onUpdating(false);
+        clearFilterPending();
       })
       .catch((error) => {
         if (controller.signal.aborted) return;
         console.warn("Falling back to empty home screenings:", error);
         onResult({ screenings: [], hasMore: false, ...filterMeta });
         onUpdating(false);
+        clearFilterPending();
       });
 
     return () => controller.abort();

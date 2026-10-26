@@ -7,6 +7,7 @@ import { IRandomScreening } from "@/interfaces/IScreenings";
 import { tmdbCdnFallbackSrc, tmdbImageSrc } from "@/lib/tmdb";
 import { formatDuration, getYouTubeEmbedUrl, WARSAW_TZ } from "@/lib/utils";
 import { wallTimeToInstant } from "@/lib/warsaw-time";
+import { useNow } from "@/hooks/use-now";
 import TrailerModal from "@/components/common/trailer-modal";
 import MobileNav from "@/components/common/mobile-nav";
 import { NAV_LINKS } from "@/components/common/nav-links";
@@ -102,6 +103,7 @@ const Hero: React.FC<HeroProps> = ({
   posterBlurDataUrl,
 }) => {
   const [trailerOpen, setTrailerOpen] = useState(false);
+  const now = useNow();
 
   if (!screening || !hasCompleteHeroData(screening)) {
     return <HeroFallback />;
@@ -122,6 +124,9 @@ const Hero: React.FC<HeroProps> = ({
     month: "long",
     timeZone: WARSAW_TZ,
   }).format(screeningDate);
+  // The cached homepage can outlive the featured showtime; once it has
+  // started, keep the cinema and city but drop the stale date and time.
+  const hasStarted = now !== null && screeningDate.getTime() <= now;
   // Older API responses may omit the field, so default to no credit line.
   const directors = screening.movie.directors ?? [];
 
@@ -132,22 +137,11 @@ const Hero: React.FC<HeroProps> = ({
       <h1 className="sr-only">
         Seanse specjalne i stare filmy w kinach studyjnych w Polsce
       </h1>
-      {/* "original" is mandatory here, not a quality choice: the MinIO
-          mirror is populated by the scraper and only holds the *original*
-          backdrop, so any other size (e.g. w1280) 404s and the hero shows
-          just the blur. The optimizer still downscales the original to the
-          viewport, so the client payload stays small. Served by the
-          scraper-populated MinIO mirror, not the TMDB CDN. */}
+      {/* The backdrop source size (w1280 or original) is chosen per
+          requested width by the loader; see tmdbBackdropLoader. Served by
+          the scraper-populated MinIO mirror, not the TMDB CDN. */}
       <HeroParallax
-        backdropSrc={tmdbImageSrc(
-          screening.movie.backdropUrl ?? "",
-          "original"
-        )}
-        backdropFallbackSrc={
-          screening.movie.backdropUrl
-            ? tmdbCdnFallbackSrc(screening.movie.backdropUrl, "original")
-            : null
-        }
+        backdropUrl={screening.movie.backdropUrl ?? ""}
         posterSrc={
           screening.movie.posterUrl
             ? tmdbImageSrc(screening.movie.posterUrl, "w780")
@@ -169,7 +163,13 @@ const Hero: React.FC<HeroProps> = ({
             <div className="flex flex-col gap-6 md:flex-1 md:min-w-0">
               <CharsReveal
                 segments={[
-                  { text: `${formattedDate} · ${screening.screening.time} · ` },
+                  ...(hasStarted
+                    ? []
+                    : [
+                        {
+                          text: `${formattedDate} · ${screening.screening.time} · `,
+                        },
+                      ]),
                   {
                     text: screening.screening.cinema.name,
                     href: `/kina/${screening.screening.cinema.slug}`,

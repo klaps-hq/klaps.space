@@ -8,6 +8,8 @@ import CityField from "@/app/(home)/_components/screenings/city-field";
 import AddToCalendarButton from "@/components/common/add-to-calendar-button";
 import ShareButton from "@/components/common/share-button";
 import { usePreferredCity } from "@/contexts/city-context";
+import { useNow } from "@/hooks/use-now";
+import { dropPastScreenings } from "@/lib/screening-filters";
 import { groupScreeningsByCinema } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { formatDateLabel, cn, WARSAW_TZ } from "@/lib/utils";
@@ -189,8 +191,16 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
   movieSlug,
   movieDuration,
 }) => {
-  const { cityId, voivodeship, locationLabel, isHydrated, setCityId, cities } =
+  const { cityId, voivodeship, locationLabel, isHydrated, cities } =
     usePreferredCity();
+  const now = useNow();
+
+  // The page is cached (ISR), so its list can include showtimes that have
+  // started since; drop them once the client clock is known.
+  const upcomingScreenings = useMemo(
+    () => (now === null ? screenings : dropPastScreenings(screenings, now)),
+    [screenings, now]
+  );
 
   // Resolve voivodeship from the canonical cities list (the same source
   // the city select is built from) keyed by city id, rather than the
@@ -206,21 +216,28 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
   }, [cities]);
 
   // The page is statically cached with the nationwide list, so the
-  // preferred-location filter is applied here after hydration. A city
-  // or voivodeship with no showtimes renders an explicit empty state.
-  const visibleScreenings = useMemo(() => {
+  // preferred-location filter is applied here after hydration.
+  const locationScreenings = useMemo(() => {
     if (!isHydrated || (cityId === null && voivodeship === null)) {
-      return screenings;
+      return upcomingScreenings;
     }
     if (cityId !== null) {
-      return screenings.filter((s) => s.cinema.city.id === cityId);
+      return upcomingScreenings.filter((s) => s.cinema.city.id === cityId);
     }
-    return screenings.filter(
+    return upcomingScreenings.filter(
       (s) => voivodeshipByCityId.get(s.cinema.city.id) === voivodeship
     );
-  }, [screenings, cityId, voivodeship, isHydrated, voivodeshipByCityId]);
+  }, [upcomingScreenings, cityId, voivodeship, isHydrated, voivodeshipByCityId]);
 
-  const cityEmpty = screenings.length > 0 && visibleScreenings.length === 0;
+  // The stored location is a soft preference here: visitors often arrive
+  // from a cinema, city or search result elsewhere in the country, and an
+  // empty "no screenings" list would contradict the listing they just
+  // clicked. With nothing in their area, show every city with a notice.
+  const locationEmpty =
+    upcomingScreenings.length > 0 && locationScreenings.length === 0;
+  const visibleScreenings = locationEmpty
+    ? upcomingScreenings
+    : locationScreenings;
 
   const availableDates = [
     ...new Set(visibleScreenings.map((s) => s.date)),
@@ -241,7 +258,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (screenings.length === 0) {
+  if (upcomingScreenings.length === 0) {
     return (
       <div className="flex flex-col items-center text-center gap-8 py-8 md:py-12">
         <div className="flex flex-col items-center gap-3 md:gap-4">
@@ -278,32 +295,6 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
               className="size-3.5 shrink-0 transition-transform group-hover:translate-x-1"
             />
           </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // The chosen location has no showtimes for this movie: explicit empty
-  // state with the city select still available, plus a one-click reset.
-  if (cityEmpty) {
-    return (
-      <div className="flex flex-col">
-        <div className="flex justify-end">
-          <CityField />
-        </div>
-        <div className="flex flex-col items-center text-center gap-6 py-10 md:py-14">
-          <p className="text-xl md:text-2xl font-medium -tracking-[0.01em] leading-tight text-white max-w-[28ch]">
-            {voivodeship !== null
-              ? `Brak seansów tego filmu w województwie ${voivodeshipLocative(voivodeship)}.`
-              : `Brak seansów tego filmu w mieście ${locationLabel}.`}
-          </p>
-          <button
-            type="button"
-            onClick={() => setCityId(null)}
-            className="inline-flex items-center border border-white/30 hover:border-white hover:bg-white/[0.06] px-6 md:px-8 py-3 text-[11px] md:text-xs uppercase tracking-[0.28em] text-white transition-colors"
-          >
-            Pokaż wszystkie miasta
-          </button>
         </div>
       </div>
     );
@@ -350,6 +341,15 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
           <CityField className="w-full md:w-auto" />
         </div>
       </div>
+
+      {locationEmpty && (
+        <p className="pt-5 text-[11px] uppercase tracking-wider text-white/50">
+          {voivodeship !== null
+            ? `Brak seansów w województwie ${voivodeshipLocative(voivodeship)}. `
+            : `Brak seansów w mieście ${locationLabel}. `}
+          Pokazujemy wszystkie miasta.
+        </p>
+      )}
 
       <ul className="divide-y divide-white/10">
         {groups.map((cinemaScreenings) => (

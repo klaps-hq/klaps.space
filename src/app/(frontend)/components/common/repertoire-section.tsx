@@ -9,6 +9,7 @@ import {
 } from "@/contexts/screenings-transition-context";
 import { cn } from "@/lib/utils";
 import FilterBarFallback from "../../(home)/_components/screenings/filter-bar-fallback";
+import FilterPendingGrid from "./filter-pending-grid";
 import RepertoireFilterIsland from "./repertoire-filter-island";
 import RepertoireGrid from "./repertoire-grid";
 
@@ -77,7 +78,9 @@ const RepertoireSectionInner: React.FC<RepertoireSectionProps> = ({
         )}
       >
         {override === null ? (
-          children
+          <FilterPendingGrid followsLocation={Boolean(usePreferredLocation)}>
+            {children}
+          </FilterPendingGrid>
         ) : (
           <RepertoireGrid screenings={override} emptyState={emptyState} />
         )}
