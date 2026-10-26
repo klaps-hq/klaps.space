@@ -45,6 +45,15 @@ const nextConfig: NextConfig = {
         destination: "/seanse",
         permanent: true,
       },
+      // Short link for the Instagram bio: Instagram shows the first link's
+      // address on the profile, so the UTM-tagged URL lives here instead.
+      // Temporary, so the target (or its tags) can change without browsers
+      // caching the old one.
+      {
+        source: "/ig",
+        destination: "/?utm_source=instagram&utm_medium=bio",
+        permanent: false,
+      },
     ];
   },
   async rewrites() {
