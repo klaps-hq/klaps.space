@@ -68,7 +68,7 @@ const HeroFallback: React.FC = () => (
       <HeroNav />
       <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 lg:p-16">
         <div className="flex flex-col gap-6 max-w-4xl">
-          <h1 className="kx-fade-up text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[0.95]">
+          <h1 className="kx-fade-up text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[1.15]">
             Seanse specjalne i stare filmy w kinach studyjnych w Polsce
           </h1>
           <div
@@ -185,7 +185,9 @@ const Hero: React.FC<HeroProps> = ({
 
               <TitleReveal
                 text={screening.movie.title}
-                className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[0.95]"
+                // 1.15: room for Polish marks above and below capitals, see
+                // PAGE_HEADING_CLASSES.
+                className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[1.15]"
               />
 
               <div
