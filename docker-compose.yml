@@ -7,6 +7,12 @@ services:
       - .env
     expose:
       - "3000"
+    volumes:
+      # Optimized images survive redeploys: without this every deploy wipes
+      # the cache and the first visitors pay a cold resize per variant
+      # (over a second for hero backdrops). Only the image cache is kept;
+      # the rest of .next/cache (ISR pages, fetch cache) is tied to a build.
+      - image-cache:/app/.next/cache/images
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.klaps-frontend-${ENV_SUFFIX:-prod}.rule=Host(`${DOMAIN}`)"
@@ -26,6 +32,10 @@ services:
       - "traefik.http.middlewares.klaps-www-redirect-${ENV_SUFFIX:-prod}.redirectregex.permanent=true"
     networks:
       - traefik_public
+
+volumes:
+  image-cache:
+    name: klaps-frontend-image-cache-${ENV_SUFFIX:-prod}
 
 networks:
   traefik_public:

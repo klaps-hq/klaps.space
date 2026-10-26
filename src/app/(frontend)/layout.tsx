@@ -10,6 +10,7 @@ import WebVitalsReporter from "@/components/common/web-vitals-reporter";
 import { CityProvider } from "@/contexts/city-context";
 import { SOCIAL_PROFILE_URLS } from "@/constants";
 import { getCities } from "@/lib/cities";
+import { FILTER_PENDING_SCRIPT } from "@/lib/filter-pending";
 import { SITE_URL } from "@/lib/site-config";
 
 const inter = Inter({
@@ -71,8 +72,14 @@ export default async function RootLayout({
   }));
 
   return (
-    <html lang="pl">
+    // suppressHydrationWarning: the head script below may add the
+    // data-filter-pending attribute to <html> before React hydrates.
+    <html lang="pl" suppressHydrationWarning>
       <head>
+        {/* Must run before the body paints: hides cached default grids
+            that a stored location or URL filter is about to replace, and
+            starts the homepage's filtered fetch ahead of hydration. */}
+        <script dangerouslySetInnerHTML={{ __html: FILTER_PENDING_SCRIPT }} />
         <link
           rel="icon"
           type="image/png"

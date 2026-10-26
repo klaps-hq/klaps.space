@@ -5,7 +5,11 @@ import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Play } from "lucide-react";
 import { IMovie } from "@/interfaces/IMovies";
-import { tmdbCdnFallbackSrc, tmdbImageSrc } from "@/lib/tmdb";
+import {
+  tmdbBackdropLoader,
+  tmdbCdnFallbackSrc,
+  tmdbImageSrc,
+} from "@/lib/tmdb";
 import { formatDuration, getYouTubeEmbedUrl } from "@/lib/utils";
 import TrailerModal from "@/components/common/trailer-modal";
 import { PAGE_HEADING_CLASSES } from "@/components/ui/page-heading";
@@ -58,14 +62,19 @@ const MovieHero: React.FC<MovieHeroProps> = ({
             className="absolute inset-0"
             style={{ y: imageY, scale: imageScale }}
           >
-            {/* "original" source: the optimizer downscales it to the
-                viewport, so the client payload stays small while the image
-                is sharp on large screens (w1280 upscaled looked soft).
-                Originals are served by the scraper-populated MinIO mirror,
-                not the TMDB CDN. */}
+            {/* The loader resizes from the w1280 file up to 1280px wide and
+                from the original above that (w1280 upscaled looked soft on
+                large screens), so most visitors skip decoding a 4K original
+                on a cold optimizer cache. Served by the scraper-populated
+                MinIO mirror, not the TMDB CDN. */}
             <Image
               key={backdropSrc}
               src={backdropSrc}
+              loader={
+                movie.backdropUrl
+                  ? tmdbBackdropLoader(movie.backdropUrl, useBackdropCdn)
+                  : undefined
+              }
               alt={movie.title}
               fill
               sizes="100vw"

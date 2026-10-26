@@ -139,6 +139,21 @@
   }
 }
 
+/* Cached default grids that a stored location or URL filter is about to
+   replace (see lib/filter-pending.ts). The attribute is set on <html> by an
+   inline head script before first paint, so the nationwide list never
+   flashes before the visitor's region. visibility keeps the layout, so
+   nothing shifts when the filtered grid swaps in. */
+html[data-filter-pending="query"] [data-filter-default],
+html[data-filter-pending="location"] [data-filter-default="location"] {
+  visibility: hidden;
+}
+
+html[data-filter-pending="query"] [data-filter-loader],
+html[data-filter-pending="location"] [data-filter-loader="location"] {
+  display: flex;
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);

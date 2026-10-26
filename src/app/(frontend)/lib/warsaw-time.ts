@@ -6,14 +6,17 @@ import { WARSAW_TZ } from "./utils";
 // which corrupts every consumer that treats it as a real instant
 // (JSON-LD startDate, calendar exports, date formatting near midnight).
 
+// Built once: listings resolve hundreds of screening times per render, and
+// constructing an Intl formatter is far more expensive than using one.
+const OFFSET_FORMAT = new Intl.DateTimeFormat("en-US", {
+  timeZone: WARSAW_TZ,
+  timeZoneName: "longOffset",
+});
+
 // Real Europe/Warsaw UTC offset (in minutes) at the given instant.
 const offsetMinutesAt = (instant: Date): number => {
   const name =
-    new Intl.DateTimeFormat("en-US", {
-      timeZone: WARSAW_TZ,
-      timeZoneName: "longOffset",
-    })
-      .formatToParts(instant)
+    OFFSET_FORMAT.formatToParts(instant)
       .find((part) => part.type === "timeZoneName")?.value ?? "GMT+01:00";
   const match = name.match(/GMT([+-])(\d{2}):(\d{2})/);
   if (!match) return 60;
