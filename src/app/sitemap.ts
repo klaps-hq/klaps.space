@@ -171,6 +171,7 @@ const staticPages: MetadataRoute.Sitemap = [
   { url: `${SITE_URL}/mapa-witryny`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/o-projekcie`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/kontakt`, changeFrequency: "monthly", priority: 0.3 },
+  { url: `${SITE_URL}/dla-kin`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/faq`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/regulamin`, changeFrequency: "monthly", priority: 0.2 },
   { url: `${SITE_URL}/polityka-prywatnosci`, changeFrequency: "monthly", priority: 0.2 },

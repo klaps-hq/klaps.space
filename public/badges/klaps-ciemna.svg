@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="52" viewBox="0 0 200 52" role="img" aria-label="Repertuar na klaps.space">
+  <rect x="0.5" y="0.5" width="199" height="51" fill="#000000" stroke="#ffffff" stroke-opacity="0.25"/>
+  <polygon points="15,24 39,17 39,35 15,28" fill="#ffffff"/>
+  <line x1="52.5" y1="12" x2="52.5" y2="40" stroke="#ffffff" stroke-opacity="0.2"/>
+  <g font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" fill="#ffffff">
+    <text x="64" y="22" font-size="8" letter-spacing="1.8" fill-opacity="0.6">REPERTUAR NA</text>
+    <text x="64" y="39" font-size="17" font-weight="500" letter-spacing="-0.3">klaps.space</text>
+  </g>
+</svg>

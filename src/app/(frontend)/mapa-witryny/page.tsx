@@ -60,6 +60,7 @@ const INFO_LINKS = [
   { label: "O projekcie", href: "/o-projekcie" },
   { label: "FAQ", href: "/faq" },
   { label: "Kontakt", href: "/kontakt" },
+  { label: "Dla kin", href: "/dla-kin" },
 ] as const;
 
 const LEGAL_LINKS = [
