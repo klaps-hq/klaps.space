@@ -56,7 +56,10 @@ const MovieHero: React.FC<MovieHeroProps> = ({
 
   return (
     <section ref={ref} className="relative w-full bg-black overflow-hidden">
-      <div className="relative h-[85vh] min-h-[640px]">
+      {/* min-h, not a fixed height: a long title and description grow the
+          hero instead of pushing the title up under the site header on
+          short viewports. */}
+      <div className="relative flex flex-col min-h-[max(85vh,640px)]">
         {backdropSrc && (
           <motion.div
             className="absolute inset-0"
@@ -108,7 +111,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({
         </div>
 
         <motion.div
-          className="absolute inset-0 z-[4] flex flex-col justify-end px-6 md:px-12 lg:px-16 pb-12 md:pb-16"
+          className="relative z-[4] flex flex-1 flex-col justify-end px-6 md:px-12 lg:px-16 pt-28 md:pt-32 pb-12 md:pb-16"
           style={{ y: contentY }}
         >
           {/* Entrance reveals are pure CSS (globals.css .kx-*) so the hero

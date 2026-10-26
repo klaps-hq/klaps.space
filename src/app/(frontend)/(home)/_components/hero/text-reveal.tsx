@@ -55,11 +55,12 @@ export const TitleReveal: React.FC<TitleRevealProps> = ({
         // whitespace-nowrap keeps a grouped orphan glued to its neighbour.
         <span key={gIdx} className="inline-block whitespace-nowrap">
           {group.map((word, i) => (
-            // Top padding + matching negative margin keep the slide-up mask
-            // from clipping tall diacritics (Ś, Ć, Ó) without shifting layout.
+            // Padding + matching negative margins keep the slide-up mask from
+            // clipping diacritics above (Ś, Ć, Ó) and ogoneks below (Ę, Ą)
+            // without shifting layout.
             <span
               key={`${word}-${i}`}
-              className="inline-block overflow-hidden pt-[0.2em] -mt-[0.2em] pb-[0.08em] mr-[0.25em] align-bottom"
+              className="inline-block overflow-hidden pt-[0.2em] -mt-[0.2em] pb-[0.25em] -mb-[0.17em] mr-[0.25em] align-bottom"
             >
               <span
                 className="kx-rise inline-block"
