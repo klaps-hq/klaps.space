@@ -5,6 +5,7 @@ import { getCityBySlug } from "@/lib/cities";
 import { getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
 import {
+  fetchRecentScreenings,
   getRecentScreenings,
   getScreenings,
   getScreeningsLastUpdated,
@@ -129,9 +130,19 @@ export const generateMetadata = async ({
       : `Kina i seanse specjalne ${prep} ${city.nameDeclinated}. Aktualna klasyka filmowa, retrospektywy i pokazy specjalne.`;
   const url = `${SITE_URL}/miasta/${city.slug}`;
 
-  // A city without cinemas is thin content; keep it out of the index.
+  // A city without cinemas is thin content; keep it out of the index. So is
+  // one whose cinemas have nothing upcoming and screened nothing in the last
+  // RECENT_SCREENINGS_DAYS (same rule as cinema pages, and the API leaves
+  // the same cities out of the sitemap). Same call as the page body, deduped
+  // by the fetch cache; a failed call never counts as empty.
   // Query-param duplicates (filters) are handled by the canonical alone.
-  const noindex = cinemasCount === 0;
+  const recentScreenings =
+    screeningsCount === 0
+      ? await fetchRecentScreenings({ cityId: city.id.toString() }).catch(
+          () => null
+        )
+      : null;
+  const noindex = cinemasCount === 0 || recentScreenings?.length === 0;
 
   return {
     title,

@@ -2,6 +2,7 @@ import { getCityBySlug } from "@/lib/cities";
 import { getCinemas } from "@/lib/cinemas";
 import { getScreeningsLastUpdated } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
+import { pluralPl } from "@/lib/seo";
 import { ICity } from "@/interfaces/ICities";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import JsonLd from "@/components/common/json-ld";
@@ -22,7 +23,7 @@ const buildCityJsonLd = (
   "@type": "CollectionPage",
   name: `Kina i seanse w ${city.nameDeclinated}`,
   url: `${SITE_URL}/miasta/${city.slug}`,
-  description: `${cinemasCount} kin i ${screeningsCount} seansów specjalnych w ${city.nameDeclinated}.`,
+  description: `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "seans specjalny", "seanse specjalne", "seansów specjalnych")} w ${city.nameDeclinated}.`,
   // Freshness signal for AI Overviews: newest screening `updatedAt` for this
   // city (mirrors the visible "Repertuar zaktualizowano" note), i.e. a real
   // data change rather than render time. Omitted when the date is unknown.
