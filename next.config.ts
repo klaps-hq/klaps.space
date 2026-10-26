@@ -45,6 +45,19 @@ const nextConfig: NextConfig = {
         destination: "/seanse",
         permanent: true,
       },
+      // Movies the scraper had matched to the wrong TMDB title; fixed in the
+      // database together with their slugs, so the old URLs move for good.
+      {
+        source: "/filmy/ziemia-obiecana-1927",
+        destination: "/filmy/ziemia-obiecana-1975",
+        permanent: true,
+      },
+      {
+        source:
+          "/filmy/die-abtei-des-verbrechens-umberto-ecos-der-name-der-rose-wird-verfilmt-1986",
+        destination: "/filmy/imie-rozy-1986",
+        permanent: true,
+      },
       // Short link for the Instagram bio: Instagram shows the first link's
       // address on the profile, so the UTM-tagged URL lives here instead.
       // Temporary, so the target (or its tags) can change without browsers

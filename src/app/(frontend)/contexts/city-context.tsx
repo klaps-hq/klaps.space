@@ -194,10 +194,12 @@ export const CityProvider = ({ children, cities }: CityProviderProps) => {
         }
         const queryString = params.toString();
         const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+        // The URL change alone re-renders the only cookie-reading page
+        // (/seanse) on the server. No router.refresh(): in Next 16 a refresh
+        // always scrolls to the top, which threw visitors off the filters
+        // they had just used. Every other page filters client-side.
         router.replace(newUrl, { scroll: false });
       }
-
-      router.refresh();
     },
     [pathname, router]
   );
