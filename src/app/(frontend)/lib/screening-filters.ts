@@ -1,4 +1,5 @@
 import { IScreening, IScreeningGroup } from "@/interfaces/IScreenings";
+import { wallTimeToInstant } from "./warsaw-time";
 
 export interface ScreeningGroupFilters {
   genreIds?: number[];
@@ -87,3 +88,41 @@ export const filterScreeningGroups = (
     })
     .filter((group) => group.screenings.length > 0);
 };
+
+/**
+ * True once the screening has started. The API returns the whole current
+ * day (from midnight), and cached pages outlive their data, so listings
+ * would otherwise keep showing showtimes that are already over.
+ */
+const hasScreeningStarted = (
+  screening: Pick<IScreening, "dateTime">,
+  now: number
+): boolean => wallTimeToInstant(screening.dateTime).getTime() <= now;
+
+/** Screenings that have not started yet, relative to `now` (epoch ms). */
+export const dropPastScreenings = <T extends Pick<IScreening, "dateTime">>(
+  screenings: T[],
+  now: number = Date.now()
+): T[] => screenings.filter((s) => !hasScreeningStarted(s, now));
+
+/**
+ * The group narrowed to upcoming screenings, with its summary recomputed,
+ * or null when nothing upcoming is left. Returns the same object when no
+ * screening was dropped, so memoized consumers do not re-render.
+ */
+export const upcomingScreeningGroup = (
+  group: IScreeningGroup,
+  now: number = Date.now()
+): IScreeningGroup | null => {
+  const screenings = dropPastScreenings(group.screenings, now);
+  if (screenings.length === group.screenings.length) return group;
+  if (screenings.length === 0) return null;
+  return rebuildGroup(group, screenings);
+};
+
+/** upcomingScreeningGroup over a list, dropping groups with nothing left. */
+export const dropPastScreeningGroups = (
+  groups: IScreeningGroup[],
+  now: number = Date.now()
+): IScreeningGroup[] =>
+  groups.flatMap((group) => upcomingScreeningGroup(group, now) ?? []);

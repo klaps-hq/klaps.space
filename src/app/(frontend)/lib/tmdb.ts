@@ -1,3 +1,5 @@
+import type { ImageLoader } from "next/image";
+
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
 
 // Public MinIO mirror populated by the scraper (single writer), e.g.
@@ -63,6 +65,38 @@ export function tmdbCdnFallbackSrc(
   }
   return tmdbImageUrl(path, size);
 }
+
+// Optimizer widths up to this value are resized from the w1280 backdrop
+// instead of the original: decoding a 4K original on a cold optimizer cache
+// costs over a second of hero TTFB, a 1280px source a fraction of that.
+// Only wider viewports pay for the original, where w1280 would look soft.
+const BACKDROP_W1280_MAX_WIDTH = 1280;
+
+// Bare TMDB path ("/abc.jpg") from a stored backdrop value; absolute TMDB
+// URLs drop their base and size segment. Anything else passes through.
+const toTmdbPath = (value: string): string => {
+  if (!value.startsWith(`${TMDB_IMAGE_BASE_URL}/`)) return value;
+  const rest = value.slice(TMDB_IMAGE_BASE_URL.length + 1);
+  const slash = rest.indexOf("/");
+  return slash > 0 ? rest.slice(slash) : value;
+};
+
+/**
+ * next/image loader for full-bleed TMDB backdrops: picks the w1280 or the
+ * original file as the optimizer source depending on the requested width
+ * (see BACKDROP_W1280_MAX_WIDTH). With `cdn` set it targets the TMDB CDN
+ * instead of the mirror, for the retry after a mirror miss.
+ */
+export const tmdbBackdropLoader =
+  (backdropUrl: string, cdn = false): ImageLoader =>
+  ({ width, quality }) => {
+    const path = toTmdbPath(backdropUrl);
+    const size: TmdbImageSize =
+      width <= BACKDROP_W1280_MAX_WIDTH ? "w1280" : "original";
+    const src =
+      (cdn ? tmdbCdnFallbackSrc(path, size) : null) ?? tmdbImageSrc(path, size);
+    return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality ?? 75}`;
+  };
 
 /**
  * Resolve a person/poster image into a usable absolute URL.

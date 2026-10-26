@@ -4,12 +4,11 @@ import React from "react";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
 import { formatDateLabel, formatDatePL } from "@/lib/utils";
+import { useNow } from "@/hooks/use-now";
+import { dropPastScreeningGroups } from "@/lib/screening-filters";
 import EmptyState from "@/components/common/empty-state";
 import ScreeningCard from "./screening-card";
 import ScreeningsEmptyState from "./empty-state";
-
-// Roughly the first row across breakpoints; see RepertoireGrid.
-const PRIORITY_POSTERS = 6;
 
 interface ScreeningsGridProps {
   screenings: IScreeningGroup[];
@@ -58,7 +57,13 @@ const ScreeningsGrid: React.FC<ScreeningsGridProps> = ({
   search,
   interactive = false,
 }) => {
-  if (screenings.length === 0) {
+  // Same started-showtime pruning as ScreeningCard, done here as well so a
+  // grid whose every movie has already played falls to the empty state.
+  const now = useNow();
+  const visibleScreenings =
+    now === null ? screenings : dropPastScreeningGroups(screenings, now);
+
+  if (visibleScreenings.length === 0) {
     // Server-rendered default view: a static, hook-free empty state so the
     // page can be prerendered. (At build time the upstream data is empty, so
     // this branch is what renders into the static HTML.)
@@ -87,12 +92,11 @@ const ScreeningsGrid: React.FC<ScreeningsGridProps> = ({
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-12">
-      {screenings.map((group, index) => (
-        <ScreeningCard
-          key={group.movie.id}
-          group={group}
-          priority={index < PRIORITY_POSTERS}
-        />
+      {/* No priority posters: on the homepage this grid sits below a
+          full-viewport hero, and eager high-priority posters would compete
+          with the hero image (the actual LCP element) for bandwidth. */}
+      {visibleScreenings.map((group) => (
+        <ScreeningCard key={group.movie.id} group={group} />
       ))}
     </div>
   );

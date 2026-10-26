@@ -9,6 +9,7 @@ import {
   useScreeningsTransition,
 } from "@/contexts/screenings-transition-context";
 import { cn } from "@/lib/utils";
+import FilterPendingGrid from "@/components/common/filter-pending-grid";
 import SectionHeader from "./section-header";
 import ScreeningsGrid from "./screenings-grid";
 import FilterBarFallback from "./filter-bar-fallback";
@@ -85,11 +86,17 @@ const HomeScreeningsInner: React.FC<HomeScreeningsProps> = ({
       <div
         className={cn(
           "px-6 md:px-12 lg:px-16 py-12 md:py-20 transition-opacity duration-200",
-          (isPending || isUpdating) && "opacity-50 pointer-events-none"
+          (isPending || (isUpdating && !showingDefault)) &&
+            "opacity-50 pointer-events-none"
         )}
       >
         {showingDefault ? (
-          children
+          // While the first filtered result (stored location, URL filters)
+          // loads, the default grid is hidden behind a loader rather than
+          // shown and then swapped out.
+          <FilterPendingGrid followsLocation loading={isUpdating}>
+            {children}
+          </FilterPendingGrid>
         ) : (
           <ScreeningsGrid
             screenings={override.screenings}

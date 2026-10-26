@@ -6,6 +6,7 @@ import {
 } from "@/interfaces/IScreenings";
 import { IMovie, PaginatedResponse } from "@/interfaces/IMovies";
 import { apiFetch } from "./client";
+import { dropPastScreeningGroups, dropPastScreenings } from "./screening-filters";
 
 interface GetScreeningsParams {
   cityId?: string | null;
@@ -40,6 +41,10 @@ interface GetLastUpdatedParams {
  * Upcoming screening groups. Throws on failure, for callers where an empty
  * list drives a decision (see fetchRecentScreenings); same URL as
  * getScreenings, so the two share one cached fetch.
+ *
+ * Every screenings call below drops showtimes that already started: the API
+ * range begins at midnight, so without this a page rendered at 18:00 would
+ * still list the 10:00 screening of the same day.
  */
 export const fetchScreenings = async (
   params: GetScreeningsParams = {}
@@ -59,7 +64,9 @@ export const fetchScreenings = async (
     },
   });
 
-  return Array.isArray(response) ? response : [...response.data];
+  return dropPastScreeningGroups(
+    Array.isArray(response) ? response : [...response.data]
+  );
 };
 
 export const getScreenings = async (
@@ -86,7 +93,9 @@ export const getMovieScreenings = async (
     }
   );
 
-  return Array.isArray(response) ? response : [...response.data];
+  return dropPastScreenings(
+    Array.isArray(response) ? response : [...response.data]
+  );
 };
 
 export const getPaginatedScreenings = async (
@@ -109,7 +118,8 @@ export const getPaginatedScreenings = async (
       },
     });
 
-    return response;
+    if (Array.isArray(response)) return dropPastScreeningGroups(response);
+    return { ...response, data: dropPastScreeningGroups([...response.data]) };
   } catch (error) {
     console.warn("Falling back to empty paginated screenings list:", error);
     return {

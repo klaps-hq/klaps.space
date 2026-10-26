@@ -3,16 +3,23 @@
 import React, { useRef, useState } from "react";
 import { getImageProps } from "next/image";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import {
+  tmdbBackdropLoader,
+  tmdbCdnFallbackSrc,
+  tmdbImageSrc,
+} from "@/lib/tmdb";
 
 interface HeroParallaxProps {
-  backdropSrc: string;
+  // Stored TMDB backdrop value; tmdbBackdropLoader picks the source size
+  // (w1280 or original) per requested width.
+  backdropUrl: string;
   // Portrait poster shown on mobile, where the wide backdrop would crop to an
   // unflattering center strip. Falls back to the backdrop when absent.
   posterSrc?: string | null;
-  // TMDB CDN equivalents, used once the mirror answers with an error: the
+  // TMDB CDN equivalent, used once the mirror answers with an error: the
   // scraper mirrors newly added movies only, so files can be missing and the
-  // hero would otherwise sit on its blur placeholder alone.
-  backdropFallbackSrc?: string | null;
+  // hero would otherwise sit on its blur placeholder alone. The backdrop
+  // derives its own CDN fallback from backdropUrl.
   posterFallbackSrc?: string | null;
   // Tiny base64 previews (lib/blur.ts) shown instantly while the full
   // images stream in; without them the placeholder stays empty.
@@ -27,9 +34,8 @@ interface HeroParallaxProps {
 const MOBILE_MEDIA = "(max-width: 767px)";
 
 const HeroParallax: React.FC<HeroParallaxProps> = ({
-  backdropSrc,
+  backdropUrl,
   posterSrc,
-  backdropFallbackSrc,
   posterFallbackSrc,
   backdropBlurDataUrl,
   posterBlurDataUrl,
@@ -38,9 +44,12 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [useFallback, setUseFallback] = useState(false);
+  const backdropFallbackSrc = tmdbCdnFallbackSrc(backdropUrl, "original");
   const hasFallback = Boolean(backdropFallbackSrc || posterFallbackSrc);
-  const backdrop =
-    useFallback && backdropFallbackSrc ? backdropFallbackSrc : backdropSrc;
+  const useBackdropFallback = useFallback && backdropFallbackSrc !== null;
+  const backdrop = useBackdropFallback
+    ? backdropFallbackSrc
+    : tmdbImageSrc(backdropUrl, "original");
   const poster =
     useFallback && posterFallbackSrc ? posterFallbackSrc : posterSrc;
   const prefersReducedMotion = useReducedMotion();
@@ -61,6 +70,7 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
   // emits loading="lazy".
   const { props: backdropProps } = getImageProps({
     src: backdrop,
+    loader: tmdbBackdropLoader(backdropUrl, useBackdropFallback),
     alt,
     fill: true,
     sizes: "100vw",
