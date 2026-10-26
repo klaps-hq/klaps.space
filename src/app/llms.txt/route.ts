@@ -49,6 +49,7 @@ Klaps to ogólnopolski przewodnik po seansach specjalnych w kinach studyjnych: k
 - [Gatunki](${SITE_URL}/gatunki): filmy w kinach według gatunków
 - [FAQ](${SITE_URL}/faq): najczęstsze pytania o serwis i kina studyjne
 - [O projekcie](${SITE_URL}/o-projekcie): czym jest Klaps i jak działa
+- [Dla kin](${SITE_URL}/dla-kin): darmowa odznaka z linkiem do strony kina na klaps.space
 
 ## Miasta z kinami studyjnymi
 

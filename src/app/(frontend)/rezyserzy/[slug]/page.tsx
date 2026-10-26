@@ -99,6 +99,10 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
 
   const movies = moviesResponse.data;
   const moviesCount = moviesResponse.meta.total || movies.length;
+  // Only films in the repertoire get a link from the filmography: the rest
+  // render noindex, and linking them chained crawlers through pages Google
+  // will not index (see RelatedMovies).
+  const screeningSlugs = new Set(screenings.map((group) => group.movie.slug));
 
   return (
     <>
@@ -210,7 +214,10 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
               </h2>
             </div>
             <div className="lg:col-span-8">
-              <RelatedMovies movies={[...movies]} />
+              <RelatedMovies
+                movies={[...movies]}
+                linkableSlugs={screeningSlugs}
+              />
             </div>
           </div>
         </section>
