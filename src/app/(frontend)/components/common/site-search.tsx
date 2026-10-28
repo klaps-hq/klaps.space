@@ -6,6 +6,7 @@ import { Search, X } from "lucide-react";
 import { ISearchResults } from "@/interfaces/ISearch";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 const MIN_QUERY_LENGTH = 2;
 const SEARCH_DEBOUNCE_DELAY_MS = 300;
@@ -56,6 +57,8 @@ const SiteSearch: React.FC<SiteSearchProps> = ({ mode, className }) => {
       return;
     }
 
+    trackEvent("search", { search_term: trimmed, search_type: mode });
+
     const controller = new AbortController();
 
     fetch(`/api/search?query=${encodeURIComponent(trimmed)}`, {
@@ -75,7 +78,7 @@ const SiteSearch: React.FC<SiteSearchProps> = ({ mode, className }) => {
       });
 
     return () => controller.abort();
-  }, [debouncedQuery]);
+  }, [debouncedQuery, mode]);
 
   // Click outside the search closes the dropdown.
   useEffect(() => {

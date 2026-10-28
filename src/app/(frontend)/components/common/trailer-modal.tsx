@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { AnimatePresence, m } from "framer-motion";
 import { X } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 interface TrailerModalProps {
   open: boolean;
@@ -17,6 +18,10 @@ const TrailerModal: React.FC<TrailerModalProps> = ({
   movieTitle,
   onClose,
 }) => {
+  useEffect(() => {
+    if (open) trackEvent("trailer_open", { item_name: movieTitle });
+  }, [open, movieTitle]);
+
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (e: KeyboardEvent) => {
