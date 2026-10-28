@@ -1,5 +1,5 @@
 import { getDirectorBySlug, getMoviesByDirector } from "@/lib/directors";
-import { SITE_URL } from "@/lib/site-config";
+import { SITE_URL, directorEntityId } from "@/lib/site-config";
 import { newestUpdatedAtIso } from "@/lib/seo";
 import { tmdbPhotoSrc } from "@/lib/tmdb";
 import { IDirector } from "@/interfaces/IDirectors";
@@ -19,6 +19,7 @@ const buildDirectorJsonLd = (
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Person",
+    "@id": directorEntityId(director.slug),
     name: director.name,
     jobTitle: "Reżyser",
     url: `${SITE_URL}/rezyserzy/${director.slug}`,
