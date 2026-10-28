@@ -20,6 +20,7 @@ import {
   pluralPl,
   wPrep,
 } from "@/lib/seo";
+import { todayDigest, todayDigestPhrases } from "@/lib/live-meta";
 import { cityFallbackIntro } from "@/lib/listing-copy";
 import { splitByChain } from "@/lib/cinema-chains";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
@@ -171,10 +172,19 @@ export const generateMetadata = async ({
   const firstTitle = screeningGroups[0]?.movie.title;
   const titlePart = firstTitle ? `, m.in. „${firstTitle}”` : "";
   const lead = `${venues} ${prep} ${city.nameDeclinated}`;
+  // Today's screenings lead when there are any: a live, dated fact that
+  // keeps the snippet unique and current (see live-meta).
+  const digest = todayDigest(screeningGroups);
+  const todayCandidates = digest
+    ? todayDigestPhrases(digest).map(
+        (phrase) => `${lead}: ${phrase}. Sprawdź repertuar.`
+      )
+    : [];
   // Without upcoming screenings the counts only repeat the venue names.
   const candidates =
     screeningsCount > 0
       ? [
+          ...todayCandidates,
           `${lead}: ${counts}${titlePart}. Seanse specjalne, klasyka i retrospektywy, sprawdź repertuar.`,
           `${lead}: ${counts}${titlePart}. Sprawdź repertuar.`,
           `${lead}: ${counts}. Sprawdź repertuar.`,

@@ -30,6 +30,7 @@ import {
   isUsableCinemaDescription,
 } from "@/lib/listing-copy";
 import { isChainCinema } from "@/lib/cinema-chains";
+import { todayDigest, todayDigestPhrases } from "@/lib/live-meta";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
@@ -80,8 +81,25 @@ const CINEMA_LINK_CLASS =
 const buildCinemaDescription = (
   cinemaName: string,
   cityName: string,
-  screeningGroups: { movie: { title: string }; screenings: unknown[] }[]
+  screeningGroups: {
+    movie: { title: string };
+    screenings: { dateTime: string }[];
+  }[]
 ): string => {
+  // Today's screenings first: a live, dated fact beats the generic counts
+  // whenever there is one (see live-meta).
+  const digest = todayDigest(screeningGroups);
+  if (digest) {
+    const lead = `Repertuar kina ${cinemaName} ${inPlace(cityName)}`;
+    const fitting = todayDigestPhrases(digest)
+      .flatMap((phrase) => [
+        `${lead}: ${phrase}. Seanse specjalne i klasyka filmowa.`,
+        `${lead}: ${phrase}.`,
+      ])
+      .find((text) => text.length <= MAX_DESCRIPTION_LENGTH);
+    if (fitting) return fitting;
+  }
+
   const moviesCount = screeningGroups.length;
   if (moviesCount === 0) {
     const full = `Repertuar kina ${cinemaName} ${inPlace(cityName)}: seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź, co aktualnie grają.`;
