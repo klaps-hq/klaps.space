@@ -84,6 +84,8 @@ const SCREENING_FILTER_PARAM_KEYS = [
   "dateFrom",
   "dateTo",
   "search",
+  // "Moje kina": the visitor's starred cinemas, a per-browser view.
+  "moje",
 ] as const;
 
 const isNonEmptyParam = (value: unknown): boolean =>

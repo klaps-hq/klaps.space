@@ -13,11 +13,15 @@ import {
 const MAX_DESCRIPTION_LENGTH = 160;
 import Footer from "@/app/(home)/_components/footer";
 import SiteHeader from "@/components/common/site-header";
+import NextScreening from "@/components/common/next-screening";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import MovieHero from "./_components/movie-hero";
 import MovieAbout from "./_components/movie-about";
 import MovieScreenings from "./_components/movie-screenings";
+import MovieScreeningCities from "./_components/movie-screening-cities";
 import RelatedMovies from "./_components/related-movies";
+import { movieNextScreeningItems } from "@/lib/next-screening-items";
+import { pickRelatedMovies } from "@/lib/related-movies";
 
 // ISR: cached HTML revalidated every 5 minutes. Reading cookies or
 // searchParams here would force per-request rendering - the preferred-city
@@ -137,18 +141,20 @@ const MoviePage = async ({ params }: MoviePageProps) => {
   // backdrop streams in; precomputed by the scraper, served by the API.
   const backdropBlurDataUrl = movie.backdropBlurDataUrl ?? null;
 
-  // Internal linking: up to 6 movies sharing the primary genre, taken from
-  // the screenings feed rather than the catalogue. Catalogue picks were
-  // mostly movies without screenings, i.e. noindex pages, so this block
-  // fed crawlers an endless chain of pages Google will not index. Movies
-  // that are screening are the indexable ones, and the more useful pick.
-  const primaryGenre = movie.genres[0];
-  const relatedMovies = primaryGenre
-    ? (await getScreenings({ genreId: primaryGenre.id.toString() }))
-        .map((group) => group.movie)
-        .filter((related) => related.id !== movie.id)
-        .slice(0, 6)
-    : [];
+  // Internal linking: up to 6 similar movies, taken from the screenings feed
+  // rather than the catalogue. Catalogue picks were mostly movies without
+  // screenings, i.e. noindex pages, so this block fed crawlers an endless
+  // chain of pages Google will not index. Movies that are screening are the
+  // indexable ones, and the more useful pick. See pickRelatedMovies for how
+  // they are ranked.
+  const relatedMovies =
+    movie.genres.length > 0
+      ? pickRelatedMovies(
+          movie,
+          new Set(screenings.map((s) => s.cinema.city.name)),
+          await getScreenings()
+        )
+      : [];
 
   return (
     <main className="bg-black min-h-screen text-white">
@@ -181,10 +187,19 @@ const MoviePage = async ({ params }: MoviePageProps) => {
           />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-4 flex flex-col gap-8 md:gap-10">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white">
                 Seanse
               </h2>
+              <NextScreening
+                preferCity
+                items={movieNextScreeningItems(screenings, movie)}
+              />
+              <MovieScreeningCities
+                movieTitle={movie.title}
+                productionYear={movie.productionYear}
+                screenings={screenings}
+              />
             </div>
             <div className="lg:col-span-8">
               <MovieScreenings
@@ -218,11 +233,9 @@ const MoviePage = async ({ params }: MoviePageProps) => {
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white">
                 Podobne filmy
               </h2>
-              {primaryGenre && (
-                <p className="mt-4 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
-                  Gatunek: {primaryGenre.name}
-                </p>
-              )}
+              <p className="mt-4 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
+                Gatunek, epoka i miasta, teraz w kinach
+              </p>
             </div>
             <div className="lg:col-span-8">
               <RelatedMovies movies={relatedMovies} />

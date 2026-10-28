@@ -38,6 +38,7 @@ const FILTER_PARAM_KEYS = [
   "dateFrom",
   "dateTo",
   "search",
+  "moje",
 ];
 
 const hasFilterParam = (search: string): boolean => {

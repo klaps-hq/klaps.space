@@ -36,6 +36,12 @@ import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
 import RepertoireGrid from "@/components/common/repertoire-grid";
 import RecentRepertoire from "@/components/common/recent-repertoire";
+import NearbyRepertoire from "@/components/common/nearby-repertoire";
+import NextScreening from "@/components/common/next-screening";
+import SaveCinemaButton from "@/components/common/save-cinema-button";
+import { cinemaNextScreeningItems } from "@/lib/next-screening-items";
+import ListingFaq from "@/components/common/listing-faq";
+import { buildCinemaFaq } from "@/lib/listing-faq";
 import Footer from "../../(home)/_components/footer";
 import CinemaMapLazy from "./_components/cinema-map-lazy";
 
@@ -97,7 +103,7 @@ const buildCinemaDescription = (
   // Add an example title only when it fits the SERP snippet budget.
   const firstTitle = screeningGroups[0]?.movie.title;
   const withTitle = firstTitle
-    ? `${base}, m.in. „${firstTitle}"${suffix}`
+    ? `${base}, m.in. „${firstTitle}”${suffix}`
     : `${base}${suffix}`;
 
   return withTitle.length <= MAX_DESCRIPTION_LENGTH
@@ -278,7 +284,20 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                   </React.Fragment>
                 ))}
               </span>
+              <SaveCinemaButton
+                className="mt-2"
+                cinema={{
+                  id: cinema.id,
+                  slug: cinema.slug,
+                  name: cinema.name,
+                  cityName: cinema.city.name,
+                }}
+              />
             </div>
+            <NextScreening
+              className="mt-8 md:mt-10 max-w-[60ch]"
+              items={cinemaNextScreeningItems(screenings)}
+            />
             {isUsableCinemaDescription(
               cinema.description,
               isChainCinema(cinema.name)
@@ -338,21 +357,31 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
         <RepertoireGrid
           screenings={screenings}
           emptyState={
-            <EmptyState
-              description={
-                <>
-                  {/* Bare name, no "Kino" prefix: many venues are already
-                      called "Kino X" and the prefix would double it. */}
-                  {cinema.name} nie ma teraz zapowiedzianych seansów
-                  specjalnych. Repertuar uzupełniamy na bieżąco, zajrzyj
-                  ponownie wkrótce.
-                </>
-              }
-              cta={{
-                href: `/miasta/${cinema.city.slug}`,
-                label: `Inne kina ${inPlace(cityForCopy)}`,
-              }}
-            />
+            // A wrapper element, not a fragment: a multi-child fragment
+            // crosses into the client RepertoireSection as an unkeyed array.
+            <div>
+              <EmptyState
+                className="pb-12 md:pb-16"
+                description={
+                  <>
+                    {/* Bare name, no "Kino" prefix: many venues are already
+                        called "Kino X" and the prefix would double it. */}
+                    {cinema.name} nie ma teraz zapowiedzianych seansów
+                    specjalnych. Repertuar uzupełniamy na bieżąco, zajrzyj
+                    ponownie wkrótce.
+                  </>
+                }
+                cta={{
+                  href: `/miasta/${cinema.city.slug}`,
+                  label: `Inne kina ${inPlace(cityForCopy)}`,
+                }}
+              />
+              <NearbyRepertoire
+                voivodeship={cinema.city.voivodeship}
+                cityId={cinema.city.id}
+                excludeCinemaId={cinema.id}
+              />
+            </div>
           }
         />
       </RepertoireSection>
@@ -402,6 +431,19 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
           </div>
         </section>
       )}
+
+      <ListingFaq
+        heading={<>Pytania o&nbsp;{cinema.name}</>}
+        questions={buildCinemaFaq({
+          cinemaName: cinema.name,
+          street: cinema.street,
+          cityName: cinema.city.name,
+          cityLocative: cityForCopy,
+          screenings,
+          recent: recentScreenings,
+          siblingNames: siblingCinemas.map((item) => item.name),
+        })}
+      />
     </>
   );
 };

@@ -16,6 +16,7 @@ import {
   BASE_OPEN_GRAPH,
   NOINDEX_FOLLOW,
   formatPlDate,
+  inPlace,
   pluralPl,
   wPrep,
 } from "@/lib/seo";
@@ -28,6 +29,9 @@ import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
 import RepertoireGrid from "@/components/common/repertoire-grid";
 import RecentRepertoire from "@/components/common/recent-repertoire";
+import NearbyRepertoire from "@/components/common/nearby-repertoire";
+import ListingFaq from "@/components/common/listing-faq";
+import { buildCityFaq } from "@/lib/listing-faq";
 import Footer from "../../(home)/_components/footer";
 
 interface CinemaCardsProps {
@@ -146,17 +150,44 @@ export const generateMetadata = async ({
     screeningsCount > 0
       ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}`
       : `${cinemasCount} ${pluralPl(cinemasCount, "kino z seansami specjalnymi", "kina z seansami specjalnymi", "kin z seansami specjalnymi")}`;
+  // Lead with what only this city has: its venue names (arthouse first) and
+  // a current title. Starting with the counts made ~40% of city snippets
+  // open with the same words ("1 kino z seansami specjalnymi..."), so they
+  // read as clones on the results page (audit, October 2026).
   // Same degradation as the title: two-word city names ("Ostrowcu
   // Świętokrzyskim") pushed the full form past the snippet limit on ~45
-  // pages (Ahrefs, October 2026), so Google cut it mid-sentence. The
-  // shorter tail keeps the counts and the call to action whole.
-  const descriptionFull = `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne, klasyka filmowa i retrospektywy w kinach studyjnych i sieciowych - sprawdź aktualny repertuar.`;
+  // pages (Ahrefs, October 2026), so Google cut it mid-sentence. The first
+  // candidate that fits wins.
+  const { independent, chain } = splitByChain(
+    cinemasResponse?.data.flatMap((g) => g.cinemas) ?? []
+  );
+  const venueNames = [...independent, ...chain].map((c) => c.name);
+  const venues =
+    venueNames.length > 2
+      ? `${venueNames.slice(0, 2).join(", ")} i inne kina`
+      : venueNames.join(" i ");
+  const firstTitle = screeningGroups[0]?.movie.title;
+  const titlePart = firstTitle ? `, m.in. „${firstTitle}”` : "";
+  const lead = `${venues} ${prep} ${city.nameDeclinated}`;
+  // Without upcoming screenings the counts only repeat the venue names.
+  const candidates =
+    screeningsCount > 0
+      ? [
+          `${lead}: ${counts}${titlePart}. Seanse specjalne, klasyka i retrospektywy, sprawdź repertuar.`,
+          `${lead}: ${counts}${titlePart}. Sprawdź repertuar.`,
+          `${lead}: ${counts}. Sprawdź repertuar.`,
+          `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`,
+        ]
+      : [
+          `${lead}: seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź aktualny repertuar.`,
+          `${lead}: seanse specjalne i klasyka filmowa. Sprawdź repertuar.`,
+          `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`,
+        ];
   const description =
     cinemasCount === 0
       ? `Kina i seanse specjalne ${prep} ${city.nameDeclinated}. Aktualna klasyka filmowa, retrospektywy i pokazy specjalne.`
-      : descriptionFull.length <= MAX_DESCRIPTION_LENGTH
-        ? descriptionFull
-        : `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`;
+      : (candidates.find((text) => text.length <= MAX_DESCRIPTION_LENGTH) ??
+        candidates[candidates.length - 1]);
   const url = `${SITE_URL}/miasta/${city.slug}`;
 
   // A city without cinemas is thin content; keep it out of the index. So is
@@ -344,16 +375,25 @@ const CityPage = async ({ params }: CityPageProps) => {
         <RepertoireGrid
           screenings={screenings}
           emptyState={
-            <EmptyState
-              description={
-                <>
-                  Kina {wPrep(cityForCopy)}&nbsp;{cityForCopy} nie mają teraz
-                  zapowiedzianych seansów specjalnych. Repertuar uzupełniamy na
-                  bieżąco, zajrzyj ponownie wkrótce.
-                </>
-              }
-              cta={{ href: "/miasta", label: "Inne miasta" }}
-            />
+            // A wrapper element, not a fragment: a multi-child fragment
+            // crosses into the client RepertoireSection as an unkeyed array.
+            <div>
+              <EmptyState
+                className="pb-12 md:pb-16"
+                description={
+                  <>
+                    Kina {wPrep(cityForCopy)}&nbsp;{cityForCopy} nie mają teraz
+                    zapowiedzianych seansów specjalnych. Repertuar uzupełniamy
+                    na bieżąco, zajrzyj ponownie wkrótce.
+                  </>
+                }
+                cta={{ href: "/miasta", label: "Inne miasta" }}
+              />
+              <NearbyRepertoire
+                voivodeship={city.voivodeship}
+                cityId={city.id}
+              />
+            </div>
           }
         />
       </RepertoireSection>
@@ -365,6 +405,17 @@ const CityPage = async ({ params }: CityPageProps) => {
           </>
         }
         items={recentScreenings}
+      />
+
+      <ListingFaq
+        heading={<>Pytania o&nbsp;kina {inPlace(cityForCopy)}</>}
+        questions={buildCityFaq({
+          cityLocative: cityForCopy,
+          independentNames: independentCinemas.map((c) => c.name),
+          chainNames: chainCinemas.map((c) => c.name),
+          screenings,
+          lastUpdated,
+        })}
       />
 
       <Footer />

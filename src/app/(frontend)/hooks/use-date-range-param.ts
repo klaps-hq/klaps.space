@@ -14,12 +14,42 @@ interface DateOption {
   label: string;
 }
 
+interface DateRangeOption {
+  from: string;
+  to: string;
+}
+
+// Shifts a YYYY-MM-DD calendar date by whole days. Parsed as UTC so the
+// arithmetic never crosses a DST boundary.
+const addDays = (isoDate: string, days: number): string => {
+  const d = new Date(`${isoDate}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+};
+
+/**
+ * Friday to Sunday of the current weekend, or of the next one on weekdays.
+ * Friday counts as weekend: special screenings cluster on Friday evenings.
+ * From Friday on, the range starts today so past days are never selected.
+ */
+export const getWeekendRange = (now: Date = new Date()): DateRangeOption => {
+  const today = getDateString(now);
+  const weekday = new Date(`${today}T00:00:00Z`).getUTCDay();
+  // Sunday is 0: the weekend ends today.
+  if (weekday === 0) return { from: today, to: today };
+  const daysToFriday = Math.max(5 - weekday, 0);
+  return { from: addDays(today, daysToFriday), to: addDays(today, 7 - weekday) };
+};
+
 interface UseDateRangeParamReturn {
   dateFrom: string | null;
   dateTo: string | null;
   isRange: boolean;
   selectedDay: string | null;
   dayOptions: DateOption[];
+  weekend: DateRangeOption;
+  isWeekend: boolean;
+  handleWeekendClick: () => void;
   handleDayClick: (value: string) => void;
   handleRangeChange: (from: string, to: string) => void;
   handleClearDate: () => void;
@@ -75,6 +105,14 @@ export const useDateRangeParam = (): UseDateRangeParamReturn => {
     [selectedDay, updateUrl]
   );
 
+  const weekend = useMemo(() => getWeekendRange(), []);
+  const isWeekend = dateFrom === weekend.from && dateTo === weekend.to;
+
+  const handleWeekendClick = useCallback(() => {
+    if (isWeekend) updateUrl(null, null);
+    else updateUrl(weekend.from, weekend.to);
+  }, [isWeekend, weekend, updateUrl]);
+
   const handleRangeChange = useCallback(
     (from: string, to: string) => {
       updateUrl(from, to);
@@ -92,6 +130,9 @@ export const useDateRangeParam = (): UseDateRangeParamReturn => {
     isRange,
     selectedDay,
     dayOptions,
+    weekend,
+    isWeekend,
+    handleWeekendClick,
     handleDayClick,
     handleRangeChange,
     handleClearDate,
