@@ -54,6 +54,11 @@ const PRIMARY_SECTIONS = [
     href: "/blog",
     hint: "Teksty o kinie studyjnym, klasyce i seansach specjalnych.",
   },
+  {
+    label: "Klaps w liczbach",
+    href: "/w-liczbach",
+    hint: "Miesięczne zestawienie seansów klasyki w polskich kinach.",
+  },
 ] as const;
 
 const INFO_LINKS = [

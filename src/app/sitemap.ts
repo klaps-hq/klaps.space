@@ -10,6 +10,7 @@ import {
 import { getScreenings } from "@/lib/screenings";
 import { getMoviePosterMap } from "@/lib/movies";
 import { getPostsPage, getPublishedPosts } from "@/lib/posts";
+import { archiveMonths, monthPath, shiftMonth } from "@/lib/month-stats";
 import type { Post } from "@/payload-types";
 import { ISitemapEntry } from "@/interfaces/ISitemap";
 
@@ -168,6 +169,7 @@ const staticPages: MetadataRoute.Sitemap = [
   { url: `${SITE_URL}/gatunki`, changeFrequency: "weekly", priority: 0.7 },
   { url: `${SITE_URL}/rezyserzy`, changeFrequency: "weekly", priority: 0.6 },
   { url: `${SITE_URL}/blog`, changeFrequency: "weekly", priority: 0.6 },
+  { url: `${SITE_URL}/w-liczbach`, changeFrequency: "daily", priority: 0.6 },
   { url: `${SITE_URL}/mapa-witryny`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/o-projekcie`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/kontakt`, changeFrequency: "monthly", priority: 0.3 },
@@ -176,6 +178,18 @@ const staticPages: MetadataRoute.Sitemap = [
   { url: `${SITE_URL}/regulamin`, changeFrequency: "monthly", priority: 0.2 },
   { url: `${SITE_URL}/polityka-prywatnosci`, changeFrequency: "monthly", priority: 0.2 },
 ];
+
+// "Klaps w liczbach" archive: one page per finished month. Computed per
+// request, not at module load, so a long-running server picks up a new
+// month without a restart. A month's numbers settle once it ends, so the
+// first day of the next month stands in as lastModified.
+const buildMonthStatsPages = (): MetadataRoute.Sitemap =>
+  archiveMonths().map((month) => ({
+    url: `${SITE_URL}${monthPath(month)}`,
+    lastModified: new Date(`${shiftMonth(month, 1)}-01T00:00:00.000Z`),
+    changeFrequency: "monthly" as const,
+    priority: 0.4,
+  }));
 
 // `next build` runs without a database or a Payload secret, so every fetch
 // in here fails and the prerendered sitemap ships empty; ISR fills it in on
@@ -249,7 +263,7 @@ const sitemap = async ({
   const sitemapId = (await id) as SitemapId;
 
   if (sitemapId === "static") {
-    return staticPages;
+    return [...staticPages, ...buildMonthStatsPages()];
   }
 
   if (sitemapId === "blog") {
