@@ -18,6 +18,10 @@ interface GetScreeningsParams {
   dateTo?: string | null;
   search?: string | null;
   limit?: number | null;
+  citySlug?: string | null;
+  // Landing page filters (/kino-plenerowe, /klasyka-w-kinach).
+  openAir?: boolean;
+  classic?: boolean;
 }
 
 interface GetPaginatedScreeningsParams extends GetScreeningsParams {
@@ -61,6 +65,9 @@ export const fetchScreenings = async (
       dateTo: params.dateTo ?? "",
       search: params.search ?? "",
       limit: params.limit ? params.limit.toString() : "",
+      citySlug: params.citySlug ?? "",
+      openAir: params.openAir ? "true" : "",
+      classic: params.classic ? "true" : "",
     },
   });
 
@@ -169,6 +176,7 @@ interface GetRecentScreeningsParams {
   cityId?: string | null;
   days?: number;
   limit?: number;
+  openAir?: boolean;
 }
 
 /** Look-back window of the "Ostatnio w repertuarze" section, in days. */
@@ -191,6 +199,7 @@ export const fetchRecentScreenings = (
       cityId: params.cityId ?? "",
       days: String(params.days ?? RECENT_SCREENINGS_DAYS),
       limit: params.limit ? params.limit.toString() : "",
+      openAir: params.openAir ? "true" : "",
     },
   });
 

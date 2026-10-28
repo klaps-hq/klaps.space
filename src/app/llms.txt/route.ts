@@ -47,6 +47,8 @@ Klaps to ogólnopolski przewodnik po seansach specjalnych w kinach studyjnych: k
 - [Mapa kin](${SITE_URL}/mapa-kin): interaktywna mapa kin studyjnych
 - [Miasta](${SITE_URL}/miasta): seanse i kina studyjne według miast
 - [Gatunki](${SITE_URL}/gatunki): filmy w kinach według gatunków
+- [Klasyka w kinach](${SITE_URL}/klasyka-w-kinach): filmy sprzed co najmniej 25 lat w repertuarze kin, także w podziale na miesiące
+- [Kino plenerowe](${SITE_URL}/kino-plenerowe): seanse pod gołym niebem i letnie cykle w polskich miastach
 - [FAQ](${SITE_URL}/faq): najczęstsze pytania o serwis i kina studyjne
 - [O projekcie](${SITE_URL}/o-projekcie): czym jest Klaps i jak działa
 - [Dla kin](${SITE_URL}/dla-kin): darmowa odznaka z linkiem do strony kina na klaps.space
