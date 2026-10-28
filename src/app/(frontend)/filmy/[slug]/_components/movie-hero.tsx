@@ -11,6 +11,7 @@ import {
   tmdbImageSrc,
 } from "@/lib/tmdb";
 import { formatDuration, getYouTubeEmbedUrl } from "@/lib/utils";
+import { movieImageAlt } from "@/lib/image-alt";
 import TrailerModal from "@/components/common/trailer-modal";
 import { PAGE_HEADING_CLASSES } from "@/components/ui/page-heading";
 
@@ -78,7 +79,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({
                   ? tmdbBackdropLoader(movie.backdropUrl, useBackdropCdn)
                   : undefined
               }
-              alt={movie.title}
+              alt={movieImageAlt(movie, "kadr")}
               fill
               sizes="100vw"
               placeholder={backdropBlurDataUrl ? "blur" : "empty"}

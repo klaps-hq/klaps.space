@@ -4,10 +4,15 @@ import React, { useState } from "react";
 import Image from "next/image";
 import NoMoviePoster from "./no-movie-poster";
 import { tmdbCdnFallbackSrc, tmdbImageSrc } from "@/lib/tmdb";
+import { IMoviePerson } from "@/interfaces/IMovies";
+import { movieImageAlt } from "@/lib/image-alt";
 
 interface MoviePosterProps {
   posterUrl: string;
   title?: string;
+  /** Year and directors make the alt text a full caption (see image-alt). */
+  productionYear?: number | null;
+  directors?: IMoviePerson[] | null;
   width: number;
   height: number;
   className?: string;
@@ -22,7 +27,9 @@ type PosterSource = "mirror" | "cdn" | "none";
 
 const MoviePoster: React.FC<MoviePosterProps> = ({
   posterUrl,
-  title = "Plakat filmu",
+  title = "Film",
+  productionYear,
+  directors,
   width,
   height,
   className,
@@ -51,7 +58,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
     <Image
       key={src}
       src={src}
-      alt={`Plakat filmu: ${title}`}
+      alt={movieImageAlt({ title, productionYear, directors }, "plakat")}
       width={width}
       height={height}
       sizes={sizes}

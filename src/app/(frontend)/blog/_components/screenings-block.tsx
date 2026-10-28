@@ -26,6 +26,7 @@ const BlockCard: React.FC<{ group: IScreeningGroup }> = ({ group }) => {
           <MoviePoster
             posterUrl={movie.posterUrl}
             title={movie.title}
+            productionYear={movie.productionYear}
             width={300}
             height={450}
             sizes="(max-width: 768px) 40vw, 170px"
