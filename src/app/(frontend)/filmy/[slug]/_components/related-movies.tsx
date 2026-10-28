@@ -29,6 +29,7 @@ const RelatedMovieCard: React.FC<RelatedMovieCardProps> = ({ movie }) => (
         <MoviePoster
           posterUrl={movie.posterUrl}
           title={movie.title}
+          productionYear={movie.productionYear}
           width={400}
           height={600}
           sizes="(max-width: 640px) 50vw, 33vw"

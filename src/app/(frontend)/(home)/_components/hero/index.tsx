@@ -12,6 +12,7 @@ import TrailerModal from "@/components/common/trailer-modal";
 import MobileNav from "@/components/common/mobile-nav";
 import { NAV_LINKS } from "@/components/common/nav-links";
 import HeroParallax from "./hero-parallax";
+import { movieImageAlt } from "@/lib/image-alt";
 import { CharsReveal, TitleReveal } from "./text-reveal";
 
 interface HeroProps {
@@ -154,7 +155,9 @@ const Hero: React.FC<HeroProps> = ({
         }
         backdropBlurDataUrl={backdropBlurDataUrl}
         posterBlurDataUrl={posterBlurDataUrl}
-        alt={screening.movie.title}
+        // The backdrop is the default source (the poster only swaps in on
+        // mobile), so the alt describes a still.
+        alt={movieImageAlt(screening.movie, "kadr")}
       >
         <HeroNav />
 
