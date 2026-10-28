@@ -16,8 +16,18 @@ import {
   getScreenings,
 } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
-import { cinemaFallbackIntro } from "@/lib/listing-copy";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
+import {
+  BASE_OPEN_GRAPH,
+  NOINDEX_FOLLOW,
+  inPlace,
+  pluralPl,
+  wPrep,
+} from "@/lib/seo";
+import {
+  cinemaFallbackIntro,
+  isUsableCinemaDescription,
+} from "@/lib/listing-copy";
 import { isChainCinema } from "@/lib/cinema-chains";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
@@ -26,6 +36,12 @@ import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
 import RepertoireGrid from "@/components/common/repertoire-grid";
 import RecentRepertoire from "@/components/common/recent-repertoire";
+import NearbyRepertoire from "@/components/common/nearby-repertoire";
+import NextScreening from "@/components/common/next-screening";
+import SaveCinemaButton from "@/components/common/save-cinema-button";
+import { cinemaNextScreeningItems } from "@/lib/next-screening-items";
+import ListingFaq from "@/components/common/listing-faq";
+import { buildCinemaFaq } from "@/lib/listing-faq";
 import Footer from "../../(home)/_components/footer";
 import CinemaMapLazy from "./_components/cinema-map-lazy";
 
@@ -67,13 +83,13 @@ const buildCinemaDescription = (
 ): string => {
   const moviesCount = screeningGroups.length;
   if (moviesCount === 0) {
-    const full = `Repertuar kina ${cinemaName} w ${cityName}: seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź, co aktualnie grają.`;
+    const full = `Repertuar kina ${cinemaName} ${inPlace(cityName)}: seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź, co aktualnie grają.`;
     // Long venue names ("Mazowiecki Teatr Muzyczny im. Jana Kiepury - Kino
     // Praha") overran the snippet limit; drop the tail rather than let
     // Google cut the sentence.
     return full.length <= MAX_DESCRIPTION_LENGTH
       ? full
-      : `Repertuar kina ${cinemaName} w ${cityName}: seanse specjalne i klasyka filmowa.`;
+      : `Repertuar kina ${cinemaName} ${inPlace(cityName)}: seanse specjalne i klasyka filmowa.`;
   }
 
   const screeningsCount = screeningGroups.reduce(
@@ -81,13 +97,13 @@ const buildCinemaDescription = (
     0
   );
   const counts = `${moviesCount} ${pluralPl(moviesCount, "film", "filmy", "filmów")} i ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")}`;
-  const base = `Repertuar kina ${cinemaName} w ${cityName}: ${counts}`;
+  const base = `Repertuar kina ${cinemaName} ${inPlace(cityName)}: ${counts}`;
   const suffix = ". Seanse specjalne, klasyka filmowa i retrospektywy.";
 
   // Add an example title only when it fits the SERP snippet budget.
   const firstTitle = screeningGroups[0]?.movie.title;
   const withTitle = firstTitle
-    ? `${base}, m.in. „${firstTitle}"${suffix}`
+    ? `${base}, m.in. „${firstTitle}”${suffix}`
     : `${base}${suffix}`;
 
   return withTitle.length <= MAX_DESCRIPTION_LENGTH
@@ -120,8 +136,15 @@ export const generateMetadata = async ({
   // never fetched at all, and dilute crawl across the ones with content.
   // The API leaves the same venues out of the sitemap. Only a confirmed
   // empty result counts, so an API failure never noindexes a page.
+  const isChain = isChainCinema(cinema.name);
+  // Chain venues additionally need something upcoming: their recent history
+  // alone is not worth indexing. GSC, October 2026: chain pages drew ~80% of
+  // all impressions (people after the chain's own repertoire) and zero
+  // clicks, and they outnumber the arthouse pages this site is about. The
+  // API applies the same rule to the sitemap.
   const noindex =
-    upcomingGroups?.length === 0 && recentScreenings?.length === 0;
+    upcomingGroups?.length === 0 &&
+    (isChain || recentScreenings?.length === 0);
 
   // Locative city name ("w Krakowie", not "w Kraków") for natural phrasing.
   const cityName = cinema.city.nameDeclinated ?? cinema.city.name;
@@ -135,9 +158,9 @@ export const generateMetadata = async ({
   // Both variants keep the venue name first and the city in the locative
   // after "w", so the chain wording stays grammatical ("w Katowicach", never
   // "Cinema City Silesia, Katowicach").
-  const title = isChainCinema(cinema.name)
-    ? `${cinema.name} - seanse specjalne i klasyka w ${cityName}`
-    : `${cinema.name} - repertuar seansów specjalnych w ${cityName}`;
+  const title = isChain
+    ? `${cinema.name} - seanse specjalne i klasyka ${inPlace(cityName)}`
+    : `${cinema.name} - repertuar seansów specjalnych ${inPlace(cityName)}`;
   const description = buildCinemaDescription(
     cinema.name,
     cityName,
@@ -149,7 +172,10 @@ export const generateMetadata = async ({
     title,
     description,
     // Query-param duplicates (filters) are handled by the canonical alone.
-    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
+    // Noindex pages keep a self-canonical: without it they inherited the
+    // /kina hub canonical from the parent layout, a mixed signal.
+    alternates: { canonical: url },
+    ...(noindex ? NOINDEX_FOLLOW : {}),
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
@@ -175,7 +201,8 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
   // Sibling venues give each cinema page contextual internal links: /kina is
   // the only other place linking here, and it spreads its authority across
   // 900 links, which is why parts of this page group never get crawled.
-  const [screenings, siblingResponse, recentScreenings] = await Promise.all([
+  const [screenings, siblingResponse, recentScreenings, indexable] =
+    await Promise.all([
     getScreenings({
       cinemaId: cinema.id.toString(),
       dateTo: cinemaRepertoireDateTo(),
@@ -184,11 +211,14 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
       data: [],
     })),
     getRecentScreenings({ cinemaId: cinema.id.toString() }),
+    getIndexableSlugs(),
   ]);
 
   const siblingCinemas = siblingResponse.data
     .flatMap((group) => group.cinemas)
     .filter((item) => item.slug !== cinema.slug)
+    // Siblings are a crawl path, so they skip venues whose page is noindex.
+    .filter((item) => !indexable || indexable.cinemas.has(item.slug))
     .sort((a, b) => a.name.localeCompare(b.name, "pl"))
     .slice(0, 12);
 
@@ -254,15 +284,33 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                   </React.Fragment>
                 ))}
               </span>
+              <SaveCinemaButton
+                className="mt-2"
+                cinema={{
+                  id: cinema.id,
+                  slug: cinema.slug,
+                  name: cinema.name,
+                  cityName: cinema.city.name,
+                }}
+              />
             </div>
-            {cinema.description ? (
+            <NextScreening
+              className="mt-8 md:mt-10 max-w-[60ch]"
+              items={cinemaNextScreeningItems(screenings)}
+            />
+            {isUsableCinemaDescription(
+              cinema.description,
+              isChainCinema(cinema.name)
+            ) ? (
               <p className="mt-8 md:mt-10 max-w-[60ch] text-base md:text-lg text-white/65 leading-relaxed">
                 {cinema.description}
               </p>
             ) : (
               // Generated intro keeps description-less cinema pages from
               // being thin content - unique copy via the live repertoire
-              // counts, the nearest titles and the dominant genres.
+              // counts, the nearest titles and the dominant genres. Also
+              // replaces stored copy written in the venue's voice or about
+              // booking (see isUsableCinemaDescription).
               <p className="mt-8 md:mt-10 max-w-[60ch] text-base md:text-lg text-white/65 leading-relaxed">
                 {cinemaFallbackIntro(
                   cinema.name,
@@ -301,7 +349,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
             description="Brak seansów pasujących do wybranych filtrów. Spróbuj zmienić zakres dat, gatunek lub frazę."
             cta={{
               href: `/miasta/${cinema.city.slug}`,
-              label: `Inne kina w ${cityForCopy}`,
+              label: `Inne kina ${inPlace(cityForCopy)}`,
             }}
           />
         }
@@ -309,21 +357,31 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
         <RepertoireGrid
           screenings={screenings}
           emptyState={
-            <EmptyState
-              description={
-                <>
-                  {/* Bare name, no "Kino" prefix: many venues are already
-                      called "Kino X" and the prefix would double it. */}
-                  {cinema.name} nie ma teraz zapowiedzianych seansów
-                  specjalnych. Repertuar uzupełniamy na bieżąco, zajrzyj
-                  ponownie wkrótce.
-                </>
-              }
-              cta={{
-                href: `/miasta/${cinema.city.slug}`,
-                label: `Inne kina w ${cityForCopy}`,
-              }}
-            />
+            // A wrapper element, not a fragment: a multi-child fragment
+            // crosses into the client RepertoireSection as an unkeyed array.
+            <div>
+              <EmptyState
+                className="pb-12 md:pb-16"
+                description={
+                  <>
+                    {/* Bare name, no "Kino" prefix: many venues are already
+                        called "Kino X" and the prefix would double it. */}
+                    {cinema.name} nie ma teraz zapowiedzianych seansów
+                    specjalnych. Repertuar uzupełniamy na bieżąco, zajrzyj
+                    ponownie wkrótce.
+                  </>
+                }
+                cta={{
+                  href: `/miasta/${cinema.city.slug}`,
+                  label: `Inne kina ${inPlace(cityForCopy)}`,
+                }}
+              />
+              <NearbyRepertoire
+                voivodeship={cinema.city.voivodeship}
+                cityId={cinema.city.id}
+                excludeCinemaId={cinema.id}
+              />
+            </div>
           }
         />
       </RepertoireSection>
@@ -340,13 +398,13 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
         <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
           <div className="mb-8 md:mb-10 flex items-end justify-between gap-6 flex-wrap">
             <h2 className="text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
-              Inne kina w&nbsp;{cityForCopy}
+              Inne kina {wPrep(cityForCopy)}&nbsp;{cityForCopy}
             </h2>
             <Link
               href={`/miasta/${cinema.city.slug}`}
               className="group inline-flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.28em] text-white/55 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
             >
-              Kina studyjne w&nbsp;{cityForCopy}
+              Kina studyjne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
               <ArrowUpRight
                 aria-hidden="true"
                 className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -373,6 +431,19 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
           </div>
         </section>
       )}
+
+      <ListingFaq
+        heading={<>Pytania o&nbsp;{cinema.name}</>}
+        questions={buildCinemaFaq({
+          cinemaName: cinema.name,
+          street: cinema.street,
+          cityName: cinema.city.name,
+          cityLocative: cityForCopy,
+          screenings,
+          recent: recentScreenings,
+          siblingNames: siblingCinemas.map((item) => item.name),
+        })}
+      />
     </>
   );
 };

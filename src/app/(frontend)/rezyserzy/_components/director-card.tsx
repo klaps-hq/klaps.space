@@ -1,11 +1,11 @@
 import React from "react";
 import Link from "next/link";
-import { IDirector } from "@/interfaces/IDirectors";
+import type { DirectorsBrowserItem } from "./directors-browser";
 import DirectorPhoto from "@/components/common/director-photo";
 import { pluralPl } from "@/lib/seo";
 
 interface DirectorCardProps {
-  director: IDirector;
+  director: DirectorsBrowserItem;
 }
 
 const DirectorCard: React.FC<DirectorCardProps> = ({ director }) => {
@@ -17,7 +17,6 @@ const DirectorCard: React.FC<DirectorCardProps> = ({ director }) => {
     <Link
       href={`/rezyserzy/${slug}`}
       className="group flex flex-col gap-2.5"
-      aria-label={`Przejdź do reżysera: ${name}`}
     >
       {/* Grayscale by default unifies the varied source headshots into the
           site's B&W palette; colour and a slight zoom return on hover. */}

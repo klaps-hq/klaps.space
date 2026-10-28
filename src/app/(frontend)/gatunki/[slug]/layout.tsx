@@ -1,5 +1,5 @@
 import { getGenreBySlug } from "@/lib/genres";
-import { getMovies } from "@/lib/movies";
+import { getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { newestUpdatedAtIso } from "@/lib/seo";
 import { IGenre, IMovieSummary } from "@/interfaces/IMovies";
@@ -15,7 +15,7 @@ const buildGenreJsonLd = (genre: IGenre, movies: readonly IMovieSummary[]) => ({
   "@type": "CollectionPage",
   name: `${genre.name} - Filmy`,
   url: `${SITE_URL}/gatunki/${genre.slug}`,
-  description: `Filmy z gatunku ${genre.name.toLowerCase()} dostępne w serwisie Klaps.`,
+  description: `Filmy z gatunku ${genre.name.toLowerCase()} w repertuarze kin studyjnych.`,
   // Freshness signal for AI Overviews: newest movie `updatedAt` in the set,
   // i.e. a real data change. Omitted when no movie carries a timestamp,
   // which beats fabricating render time.
@@ -47,10 +47,13 @@ export default async function GenreLayout({
     return children;
   }
 
-  const { data: movies } = await getMovies({
-    genreId: genre.id.toString(),
-    limit: 24,
-  });
+  // The page renders upcoming screenings, so the ItemList mirrors those
+  // films rather than the genre's catalogue: catalogue entries without
+  // screenings are noindex pages. Same call as the page body, deduped by
+  // the fetch cache.
+  const movies = (await getScreenings({ genreId: genre.id.toString() }))
+    .map((group) => group.movie)
+    .slice(0, 24);
 
   return (
     <>

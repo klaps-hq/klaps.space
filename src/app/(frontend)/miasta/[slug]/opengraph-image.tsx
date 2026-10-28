@@ -1,5 +1,6 @@
 import { getCityBySlug } from "@/lib/cities";
 import { buildOgImage, OG_SIZE } from "@/lib/og-image";
+import { inPlace } from "@/lib/seo";
 
 export const size = OG_SIZE;
 export const contentType = "image/png";
@@ -16,6 +17,6 @@ export default async function OgImage({ params }: OgImageProps) {
   return buildOgImage({
     eyebrow: "Miasto",
     title: city.name,
-    subtitle: `Kina studyjne i seanse specjalne w ${city.nameDeclinated ?? city.name}`,
+    subtitle: `Kina studyjne i seanse specjalne ${inPlace(city.nameDeclinated ?? city.name)}`,
   });
 }

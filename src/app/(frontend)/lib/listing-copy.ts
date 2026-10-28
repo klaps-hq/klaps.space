@@ -1,6 +1,6 @@
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IMovieSummary } from "@/interfaces/IMovies";
-import { pluralPl } from "./seo";
+import { inPlace, pluralPl } from "./seo";
 
 /**
  * Auto-generated intro copy for taxonomy/listing pages that have no editorial
@@ -142,6 +142,25 @@ export const cityFallbackIntro = (
   return bindOrphans(`${first} ${second}`);
 };
 
+// Stored cinema descriptions were machine-written from the venue's own
+// marketing copy, and some kept its voice: first person ("Zapraszamy",
+// "sprawdź nasz repertuar", "co graliśmy") or booking language, which this
+// site must never use since it does not sell anything.
+const FIRST_PERSON_OR_BOOKING =
+  /\b(zapraszamy|oferujemy|skupiamy|prezentujemy|pokazujemy|gramy|graliśmy|nasz|nasza|nasze|naszego|naszej|naszym|naszych|u nas)\b|bilet|rezerwuj|rezerwacj/i;
+
+/**
+ * Whether a stored cinema description can be shown as the page intro.
+ * Chain venues never use it: theirs read as the chain's sales copy
+ * ("zarezerwuj bilety na najnowsze premiery"), while the generated intro
+ * describes what this site actually lists there.
+ */
+export const isUsableCinemaDescription = (
+  description: string | null | undefined,
+  isChain: boolean
+): description is string =>
+  !!description && !isChain && !FIRST_PERSON_OR_BOOKING.test(description);
+
 /**
  * Fallback intro for /kina/[slug] without an editorial description.
  *
@@ -158,10 +177,11 @@ export const cinemaFallbackIntro = (
 ): string => {
   const kind = isChain ? "kino sieciowe" : "kino studyjne";
   const moviesCount = groups.length;
+  const place = inPlace(cityLocative);
 
   if (moviesCount === 0) {
     return bindOrphans(
-      `${cinemaName} to ${kind} w ${cityLocative}. Nie ma tu teraz ` +
+      `${cinemaName} to ${kind} ${place}. Nie ma tu teraz ` +
         `zapowiedzianych seansów specjalnych - repertuar uzupełniamy na ` +
         `bieżąco, więc zajrzyj ponownie albo sprawdź inne kina w okolicy.`
     );
@@ -175,7 +195,7 @@ export const cinemaFallbackIntro = (
   const genres = topGenres(groups, 2);
 
   const first =
-    `${cinemaName} to ${kind} w ${cityLocative}, w którego repertuarze ` +
+    `${cinemaName} to ${kind} ${place}, w którego repertuarze ` +
     `${pluralPl(moviesCount, "jest", "są", "jest")} ${moviesCount} ` +
     `${pluralPl(moviesCount, "film", "filmy", "filmów")} i ` +
     `${screeningsCount} ` +

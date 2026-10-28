@@ -37,7 +37,10 @@ export const generateMetadata = async ({
   params,
 }: PostPageProps): Promise<Metadata> => {
   const { slug } = await params;
-  const post = await getPostBySlug(slug).catch(() => null);
+  // Only "no such post" (null) means 404. A database error propagates so
+  // ISR keeps serving the last good copy instead of caching a 404 for a
+  // live article (Mongo is briefly unreachable right after a deploy).
+  const post = await getPostBySlug(slug);
   if (!post) return {};
 
   const title = post.meta?.title || post.title;
@@ -126,7 +129,8 @@ const buildPostJsonLd = (post: Post) => {
 
 const PostPage = async ({ params }: PostPageProps) => {
   const { slug } = await params;
-  const post = await getPostBySlug(slug).catch(() => null);
+  // See generateMetadata: errors propagate, only null is a 404.
+  const post = await getPostBySlug(slug);
   if (!post) notFound();
 
   const cover = getCover(post);

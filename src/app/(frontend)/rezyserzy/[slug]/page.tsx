@@ -70,7 +70,9 @@ export const generateMetadata = async ({
   return {
     title,
     description,
-    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
+    // Self-canonical on noindex pages too, instead of inheriting the hub's.
+    alternates: { canonical: url },
+    ...(noindex ? NOINDEX_FOLLOW : {}),
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "profile",
@@ -144,6 +146,9 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
                 declined). */}
             <PageHeading variant="detail" className="max-w-[20ch]">
               {director.name}
+              {/* Separator for the text crawlers read; visually the second
+                  line is already set apart. */}
+              <span className="sr-only"> -</span>
               <PageHeadingMuted className="mt-2 md:mt-3 text-xl md:text-3xl lg:text-4xl normal-case tracking-tight">
                 Filmy i&nbsp;seanse w&nbsp;kinach studyjnych
               </PageHeadingMuted>

@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import { getImageProps } from "next/image";
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { m, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import {
   tmdbBackdropLoader,
   tmdbCdnFallbackSrc,
@@ -97,7 +97,7 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
           blur placeholder already provides the "appearing" feel; text and
           nav reveals (framer) stay untouched. */}
       <div className="absolute inset-0">
-        <motion.div
+        <m.div
           className="absolute inset-0"
           style={{ y: imageY, scale: imageScale }}
         >
@@ -126,7 +126,7 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
               scale 1 (no opacity:0 / no initial), so the LCP hero image is
               painted at full size from the first frame; the motion only adds
               a gentle zoom afterwards. Skipped for prefers-reduced-motion. */}
-          <motion.div
+          <m.div
             className="absolute inset-0"
             animate={
               prefersReducedMotion ? undefined : { scale: [1, 1.08], y: ["0%", "-2.5%"] }
@@ -167,8 +167,8 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
                 }}
               />
             </picture>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       </div>
 
       <div className="pointer-events-none absolute inset-0 opacity-[0.08] mix-blend-soft-light">
@@ -192,9 +192,9 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
 
       <div className="absolute inset-0 bg-gradient-to-t from-black from-[6%] via-black/50 via-50% to-black/30" />
 
-      <motion.div className="absolute inset-0 z-[4]" style={{ y: contentY }}>
+      <m.div className="absolute inset-0 z-[4]" style={{ y: contentY }}>
         {children}
-      </motion.div>
+      </m.div>
     </div>
   );
 };

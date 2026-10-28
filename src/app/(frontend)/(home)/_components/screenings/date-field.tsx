@@ -25,6 +25,8 @@ const DateField: React.FC<DateFieldProps> = ({ className }) => {
     isRange,
     dateFrom,
     dateTo,
+    isWeekend,
+    handleWeekendClick,
     handleDayClick,
     handleRangeChange,
     handleClearDate,
@@ -36,6 +38,7 @@ const DateField: React.FC<DateFieldProps> = ({ className }) => {
   const hasSelection = !!selectedDay || isRange;
 
   const triggerLabel = (() => {
+    if (isWeekend) return "Weekend";
     if (isRange && dateFrom && dateTo) {
       return `${formatDatePL(dateFrom)} – ${formatDatePL(dateTo)}`;
     }
@@ -64,6 +67,11 @@ const DateField: React.FC<DateFieldProps> = ({ className }) => {
 
   const onPickDay = (value: string) => {
     handleDayClick(value);
+    setOpen(false);
+  };
+
+  const onPickWeekend = () => {
+    handleWeekendClick();
     setOpen(false);
   };
 
@@ -121,6 +129,19 @@ const DateField: React.FC<DateFieldProps> = ({ className }) => {
                 </button>
               );
             })}
+            <button
+              type="button"
+              onClick={onPickWeekend}
+              aria-pressed={isWeekend}
+              className={cn(
+                "col-span-5 text-center px-1 py-2 text-[10px] uppercase tracking-wide transition-colors",
+                isWeekend
+                  ? "text-white bg-white/[0.08]"
+                  : "text-white/65 hover:text-white hover:bg-white/[0.03]"
+              )}
+            >
+              Ten weekend
+            </button>
           </div>
 
           <Calendar
