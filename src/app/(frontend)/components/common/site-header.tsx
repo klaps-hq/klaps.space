@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  motion,
+  m,
   useMotionValueEvent,
   useReducedMotion,
   useScroll,
@@ -97,7 +97,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ overlay = false }) => {
   const logoScale = useTransform(progress, [0, 1], [1, 0.88]);
 
   return (
-    <motion.header
+    <m.header
       className={cn("z-40", overlay ? "fixed inset-x-0 top-0" : "sticky top-0")}
       initial={false}
       animate={
@@ -112,7 +112,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ overlay = false }) => {
       }
       style={overlay ? { pointerEvents: revealed ? "auto" : "none" } : undefined}
     >
-      <motion.div
+      <m.div
         style={{
           y: isMobile ? 0 : y,
           marginLeft: isMobile ? 0 : marginX,
@@ -126,7 +126,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ overlay = false }) => {
         }}
         className="flex items-center justify-between gap-8 border-x-0 border-b md:border px-6 md:px-10 lg:px-12 py-5"
       >
-        <motion.div
+        <m.div
           style={{ scale: isMobile ? 1 : logoScale }}
           className="origin-left shrink-0"
         >
@@ -147,7 +147,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ overlay = false }) => {
               klaps
             </span>
           </Link>
-        </motion.div>
+        </m.div>
         <nav
           aria-label="Główna nawigacja"
           className="hidden md:flex items-center gap-6 lg:gap-8 text-sm text-white/80"
@@ -165,8 +165,8 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ overlay = false }) => {
           ))}
         </nav>
         <MobileNav links={NAV_LINKS} />
-      </motion.div>
-    </motion.header>
+      </m.div>
+    </m.header>
   );
 };
 

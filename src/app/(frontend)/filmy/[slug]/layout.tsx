@@ -51,18 +51,10 @@ const buildMovieJsonLd = (movie: IMovie) => {
     }));
   }
 
-  // Audience rating - also rendered visibly in MovieAbout, as Google
-  // requires structured data to reflect on-page content.
-  const userRating = movie.ratings?.users;
-  if (userRating && userRating.votes > 0) {
-    jsonLd.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: Number(userRating.score.toFixed(1)),
-      ratingCount: userRating.votes,
-      bestRating: 10,
-      worstRating: 1,
-    };
-  }
+  // No aggregateRating: the visible score comes from TMDB users, not from
+  // reviews collected on this site, and Google's review snippet guidelines
+  // forbid marking up ratings aggregated from another source (manual
+  // action risk). The score stays visible in MovieAbout with attribution.
 
   // Filmweb is intentionally not referenced anywhere on the site.
 

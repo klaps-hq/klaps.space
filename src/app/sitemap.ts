@@ -256,9 +256,11 @@ const sitemap = async ({
     return dedupeByUrl(await buildBlogPages());
   }
 
-  // The repertoire-backed types share one upstream call. On failure each
-  // sub-sitemap ships empty rather than 500ing the whole index; the static
-  // and blog sub-sitemaps stay unaffected because they don't reach here.
+  // The repertoire-backed types share one upstream call. A failure is
+  // tolerated only during the build (same reason as the blog guard); at
+  // runtime it rethrows so Next keeps serving the last good sub-sitemap
+  // instead of caching an empty one as a success. The static and blog
+  // sub-sitemaps stay unaffected because they don't reach here.
   let entries;
   try {
     entries = await getSitemapEntries();
@@ -267,7 +269,7 @@ const sitemap = async ({
       `Sitemap[${sitemapId}]: failed to fetch /sitemap from API:`,
       error
     );
-    return [];
+    return emptyDuringBuild<MetadataRoute.Sitemap[number]>(error);
   }
 
   switch (sitemapId) {

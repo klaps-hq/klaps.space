@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getCities } from "@/lib/cities";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { formatVoivodeship } from "@/lib/voivodeships";
 import { ICity } from "@/interfaces/ICities";
 import { SITE_URL } from "@/lib/site-config";
@@ -45,9 +46,6 @@ const buildCitiesJsonLd = (cities: readonly ICity[]) => ({
   url: `${SITE_URL}/miasta`,
   description:
     "Miasta w Polsce z kinami studyjnymi i repertuarem seansów specjalnych.",
-  // Freshness signal for AI Overviews: render time equals the moment
-  // the city data was last refreshed (ISR).
-  dateModified: new Date().toISOString(),
   mainEntity: {
     "@type": "ItemList",
     numberOfItems: cities.length,
@@ -61,14 +59,27 @@ const buildCitiesJsonLd = (cities: readonly ICity[]) => ({
 });
 
 const CitiesPage = async () => {
-  const cities = await getCities();
+  const [cities, indexable] = await Promise.all([
+    getCities(),
+    getIndexableSlugs(),
+  ]);
+  // Cities whose page is noindex (no screenings for months) stay listed as
+  // plain text, so the hub spends its links on pages Google can index.
+  const isCityLinked = (slug: string): boolean =>
+    !indexable || indexable.cities.has(slug);
   const voivodeshipGroups = groupByVoivodeship(cities);
   const totalCities = cities.length;
   const totalCinemas = cities.reduce((acc, c) => acc + c.numberOfCinemas, 0);
 
   return (
     <main className="bg-black text-white min-h-screen">
-      {cities.length > 0 && <JsonLd data={buildCitiesJsonLd(cities)} />}
+      {cities.length > 0 && (
+        <JsonLd
+          data={buildCitiesJsonLd(
+            cities.filter((city) => isCityLinked(city.slug))
+          )}
+        />
+      )}
       <SiteHeader />
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-6">
@@ -113,12 +124,18 @@ const CitiesPage = async () => {
                 <ul className="flex flex-col gap-2">
                   {citiesInGroup.map((city) => (
                     <li key={city.id}>
-                      <Link
-                        href={`/miasta/${city.slug}`}
-                        className="text-base md:text-lg text-white/65 hover:text-white transition-colors block truncate"
-                      >
-                        {city.name}
-                      </Link>
+                      {isCityLinked(city.slug) ? (
+                        <Link
+                          href={`/miasta/${city.slug}`}
+                          className="text-base md:text-lg text-white/65 hover:text-white transition-colors block truncate"
+                        >
+                          {city.name}
+                        </Link>
+                      ) : (
+                        <span className="text-base md:text-lg text-white/35 block truncate">
+                          {city.name}
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ul>

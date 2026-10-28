@@ -27,23 +27,34 @@ function groupCinemasByCity(cinemas: ICinemaSummary[]): ICinemaGroup[] {
   return Array.from(map.values());
 }
 
+/**
+ * Cinemas grouped by city. Throws on failure, for callers where an empty
+ * list drives a decision (noindex); same URL as getCinemas, so the two share
+ * one cached fetch.
+ */
+export const fetchCinemas = async (
+  params: GetCinemasParams = {}
+): Promise<{ data: ICinemaGroup[] }> => {
+  const response = await apiFetch<
+    ICinemaSummary[] | { data: ICinemaGroup[] }
+  >("/cinemas", {
+    params: {
+      cityId: params.cityId ?? "",
+      limit: params.limit?.toString() ?? "",
+    },
+  });
+
+  if (Array.isArray(response)) {
+    return { data: groupCinemasByCity(response) };
+  }
+  return response;
+};
+
 export const getCinemas = async (
   params: GetCinemasParams = {}
 ): Promise<{ data: ICinemaGroup[] }> => {
   try {
-    const response = await apiFetch<
-      ICinemaSummary[] | { data: ICinemaGroup[] }
-    >("/cinemas", {
-      params: {
-        cityId: params.cityId ?? "",
-        limit: params.limit?.toString() ?? "",
-      },
-    });
-
-    if (Array.isArray(response)) {
-      return { data: groupCinemasByCity(response) };
-    }
-    return response;
+    return await fetchCinemas(params);
   } catch (error) {
     console.warn("Falling back to empty cinemas list:", error);
     return { data: [] };

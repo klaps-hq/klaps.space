@@ -3,57 +3,32 @@
 import React, { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { IDirector } from "@/interfaces/IDirectors";
-import { cn } from "@/lib/utils";
 import EmptyState from "@/components/common/empty-state";
-import PaginatedNav from "@/components/common/paginated-nav";
+import { pluralPl } from "@/lib/seo";
 import DirectorCard from "./director-card";
 
+/** The card fields only - full records (with bios) stay on the server. */
+export type DirectorsBrowserItem = Pick<
+  IDirector,
+  "id" | "slug" | "name" | "photoUrl" | "moviesCount" | "upcomingScreeningsCount"
+>;
+
 interface DirectorsBrowserProps {
-  /** Pre-sorted server-side (directors with upcoming screenings first). */
-  directors: IDirector[];
-  currentPage: number;
-  totalPages: number;
-  pageSize: number;
+  /** Pre-filtered and sorted server-side (directors with screenings only). */
+  directors: DirectorsBrowserItem[];
 }
 
-const buildPageHref = (page: number): string =>
-  page <= 1 ? "/rezyserzy" : `/rezyserzy?page=${page}`;
-
-const DirectorsBrowser: React.FC<DirectorsBrowserProps> = ({
-  directors,
-  currentPage,
-  totalPages,
-  pageSize,
-}) => {
+const DirectorsBrowser: React.FC<DirectorsBrowserProps> = ({ directors }) => {
   const [query, setQuery] = useState("");
-  const [onlyUpcoming, setOnlyUpcoming] = useState(false);
 
-  // Name search and the "upcoming only" toggle run client-side over the full
-  // list, so neither triggers an extra request. While either is active the
-  // URL-based pagination is suspended and all matches show at once.
-  const isFiltering = query.trim().length > 0 || onlyUpcoming;
-
-  const filtered = useMemo(() => {
+  // Name search runs client-side over the full list, so it never triggers
+  // an extra request. The unfiltered list is what the server renders.
+  const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return directors.filter((director) => {
-      if (onlyUpcoming && director.upcomingScreeningsCount === 0) return false;
-      if (q && !director.name.toLowerCase().includes(q)) return false;
-      return true;
-    });
-  }, [directors, query, onlyUpcoming]);
-
-  const visible = useMemo(
-    () =>
-      isFiltering
-        ? filtered
-        : filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize),
-    [filtered, isFiltering, currentPage, pageSize]
-  );
-
-  const upcomingCount = useMemo(
-    () => directors.filter((d) => d.upcomingScreeningsCount > 0).length,
-    [directors]
-  );
+    return q
+      ? directors.filter((director) => director.name.toLowerCase().includes(q))
+      : directors;
+  }, [directors, query]);
 
   return (
     <section className="px-6 md:px-12 lg:px-16 pb-24 md:pb-32">
@@ -83,23 +58,11 @@ const DirectorsBrowser: React.FC<DirectorsBrowserProps> = ({
               </button>
             )}
           </div>
-
-          {upcomingCount > 0 && (
-            <button
-              type="button"
-              onClick={() => setOnlyUpcoming((value) => !value)}
-              aria-pressed={onlyUpcoming}
-              className={cn(
-                "inline-flex items-center justify-between gap-2.5 h-9 px-3.5 border text-[11px] uppercase tracking-wider transition-colors whitespace-nowrap md:ml-auto",
-                onlyUpcoming
-                  ? "border-white text-white"
-                  : "border-white/25 text-white/80 hover:border-white/60 hover:text-white"
-              )}
-            >
-              Tylko z&nbsp;nadchodzącymi seansami
-              <span className="text-white/50">{upcomingCount}</span>
-            </button>
-          )}
+          <p className="text-[11px] uppercase tracking-wider text-white/50 md:ml-auto">
+            {directors.length}{" "}
+            {pluralPl(directors.length, "reżyser", "reżyserów", "reżyserów")}{" "}
+            z&nbsp;nadchodzącymi seansami
+          </p>
         </div>
         <div
           className="mt-8 md:mt-12 -mx-6 md:-mx-12 lg:-mx-16 h-px bg-white/10"
@@ -110,10 +73,17 @@ const DirectorsBrowser: React.FC<DirectorsBrowserProps> = ({
       {visible.length === 0 ? (
         <EmptyState
           description={
-            <>
-              Brak reżyserów pasujących do&nbsp;wyszukiwania. Spróbuj zmienić
-              frazę.
-            </>
+            directors.length === 0 ? (
+              <>
+                Żaden reżyser nie ma teraz zapowiedzianych seansów. Zajrzyj
+                ponownie wkrótce.
+              </>
+            ) : (
+              <>
+                Brak reżyserów pasujących do&nbsp;wyszukiwania. Spróbuj zmienić
+                frazę.
+              </>
+            )
           }
         />
       ) : (
@@ -121,16 +91,6 @@ const DirectorsBrowser: React.FC<DirectorsBrowserProps> = ({
           {visible.map((director) => (
             <DirectorCard key={director.id} director={director} />
           ))}
-        </div>
-      )}
-
-      {!isFiltering && totalPages > 1 && (
-        <div className="mt-16 md:mt-20">
-          <PaginatedNav
-            currentPage={currentPage}
-            totalPages={totalPages}
-            buildHref={buildPageHref}
-          />
         </div>
       )}
     </section>

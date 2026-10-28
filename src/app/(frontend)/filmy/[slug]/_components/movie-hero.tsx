@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { m, useScroll, useTransform } from "framer-motion";
 import { Play } from "lucide-react";
 import { IMovie } from "@/interfaces/IMovies";
 import {
@@ -61,7 +61,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({
           short viewports. */}
       <div className="relative flex flex-col min-h-[max(85vh,640px)]">
         {backdropSrc && (
-          <motion.div
+          <m.div
             className="absolute inset-0"
             style={{ y: imageY, scale: imageScale }}
           >
@@ -87,7 +87,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({
               priority
               onError={() => setUseBackdropCdn(true)}
             />
-          </motion.div>
+          </m.div>
         )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
@@ -110,7 +110,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({
           </svg>
         </div>
 
-        <motion.div
+        <m.div
           className="relative z-[4] flex flex-1 flex-col justify-end px-6 md:px-12 lg:px-16 pt-28 md:pt-32 pb-12 md:pb-16"
           style={{ y: contentY }}
         >
@@ -165,7 +165,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({
               </button>
             )}
           </div>
-        </motion.div>
+        </m.div>
       </div>
 
       {embedUrl && (

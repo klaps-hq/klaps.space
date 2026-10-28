@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 
 interface NavLink {
   href: string;
@@ -59,7 +59,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ links }) => {
         createPortal(
           <AnimatePresence>
             {open && (
-              <motion.div
+              <m.div
                 role="dialog"
                 aria-modal="true"
                 aria-label="Menu nawigacji"
@@ -98,7 +98,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ links }) => {
                   </button>
                 </div>
 
-                <motion.nav
+                <m.nav
                   aria-label="Główna nawigacja"
                   className="flex-1 flex flex-col justify-center px-6"
                   initial="hidden"
@@ -112,7 +112,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ links }) => {
                 >
                   <ul className="flex flex-col divide-y divide-white/10">
                     {links.map((link) => (
-                      <motion.li
+                      <m.li
                         key={link.href}
                         variants={{
                           hidden: { opacity: 0, y: 16 },
@@ -137,11 +137,11 @@ const MobileNav: React.FC<MobileNavProps> = ({ links }) => {
                         >
                           {link.label}
                         </Link>
-                      </motion.li>
+                      </m.li>
                     ))}
                   </ul>
-                </motion.nav>
-              </motion.div>
+                </m.nav>
+              </m.div>
             )}
           </AnimatePresence>,
           document.body

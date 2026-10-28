@@ -5,6 +5,7 @@ import "../globals.css";
 import JsonLd from "@/components/common/json-ld";
 import SmoothScroll from "@/components/common/smooth-scroll";
 import CustomCursor from "@/components/common/custom-cursor";
+import MotionProvider from "@/components/common/motion-provider";
 import ConsentBanner from "@/components/common/consent-banner";
 import WebVitalsReporter from "@/components/common/web-vitals-reporter";
 import { CityProvider } from "@/contexts/city-context";
@@ -41,12 +42,12 @@ export const metadata: Metadata = {
     description:
       "Ogólnopolski przewodnik po seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych.",
   },
+  // No explicit index/follow: both are the default, and spelling them out
+  // put "index, follow" into the static HTML of filtered variants
+  // (/kina/x?genres=1), whose X-Robots-Tag says noindex. ISR pages cannot
+  // vary their meta by query, so the header alone carries that verdict.
   robots: {
-    index: true,
-    follow: true,
     googleBot: {
-      index: true,
-      follow: true,
       // Unlimited snippet length: Google applies this limit to AI Overviews
       // and AI Mode citations as well, so capping it hurts GEO/AEO.
       "max-snippet": -1,
@@ -161,10 +162,12 @@ export default async function RootLayout({
           }}
         />
         <SmoothScroll />
-        <CustomCursor />
-        {process.env.GA_MEASUREMENT_ID && <ConsentBanner />}
-        {process.env.GA_MEASUREMENT_ID && <WebVitalsReporter />}
-        <CityProvider cities={cities}>{children}</CityProvider>
+        <MotionProvider>
+          <CustomCursor />
+          {process.env.GA_MEASUREMENT_ID && <ConsentBanner />}
+          {process.env.GA_MEASUREMENT_ID && <WebVitalsReporter />}
+          <CityProvider cities={cities}>{children}</CityProvider>
+        </MotionProvider>
       </body>
     </html>
   );

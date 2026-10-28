@@ -67,7 +67,6 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
                     // the layout in place (bare text is ~16px tall).
                     className="inline-block py-2 max-w-[220px] truncate text-white/50 transition-colors duration-300 hover:text-white/85 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/80 md:max-w-[320px]"
                     tabIndex={0}
-                    aria-label={`Przejdź do ${item.name}`}
                   >
                     {item.name}
                   </Link>

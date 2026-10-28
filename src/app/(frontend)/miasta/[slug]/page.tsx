@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { getCityBySlug } from "@/lib/cities";
-import { getCinemas } from "@/lib/cinemas";
+import { fetchCinemas, getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
 import {
   fetchRecentScreenings,
@@ -11,11 +11,14 @@ import {
   getScreeningsLastUpdated,
 } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import {
   BASE_OPEN_GRAPH,
   NOINDEX_FOLLOW,
   formatPlDate,
+  inPlace,
   pluralPl,
+  wPrep,
 } from "@/lib/seo";
 import { cityFallbackIntro } from "@/lib/listing-copy";
 import { splitByChain } from "@/lib/cinema-chains";
@@ -26,34 +29,55 @@ import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
 import RepertoireGrid from "@/components/common/repertoire-grid";
 import RecentRepertoire from "@/components/common/recent-repertoire";
+import NearbyRepertoire from "@/components/common/nearby-repertoire";
+import ListingFaq from "@/components/common/listing-faq";
+import { buildCityFaq } from "@/lib/listing-faq";
 import Footer from "../../(home)/_components/footer";
 
 interface CinemaCardsProps {
   cinemas: { id: number; slug: string; name: string; street: string | null }[];
+  /** Venues whose page is noindex render as plain cards, without a link. */
+  isLinked: (slug: string) => boolean;
 }
+
+const CARD_CLASS =
+  "bg-black border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1";
 
 // Borders live on the cards (not the container) so lines end with the last
 // card instead of running across empty grid columns. Negative margins
 // collapse the doubled inner borders; opaque #1a1a1a (white/10 on black)
 // keeps overlaps from brightening.
-const CinemaCards: React.FC<CinemaCardsProps> = ({ cinemas }) => (
+const CinemaCards: React.FC<CinemaCardsProps> = ({ cinemas, isLinked }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-px pl-px">
-    {cinemas.map((cinema) => (
-      <Link
-        key={cinema.id}
-        href={`/kina/${cinema.slug}`}
-        className="group bg-black hover:bg-white/[0.04] transition-colors border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1"
-      >
-        <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
-          {cinema.name}
-        </span>
-        {cinema.street && (
-          <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
-            {cinema.street}
+    {cinemas.map((cinema) =>
+      isLinked(cinema.slug) ? (
+        <Link
+          key={cinema.id}
+          href={`/kina/${cinema.slug}`}
+          className={`group hover:bg-white/[0.04] transition-colors ${CARD_CLASS}`}
+        >
+          <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
+            {cinema.name}
           </span>
-        )}
-      </Link>
-    ))}
+          {cinema.street && (
+            <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
+              {cinema.street}
+            </span>
+          )}
+        </Link>
+      ) : (
+        <div key={cinema.id} className={CARD_CLASS}>
+          <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/35">
+            {cinema.name}
+          </span>
+          {cinema.street && (
+            <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/30">
+              {cinema.street}
+            </span>
+          )}
+        </div>
+      )
+    )}
   </div>
 );
 
@@ -61,11 +85,6 @@ const CinemaCards: React.FC<CinemaCardsProps> = ({ cinemas }) => (
 const MAX_TITLE_LENGTH = 60;
 // Google truncates snippets past roughly this length.
 const MAX_DESCRIPTION_LENGTH = 160;
-
-// Polish locative preposition: "we" before a w-/f- consonant cluster
-// (we Wrocławiu, we Włocławku, we Fromborku), otherwise "w" (w Krakowie).
-const wPrep = (locative: string): "w" | "we" =>
-  /^[wWfF][bcćdfghjklłmnńprsśtwzźż]/.test(locative) ? "we" : "w";
 
 // ISR: cached HTML revalidated every 5 minutes. The repertoire filters
 // (genres, dates, search) are applied client-side in CityRepertoire,
@@ -95,8 +114,13 @@ export const generateMetadata = async ({
   const { slug } = await params;
   const { city, screenings: rawScreenings } = await getCityBySlug(slug);
 
-  const cinemasResponse = await getCinemas({ cityId: city.id.toString() });
-  const cinemasCount = cinemasResponse.data.flatMap((g) => g.cinemas).length;
+  // null means the call failed, which is not the same as "no cinemas": a
+  // swallowed error used to noindex the page and ISR cached that verdict.
+  const cinemasResponse = await fetchCinemas({
+    cityId: city.id.toString(),
+  }).catch(() => null);
+  const cinemasCount =
+    cinemasResponse?.data.flatMap((g) => g.cinemas).length ?? 0;
   const screeningGroups = Array.isArray(rawScreenings)
     ? rawScreenings
     : [...(rawScreenings?.data ?? [])];
@@ -126,17 +150,44 @@ export const generateMetadata = async ({
     screeningsCount > 0
       ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}`
       : `${cinemasCount} ${pluralPl(cinemasCount, "kino z seansami specjalnymi", "kina z seansami specjalnymi", "kin z seansami specjalnymi")}`;
+  // Lead with what only this city has: its venue names (arthouse first) and
+  // a current title. Starting with the counts made ~40% of city snippets
+  // open with the same words ("1 kino z seansami specjalnymi..."), so they
+  // read as clones on the results page (audit, October 2026).
   // Same degradation as the title: two-word city names ("Ostrowcu
   // Świętokrzyskim") pushed the full form past the snippet limit on ~45
-  // pages (Ahrefs, October 2026), so Google cut it mid-sentence. The
-  // shorter tail keeps the counts and the call to action whole.
-  const descriptionFull = `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne, klasyka filmowa i retrospektywy w kinach studyjnych i sieciowych - sprawdź aktualny repertuar.`;
+  // pages (Ahrefs, October 2026), so Google cut it mid-sentence. The first
+  // candidate that fits wins.
+  const { independent, chain } = splitByChain(
+    cinemasResponse?.data.flatMap((g) => g.cinemas) ?? []
+  );
+  const venueNames = [...independent, ...chain].map((c) => c.name);
+  const venues =
+    venueNames.length > 2
+      ? `${venueNames.slice(0, 2).join(", ")} i inne kina`
+      : venueNames.join(" i ");
+  const firstTitle = screeningGroups[0]?.movie.title;
+  const titlePart = firstTitle ? `, m.in. „${firstTitle}”` : "";
+  const lead = `${venues} ${prep} ${city.nameDeclinated}`;
+  // Without upcoming screenings the counts only repeat the venue names.
+  const candidates =
+    screeningsCount > 0
+      ? [
+          `${lead}: ${counts}${titlePart}. Seanse specjalne, klasyka i retrospektywy, sprawdź repertuar.`,
+          `${lead}: ${counts}${titlePart}. Sprawdź repertuar.`,
+          `${lead}: ${counts}. Sprawdź repertuar.`,
+          `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`,
+        ]
+      : [
+          `${lead}: seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź aktualny repertuar.`,
+          `${lead}: seanse specjalne i klasyka filmowa. Sprawdź repertuar.`,
+          `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`,
+        ];
   const description =
     cinemasCount === 0
       ? `Kina i seanse specjalne ${prep} ${city.nameDeclinated}. Aktualna klasyka filmowa, retrospektywy i pokazy specjalne.`
-      : descriptionFull.length <= MAX_DESCRIPTION_LENGTH
-        ? descriptionFull
-        : `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`;
+      : (candidates.find((text) => text.length <= MAX_DESCRIPTION_LENGTH) ??
+        candidates[candidates.length - 1]);
   const url = `${SITE_URL}/miasta/${city.slug}`;
 
   // A city without cinemas is thin content; keep it out of the index. So is
@@ -151,12 +202,18 @@ export const generateMetadata = async ({
           () => null
         )
       : null;
-  const noindex = cinemasCount === 0 || recentScreenings?.length === 0;
+  const noindex =
+    (cinemasResponse !== null && cinemasCount === 0) ||
+    recentScreenings?.length === 0;
 
   return {
     title,
     description,
-    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
+    // Self-canonical on noindex pages too: without it they inherited the
+    // /miasta hub canonical from the parent layout, which reads as "this
+    // page duplicates the hub" next to the noindex.
+    alternates: { canonical: url },
+    ...(noindex ? NOINDEX_FOLLOW : {}),
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
@@ -186,13 +243,17 @@ const CityPage = async ({ params }: CityPageProps) => {
     screenings,
     lastUpdated,
     recentScreenings,
+    indexable,
   ] = await Promise.all([
     getCinemas({ cityId: city.id.toString() }),
     getGenres(),
     getScreenings({ cityId: city.id.toString() }),
     getScreeningsLastUpdated({ cityId: city.id.toString() }),
     getRecentScreenings({ cityId: city.id.toString() }),
+    getIndexableSlugs(),
   ]);
+  const isCinemaLinked = (slug: string): boolean =>
+    !indexable || indexable.cinemas.has(slug);
 
   const cinemas = cinemaGroups
     .flatMap((g) => g.cinemas)
@@ -267,7 +328,10 @@ const CityPage = async ({ params }: CityPageProps) => {
               <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
                 Kina studyjne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
               </h2>
-              <CinemaCards cinemas={independentCinemas} />
+              <CinemaCards
+                cinemas={independentCinemas}
+                isLinked={isCinemaLinked}
+              />
             </div>
           )}
           {chainCinemas.length > 0 && (
@@ -276,7 +340,7 @@ const CityPage = async ({ params }: CityPageProps) => {
                 Seanse specjalne w&nbsp;kinach sieciowych{" "}
                 {wPrep(cityForCopy)}&nbsp;{cityForCopy}
               </h2>
-              <CinemaCards cinemas={chainCinemas} />
+              <CinemaCards cinemas={chainCinemas} isLinked={isCinemaLinked} />
             </div>
           )}
         </section>
@@ -300,8 +364,8 @@ const CityPage = async ({ params }: CityPageProps) => {
           <EmptyState
             description={
               <>
-                Brak seansów pasujących do wybranych filtrów w&nbsp;
-                {cityForCopy}. Spróbuj zmienić zakres dat, gatunek lub frazę.
+                Brak seansów pasujących do wybranych filtrów{" "}
+                {wPrep(cityForCopy)}&nbsp;{cityForCopy}. Spróbuj zmienić zakres dat, gatunek lub frazę.
               </>
             }
             cta={{ href: "/miasta", label: "Inne miasta" }}
@@ -311,16 +375,25 @@ const CityPage = async ({ params }: CityPageProps) => {
         <RepertoireGrid
           screenings={screenings}
           emptyState={
-            <EmptyState
-              description={
-                <>
-                  Kina {wPrep(cityForCopy)}&nbsp;{cityForCopy} nie mają teraz
-                  zapowiedzianych seansów specjalnych. Repertuar uzupełniamy na
-                  bieżąco, zajrzyj ponownie wkrótce.
-                </>
-              }
-              cta={{ href: "/miasta", label: "Inne miasta" }}
-            />
+            // A wrapper element, not a fragment: a multi-child fragment
+            // crosses into the client RepertoireSection as an unkeyed array.
+            <div>
+              <EmptyState
+                className="pb-12 md:pb-16"
+                description={
+                  <>
+                    Kina {wPrep(cityForCopy)}&nbsp;{cityForCopy} nie mają teraz
+                    zapowiedzianych seansów specjalnych. Repertuar uzupełniamy
+                    na bieżąco, zajrzyj ponownie wkrótce.
+                  </>
+                }
+                cta={{ href: "/miasta", label: "Inne miasta" }}
+              />
+              <NearbyRepertoire
+                voivodeship={city.voivodeship}
+                cityId={city.id}
+              />
+            </div>
           }
         />
       </RepertoireSection>
@@ -332,6 +405,17 @@ const CityPage = async ({ params }: CityPageProps) => {
           </>
         }
         items={recentScreenings}
+      />
+
+      <ListingFaq
+        heading={<>Pytania o&nbsp;kina {inPlace(cityForCopy)}</>}
+        questions={buildCityFaq({
+          cityLocative: cityForCopy,
+          independentNames: independentCinemas.map((c) => c.name),
+          chainNames: chainCinemas.map((c) => c.name),
+          screenings,
+          lastUpdated,
+        })}
       />
 
       <Footer />

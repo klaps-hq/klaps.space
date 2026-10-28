@@ -1,7 +1,7 @@
 import { getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site-config";
-import { pluralPl } from "@/lib/seo";
+import { inPlace, pluralPl } from "@/lib/seo";
 
 // llms.txt - a machine-readable site guide for AI search crawlers
 // (ChatGPT, Claude, Perplexity, Google AI). https://llmstxt.org/
@@ -24,7 +24,7 @@ export async function GET() {
   const cityLines = citiesWithCinemas.map((group) => {
     const count = group.cinemas.length;
     const label = `${count} ${pluralPl(count, "kino", "kina", "kin")}`;
-    return `- [Kina i seanse w ${group.city.nameDeclinated ?? group.city.name}](${SITE_URL}/miasta/${group.city.slug}): ${label}`;
+    return `- [Kina i seanse ${inPlace(group.city.nameDeclinated ?? group.city.name)}](${SITE_URL}/miasta/${group.city.slug}): ${label}`;
   });
 
   const genreLines = [...genres]

@@ -7,7 +7,6 @@ import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
 import { SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH } from "@/lib/seo";
 import { getPostsPage } from "@/lib/posts";
-import type { Post } from "@/payload-types";
 import Footer from "../../../(home)/_components/footer";
 import PostListItem from "../../_components/post-list-item";
 import PaginationNav from "../../_components/pagination-nav";
@@ -71,10 +70,9 @@ const BlogArchivePage = async ({ params }: BlogArchivePageProps) => {
   // Page 1 is /blog itself; keep a single canonical URL for it.
   if (page === 1) permanentRedirect("/blog");
 
-  const { posts, totalPages } = await getPostsPage(page).catch(() => ({
-    posts: [] as Post[],
-    totalPages: 0,
-  }));
+  // A database error propagates (ISR keeps the last good copy); only a
+  // page past the end is a 404.
+  const { posts, totalPages } = await getPostsPage(page);
   if (posts.length === 0) notFound();
 
   return (

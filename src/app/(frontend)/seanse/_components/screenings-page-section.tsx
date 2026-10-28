@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 import FilterBar from "../../(home)/_components/screenings/filter-bar";
 import ScreeningsGrid from "../../(home)/_components/screenings/screenings-grid";
 import PaginatedNav from "@/components/common/paginated-nav";
+import { MY_CINEMAS_PARAM } from "../../(home)/_components/screenings/my-cinemas-field";
+import MyCinemasGrid from "./my-cinemas-grid";
 
 interface ScreeningsPageSectionProps {
   screenings: IScreeningGroup[];
@@ -36,6 +38,9 @@ const Inner: React.FC<ScreeningsPageSectionProps> = ({
 }) => {
   const { isPending } = useScreeningsTransition();
   const searchParams = useSearchParams();
+  // Starred cinemas replace the location filter, so the city field and the
+  // server-paginated listing step aside in this view.
+  const showMyCinemas = searchParams.get(MY_CINEMAS_PARAM) === "1";
 
   const buildPageHref = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -52,7 +57,7 @@ const Inner: React.FC<ScreeningsPageSectionProps> = ({
     <>
       <div>
         <div className="px-6 md:px-12 lg:px-16 py-4 md:py-5">
-          <FilterBar genres={genres} />
+          <FilterBar genres={genres} showMyCinemas hideCity={showMyCinemas} />
         </div>
         <div className="h-px w-full bg-white/10" aria-hidden="true" />
       </div>
@@ -63,23 +68,35 @@ const Inner: React.FC<ScreeningsPageSectionProps> = ({
           isPending && "opacity-50 pointer-events-none"
         )}
       >
-        <ScreeningsGrid
-          screenings={screenings}
-          genres={genres}
-          selectedGenreIds={selectedGenreIds}
-          dateFrom={dateFrom}
-          dateTo={dateTo}
-          search={search}
-        />
-
-        {totalPages > 1 && screenings.length > 0 && (
-          <div className="mt-16 md:mt-20">
-            <PaginatedNav
-              currentPage={currentPage}
-              totalPages={totalPages}
-              buildHref={buildPageHref}
+        {showMyCinemas ? (
+          <MyCinemasGrid
+            genres={genres}
+            selectedGenreIds={selectedGenreIds}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            search={search}
+          />
+        ) : (
+          <>
+            <ScreeningsGrid
+              screenings={screenings}
+              genres={genres}
+              selectedGenreIds={selectedGenreIds}
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              search={search}
             />
-          </div>
+
+            {totalPages > 1 && screenings.length > 0 && (
+              <div className="mt-16 md:mt-20">
+                <PaginatedNav
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  buildHref={buildPageHref}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
     </>

@@ -7,66 +7,33 @@ import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import JsonLd from "@/components/common/json-ld";
 import { SITE_URL } from "@/lib/site-config";
-import {
-  BASE_OPEN_GRAPH,
-  buildPaginationMeta,
-  parsePageParam,
-} from "@/lib/seo";
+import { BASE_OPEN_GRAPH } from "@/lib/seo";
 import Footer from "../(home)/_components/footer";
-import DirectorsBrowser from "./_components/directors-browser";
+import DirectorsBrowser, {
+  type DirectorsBrowserItem,
+} from "./_components/directors-browser";
 
+// Static ISR: the page reads no searchParams (old ?page=N URLs are
+// redirected to the hub in the proxy), so it is cached like the other hubs.
 export const revalidate = 300;
 
-const PAGE_SIZE = 40;
-
-interface DirectorsSearchParams {
-  page?: string;
-}
-
-interface DirectorsPageProps {
-  searchParams: Promise<DirectorsSearchParams>;
-}
-
-export const generateMetadata = async ({
-  searchParams,
-}: DirectorsPageProps): Promise<Metadata> => {
-  const { page } = await searchParams;
+export const generateMetadata = async (): Promise<Metadata> => {
+  const title = "Reżyserzy - filmy i seanse w kinach studyjnych";
   const description =
     "Przeglądaj reżyserów, których kino wraca na duży ekran w polskich kinach studyjnych. Retrospektywy, klasyka filmowa i seanse specjalne.";
   const url = `${SITE_URL}/rezyserzy`;
 
-  // Plain pagination stays indexable: unique title, self-canonical and
-  // rel prev/next, so the deeper parts of the listing keep their crawl
-  // path. getDirectors() is deduplicated against the page render's call
-  // by Next's fetch memoization.
-  const { data: directors } = await getDirectors();
-  const totalPages = Math.max(1, Math.ceil(directors.length / PAGE_SIZE));
-  const currentPage = Math.min(parsePageParam(page), totalPages);
-
-  // The paginated variant drops part of the base title so the whole thing
-  // (with the "- Klaps" template suffix) stays under ~60 chars in SERPs.
-  const title =
-    currentPage >= 2
-      ? `Reżyserzy w kinach studyjnych (strona ${currentPage})`
-      : "Reżyserzy - filmy i seanse w kinach studyjnych";
-  const { canonical, pagination } = buildPaginationMeta(
-    url,
-    currentPage,
-    totalPages
-  );
-
   return {
     title,
     description,
-    alternates: { canonical },
-    pagination,
+    alternates: { canonical: url },
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
       title,
       description:
         "Reżyserzy, których filmy wracają na duży ekran. Seanse specjalne w kinach studyjnych w Polsce.",
-      url: canonical,
+      url,
     },
   };
 };
@@ -92,31 +59,39 @@ const buildDirectorsJsonLd = (directors: readonly IDirector[]) => ({
   },
 });
 
-// Directors with the most upcoming screenings lead; those without surface
-// further down, ordered by filmography size then name.
+// Directors with the most upcoming screenings lead, then by filmography
+// size and name.
 const byRelevance = (a: IDirector, b: IDirector): number =>
   b.upcomingScreeningsCount - a.upcomingScreeningsCount ||
   b.moviesCount - a.moviesCount ||
   a.name.localeCompare(b.name, "pl");
 
-const DirectorsPage = async ({ searchParams }: DirectorsPageProps) => {
-  const { page } = await searchParams;
+// Only the fields the cards render cross into the client component. The
+// full records carry bios, and shipping ~1200 of them made every page of
+// the old paginated hub weigh ~0.9 MB of HTML.
+const toBrowserItem = (director: IDirector): DirectorsBrowserItem => ({
+  id: director.id,
+  slug: director.slug,
+  name: director.name,
+  photoUrl: director.photoUrl,
+  moviesCount: director.moviesCount,
+  upcomingScreeningsCount: director.upcomingScreeningsCount,
+});
+
+const DirectorsPage = async () => {
   const { data: directors } = await getDirectors();
-  const sorted = [...directors].sort(byRelevance);
 
-  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
-  const currentPage = Math.min(parsePageParam(page), totalPages);
-
-  const withRepertoire = sorted.filter(
-    (director) => director.upcomingScreeningsCount > 0
-  );
+  // The hub lists only directors whose films are on screen. The long tail
+  // without screenings (98% of ~1200) are noindex pages; 31 paginated pages
+  // of links to them were the bulk of the crawl Google spent here. Those
+  // pages stay reachable from their films.
+  const withRepertoire = directors
+    .filter((director) => director.upcomingScreeningsCount > 0)
+    .sort(byRelevance);
 
   return (
     <main className="bg-black text-white min-h-screen">
-      {/* The ItemList describes directors with an active repertoire, which
-          surface on page 1; deeper pages would pair it with content it does
-          not describe, so they skip the CollectionPage JSON-LD. */}
-      {currentPage === 1 && withRepertoire.length > 0 && (
+      {withRepertoire.length > 0 && (
         <JsonLd data={buildDirectorsJsonLd(withRepertoire)} />
       )}
       <SiteHeader />
@@ -131,18 +106,13 @@ const DirectorsPage = async ({ searchParams }: DirectorsPageProps) => {
           <PageHeadingMuted>Twórcy na dużym ekranie.</PageHeadingMuted>
         </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
-          Reżyserzy, których kino wraca na duży ekran w&nbsp;polskich kinach
+          Reżyserzy, których filmy grają teraz w&nbsp;polskich kinach
           studyjnych. Retrospektywy, klasyka filmowa i&nbsp;seanse specjalne.
           Wybierz nazwisko i&nbsp;zobacz filmografię oraz aktualny repertuar.
         </p>
       </div>
 
-      <DirectorsBrowser
-        directors={sorted}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        pageSize={PAGE_SIZE}
-      />
+      <DirectorsBrowser directors={withRepertoire.map(toBrowserItem)} />
 
       <Footer />
     </main>

@@ -55,7 +55,11 @@ export const PageHeadingMuted: React.FC<PageHeadingMutedProps> = ({
   children,
 }) => {
   return (
+    // The leading space is invisible at the start of a block but keeps the
+    // two lines apart in the text crawlers read ("Reżyserzy. Twórcy", not
+    // "Reżyserzy.Twórcy").
     <span className={cn("block font-normal text-white/40", className)}>
+      {" "}
       {children}
     </span>
   );

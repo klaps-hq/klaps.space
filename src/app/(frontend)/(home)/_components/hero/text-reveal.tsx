@@ -91,7 +91,18 @@ interface CharsRevealProps {
 // Splits into words so spaces stay as plain text nodes and lines can wrap.
 // baseIndex offsets the per-char stagger so it stays continuous across
 // segments without mutating a shared counter during render.
-const renderChars = (text: string, baseIndex: number) => {
+// The per-char spans are aria-hidden and the plain text sits next to them
+// in an sr-only span: screen readers, crawlers and LLM extractors that join
+// inline elements with spaces read "26 października", not
+// "2 6 p a ź d z i e r n i k a".
+const renderChars = (text: string, baseIndex: number) => (
+  <>
+    <span className="sr-only">{text}</span>
+    <span aria-hidden="true">{renderCharSpans(text, baseIndex)}</span>
+  </>
+);
+
+const renderCharSpans = (text: string, baseIndex: number) => {
   const words = text.split(" ");
   const wordOffset = words.map((_, wIdx) =>
     words.slice(0, wIdx).reduce((sum, w) => sum + w.length, 0)
