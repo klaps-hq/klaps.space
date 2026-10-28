@@ -124,68 +124,14 @@ const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({ cinemas }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
-      <div className="lg:col-span-5 flex flex-col gap-10">
-        <div>
-          <label
-            htmlFor="badge-cinema-search"
-            className="block text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50"
-          >
-            1. Wybierz kino
-          </label>
-          <input
-            id="badge-cinema-search"
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Nazwa kina lub miasto"
-            autoComplete="off"
-            className="mt-4 w-full bg-transparent border-b border-white/25 focus:border-white outline-none py-3 text-base md:text-lg text-white placeholder:text-white/35 transition-colors"
-          />
-          {results.length > 0 && (
-            <ul className="mt-2 flex flex-col">
-              {results.map((cinema) => (
-                <li key={cinema.slug}>
-                  <button
-                    type="button"
-                    onClick={() => handleSelect(cinema)}
-                    className="w-full flex items-baseline justify-between gap-4 py-3 text-left border-b border-white/10 text-white/75 hover:text-white transition-colors"
-                  >
-                    <span className="text-base">{cinema.name}</span>
-                    <span className="shrink-0 text-[10px] uppercase tracking-[0.22em] text-white/50">
-                      {cinema.city}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          {query.trim().length >= 2 && results.length === 0 && (
-            <p className="mt-4 text-sm text-white/50">
-              Nie znaleźliśmy takiego kina. Sprawdź pisownię albo napisz do nas.
-            </p>
-          )}
-          <p
-            className="mt-5 text-sm md:text-base text-white/65"
-            aria-live="polite"
-          >
-            {selected ? (
-              <>
-                Wybrane: <span className="text-white">{selected.name}</span>,{" "}
-                {selected.city}
-              </>
-            ) : (
-              "Bez wybranego kina odznaka prowadzi na stronę główną Klapsa."
-            )}
-          </p>
-        </div>
-
-        <div>
-          <span className="block text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
-            2. Wybierz wersję
+    <div className="flex flex-col gap-12 md:gap-14">
+      <div>
+        <div className="flex items-baseline justify-between gap-4">
+          <span className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
+            Podgląd
           </span>
           <div
-            className="mt-4 flex gap-3"
+            className="flex gap-5"
             role="group"
             aria-label="Wersja odznaki"
           >
@@ -196,10 +142,10 @@ const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({ cinemas }) => {
                 aria-pressed={variant === item.id}
                 onClick={() => setVariant(item.id)}
                 className={cn(
-                  "px-5 py-2.5 text-xs uppercase tracking-[0.22em] border transition-colors",
+                  "text-xs uppercase tracking-[0.22em] transition-colors",
                   variant === item.id
-                    ? "border-white text-white"
-                    : "border-white/20 text-white/55 hover:text-white hover:border-white/50"
+                    ? "text-white"
+                    : "text-white/35 hover:text-white/70"
                 )}
               >
                 {item.label}
@@ -207,14 +153,11 @@ const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({ cinemas }) => {
             ))}
           </div>
         </div>
-      </div>
-
-      <div className="lg:col-span-7 flex flex-col gap-6">
         <div
           className={cn(
-            "flex items-center justify-center px-6 py-12 md:py-16 border border-white/10",
+            "mt-4 flex items-center justify-center px-6 py-14 md:py-20 transition-colors duration-300",
             // Each variant is shown on the kind of page it is meant for.
-            variant === "ciemna" ? "bg-[#f2f2f2]" : "bg-[#111111]"
+            variant === "ciemna" ? "bg-[#f2f2f2]" : "bg-[#141414]"
           )}
         >
           {/* Plain <img>: this previews the exact file cinemas embed. */}
@@ -226,29 +169,80 @@ const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({ cinemas }) => {
             height={BADGE_HEIGHT}
           />
         </div>
+      </div>
 
-        <div>
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
-              3. Skopiuj kod i wklej na stronę kina
-            </span>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="shrink-0 inline-flex items-center gap-2 min-h-11 px-4 whitespace-nowrap text-xs uppercase tracking-[0.22em] text-white border border-white/25 hover:border-white transition-colors"
-            >
-              {copied ? (
-                <Check aria-hidden="true" className="size-4" />
-              ) : (
-                <Copy aria-hidden="true" className="size-4" />
-              )}
-              {copied ? "Skopiowano" : "Kopiuj kod"}
-            </button>
-          </div>
-          <pre className="mt-4 p-5 bg-white/[0.04] border border-white/10 text-xs md:text-sm text-white/80 leading-relaxed whitespace-pre-wrap break-all select-all">
-            <code>{snippet}</code>
-          </pre>
+      <div>
+        <label
+          htmlFor="badge-cinema-search"
+          className="block text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50"
+        >
+          Kino
+        </label>
+        <input
+          id="badge-cinema-search"
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Nazwa kina lub miasto"
+          autoComplete="off"
+          className="mt-3 w-full bg-transparent border-b border-white/25 focus:border-white outline-none py-3 text-lg md:text-2xl text-white placeholder:text-white/30 -tracking-[0.01em] transition-colors [&::-webkit-search-cancel-button]:appearance-none"
+        />
+        {results.length > 0 && (
+          <ul className="flex flex-col">
+            {results.map((cinema) => (
+              <li key={cinema.slug}>
+                <button
+                  type="button"
+                  onClick={() => handleSelect(cinema)}
+                  className="w-full flex items-baseline justify-between gap-4 py-3 text-left border-b border-white/10 text-white/70 hover:text-white transition-colors"
+                >
+                  <span className="text-base">{cinema.name}</span>
+                  <span className="shrink-0 text-[10px] uppercase tracking-[0.22em] text-white/45">
+                    {cinema.city}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {query.trim().length >= 2 && results.length === 0 && (
+          <p className="mt-4 text-sm text-white/50">
+            Nie znaleźliśmy takiego kina. Sprawdź pisownię albo napisz do nas.
+          </p>
+        )}
+        <p className="mt-4 text-sm md:text-base text-white/55" aria-live="polite">
+          {selected ? (
+            <>
+              Wybrane: <span className="text-white">{selected.name}</span>,{" "}
+              {selected.city}
+            </>
+          ) : (
+            "Bez wybranego kina odznaka prowadzi na stronę główną Klapsa."
+          )}
+        </p>
+      </div>
+
+      <div>
+        <div className="flex items-baseline justify-between gap-4">
+          <span className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
+            Kod
+          </span>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="shrink-0 inline-flex items-center gap-2 min-h-11 -my-3 whitespace-nowrap text-xs uppercase tracking-[0.22em] text-white/70 hover:text-white transition-colors"
+          >
+            {copied ? (
+              <Check aria-hidden="true" className="size-4" />
+            ) : (
+              <Copy aria-hidden="true" className="size-4" />
+            )}
+            {copied ? "Skopiowano" : "Kopiuj kod"}
+          </button>
         </div>
+        <pre className="mt-4 p-5 md:p-6 bg-white/[0.04] font-mono text-xs md:text-sm text-white/70 leading-relaxed whitespace-pre-wrap break-all select-all">
+          <code>{snippet}</code>
+        </pre>
       </div>
     </div>
   );
