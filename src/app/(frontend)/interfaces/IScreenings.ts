@@ -38,9 +38,18 @@ export interface IRecentScreening {
   /** Wall-clock date of the most recent screening, YYYY-MM-DD. */
   lastScreeningDate: string;
   screeningsCount: number;
-  /**
-   * Scheduled anywhere in the next 30 days, i.e. the movie page is
-   * indexable. Only these get a link.
-   */
+  /** Scheduled anywhere in the next 30 days. */
   hasUpcomingScreenings: boolean;
+}
+
+/** One cinema from GET /screenings/recent-venues: where a film played lately. */
+export interface IRecentVenue {
+  cinema: {
+    slug: string;
+    name: string;
+    city: { name: string; slug: string };
+  };
+  /** Wall-clock date of the film's most recent screening there, YYYY-MM-DD. */
+  lastScreeningDate: string;
+  screeningsCount: number;
 }

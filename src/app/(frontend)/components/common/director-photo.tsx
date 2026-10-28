@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { tmdbPhotoCdnFallbackSrc, tmdbPhotoSrc } from "@/lib/tmdb";
+import { directorPhotoAlt } from "@/lib/image-alt";
 
 interface DirectorPhotoProps {
   photoUrl: string | null;
@@ -64,7 +65,7 @@ const DirectorPhoto: React.FC<DirectorPhotoProps> = ({
     <Image
       key={src}
       src={src}
-      alt={`Zdjęcie: ${name}`}
+      alt={directorPhotoAlt(name)}
       width={width}
       height={height}
       sizes={sizes}

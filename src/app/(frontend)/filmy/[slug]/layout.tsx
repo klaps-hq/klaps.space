@@ -1,7 +1,11 @@
 import { getMovieBySlug } from "@/lib/movies";
 import { getMovieScreenings } from "@/lib/screenings";
 import { tmdbImageSrc } from "@/lib/tmdb";
-import { SITE_URL } from "@/lib/site-config";
+import {
+  SITE_URL,
+  directorEntityId,
+  movieEntityId,
+} from "@/lib/site-config";
 import { buildScreeningEventsJsonLd } from "@/lib/screening-event-jsonld";
 import { IMovie } from "@/interfaces/IMovies";
 import { IScreening } from "@/interfaces/IScreenings";
@@ -16,6 +20,7 @@ const buildMovieJsonLd = (movie: IMovie) => {
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Movie",
+    "@id": movieEntityId(movie.slug),
     name: movie.title,
     url: `${SITE_URL}/filmy/${movie.slug}`,
     description: movie.description ?? undefined,
@@ -38,9 +43,17 @@ const buildMovieJsonLd = (movie: IMovie) => {
   }
 
   if (movie.directors?.length) {
+    // Directors with a page on this site link to it, so the Movie and the
+    // director's Person node resolve to the same entity.
     jsonLd.director = movie.directors.map((d) => ({
       "@type": "Person",
       name: d.name,
+      ...(d.slug
+        ? {
+            "@id": directorEntityId(d.slug),
+            url: `${SITE_URL}/rezyserzy/${d.slug}`,
+          }
+        : {}),
     }));
   }
 

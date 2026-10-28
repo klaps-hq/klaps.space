@@ -3,6 +3,7 @@ import {
   IScreeningGroup,
   IRandomScreening,
   IRecentScreening,
+  IRecentVenue,
 } from "@/interfaces/IScreenings";
 import { IMovie, PaginatedResponse } from "@/interfaces/IMovies";
 import { apiFetch } from "./client";
@@ -18,6 +19,10 @@ interface GetScreeningsParams {
   dateTo?: string | null;
   search?: string | null;
   limit?: number | null;
+  citySlug?: string | null;
+  // Landing page filters (/kino-plenerowe, /klasyka-w-kinach).
+  openAir?: boolean;
+  classic?: boolean;
 }
 
 interface GetPaginatedScreeningsParams extends GetScreeningsParams {
@@ -61,6 +66,9 @@ export const fetchScreenings = async (
       dateTo: params.dateTo ?? "",
       search: params.search ?? "",
       limit: params.limit ? params.limit.toString() : "",
+      citySlug: params.citySlug ?? "",
+      openAir: params.openAir ? "true" : "",
+      classic: params.classic ? "true" : "",
     },
   });
 
@@ -169,6 +177,7 @@ interface GetRecentScreeningsParams {
   cityId?: string | null;
   days?: number;
   limit?: number;
+  openAir?: boolean;
 }
 
 /** Look-back window of the "Ostatnio w repertuarze" section, in days. */
@@ -191,6 +200,7 @@ export const fetchRecentScreenings = (
       cityId: params.cityId ?? "",
       days: String(params.days ?? RECENT_SCREENINGS_DAYS),
       limit: params.limit ? params.limit.toString() : "",
+      openAir: params.openAir ? "true" : "",
     },
   });
 
@@ -206,6 +216,30 @@ export const getRecentScreenings = async (
     return await fetchRecentScreenings(params);
   } catch (error) {
     console.warn("Falling back to empty recent screenings list:", error);
+    return [];
+  }
+};
+
+/**
+ * Cinemas where a film played during the last RECENT_SCREENINGS_DAYS days,
+ * newest first. Keeps a movie page indexable between screening runs.
+ *
+ * Returns an empty list on any failure, which means "noindex" for a movie
+ * without upcoming screenings: the behaviour from before this list existed,
+ * and the safe one on an API deployment that predates the endpoint.
+ */
+export const getRecentVenues = async (
+  movieId: number
+): Promise<IRecentVenue[]> => {
+  try {
+    return await apiFetch<IRecentVenue[]>("/screenings/recent-venues", {
+      params: {
+        movieId: movieId.toString(),
+        days: String(RECENT_SCREENINGS_DAYS),
+      },
+    });
+  } catch (error) {
+    console.warn("Falling back to empty recent venues list:", error);
     return [];
   }
 };

@@ -8,6 +8,8 @@ interface RecentRepertoireProps {
   /** Content of the section's H2. */
   heading: React.ReactNode;
   items: IRecentScreening[];
+  /** Line under the heading; defaults to the 90-day look-back note. */
+  description?: React.ReactNode;
 }
 
 // Same cell as the "Inne kina" grid on the cinema page, so the section reads
@@ -30,11 +32,15 @@ const META_CLASS =
  * Hook-free on purpose, so it renders on the server and ships in the static
  * HTML like the repertoire grid.
  *
- * Only films scheduled again somewhere get a link. The others have
- * noindexed movie pages, and pointing crawlers at those spends crawl budget,
- * which is the constraint this site is actually up against.
+ * Every film links to its page: a film screened within the window keeps an
+ * indexable movie page (it lists where the film played, see
+ * getRecentVenues), so these are crawl paths worth following.
  */
-const RecentRepertoire = ({ heading, items }: RecentRepertoireProps) => {
+const RecentRepertoire = ({
+  heading,
+  items,
+  description,
+}: RecentRepertoireProps) => {
   if (items.length === 0) return null;
 
   return (
@@ -43,8 +49,12 @@ const RecentRepertoire = ({ heading, items }: RecentRepertoireProps) => {
         {heading}
       </h2>
       <p className="mt-4 md:mt-5 mb-8 md:mb-10 max-w-[64ch] text-sm md:text-base text-white/55 leading-relaxed">
-        Filmy pokazywane w&nbsp;ostatnich {RECENT_SCREENINGS_DAYS} dniach, od
-        najnowszego seansu.
+        {description ?? (
+          <>
+            Filmy pokazywane w&nbsp;ostatnich {RECENT_SCREENINGS_DAYS} dniach,
+            od najnowszego seansu.
+          </>
+        )}
       </p>
       <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-px pl-px">
         {items.map((item) => {
@@ -57,7 +67,7 @@ const RecentRepertoire = ({ heading, items }: RecentRepertoireProps) => {
           const body = (
             <>
               <span
-                className={`${TITLE_CLASS} ${item.hasUpcomingScreenings ? "group-hover:text-white" : ""}`}
+                className={`${TITLE_CLASS} group-hover:text-white`}
               >
                 {item.movie.title}
               </span>
@@ -73,16 +83,12 @@ const RecentRepertoire = ({ heading, items }: RecentRepertoireProps) => {
 
           return (
             <li key={item.movie.id} className="flex">
-              {item.hasUpcomingScreenings ? (
-                <Link
-                  href={`/filmy/${item.movie.slug}`}
-                  className={`group w-full bg-black hover:bg-white/[0.04] transition-colors ${CELL_CLASS}`}
-                >
-                  {body}
-                </Link>
-              ) : (
-                <div className={`w-full bg-black ${CELL_CLASS}`}>{body}</div>
-              )}
+              <Link
+                href={`/filmy/${item.movie.slug}`}
+                className={`group w-full bg-black hover:bg-white/[0.04] transition-colors ${CELL_CLASS}`}
+              >
+                {body}
+              </Link>
             </li>
           );
         })}

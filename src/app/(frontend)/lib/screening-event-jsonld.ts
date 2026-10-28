@@ -1,4 +1,5 @@
-import { SITE_URL } from "./site-config";
+import { cinemaLocative } from "./cinema-name";
+import { SITE_URL, cinemaEntityId, movieEntityId } from "./site-config";
 import { tmdbPhotoSrc } from "./tmdb";
 import { wallTimeToInstant, wallTimeToWarsawIso } from "./warsaw-time";
 
@@ -46,6 +47,7 @@ const buildEvent = (
 
   const location: Record<string, unknown> = {
     "@type": "MovieTheater",
+    "@id": cinemaEntityId(cinema.slug),
     name: cinema.name,
     address: {
       "@type": "PostalAddress",
@@ -66,13 +68,14 @@ const buildEvent = (
   const event: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "ScreeningEvent",
-    // "w kinie X (Miasto)": venue and city names arrive in the nominative,
+    // "w kinie X (Miasto)": venue and city names arrive in the nominative
+    // ("Kino X" names inflect themselves, see cinema-name),
     // so they sit after "kinie" as an indeclinable apposition and the city
     // goes in parentheses ("seans w Muranów, Warszawa" read as broken Polish).
-    name: `${movie.title} - seans w kinie ${cinema.name} (${cinema.cityName})`,
+    name: `${movie.title} - seans w ${cinemaLocative(cinema.name)} (${cinema.cityName})`,
     // image and description are recommended fields for Event rich results;
     // without them Search Console reports warnings on every event.
-    description: `Seans filmu ${movie.title} w kinie ${cinema.name} (${cinema.cityName}). Szczegóły pokazu i pełny repertuar na klaps.space.`,
+    description: `Seans filmu ${movie.title} w ${cinemaLocative(cinema.name)} (${cinema.cityName}). Szczegóły pokazu i pełny repertuar na klaps.space.`,
     // The API's dateTime is Warsaw wall time with a misleading "Z";
     // keep the displayed hour and attach the real offset (see warsaw-time).
     startDate: wallTimeToWarsawIso(dateTime),
@@ -87,6 +90,7 @@ const buildEvent = (
     },
     workPresented: {
       "@type": "Movie",
+      "@id": movieEntityId(movie.slug),
       name: movie.title,
       url: `${SITE_URL}/filmy/${movie.slug}`,
     },

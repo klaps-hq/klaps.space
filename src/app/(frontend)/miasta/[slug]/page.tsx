@@ -20,6 +20,7 @@ import {
   pluralPl,
   wPrep,
 } from "@/lib/seo";
+import { todayDigest, todayDigestPhrases } from "@/lib/live-meta";
 import { cityFallbackIntro } from "@/lib/listing-copy";
 import { splitByChain } from "@/lib/cinema-chains";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
@@ -29,6 +30,8 @@ import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
 import RepertoireGrid from "@/components/common/repertoire-grid";
 import RecentRepertoire from "@/components/common/recent-repertoire";
+import { LinkGrid } from "@/components/common/landing-page";
+import { OPEN_AIR_PATH } from "@/lib/landing-pages";
 import NearbyRepertoire from "@/components/common/nearby-repertoire";
 import ListingFaq from "@/components/common/listing-faq";
 import { buildCityFaq } from "@/lib/listing-faq";
@@ -141,11 +144,13 @@ export const generateMetadata = async ({
   // ~60 chars a SERP renders, so the suffix degrades instead of being
   // truncated mid-phrase. The target keyword stays first either way.
   const titleBase = `Kina studyjne ${prep} ${city.nameDeclinated}`;
-  const titleFull = `${titleBase} - repertuar i seanse specjalne`;
+  // Colon form shared with the cinema titles ("[kino] [miasto]: repertuar
+  // i godziny seansów"), so the keyword phrase reads as one unit.
+  const titleFull = `${titleBase}: repertuar i godziny seansów`;
   const title =
     titleFull.length <= MAX_TITLE_LENGTH
       ? titleFull
-      : `${titleBase} - repertuar`;
+      : `${titleBase}: repertuar`;
   const counts =
     screeningsCount > 0
       ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}`
@@ -169,10 +174,19 @@ export const generateMetadata = async ({
   const firstTitle = screeningGroups[0]?.movie.title;
   const titlePart = firstTitle ? `, m.in. „${firstTitle}”` : "";
   const lead = `${venues} ${prep} ${city.nameDeclinated}`;
+  // Today's screenings lead when there are any: a live, dated fact that
+  // keeps the snippet unique and current (see live-meta).
+  const digest = todayDigest(screeningGroups);
+  const todayCandidates = digest
+    ? todayDigestPhrases(digest).map(
+        (phrase) => `${lead}: ${phrase}. Sprawdź repertuar.`
+      )
+    : [];
   // Without upcoming screenings the counts only repeat the venue names.
   const candidates =
     screeningsCount > 0
       ? [
+          ...todayCandidates,
           `${lead}: ${counts}${titlePart}. Seanse specjalne, klasyka i retrospektywy, sprawdź repertuar.`,
           `${lead}: ${counts}${titlePart}. Sprawdź repertuar.`,
           `${lead}: ${counts}. Sprawdź repertuar.`,
@@ -406,6 +420,19 @@ const CityPage = async ({ params }: CityPageProps) => {
         }
         items={recentScreenings}
       />
+
+      {cinemas.some((cinema) => cinema.isOpenAir) && (
+        <LinkGrid
+          heading={<>Kino plenerowe {inPlace(cityForCopy)}</>}
+          description="Letnie pokazy pod gołym niebem: miejsca, repertuar i filmy z ostatniego sezonu."
+          items={[
+            {
+              href: `${OPEN_AIR_PATH}/${city.slug}`,
+              label: `Kino plenerowe ${inPlace(cityForCopy)}`,
+            },
+          ]}
+        />
+      )}
 
       <ListingFaq
         heading={<>Pytania o&nbsp;kina {inPlace(cityForCopy)}</>}

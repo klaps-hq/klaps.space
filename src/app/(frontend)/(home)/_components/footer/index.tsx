@@ -14,8 +14,11 @@ const NAV_COLUMNS = [
       { label: "Miasta", href: "/miasta" },
       { label: "Gatunki", href: "/gatunki" },
       { label: "Reżyserzy", href: "/rezyserzy" },
+      { label: "Klasyka w kinach", href: "/klasyka-w-kinach" },
+      { label: "Kino plenerowe", href: "/kino-plenerowe" },
       { label: "Mapa kin", href: "/mapa-kin" },
       { label: "Blog", href: "/blog" },
+      { label: "Klaps w liczbach", href: "/w-liczbach" },
     ],
   },
   {

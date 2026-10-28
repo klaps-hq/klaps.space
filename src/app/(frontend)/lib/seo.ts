@@ -139,3 +139,43 @@ export const buildPaginationMeta = (
     },
   };
 };
+
+// ~60 characters is what a desktop SERP renders before cutting the title.
+const MAX_SERP_TITLE_LENGTH = 60;
+
+const normalizeForMatch = (value: string): string =>
+  value.toLocaleLowerCase("pl").normalize("NFD").replace(/\p{M}/gu, "");
+
+/**
+ * Venue name plus the city in the nominative, unless the name already
+ * carries it ("Kino Muranów Warszawa", but "Kino Pod Baranami" in Kraków
+ * gets the city appended). Mirrors the navigational queries in GSC:
+ * "[sieć] [galeria] [miasto] repertuar", "[kino] [miasto] repertuar".
+ */
+export const cinemaWithCity = (cinemaName: string, cityName: string): string =>
+  normalizeForMatch(cinemaName).includes(normalizeForMatch(cityName))
+    ? cinemaName
+    : `${cinemaName} ${cityName}`;
+
+/**
+ * Cinema page <title>, before the " - Klaps" template suffix.
+ * Independent venues: "Kino Pod Baranami Kraków: repertuar i godziny
+ * seansów". Chain venues keep the special-screenings angle: this site lists
+ * only the special programme of a multiplex, so promising its full
+ * repertoire would match the query and then disappoint the visitor.
+ * Degrades to a shorter suffix instead of letting the SERP cut it.
+ */
+export const cinemaPageTitle = (
+  cinemaName: string,
+  cityName: string,
+  isChain: boolean
+): string => {
+  const subject = cinemaWithCity(cinemaName, cityName);
+  const [full, short] = isChain
+    ? ["seanse specjalne i klasyka", "seanse specjalne"]
+    : ["repertuar i godziny seansów", "repertuar"];
+  const fullTitle = `${subject}: ${full}`;
+  return fullTitle.length <= MAX_SERP_TITLE_LENGTH
+    ? fullTitle
+    : `${subject}: ${short}`;
+};

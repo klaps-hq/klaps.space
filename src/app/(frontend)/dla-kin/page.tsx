@@ -107,21 +107,6 @@ const ForCinemasPage = async () => {
         </ol>
       </section>
 
-      <section
-        id="odznaka"
-        className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-14 md:pt-20 pb-14 md:pb-20"
-      >
-        <h2 className="mb-4 md:mb-6 text-3xl md:text-5xl lg:text-6xl leading-[1] -tracking-[0.03em] text-white font-medium">
-          Odznaka
-        </h2>
-        <p className="mb-10 md:mb-14 max-w-[68ch] text-base md:text-lg text-white/65 leading-relaxed">
-          Odznaka prowadzi prosto do strony Waszego kina na klaps.space, nie na
-          stronę główną. Plik jest lekki, nie śledzi odwiedzających i nie ładuje
-          żadnych skryptów.
-        </p>
-        <BadgeGenerator cinemas={cinemas} />
-      </section>
-
       <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-14 md:pt-20 pb-14 md:pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           <h2 className="lg:col-span-4 text-3xl md:text-5xl lg:text-6xl leading-[1] -tracking-[0.03em] text-white font-medium">
@@ -131,7 +116,7 @@ const ForCinemasPage = async () => {
             {STEPS.map((step, index) => (
               <li
                 key={step}
-                className="flex items-baseline gap-5 md:gap-8 border-t border-white/10 last:border-b py-5 md:py-7"
+                className="flex items-baseline gap-5 md:gap-8 border-t border-white/10 first:border-t-0 first:pt-0 last:pb-0 py-5 md:py-7"
               >
                 <span className="shrink-0 text-xs md:text-sm tabular-nums text-white/50 leading-none">
                   {String(index + 1).padStart(2, "0")}
@@ -142,6 +127,26 @@ const ForCinemasPage = async () => {
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      <section
+        id="odznaka"
+        className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-14 md:pt-20 pb-14 md:pb-20"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          <div className="lg:col-span-4">
+            <h2 className="text-3xl md:text-5xl lg:text-6xl leading-[1] -tracking-[0.03em] text-white font-medium">
+              Odznaka
+            </h2>
+            <p className="mt-5 md:mt-6 max-w-[40ch] text-sm md:text-base text-white/55 leading-relaxed">
+              Prowadzi prosto do strony Waszego kina na klaps.space. Plik jest
+              lekki, nie śledzi odwiedzających i nie ładuje żadnych skryptów.
+            </p>
+          </div>
+          <div className="lg:col-span-8">
+            <BadgeGenerator cinemas={cinemas} />
+          </div>
         </div>
       </section>
 

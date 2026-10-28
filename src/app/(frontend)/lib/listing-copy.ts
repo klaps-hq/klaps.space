@@ -1,6 +1,7 @@
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IMovieSummary } from "@/interfaces/IMovies";
 import { inPlace, pluralPl } from "./seo";
+import { CLASSIC_MIN_AGE_YEARS } from "./landing-pages";
 
 /**
  * Auto-generated intro copy for taxonomy/listing pages that have no editorial
@@ -242,4 +243,67 @@ export const directorFallbackIntro = (
     `retrospektyw i klasyki filmowej na dużym ekranie.`;
 
   return bindOrphans(`${first} ${second}`);
+};
+
+/**
+ * Fallback intro for /kino-plenerowe and /kino-plenerowe/[city] until the
+ * AI intro exists. `cityLocative` is null on the nationwide hub.
+ */
+export const openAirFallbackIntro = (
+  cityLocative: string | null,
+  venueNames: string[],
+  upcoming: IScreeningGroup[],
+  seasonTitles: string[]
+): string => {
+  const where = cityLocative ? ` ${inPlace(cityLocative)}` : " w Polsce";
+  const venues = venueNames.length;
+  // No venue list (a failed fetch) reads better without a count than as
+  // "0 miejsc".
+  const first =
+    venues === 0
+      ? `Kino plenerowe${where}: pokazy filmowe pod gołym niebem.`
+      : `Kino plenerowe${where}: ${venues} ` +
+        `${pluralPl(venues, "miejsce", "miejsca", "miejsc")} z pokazami pod gołym niebem` +
+        (venues <= 3 ? `, takich jak ${joinPl(venueNames)}.` : ".");
+
+  const upcomingTitles = uniqueTitles(upcoming, 3);
+  const second =
+    upcomingTitles.length > 0
+      ? `W najbliższym repertuarze ${joinPl(upcomingTitles)}.`
+      : seasonTitles.length > 0
+        ? `W ostatnim sezonie grano między innymi ${joinPl(seasonTitles.slice(0, 3))}.`
+        : "Seanse plenerowe pojawiają się tu, gdy kina publikują letni repertuar.";
+
+  return bindOrphans(`${first} ${second}`);
+};
+
+/**
+ * Fallback intro for /klasyka-w-kinach and its month pages until the AI
+ * intro exists. `monthLocative` ("listopadzie") is null on the hub.
+ */
+export const classicFallbackIntro = (
+  monthLocative: string | null,
+  groups: IScreeningGroup[]
+): string => {
+  const when = monthLocative ? ` w ${monthLocative}` : "";
+  const movies = groups.length;
+  if (movies === 0) {
+    return bindOrphans(
+      `Klasyka w kinach${when}: filmy sprzed co najmniej ${CLASSIC_MIN_AGE_YEARS} lat na dużym ` +
+        `ekranie, w kinach studyjnych w całej Polsce.`
+    );
+  }
+
+  const titles = uniqueTitles(groups, 3);
+  const cities = distinctCities(groups, 4);
+  const first =
+    `Klasyka w kinach${when}: ${movies} ` +
+    `${pluralPl(movies, "film", "filmy", "filmów")} sprzed co najmniej ${CLASSIC_MIN_AGE_YEARS} lat ` +
+    `na dużym ekranie, w tym ${joinPl(titles)}.`;
+  const second =
+    cities.length >= 2
+      ? `Seanse między innymi w miastach takich jak ${joinPl(cities)}.`
+      : "";
+
+  return bindOrphans(`${first} ${second}`.trim());
 };
