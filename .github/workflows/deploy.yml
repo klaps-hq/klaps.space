@@ -136,3 +136,29 @@ jobs:
             docker compose -p klaps-frontend-${{ env.ENV_SUFFIX }} up -d --force-recreate
 
             docker image prune -f || true
+
+      # `next build` runs without the API and the CMS, so ISR pages and
+      # sub-sitemaps fed by them (blog, feed, landing pages, sitemaps) ship
+      # empty and only refill on a request after their revalidate window.
+      # Rarely visited ones stayed empty for hours after a release (October
+      # 2026: /sitemap/blog.xml and /sitemap/tematy.xml). Two passes: the
+      # first marks them stale and triggers the regeneration, the second
+      # picks the fresh copy up. Best effort: never fails the deploy.
+      - name: Warm ISR caches
+        continue-on-error: true
+        env:
+          SITE: https://${{ env.DOMAIN }}
+        run: |
+          for i in $(seq 1 36); do
+            curl -fsS -o /dev/null "$SITE/" && break
+            sleep 5
+          done
+          paths="/ /seanse /kina /miasta /gatunki /rezyserzy /blog /blog/feed.xml /kino-plenerowe /klasyka-w-kinach /w-liczbach /sitemap.xml /sitemap/static.xml /sitemap/filmy.xml /sitemap/kina.xml /sitemap/miasta.xml /sitemap/gatunki.xml /sitemap/rezyserzy.xml /sitemap/blog.xml /sitemap/tematy.xml /llms.txt"
+          for pass in 1 2; do
+            for path in $paths; do
+              code=$(curl -s -o /dev/null -w "%{http_code}" "$SITE$path" || true)
+              echo "pass $pass $code $path"
+            done
+            sleep 20
+          done
+          echo "blog sitemap URLs: $(curl -s "$SITE/sitemap/blog.xml" | grep -c '<loc>' || true)"

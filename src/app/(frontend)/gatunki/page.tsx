@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getGenres } from "@/lib/genres";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { IGenre } from "@/interfaces/IMovies";
 import { SITE_URL } from "@/lib/site-config";
 import JsonLd from "@/components/common/json-ld";
@@ -34,10 +35,16 @@ const buildGenresJsonLd = (genres: readonly IGenre[]) => ({
 });
 
 const GenresPage = async () => {
-  const genres = await getGenres();
-  const sortedGenres = [...genres].sort((a, b) =>
-    a.name.localeCompare(b.name, "pl")
-  );
+  const [genres, indexable] = await Promise.all([
+    getGenres(),
+    getIndexableSlugs(),
+  ]);
+  // Genres nobody is screening render a noindex page with an empty grid;
+  // the hub lists only the ones with screenings (all of them when the
+  // screenings feed is unavailable).
+  const sortedGenres = genres
+    .filter((genre) => !indexable?.genres || indexable.genres.has(genre.slug))
+    .sort((a, b) => a.name.localeCompare(b.name, "pl"));
 
   return (
     <main className="bg-black text-white min-h-screen">
