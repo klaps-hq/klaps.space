@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getCinemas } from "@/lib/cinemas";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { ICinemaGroup } from "@/interfaces/ICinema";
 import { SITE_URL } from "@/lib/site-config";
 import JsonLd from "@/components/common/json-ld";
@@ -30,8 +31,12 @@ const formatPlural = (
 // a capped list keeps the signal with a fraction of the payload.
 const MAX_JSONLD_CINEMAS = 100;
 
-const buildCinemasJsonLd = (cinemaGroups: readonly ICinemaGroup[]) => {
+const buildCinemasJsonLd = (
+  cinemaGroups: readonly ICinemaGroup[],
+  isLinked: (slug: string) => boolean
+) => {
   const cinemas = cinemaGroups.flatMap((group) => group.cinemas);
+  const listed = cinemas.filter((cinema) => isLinked(cinema.slug));
 
   // Newest cinema updatedAt, i.e. a real data change rather than render
   // time (ISR re-renders every 5 min, which would fake freshness).
@@ -50,9 +55,10 @@ const buildCinemasJsonLd = (cinemaGroups: readonly ICinemaGroup[]) => {
     ...(newestUpdatedAt && { dateModified: newestUpdatedAt }),
     mainEntity: {
       "@type": "ItemList",
-      // The full count, even though the listed elements are capped.
-      numberOfItems: cinemas.length,
-      itemListElement: cinemas
+      // The full count, even though the listed elements are capped. Only
+      // indexable pages are listed, same as the visible links.
+      numberOfItems: listed.length,
+      itemListElement: listed
         .slice(0, MAX_JSONLD_CINEMAS)
         .map((cinema, index) => ({
           "@type": "ListItem",
@@ -65,7 +71,17 @@ const buildCinemasJsonLd = (cinemaGroups: readonly ICinemaGroup[]) => {
 };
 
 const CinemasPage = async () => {
-  const { data: cinemaGroups } = await getCinemas({ limit: 1000 });
+  const [{ data: cinemaGroups }, indexable] = await Promise.all([
+    getCinemas({ limit: 1000 }),
+    getIndexableSlugs(),
+  ]);
+  // Venues whose page is noindex (no screenings for months, or a chain
+  // venue with nothing upcoming) stay listed but as plain text, so the hub
+  // spends its links on pages Google can index.
+  const isCinemaLinked = (slug: string): boolean =>
+    !indexable || indexable.cinemas.has(slug);
+  const isCityLinked = (slug: string): boolean =>
+    !indexable || indexable.cities.has(slug);
   const sortedGroups = [...cinemaGroups].sort((a, b) =>
     a.city.name.localeCompare(b.city.name, "pl")
   );
@@ -78,7 +94,7 @@ const CinemasPage = async () => {
   return (
     <main className="bg-black text-white min-h-screen">
       {sortedGroups.length > 0 && (
-        <JsonLd data={buildCinemasJsonLd(sortedGroups)} />
+        <JsonLd data={buildCinemasJsonLd(sortedGroups, isCinemaLinked)} />
       )}
       <SiteHeader />
 
@@ -95,14 +111,11 @@ const CinemasPage = async () => {
         </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
           Pełna lista {totalCinemas}{" "}
-          {formatPlural(totalCinemas, [
-            "kina studyjnego",
-            "kin studyjnych",
-            "kin studyjnych",
-          ])}{" "}
+          {formatPlural(totalCinemas, ["kina", "kin", "kin"])}{" "}
           w&nbsp;{totalCities}{" "}
           {formatPlural(totalCities, ["mieście", "miastach", "miastach"])}{" "}
-          w&nbsp;Polsce. Niezależne miejsca z&nbsp;autorskim repertuarem.
+          w&nbsp;Polsce, w&nbsp;których odbywają się seanse specjalne.
+          Przede wszystkim niezależne miejsca z&nbsp;autorskim repertuarem.
           Klasyka, retrospektywy, pokazy specjalne i&nbsp;cykle tematyczne.
           Zobacz też{" "}
           <Link
@@ -135,23 +148,33 @@ const CinemasPage = async () => {
               >
                 <div className="border-b border-white/10 pb-3 mb-6">
                   <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold uppercase -tracking-[0.02em]">
-                    <Link
-                      href={`/miasta/${group.city.slug}`}
-                      className="text-white hover:text-white/70 transition-colors"
-                    >
-                      {group.city.name}
-                    </Link>
+                    {isCityLinked(group.city.slug) ? (
+                      <Link
+                        href={`/miasta/${group.city.slug}`}
+                        className="text-white hover:text-white/70 transition-colors"
+                      >
+                        {group.city.name}
+                      </Link>
+                    ) : (
+                      group.city.name
+                    )}
                   </h2>
                 </div>
                 <ul className="flex flex-col gap-3">
                   {group.cinemas.map((cinema) => (
                     <li key={cinema.id}>
-                      <Link
-                        href={`/kina/${cinema.slug}`}
-                        className="text-base md:text-lg text-white/65 hover:text-white transition-colors block truncate"
-                      >
-                        {cinema.name}
-                      </Link>
+                      {isCinemaLinked(cinema.slug) ? (
+                        <Link
+                          href={`/kina/${cinema.slug}`}
+                          className="text-base md:text-lg text-white/65 hover:text-white transition-colors block truncate"
+                        >
+                          {cinema.name}
+                        </Link>
+                      ) : (
+                        <span className="text-base md:text-lg text-white/35 block truncate">
+                          {cinema.name}
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ul>

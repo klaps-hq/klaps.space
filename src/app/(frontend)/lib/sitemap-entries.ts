@@ -24,3 +24,29 @@ export const SITEMAP_IDS = [
   "blog",
 ] as const;
 export type SitemapId = (typeof SITEMAP_IDS)[number];
+
+export interface IndexableSlugs {
+  cinemas: ReadonlySet<string>;
+  cities: ReadonlySet<string>;
+}
+
+/**
+ * Cinema and city slugs whose pages are indexable, i.e. the ones the API
+ * advertises in the sitemap (the pages apply the same rules for noindex).
+ * Hubs link only these: /kina and /miasta used to link ~450 noindex pages,
+ * which Google kept crawling instead of the ones with content.
+ *
+ * null when the API call fails - callers then link everything, since a
+ * missing link costs more than a crawl of a noindex page.
+ */
+export const getIndexableSlugs = async (): Promise<IndexableSlugs | null> => {
+  try {
+    const entries = await getSitemapEntries();
+    return {
+      cinemas: new Set(entries.cinemas.map((entry) => entry.slug)),
+      cities: new Set(entries.cities.map((entry) => entry.slug)),
+    };
+  } catch {
+    return null;
+  }
+};

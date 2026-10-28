@@ -66,10 +66,13 @@ const buildEvent = (
   const event: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "ScreeningEvent",
-    name: `${movie.title} - seans w ${cinema.name}, ${cinema.cityName}`,
+    // "w kinie X (Miasto)": venue and city names arrive in the nominative,
+    // so they sit after "kinie" as an indeclinable apposition and the city
+    // goes in parentheses ("seans w Muranów, Warszawa" read as broken Polish).
+    name: `${movie.title} - seans w kinie ${cinema.name} (${cinema.cityName})`,
     // image and description are recommended fields for Event rich results;
     // without them Search Console reports warnings on every event.
-    description: `Seans filmu ${movie.title} w kinie ${cinema.name} w ${cinema.cityName}. Szczegóły pokazu i pełny repertuar na klaps.space.`,
+    description: `Seans filmu ${movie.title} w kinie ${cinema.name} (${cinema.cityName}). Szczegóły pokazu i pełny repertuar na klaps.space.`,
     // The API's dateTime is Warsaw wall time with a misleading "Z";
     // keep the displayed hour and attach the real offset (see warsaw-time).
     startDate: wallTimeToWarsawIso(dateTime),

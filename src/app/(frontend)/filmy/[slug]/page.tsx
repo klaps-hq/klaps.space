@@ -46,9 +46,12 @@ export const generateMetadata = async ({
   const { slug } = await params;
   const movie = await getMovieBySlug(slug);
 
-  const screenings = await getMovieScreenings({
+  // null means the call failed, which must never read as "no screenings"
+  // (that would noindex the page for the ISR window).
+  const upcoming = await getMovieScreenings({
     movieId: movie.id.toString(),
-  }).catch(() => []);
+  }).catch(() => null);
+  const screenings = upcoming ?? [];
   const screeningsCount = screenings.length;
 
   const genreNames = movie.genres.map((g) => g.name).join(", ");
@@ -104,12 +107,14 @@ export const generateMetadata = async ({
   // Movies without upcoming screenings are thin TMDB duplicates - keep
   // them out of the index until they have showtimes again. Query-param
   // duplicates are handled by the canonical URL alone.
-  const noindex = screeningsCount === 0;
+  const noindex = upcoming?.length === 0;
 
   return {
     title,
     description,
-    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
+    // Self-canonical on noindex pages too, instead of inheriting a parent's.
+    alternates: { canonical: url },
+    ...(noindex ? NOINDEX_FOLLOW : {}),
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "video.movie",

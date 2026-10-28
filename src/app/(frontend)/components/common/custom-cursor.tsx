@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, useMotionValue } from "framer-motion";
+import { m, useMotionValue } from "framer-motion";
 
 const INTERACTIVE_SELECTOR =
   'a, button, [role="button"], summary, [data-cursor="accent"]';
@@ -58,16 +58,16 @@ const CustomCursor = () => {
   const scale = pressed ? 0.8 : hovering ? 3 : 1;
 
   return (
-    <motion.div
+    <m.div
       className="pointer-events-none fixed top-0 left-0 z-[9999] hidden md:block mix-blend-difference"
       style={{ x: mouseX, y: mouseY, opacity: visible ? 1 : 0 }}
     >
-      <motion.div
+      <m.div
         className="-translate-x-1/2 -translate-y-1/2 w-[18px] h-[18px] rounded-full bg-white"
         animate={{ scale }}
         transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
       />
-    </motion.div>
+    </m.div>
   );
 };
 

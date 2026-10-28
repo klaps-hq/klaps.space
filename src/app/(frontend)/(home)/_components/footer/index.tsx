@@ -15,6 +15,7 @@ const NAV_COLUMNS = [
       { label: "Gatunki", href: "/gatunki" },
       { label: "Reżyserzy", href: "/rezyserzy" },
       { label: "Mapa kin", href: "/mapa-kin" },
+      { label: "Blog", href: "/blog" },
     ],
   },
   {

@@ -10,6 +10,17 @@ export const NOINDEX_FOLLOW = {
   },
 } as const;
 
+/**
+ * Polish locative preposition: "we" before a w-/f- consonant cluster
+ * (we Wrocławiu, we Włocławku, we Fromborku), otherwise "w" (w Krakowie).
+ */
+export const wPrep = (locative: string): "w" | "we" =>
+  /^[wWfF][bcćdfghjklłmnńprsśtwzźż]/.test(locative) ? "we" : "w";
+
+/** "w Krakowie" / "we Wrocławiu" - preposition plus the locative name. */
+export const inPlace = (locative: string): string =>
+  `${wPrep(locative)} ${locative}`;
+
 /** Polish noun declension after a numeral: pluralPl(3, "kino", "kina", "kin") → "kina". */
 export const pluralPl = (
   count: number,

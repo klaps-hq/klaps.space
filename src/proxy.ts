@@ -99,6 +99,22 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url), 301);
   }
 
+  // "//kina" rendered the /kina page with a 200; collapse repeated slashes
+  // so every duplicate path folds into one URL.
+  if (pathname.includes("//")) {
+    const destination = new URL(request.url);
+    destination.pathname = pathname.replace(/\/{2,}/g, "/");
+    return NextResponse.redirect(destination, 301);
+  }
+
+  // The directors hub is no longer paginated: it lists only directors with
+  // upcoming screenings on one page. Old ?page=N URLs (31 of them, crawled)
+  // fold into the hub instead of 404ing.
+  if (pathname === "/rezyserzy" && request.nextUrl.searchParams.has("page")) {
+    const destination = new URL("/rezyserzy", request.url);
+    return NextResponse.redirect(destination, 301);
+  }
+
   const segments = pathname.split("/").filter(Boolean);
 
   if (segments.length === 2) {

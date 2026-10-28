@@ -5,6 +5,7 @@ import "../globals.css";
 import JsonLd from "@/components/common/json-ld";
 import SmoothScroll from "@/components/common/smooth-scroll";
 import CustomCursor from "@/components/common/custom-cursor";
+import MotionProvider from "@/components/common/motion-provider";
 import ConsentBanner from "@/components/common/consent-banner";
 import WebVitalsReporter from "@/components/common/web-vitals-reporter";
 import { CityProvider } from "@/contexts/city-context";
@@ -161,10 +162,12 @@ export default async function RootLayout({
           }}
         />
         <SmoothScroll />
-        <CustomCursor />
-        {process.env.GA_MEASUREMENT_ID && <ConsentBanner />}
-        {process.env.GA_MEASUREMENT_ID && <WebVitalsReporter />}
-        <CityProvider cities={cities}>{children}</CityProvider>
+        <MotionProvider>
+          <CustomCursor />
+          {process.env.GA_MEASUREMENT_ID && <ConsentBanner />}
+          {process.env.GA_MEASUREMENT_ID && <WebVitalsReporter />}
+          <CityProvider cities={cities}>{children}</CityProvider>
+        </MotionProvider>
       </body>
     </html>
   );

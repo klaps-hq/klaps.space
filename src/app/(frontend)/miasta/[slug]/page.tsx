@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { getCityBySlug } from "@/lib/cities";
-import { getCinemas } from "@/lib/cinemas";
+import { fetchCinemas, getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
 import {
   fetchRecentScreenings,
@@ -11,11 +11,13 @@ import {
   getScreeningsLastUpdated,
 } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import {
   BASE_OPEN_GRAPH,
   NOINDEX_FOLLOW,
   formatPlDate,
   pluralPl,
+  wPrep,
 } from "@/lib/seo";
 import { cityFallbackIntro } from "@/lib/listing-copy";
 import { splitByChain } from "@/lib/cinema-chains";
@@ -30,30 +32,48 @@ import Footer from "../../(home)/_components/footer";
 
 interface CinemaCardsProps {
   cinemas: { id: number; slug: string; name: string; street: string | null }[];
+  /** Venues whose page is noindex render as plain cards, without a link. */
+  isLinked: (slug: string) => boolean;
 }
+
+const CARD_CLASS =
+  "bg-black border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1";
 
 // Borders live on the cards (not the container) so lines end with the last
 // card instead of running across empty grid columns. Negative margins
 // collapse the doubled inner borders; opaque #1a1a1a (white/10 on black)
 // keeps overlaps from brightening.
-const CinemaCards: React.FC<CinemaCardsProps> = ({ cinemas }) => (
+const CinemaCards: React.FC<CinemaCardsProps> = ({ cinemas, isLinked }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-px pl-px">
-    {cinemas.map((cinema) => (
-      <Link
-        key={cinema.id}
-        href={`/kina/${cinema.slug}`}
-        className="group bg-black hover:bg-white/[0.04] transition-colors border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1"
-      >
-        <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
-          {cinema.name}
-        </span>
-        {cinema.street && (
-          <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
-            {cinema.street}
+    {cinemas.map((cinema) =>
+      isLinked(cinema.slug) ? (
+        <Link
+          key={cinema.id}
+          href={`/kina/${cinema.slug}`}
+          className={`group hover:bg-white/[0.04] transition-colors ${CARD_CLASS}`}
+        >
+          <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
+            {cinema.name}
           </span>
-        )}
-      </Link>
-    ))}
+          {cinema.street && (
+            <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
+              {cinema.street}
+            </span>
+          )}
+        </Link>
+      ) : (
+        <div key={cinema.id} className={CARD_CLASS}>
+          <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/35">
+            {cinema.name}
+          </span>
+          {cinema.street && (
+            <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/30">
+              {cinema.street}
+            </span>
+          )}
+        </div>
+      )
+    )}
   </div>
 );
 
@@ -61,11 +81,6 @@ const CinemaCards: React.FC<CinemaCardsProps> = ({ cinemas }) => (
 const MAX_TITLE_LENGTH = 60;
 // Google truncates snippets past roughly this length.
 const MAX_DESCRIPTION_LENGTH = 160;
-
-// Polish locative preposition: "we" before a w-/f- consonant cluster
-// (we Wrocławiu, we Włocławku, we Fromborku), otherwise "w" (w Krakowie).
-const wPrep = (locative: string): "w" | "we" =>
-  /^[wWfF][bcćdfghjklłmnńprsśtwzźż]/.test(locative) ? "we" : "w";
 
 // ISR: cached HTML revalidated every 5 minutes. The repertoire filters
 // (genres, dates, search) are applied client-side in CityRepertoire,
@@ -95,8 +110,13 @@ export const generateMetadata = async ({
   const { slug } = await params;
   const { city, screenings: rawScreenings } = await getCityBySlug(slug);
 
-  const cinemasResponse = await getCinemas({ cityId: city.id.toString() });
-  const cinemasCount = cinemasResponse.data.flatMap((g) => g.cinemas).length;
+  // null means the call failed, which is not the same as "no cinemas": a
+  // swallowed error used to noindex the page and ISR cached that verdict.
+  const cinemasResponse = await fetchCinemas({
+    cityId: city.id.toString(),
+  }).catch(() => null);
+  const cinemasCount =
+    cinemasResponse?.data.flatMap((g) => g.cinemas).length ?? 0;
   const screeningGroups = Array.isArray(rawScreenings)
     ? rawScreenings
     : [...(rawScreenings?.data ?? [])];
@@ -151,12 +171,18 @@ export const generateMetadata = async ({
           () => null
         )
       : null;
-  const noindex = cinemasCount === 0 || recentScreenings?.length === 0;
+  const noindex =
+    (cinemasResponse !== null && cinemasCount === 0) ||
+    recentScreenings?.length === 0;
 
   return {
     title,
     description,
-    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
+    // Self-canonical on noindex pages too: without it they inherited the
+    // /miasta hub canonical from the parent layout, which reads as "this
+    // page duplicates the hub" next to the noindex.
+    alternates: { canonical: url },
+    ...(noindex ? NOINDEX_FOLLOW : {}),
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
@@ -186,13 +212,17 @@ const CityPage = async ({ params }: CityPageProps) => {
     screenings,
     lastUpdated,
     recentScreenings,
+    indexable,
   ] = await Promise.all([
     getCinemas({ cityId: city.id.toString() }),
     getGenres(),
     getScreenings({ cityId: city.id.toString() }),
     getScreeningsLastUpdated({ cityId: city.id.toString() }),
     getRecentScreenings({ cityId: city.id.toString() }),
+    getIndexableSlugs(),
   ]);
+  const isCinemaLinked = (slug: string): boolean =>
+    !indexable || indexable.cinemas.has(slug);
 
   const cinemas = cinemaGroups
     .flatMap((g) => g.cinemas)
@@ -267,7 +297,10 @@ const CityPage = async ({ params }: CityPageProps) => {
               <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
                 Kina studyjne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
               </h2>
-              <CinemaCards cinemas={independentCinemas} />
+              <CinemaCards
+                cinemas={independentCinemas}
+                isLinked={isCinemaLinked}
+              />
             </div>
           )}
           {chainCinemas.length > 0 && (
@@ -276,7 +309,7 @@ const CityPage = async ({ params }: CityPageProps) => {
                 Seanse specjalne w&nbsp;kinach sieciowych{" "}
                 {wPrep(cityForCopy)}&nbsp;{cityForCopy}
               </h2>
-              <CinemaCards cinemas={chainCinemas} />
+              <CinemaCards cinemas={chainCinemas} isLinked={isCinemaLinked} />
             </div>
           )}
         </section>
@@ -300,8 +333,8 @@ const CityPage = async ({ params }: CityPageProps) => {
           <EmptyState
             description={
               <>
-                Brak seansów pasujących do wybranych filtrów w&nbsp;
-                {cityForCopy}. Spróbuj zmienić zakres dat, gatunek lub frazę.
+                Brak seansów pasujących do wybranych filtrów{" "}
+                {wPrep(cityForCopy)}&nbsp;{cityForCopy}. Spróbuj zmienić zakres dat, gatunek lub frazę.
               </>
             }
             cta={{ href: "/miasta", label: "Inne miasta" }}

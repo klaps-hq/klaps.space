@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
 import { getGenrePageData, getGenres } from "@/lib/genres";
-import { getScreenings } from "@/lib/screenings";
+import { fetchScreenings, getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
 import { genreFallbackIntro } from "@/lib/listing-copy";
@@ -47,9 +47,12 @@ export const generateMetadata = async ({
   // zero screenings and 151 words of boilerplate - indexable and in the
   // sitemap. Next's fetch memoization deduplicates this against the identical
   // call in the page render below.
-  const screeningGroups = await getScreenings({
+  // null means the call failed: getScreenings swallowed errors into [],
+  // which noindexed the page and ISR cached that for the revalidate window.
+  const upcomingGroups = await fetchScreenings({
     genreId: genre.id.toString(),
-  });
+  }).catch(() => null);
+  const screeningGroups = upcomingGroups ?? [];
   const moviesCount = screeningGroups.length;
   const screeningsCount = screeningGroups.reduce(
     (sum, group) => sum + group.screenings.length,
@@ -67,12 +70,15 @@ export const generateMetadata = async ({
   // A genre nobody is screening right now renders an empty grid; that is
   // thin content, so keep it out of the index until it has something to show.
   // Query-param duplicates (filters) are handled by the canonical alone.
-  const noindex = moviesCount === 0;
+  const noindex = upcomingGroups?.length === 0;
 
   return {
     title,
     description,
-    ...(noindex ? NOINDEX_FOLLOW : { alternates: { canonical: url } }),
+    // Self-canonical on noindex pages too, instead of inheriting the
+    // /gatunki hub canonical from the parent layout.
+    alternates: { canonical: url },
+    ...(noindex ? NOINDEX_FOLLOW : {}),
     openGraph: {
       ...BASE_OPEN_GRAPH,
       type: "website",
