@@ -2,12 +2,20 @@ import React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getCinemas } from "@/lib/cinemas";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 
 const TOP_CITIES_LIMIT = 8;
 const CINEMAS_PER_CITY = 6;
 
 const Cinemas = async () => {
-  const { data: groups } = await getCinemas({ limit: 1000 });
+  const [{ data: groups }, indexable] = await Promise.all([
+    getCinemas({ limit: 1000 }),
+    getIndexableSlugs(),
+  ]);
+  // Venues whose page is noindex stay listed as plain text (same rule as
+  // the /kina hub).
+  const isCinemaLinked = (slug: string): boolean =>
+    !indexable || indexable.cinemas.has(slug);
 
   const topCities = [...groups]
     .filter((g) => g.cinemas.length > 0)
@@ -70,12 +78,18 @@ const Cinemas = async () => {
               <ul className="flex flex-col gap-1.5">
                 {group.cinemas.slice(0, CINEMAS_PER_CITY).map((cinema) => (
                   <li key={cinema.id}>
-                    <Link
-                      href={`/kina/${cinema.slug}`}
-                      className="inline-block text-sm md:text-base text-white/55 hover:text-white transition-colors"
-                    >
-                      {cinema.name}
-                    </Link>
+                    {isCinemaLinked(cinema.slug) ? (
+                      <Link
+                        href={`/kina/${cinema.slug}`}
+                        className="inline-block text-sm md:text-base text-white/55 hover:text-white transition-colors"
+                      >
+                        {cinema.name}
+                      </Link>
+                    ) : (
+                      <span className="inline-block text-sm md:text-base text-white/35">
+                        {cinema.name}
+                      </span>
+                    )}
                   </li>
                 ))}
                 {group.cinemas.length > CINEMAS_PER_CITY && (

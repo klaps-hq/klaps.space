@@ -1,4 +1,5 @@
 import { apiFetch } from "./client";
+import { getScreenings } from "./screenings";
 import { ISitemapResponse } from "@/interfaces/ISitemap";
 
 /**
@@ -30,6 +31,15 @@ export type SitemapId = (typeof SITEMAP_IDS)[number];
 export interface IndexableSlugs {
   cinemas: ReadonlySet<string>;
   cities: ReadonlySet<string>;
+  /** Directors at or above the indexing threshold (the API filters them). */
+  directors: ReadonlySet<string>;
+  /**
+   * Genres with upcoming screenings, the same rule as the genre page's
+   * noindex and the gatunki sub-sitemap. null when the screenings feed is
+   * empty or failed: an empty feed is a backend hiccup, not a nationwide
+   * blank, so callers then link every genre.
+   */
+  genres: ReadonlySet<string> | null;
 }
 
 /**
@@ -43,10 +53,22 @@ export interface IndexableSlugs {
  */
 export const getIndexableSlugs = async (): Promise<IndexableSlugs | null> => {
   try {
-    const entries = await getSitemapEntries();
+    const [entries, groups] = await Promise.all([
+      getSitemapEntries(),
+      getScreenings(),
+    ]);
     return {
       cinemas: new Set(entries.cinemas.map((entry) => entry.slug)),
       cities: new Set(entries.cities.map((entry) => entry.slug)),
+      directors: new Set((entries.directors ?? []).map((entry) => entry.slug)),
+      genres:
+        groups.length > 0
+          ? new Set(
+              groups.flatMap((group) =>
+                group.movie.genres.map((genre) => genre.slug)
+              )
+            )
+          : null,
     };
   } catch {
     return null;

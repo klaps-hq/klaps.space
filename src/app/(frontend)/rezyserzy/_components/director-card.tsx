@@ -8,16 +8,31 @@ interface DirectorCardProps {
   director: DirectorsBrowserItem;
 }
 
+interface CardShellProps {
+  /** null renders a plain block: the director's page is noindex. */
+  href: string | null;
+  children: React.ReactNode;
+}
+
+// Directors below the indexing threshold have a noindex page; their card
+// stays visible but is not a link, so the hub spends crawl on pages Google
+// can index.
+const CardShell: React.FC<CardShellProps> = ({ href, children }) =>
+  href ? (
+    <Link href={href} className="group flex flex-col gap-2.5">
+      {children}
+    </Link>
+  ) : (
+    <div className="flex flex-col gap-2.5">{children}</div>
+  );
+
 const DirectorCard: React.FC<DirectorCardProps> = ({ director }) => {
   const { name, slug, photoUrl, moviesCount, upcomingScreeningsCount } =
     director;
   const hasUpcoming = upcomingScreeningsCount > 0;
 
   return (
-    <Link
-      href={`/rezyserzy/${slug}`}
-      className="group flex flex-col gap-2.5"
-    >
+    <CardShell href={director.linked ? `/rezyserzy/${slug}` : null}>
       {/* Grayscale by default unifies the varied source headshots into the
           site's B&W palette; colour and a slight zoom return on hover. */}
       <div className="relative aspect-[3/4] overflow-hidden bg-white/[0.04] ring-1 ring-inset ring-white/0 transition duration-300 group-hover:ring-white/15">
@@ -59,7 +74,7 @@ const DirectorCard: React.FC<DirectorCardProps> = ({ director }) => {
           </p>
         )}
       </div>
-    </Link>
+    </CardShell>
   );
 };
 
