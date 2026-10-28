@@ -1,6 +1,6 @@
 import { getCinemaBySlug, cinemaRepertoireDateTo } from "@/lib/cinemas";
 import { getScreenings } from "@/lib/screenings";
-import { SITE_URL } from "@/lib/site-config";
+import { SITE_URL, cinemaEntityId } from "@/lib/site-config";
 import { buildScreeningEventsJsonLd } from "@/lib/screening-event-jsonld";
 import { ICinema } from "@/interfaces/ICinema";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
@@ -15,6 +15,7 @@ const buildCinemaJsonLd = (cinema: ICinema) => {
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "MovieTheater",
+    "@id": cinemaEntityId(cinema.slug),
     name: cinema.name,
     url: `${SITE_URL}/kina/${cinema.slug}`,
     address: {

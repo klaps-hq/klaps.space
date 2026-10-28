@@ -1,4 +1,4 @@
-import { SITE_URL } from "./site-config";
+import { SITE_URL, cinemaEntityId, movieEntityId } from "./site-config";
 import { tmdbPhotoSrc } from "./tmdb";
 import { wallTimeToInstant, wallTimeToWarsawIso } from "./warsaw-time";
 
@@ -46,6 +46,7 @@ const buildEvent = (
 
   const location: Record<string, unknown> = {
     "@type": "MovieTheater",
+    "@id": cinemaEntityId(cinema.slug),
     name: cinema.name,
     address: {
       "@type": "PostalAddress",
@@ -87,6 +88,7 @@ const buildEvent = (
     },
     workPresented: {
       "@type": "Movie",
+      "@id": movieEntityId(movie.slug),
       name: movie.title,
       url: `${SITE_URL}/filmy/${movie.slug}`,
     },
