@@ -141,9 +141,13 @@ jobs:
       # sub-sitemaps fed by them (blog, feed, landing pages, sitemaps) ship
       # empty and only refill on a request after their revalidate window.
       # Rarely visited ones stayed empty for hours after a release (October
-      # 2026: /sitemap/blog.xml and /sitemap/tematy.xml). Two passes: the
-      # first marks them stale and triggers the regeneration, the second
-      # picks the fresh copy up. Best effort: never fails the deploy.
+      # 2026: /sitemap/blog.xml and /sitemap/tematy.xml). The prerendered
+      # copies count as fresh for the first revalidate window (300 s), so
+      # requests before that only get the empty copy back: poll the blog
+      # sitemap until it lists URLs, which means the window has passed and
+      # regeneration works. Then two passes: the first marks every page stale
+      # and triggers the regeneration, the second picks the fresh copy up.
+      # Best effort: never fails the deploy.
       - name: Warm ISR caches
         continue-on-error: true
         env:
@@ -152,6 +156,12 @@ jobs:
           for i in $(seq 1 36); do
             curl -fsS -o /dev/null "$SITE/" && break
             sleep 5
+          done
+          for i in $(seq 1 30); do
+            urls=$(curl -s "$SITE/sitemap/blog.xml" | grep -c '<loc>' || true)
+            echo "poll $i: blog sitemap URLs: $urls"
+            [ "${urls:-0}" -gt 0 ] && break
+            sleep 20
           done
           paths="/ /seanse /kina /miasta /gatunki /rezyserzy /blog /blog/feed.xml /kino-plenerowe /klasyka-w-kinach /w-liczbach /sitemap.xml /sitemap/static.xml /sitemap/filmy.xml /sitemap/kina.xml /sitemap/miasta.xml /sitemap/gatunki.xml /sitemap/rezyserzy.xml /sitemap/blog.xml /sitemap/tematy.xml /llms.txt"
           for pass in 1 2; do
