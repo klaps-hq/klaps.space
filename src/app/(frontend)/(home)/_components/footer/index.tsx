@@ -16,6 +16,7 @@ const NAV_COLUMNS = [
       { label: "Reżyserzy", href: "/rezyserzy" },
       { label: "Mapa kin", href: "/mapa-kin" },
       { label: "Blog", href: "/blog" },
+      { label: "Klaps w liczbach", href: "/w-liczbach" },
     ],
   },
   {
