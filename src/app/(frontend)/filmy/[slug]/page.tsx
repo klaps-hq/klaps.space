@@ -1,6 +1,11 @@
 import { Metadata } from "next";
 import { getMoviePageData, getMovieBySlug } from "@/lib/movies";
-import { getMovieScreenings, getScreenings } from "@/lib/screenings";
+import {
+  getMovieScreenings,
+  getRecentVenues,
+  getScreenings,
+} from "@/lib/screenings";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { SITE_URL } from "@/lib/site-config";
 import {
   BASE_OPEN_GRAPH,
@@ -19,6 +24,7 @@ import MovieHero from "./_components/movie-hero";
 import MovieAbout from "./_components/movie-about";
 import MovieScreenings from "./_components/movie-screenings";
 import MovieScreeningCities from "./_components/movie-screening-cities";
+import MovieRecentVenues from "./_components/movie-recent-venues";
 import RelatedMovies from "./_components/related-movies";
 import { movieNextScreeningItems } from "@/lib/next-screening-items";
 import { pickRelatedMovies } from "@/lib/related-movies";
@@ -57,6 +63,9 @@ export const generateMetadata = async ({
   }).catch(() => null);
   const screenings = upcoming ?? [];
   const screeningsCount = screenings.length;
+  // Only needed between screening runs; [] on failure keeps the old rule.
+  const recentVenues =
+    upcoming?.length === 0 ? await getRecentVenues(movie.id) : [];
 
   const genreNames = movie.genres.map((g) => g.name).join(", ");
   const directorNames = movie.directors?.map((d) => d.name).join(", ");
@@ -74,10 +83,16 @@ export const generateMetadata = async ({
     ...new Set(screenings.map((s) => s.cinema.city.name)),
   ].slice(0, 2);
   const citiesPart = cityNames.length > 0 ? ` (m.in. ${cityNames.join(", ")})` : "";
+  const recentCities = [
+    ...new Set(recentVenues.map((v) => v.cinema.city.name)),
+  ].slice(0, 2);
+  const recentSuffix = `Ostatnio w ${recentVenues.length} ${pluralPl(recentVenues.length, "kinie", "kinach", "kinach")} (m.in. ${recentCities.join(", ")}). Sprawdź, kiedy wróci.`;
   const screeningsSuffix =
     screeningsCount > 0
       ? `Sprawdź ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")} w kinach${citiesPart} - daty i godziny.`
-      : "Sprawdź, gdzie i kiedy grają ten film w kinach.";
+      : recentVenues.length > 0
+        ? recentSuffix
+        : "Sprawdź, gdzie i kiedy grają ten film w kinach.";
 
   const metaLine = [
     genreNames,
@@ -108,10 +123,14 @@ export const generateMetadata = async ({
   const title = `${movie.title} (${movie.productionYear}) - seanse: gdzie i kiedy w kinie`;
   const url = `${SITE_URL}/filmy/${movie.slug}`;
 
-  // Movies without upcoming screenings are thin TMDB duplicates - keep
-  // them out of the index until they have showtimes again. Query-param
-  // duplicates are handled by the canonical URL alone.
-  const noindex = upcoming?.length === 0;
+  // Movies with neither upcoming nor recent screenings are thin TMDB
+  // duplicates - keep them out of the index until they have showtimes
+  // again. Recent ones stay indexed: classics play in runs, and dropping
+  // the page between runs made it fall out of the index and come back
+  // (the "Ostatnio w kinach" list is their page-specific content). Same
+  // 90-day window as cinema and city pages. Query-param duplicates are
+  // handled by the canonical URL alone.
+  const noindex = upcoming?.length === 0 && recentVenues.length === 0;
 
   return {
     title,
@@ -137,6 +156,10 @@ export const generateMetadata = async ({
 const MoviePage = async ({ params }: MoviePageProps) => {
   const { slug } = await params;
   const { movie, screenings } = await getMoviePageData(slug);
+  const [recentVenues, indexable] =
+    screenings.length === 0
+      ? await Promise.all([getRecentVenues(movie.id), getIndexableSlugs()])
+      : [[], null];
   // Instant blurred preview baked into the cached HTML while the full-size
   // backdrop streams in; precomputed by the scraper, served by the API.
   const backdropBlurDataUrl = movie.backdropBlurDataUrl ?? null;
@@ -212,6 +235,12 @@ const MoviePage = async ({ params }: MoviePageProps) => {
           </div>
         )}
       </section>
+
+      <MovieRecentVenues
+        movieTitle={movie.title}
+        venues={recentVenues}
+        indexableCinemas={indexable?.cinemas ?? null}
+      />
 
       <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-16 md:pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">

@@ -3,6 +3,7 @@ import {
   IScreeningGroup,
   IRandomScreening,
   IRecentScreening,
+  IRecentVenue,
 } from "@/interfaces/IScreenings";
 import { IMovie, PaginatedResponse } from "@/interfaces/IMovies";
 import { apiFetch } from "./client";
@@ -206,6 +207,30 @@ export const getRecentScreenings = async (
     return await fetchRecentScreenings(params);
   } catch (error) {
     console.warn("Falling back to empty recent screenings list:", error);
+    return [];
+  }
+};
+
+/**
+ * Cinemas where a film played during the last RECENT_SCREENINGS_DAYS days,
+ * newest first. Keeps a movie page indexable between screening runs.
+ *
+ * Returns an empty list on any failure, which means "noindex" for a movie
+ * without upcoming screenings: the behaviour from before this list existed,
+ * and the safe one on an API deployment that predates the endpoint.
+ */
+export const getRecentVenues = async (
+  movieId: number
+): Promise<IRecentVenue[]> => {
+  try {
+    return await apiFetch<IRecentVenue[]>("/screenings/recent-venues", {
+      params: {
+        movieId: movieId.toString(),
+        days: String(RECENT_SCREENINGS_DAYS),
+      },
+    });
+  } catch (error) {
+    console.warn("Falling back to empty recent venues list:", error);
     return [];
   }
 };

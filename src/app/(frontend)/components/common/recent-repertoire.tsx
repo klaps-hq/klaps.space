@@ -30,9 +30,9 @@ const META_CLASS =
  * Hook-free on purpose, so it renders on the server and ships in the static
  * HTML like the repertoire grid.
  *
- * Only films scheduled again somewhere get a link. The others have
- * noindexed movie pages, and pointing crawlers at those spends crawl budget,
- * which is the constraint this site is actually up against.
+ * Every film links to its page: a film screened within the window keeps an
+ * indexable movie page (it lists where the film played, see
+ * getRecentVenues), so these are crawl paths worth following.
  */
 const RecentRepertoire = ({ heading, items }: RecentRepertoireProps) => {
   if (items.length === 0) return null;
@@ -57,7 +57,7 @@ const RecentRepertoire = ({ heading, items }: RecentRepertoireProps) => {
           const body = (
             <>
               <span
-                className={`${TITLE_CLASS} ${item.hasUpcomingScreenings ? "group-hover:text-white" : ""}`}
+                className={`${TITLE_CLASS} group-hover:text-white`}
               >
                 {item.movie.title}
               </span>
@@ -73,16 +73,12 @@ const RecentRepertoire = ({ heading, items }: RecentRepertoireProps) => {
 
           return (
             <li key={item.movie.id} className="flex">
-              {item.hasUpcomingScreenings ? (
-                <Link
-                  href={`/filmy/${item.movie.slug}`}
-                  className={`group w-full bg-black hover:bg-white/[0.04] transition-colors ${CELL_CLASS}`}
-                >
-                  {body}
-                </Link>
-              ) : (
-                <div className={`w-full bg-black ${CELL_CLASS}`}>{body}</div>
-              )}
+              <Link
+                href={`/filmy/${item.movie.slug}`}
+                className={`group w-full bg-black hover:bg-white/[0.04] transition-colors ${CELL_CLASS}`}
+              >
+                {body}
+              </Link>
             </li>
           );
         })}
