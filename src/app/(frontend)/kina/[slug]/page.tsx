@@ -30,6 +30,7 @@ import {
   isUsableCinemaDescription,
 } from "@/lib/listing-copy";
 import { isChainCinema } from "@/lib/cinema-chains";
+import { cinemaGenitive } from "@/lib/cinema-name";
 import { todayDigest, todayDigestPhrases } from "@/lib/live-meta";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
@@ -90,7 +91,7 @@ const buildCinemaDescription = (
   // whenever there is one (see live-meta).
   const digest = todayDigest(screeningGroups);
   if (digest) {
-    const lead = `Repertuar kina ${cinemaName} ${inPlace(cityName)}`;
+    const lead = `Repertuar ${cinemaGenitive(cinemaName)} ${inPlace(cityName)}`;
     const fitting = todayDigestPhrases(digest)
       .flatMap((phrase) => [
         `${lead}: ${phrase}. Seanse specjalne i klasyka filmowa.`,
@@ -102,13 +103,13 @@ const buildCinemaDescription = (
 
   const moviesCount = screeningGroups.length;
   if (moviesCount === 0) {
-    const full = `Repertuar kina ${cinemaName} ${inPlace(cityName)}: seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź, co aktualnie grają.`;
+    const full = `Repertuar ${cinemaGenitive(cinemaName)} ${inPlace(cityName)}: seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź, co aktualnie grają.`;
     // Long venue names ("Mazowiecki Teatr Muzyczny im. Jana Kiepury - Kino
     // Praha") overran the snippet limit; drop the tail rather than let
     // Google cut the sentence.
     return full.length <= MAX_DESCRIPTION_LENGTH
       ? full
-      : `Repertuar kina ${cinemaName} ${inPlace(cityName)}: seanse specjalne i klasyka filmowa.`;
+      : `Repertuar ${cinemaGenitive(cinemaName)} ${inPlace(cityName)}: seanse specjalne i klasyka filmowa.`;
   }
 
   const screeningsCount = screeningGroups.reduce(
@@ -116,7 +117,7 @@ const buildCinemaDescription = (
     0
   );
   const counts = `${moviesCount} ${pluralPl(moviesCount, "film", "filmy", "filmów")} i ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")}`;
-  const base = `Repertuar kina ${cinemaName} ${inPlace(cityName)}: ${counts}`;
+  const base = `Repertuar ${cinemaGenitive(cinemaName)} ${inPlace(cityName)}: ${counts}`;
   const suffix = ". Seanse specjalne, klasyka filmowa i retrospektywy.";
 
   // Add an example title only when it fits the SERP snippet budget.
@@ -364,7 +365,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
         className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-8 md:pt-12 pb-20 md:pb-28"
         heading={
           <h2 className="mb-6 md:mb-8 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
-            Repertuar kina {cinema.name}
+            Repertuar {cinemaGenitive(cinema.name)}
           </h2>
         }
         emptyState={
