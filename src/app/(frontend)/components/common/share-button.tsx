@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Check, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 interface ShareButtonProps {
   title: string;
@@ -38,6 +39,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({
     if (typeof navigator.share === "function") {
       try {
         await navigator.share({ title, text, url });
+        trackEvent("share", { method: "native", item_name: title });
         return;
       } catch (error) {
         // User dismissed the share sheet - nothing to do.
@@ -50,6 +52,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({
 
     try {
       await navigator.clipboard.writeText(url);
+      trackEvent("share", { method: "copy", item_name: title });
       setCopied(true);
       if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
       timeoutRef.current = window.setTimeout(() => setCopied(false), 2000);

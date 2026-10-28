@@ -9,12 +9,9 @@ import { useReportWebVitals } from "next/web-vitals";
 const WebVitalsReporter = () => {
   useReportWebVitals((metric) => {
     if (typeof window === "undefined") return;
-    const gtag = (
-      window as unknown as { gtag?: (...args: unknown[]) => void }
-    ).gtag;
-    if (typeof gtag !== "function") return;
+    if (typeof window.gtag !== "function") return;
 
-    gtag("event", metric.name, {
+    window.gtag("event", metric.name, {
       // GA4 event value must be an integer. CLS is sub-1, so scale it up.
       value: Math.round(
         metric.name === "CLS" ? metric.value * 1000 : metric.value

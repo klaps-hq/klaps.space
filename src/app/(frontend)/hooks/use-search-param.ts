@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useScreeningsTransition } from "@/contexts/screenings-transition-context";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { trackEvent } from "@/lib/analytics";
 
 const SEARCH_PARAM_KEY = "search";
 const SEARCH_DEBOUNCE_DELAY_MS = 400;
@@ -49,6 +50,7 @@ export const useSearchParam = (): UseSearchParamReturn => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (trimmed) {
+      trackEvent("search", { search_term: trimmed, search_type: "screenings" });
       params.set(SEARCH_PARAM_KEY, trimmed);
     } else {
       params.delete(SEARCH_PARAM_KEY);

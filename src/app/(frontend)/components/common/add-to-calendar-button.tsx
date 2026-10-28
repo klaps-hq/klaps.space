@@ -8,6 +8,7 @@ import {
   CalendarEventInput,
 } from "@/lib/calendar";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 // Fallback event length when the movie duration is unknown.
 const DEFAULT_DURATION_MINUTES = 120;
@@ -88,7 +89,13 @@ const AddToCalendarButton: React.FC<AddToCalendarButtonProps> = ({
       uid: option.uid,
     };
 
-    if (!isAppleDevice()) {
+    const apple = isAppleDevice();
+    trackEvent("add_to_calendar", {
+      method: apple ? "ics" : "google",
+      item_name: title,
+    });
+
+    if (!apple) {
       window.open(
         buildGoogleCalendarUrl(event),
         "_blank",

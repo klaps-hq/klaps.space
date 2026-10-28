@@ -42,6 +42,7 @@ import RecentRepertoire from "@/components/common/recent-repertoire";
 import NearbyRepertoire from "@/components/common/nearby-repertoire";
 import NextScreening from "@/components/common/next-screening";
 import SaveCinemaButton from "@/components/common/save-cinema-button";
+import TrackedCinemaLink from "@/components/common/tracked-cinema-link";
 import { cinemaNextScreeningItems } from "@/lib/next-screening-items";
 import ListingFaq from "@/components/common/listing-faq";
 import { buildCinemaFaq } from "@/lib/listing-faq";
@@ -293,10 +294,9 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                         for internal routes. rel keeps "noopener" only - the
                         referrer is intentional so cinemas see klaps.space in
                         their analytics (see externalLinks comment above). */}
-                    <a
+                    <TrackedCinemaLink
                       href={link.href}
-                      target="_blank"
-                      rel="noopener"
+                      cinemaSlug={cinema.slug}
                       className={CINEMA_LINK_CLASS}
                     >
                       {link.label}
@@ -304,7 +304,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                         aria-hidden="true"
                         className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                       />
-                    </a>
+                    </TrackedCinemaLink>
                   </React.Fragment>
                 ))}
               </span>

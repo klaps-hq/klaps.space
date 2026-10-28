@@ -4,6 +4,7 @@ import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { IGenre } from "@/interfaces/IMovies";
 import { useScreeningsTransition } from "@/contexts/screenings-transition-context";
+import { trackEvent } from "@/lib/analytics";
 
 const GENRES_PARAM_KEY = "genres";
 
@@ -65,12 +66,21 @@ export const useMultiGenreParam = (
 
   const toggleGenre = useCallback(
     (id: number) => {
-      const next = selectedGenreIds.includes(id)
-        ? selectedGenreIds.filter((g) => g !== id)
-        : [...selectedGenreIds, id];
+      const adding = !selectedGenreIds.includes(id);
+      const next = adding
+        ? [...selectedGenreIds, id]
+        : selectedGenreIds.filter((g) => g !== id);
+      // Only additions are tracked: they show which genres people look for.
+      const label = options.find((o) => o.value === id)?.label;
+      if (adding && label) {
+        trackEvent("filter_change", {
+          filter_type: "genre",
+          filter_value: label,
+        });
+      }
       updateUrl(next);
     },
-    [selectedGenreIds, updateUrl]
+    [selectedGenreIds, options, updateUrl]
   );
 
   const clearGenres = useCallback(() => {
