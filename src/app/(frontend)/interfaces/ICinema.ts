@@ -11,6 +11,8 @@ export interface ICinemaSummary {
   latitude?: number | null;
   longitude?: number | null;
   updatedAt?: string | null;
+  // Open-air venue (summer cinema series); absent on older API responses.
+  isOpenAir?: boolean;
 }
 
 export interface ICinema {

@@ -30,6 +30,8 @@ import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
 import RepertoireGrid from "@/components/common/repertoire-grid";
 import RecentRepertoire from "@/components/common/recent-repertoire";
+import { LinkGrid } from "@/components/common/landing-page";
+import { OPEN_AIR_PATH } from "@/lib/landing-pages";
 import NearbyRepertoire from "@/components/common/nearby-repertoire";
 import ListingFaq from "@/components/common/listing-faq";
 import { buildCityFaq } from "@/lib/listing-faq";
@@ -418,6 +420,19 @@ const CityPage = async ({ params }: CityPageProps) => {
         }
         items={recentScreenings}
       />
+
+      {cinemas.some((cinema) => cinema.isOpenAir) && (
+        <LinkGrid
+          heading={<>Kino plenerowe {inPlace(cityForCopy)}</>}
+          description="Letnie pokazy pod gołym niebem: miejsca, repertuar i filmy z ostatniego sezonu."
+          items={[
+            {
+              href: `${OPEN_AIR_PATH}/${city.slug}`,
+              label: `Kino plenerowe ${inPlace(cityForCopy)}`,
+            },
+          ]}
+        />
+      )}
 
       <ListingFaq
         heading={<>Pytania o&nbsp;kina {inPlace(cityForCopy)}</>}

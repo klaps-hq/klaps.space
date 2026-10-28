@@ -13,6 +13,16 @@ import { getPostsPage, getPublishedPosts } from "@/lib/posts";
 import { archiveMonths, monthPath, shiftMonth } from "@/lib/month-stats";
 import type { Post } from "@/payload-types";
 import { ISitemapEntry } from "@/interfaces/ISitemap";
+import {
+  CLASSIC_PATH,
+  classicMonthRange,
+  fetchClassicScreenings,
+  getClassicMonths,
+  getOpenAirCities,
+  getOpenAirPageData,
+  isClassicIndexable,
+  OPEN_AIR_PATH,
+} from "@/lib/landing-pages";
 
 /**
  * Five minutes, matching the listing pages rather than the hour a sitemap
@@ -246,6 +256,52 @@ const buildBlogPages = async (): Promise<MetadataRoute.Sitemap> => {
   return [...postPages, ...archivePages];
 };
 
+/**
+ * Long-tail landing pages (open-air cinema, classics per month), listed
+ * only while indexable by the same rules the pages apply. An unknown answer
+ * (a failed call) throws, so Next keeps serving the last good copy rather
+ * than caching a sitemap that silently dropped pages.
+ */
+const buildLandingPages = async (): Promise<MetadataRoute.Sitemap> => {
+  const known = (indexable: boolean | null): boolean => {
+    if (indexable === null) throw new Error("landing page data unavailable");
+    return indexable;
+  };
+  const page = (path: string, priority: number) => ({
+    url: `${SITE_URL}${path}`,
+    changeFrequency: "daily" as const,
+    priority,
+  });
+
+  const cities = await getOpenAirCities();
+  const [openAirHub, ...openAirCities] = await Promise.all([
+    getOpenAirPageData(),
+    ...cities.map(({ city }) => getOpenAirPageData(city)),
+  ]);
+  const months = getClassicMonths();
+  const [classicHub, ...classicMonths] = await Promise.all([
+    fetchClassicScreenings().catch(() => null),
+    ...months.map((month) =>
+      fetchClassicScreenings(classicMonthRange(month)).catch(() => null)
+    ),
+  ]);
+
+  return [
+    ...(known(openAirHub.indexable) ? [page(OPEN_AIR_PATH, 0.6)] : []),
+    ...cities.flatMap(({ city }, index) =>
+      known(openAirCities[index].indexable)
+        ? [page(`${OPEN_AIR_PATH}/${city.slug}`, 0.5)]
+        : []
+    ),
+    ...(known(isClassicIndexable(classicHub)) ? [page(CLASSIC_PATH, 0.6)] : []),
+    ...months.flatMap((month, index) =>
+      known(isClassicIndexable(classicMonths[index]))
+        ? [page(`${CLASSIC_PATH}/${month.slug}`, 0.5)]
+        : []
+    ),
+  ];
+};
+
 // One sub-sitemap per resource type (SITEMAP_IDS lives in the shared lib so
 // the /sitemap.xml index route can list the same set). Next serves each
 // sub-sitemap at /sitemap/[id].xml but does NOT generate the index itself;
@@ -268,6 +324,12 @@ const sitemap = async ({
 
   if (sitemapId === "blog") {
     return dedupeByUrl(await buildBlogPages());
+  }
+
+  if (sitemapId === "tematy") {
+    return buildLandingPages().catch(
+      emptyDuringBuild<MetadataRoute.Sitemap[number]>
+    );
   }
 
   // The repertoire-backed types share one upstream call. A failure is

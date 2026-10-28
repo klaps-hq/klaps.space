@@ -50,6 +50,16 @@ const PRIMARY_SECTIONS = [
     hint: "Twórcy, których kino wraca na duży ekran.",
   },
   {
+    label: "Klasyka w kinach",
+    href: "/klasyka-w-kinach",
+    hint: "Filmy sprzed co najmniej 25 lat, miesiąc po miesiącu.",
+  },
+  {
+    label: "Kino plenerowe",
+    href: "/kino-plenerowe",
+    hint: "Letnie pokazy pod gołym niebem w polskich miastach.",
+  },
+  {
     label: "Blog",
     href: "/blog",
     hint: "Teksty o kinie studyjnym, klasyce i seansach specjalnych.",

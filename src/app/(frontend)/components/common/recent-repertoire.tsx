@@ -8,6 +8,8 @@ interface RecentRepertoireProps {
   /** Content of the section's H2. */
   heading: React.ReactNode;
   items: IRecentScreening[];
+  /** Line under the heading; defaults to the 90-day look-back note. */
+  description?: React.ReactNode;
 }
 
 // Same cell as the "Inne kina" grid on the cinema page, so the section reads
@@ -34,7 +36,11 @@ const META_CLASS =
  * indexable movie page (it lists where the film played, see
  * getRecentVenues), so these are crawl paths worth following.
  */
-const RecentRepertoire = ({ heading, items }: RecentRepertoireProps) => {
+const RecentRepertoire = ({
+  heading,
+  items,
+  description,
+}: RecentRepertoireProps) => {
   if (items.length === 0) return null;
 
   return (
@@ -43,8 +49,12 @@ const RecentRepertoire = ({ heading, items }: RecentRepertoireProps) => {
         {heading}
       </h2>
       <p className="mt-4 md:mt-5 mb-8 md:mb-10 max-w-[64ch] text-sm md:text-base text-white/55 leading-relaxed">
-        Filmy pokazywane w&nbsp;ostatnich {RECENT_SCREENINGS_DAYS} dniach, od
-        najnowszego seansu.
+        {description ?? (
+          <>
+            Filmy pokazywane w&nbsp;ostatnich {RECENT_SCREENINGS_DAYS} dniach,
+            od najnowszego seansu.
+          </>
+        )}
       </p>
       <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-px pl-px">
         {items.map((item) => {
