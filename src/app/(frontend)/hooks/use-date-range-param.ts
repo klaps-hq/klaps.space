@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { formatDateLabel, getDateString } from "@/lib/utils";
 import { useScreeningsTransition } from "@/contexts/screenings-transition-context";
+import { trackEvent } from "@/lib/analytics";
 
 const DATE_FROM_KEY = "dateFrom";
 const DATE_TO_KEY = "dateTo";
@@ -99,6 +100,10 @@ export const useDateRangeParam = (): UseDateRangeParamReturn => {
       if (selectedDay === value) {
         updateUrl(null, null);
       } else {
+        trackEvent("filter_change", {
+          filter_type: "date",
+          filter_value: "day",
+        });
         updateUrl(value, value);
       }
     },
@@ -109,12 +114,23 @@ export const useDateRangeParam = (): UseDateRangeParamReturn => {
   const isWeekend = dateFrom === weekend.from && dateTo === weekend.to;
 
   const handleWeekendClick = useCallback(() => {
-    if (isWeekend) updateUrl(null, null);
-    else updateUrl(weekend.from, weekend.to);
+    if (isWeekend) {
+      updateUrl(null, null);
+      return;
+    }
+    trackEvent("filter_change", {
+      filter_type: "date",
+      filter_value: "weekend",
+    });
+    updateUrl(weekend.from, weekend.to);
   }, [isWeekend, weekend, updateUrl]);
 
   const handleRangeChange = useCallback(
     (from: string, to: string) => {
+      trackEvent("filter_change", {
+        filter_type: "date",
+        filter_value: "range",
+      });
       updateUrl(from, to);
     },
     [updateUrl]

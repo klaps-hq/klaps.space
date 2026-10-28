@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import { SavedCinema, useMyCinemas } from "@/hooks/use-my-cinemas";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 interface SaveCinemaButtonProps {
   cinema: SavedCinema;
@@ -29,7 +30,13 @@ const SaveCinemaButton: React.FC<SaveCinemaButtonProps> = ({
     >
       <button
         type="button"
-        onClick={() => toggle(cinema)}
+        onClick={() => {
+          trackEvent("save_cinema", {
+            cinema_slug: cinema.slug,
+            saved: !saved,
+          });
+          toggle(cinema);
+        }}
         aria-pressed={saved}
         // py/-my widen the ~12px label to a usable tap target.
         className={cn(
