@@ -20,6 +20,7 @@ import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import {
   BASE_OPEN_GRAPH,
   NOINDEX_FOLLOW,
+  cinemaPageTitle,
   inPlace,
   pluralPl,
   wPrep,
@@ -30,7 +31,7 @@ import {
 } from "@/lib/listing-copy";
 import { isChainCinema } from "@/lib/cinema-chains";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
-import PageHeading from "@/components/ui/page-heading";
+import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
@@ -148,19 +149,14 @@ export const generateMetadata = async ({
 
   // Locative city name ("w Krakowie", not "w Kraków") for natural phrasing.
   const cityName = cinema.city.nameDeclinated ?? cinema.city.name;
-  // Chain venues lead with the special-screenings angle instead of
-  // "repertuar": on "cinema city X repertuar" the chain's own page, its
-  // Google listing and the ticket sellers own the SERP, and 90 days of GSC
-  // show 925 impressions and zero clicks from that group. What this site
-  // adds for those venues is the special-screenings programme, so the title
-  // targets that. Independent cinemas keep the repertoire phrasing, which
-  // is what people search for them.
-  // Both variants keep the venue name first and the city in the locative
-  // after "w", so the chain wording stays grammatical ("w Katowicach", never
-  // "Cinema City Silesia, Katowicach").
-  const title = isChain
-    ? `${cinema.name} - seanse specjalne i klasyka ${inPlace(cityName)}`
-    : `${cinema.name} - repertuar seansów specjalnych ${inPlace(cityName)}`;
+  // Venue name plus the nominative city first, matching the navigational
+  // queries GSC shows at positions 40-80 ("helios metropolia gdańsk
+  // repertuar"): the old titles had the city only in the locative after the
+  // suffix, so the exact "[kino] [miasto]" pair never appeared. Chain venues
+  // keep the special-screenings angle (see cinemaPageTitle): on "cinema
+  // city X repertuar" the chain's own page owns the SERP, and 90 days of
+  // GSC showed 925 impressions and zero clicks for repertoire wording.
+  const title = cinemaPageTitle(cinema.name, cinema.city.name, isChain);
   const description = buildCinemaDescription(
     cinema.name,
     cityName,
@@ -246,8 +242,17 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-12 md:pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           <div className="lg:col-span-5">
+            {/* The muted second line puts the city and "repertuar" into the
+                h1 text, the same pair the title targets, without changing
+                the venue name visitors recognise. */}
             <PageHeading variant="detail" className="max-w-[20ch]">
               {cinema.name}
+              <span className="sr-only"> -</span>
+              <PageHeadingMuted className="mt-2 md:mt-3 text-xl md:text-3xl lg:text-4xl normal-case tracking-tight">
+                {isChainCinema(cinema.name)
+                  ? <>Seanse specjalne, {cinema.city.name}</>
+                  : <>Repertuar kina, {cinema.city.name}</>}
+              </PageHeadingMuted>
             </PageHeading>
             <div className="mt-4 md:mt-5 flex flex-col gap-1.5 text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
               {cinema.street && <span>{cinema.street}</span>}

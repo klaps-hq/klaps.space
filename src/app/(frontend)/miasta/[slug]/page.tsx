@@ -141,11 +141,13 @@ export const generateMetadata = async ({
   // ~60 chars a SERP renders, so the suffix degrades instead of being
   // truncated mid-phrase. The target keyword stays first either way.
   const titleBase = `Kina studyjne ${prep} ${city.nameDeclinated}`;
-  const titleFull = `${titleBase} - repertuar i seanse specjalne`;
+  // Colon form shared with the cinema titles ("[kino] [miasto]: repertuar
+  // i godziny seansów"), so the keyword phrase reads as one unit.
+  const titleFull = `${titleBase}: repertuar i godziny seansów`;
   const title =
     titleFull.length <= MAX_TITLE_LENGTH
       ? titleFull
-      : `${titleBase} - repertuar`;
+      : `${titleBase}: repertuar`;
   const counts =
     screeningsCount > 0
       ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}`
