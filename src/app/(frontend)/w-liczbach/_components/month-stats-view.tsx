@@ -112,6 +112,7 @@ const Poster: React.FC<{ movie: IMonthStatsMovie; sizes: string }> = ({
       <MoviePoster
         posterUrl={movie.posterUrl}
         title={movie.title}
+        productionYear={movie.productionYear}
         width={400}
         height={600}
         sizes={sizes}
