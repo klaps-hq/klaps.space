@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getGenres } from "@/lib/genres";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { getDirectors, DIRECTOR_INDEX_THRESHOLD } from "@/lib/directors";
 import { getPublishedPosts } from "@/lib/posts";
 import { IGenre } from "@/interfaces/IMovies";
@@ -125,15 +126,17 @@ const linkClass =
 const SiteMapPage = async () => {
   // Resilient fan-out: a hiccup in any single feed degrades to an empty
   // section instead of 500ing the whole index.
-  const [genres, directorsResult, posts] = await Promise.all([
+  const [genres, directorsResult, posts, indexable] = await Promise.all([
     getGenres().catch(() => [] as IGenre[]),
     getDirectors().catch(() => ({ data: [] as IDirector[] })),
     getPublishedPosts().catch(() => [] as Post[]),
+    getIndexableSlugs(),
   ]);
 
-  const sortedGenres = [...genres].sort((a, b) =>
-    a.name.localeCompare(b.name, "pl")
-  );
+  // Genres without screenings are noindex pages; leave them out.
+  const sortedGenres = genres
+    .filter((genre) => !indexable?.genres || indexable.genres.has(genre.slug))
+    .sort((a, b) => a.name.localeCompare(b.name, "pl"));
 
   // Only link directors above the indexing threshold: thinner pages carry a
   // noindex meta and stay out of the sitemap, so linking them here would

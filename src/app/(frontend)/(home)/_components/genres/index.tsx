@@ -2,11 +2,19 @@ import React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getGenres } from "@/lib/genres";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 
 const FEATURED_COUNT = 10;
 
 const Genres = async () => {
-  const genres = await getGenres();
+  const [allGenres, indexable] = await Promise.all([
+    getGenres(),
+    getIndexableSlugs(),
+  ]);
+  // Only genres with screenings: the others are noindex pages.
+  const genres = allGenres.filter(
+    (genre) => !indexable?.genres || indexable.genres.has(genre.slug)
+  );
   if (genres.length === 0) return null;
 
   const featured = genres.slice(0, FEATURED_COUNT);

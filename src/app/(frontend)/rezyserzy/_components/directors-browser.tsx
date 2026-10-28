@@ -8,10 +8,14 @@ import { pluralPl } from "@/lib/seo";
 import DirectorCard from "./director-card";
 
 /** The card fields only - full records (with bios) stay on the server. */
-export type DirectorsBrowserItem = Pick<
-  IDirector,
-  "id" | "slug" | "name" | "photoUrl" | "moviesCount" | "upcomingScreeningsCount"
->;
+export interface DirectorsBrowserItem
+  extends Pick<
+    IDirector,
+    "id" | "slug" | "name" | "photoUrl" | "moviesCount" | "upcomingScreeningsCount"
+  > {
+  /** False when the director's page is noindex: the card renders unlinked. */
+  linked: boolean;
+}
 
 interface DirectorsBrowserProps {
   /** Pre-filtered and sorted server-side (directors with screenings only). */
