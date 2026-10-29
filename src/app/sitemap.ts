@@ -182,6 +182,7 @@ const staticPages: MetadataRoute.Sitemap = [
   { url: `${SITE_URL}/w-liczbach`, changeFrequency: "daily", priority: 0.6 },
   { url: `${SITE_URL}/mapa-witryny`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/o-projekcie`, changeFrequency: "monthly", priority: 0.3 },
+  { url: `${SITE_URL}/o-tworcy`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/kontakt`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/dla-kin`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/faq`, changeFrequency: "monthly", priority: 0.3 },

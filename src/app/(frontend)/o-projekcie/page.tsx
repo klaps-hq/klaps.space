@@ -243,7 +243,15 @@ const AboutPage = () => {
               się bezpośrednio na stronie kina.
             </p>
             <p>
-              Lista obsługiwanych kin jest stale rozwijana. Jeśli znasz kino,
+              Za projektem stoi jedna osoba,{" "}
+              <Link
+                href="/o-tworcy"
+                className="text-white underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors"
+              >
+                Robert Siński
+              </Link>
+              , który zbudował system zbierający repertuar. Lista obsługiwanych
+              kin jest stale rozwijana. Jeśli znasz kino,
               które powinno się znaleźć w&nbsp;serwisie,{" "}
               <Link
                 href="/kontakt"
