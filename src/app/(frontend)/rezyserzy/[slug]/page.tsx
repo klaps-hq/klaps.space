@@ -20,6 +20,9 @@ import Footer from "../../(home)/_components/footer";
 import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
 import RepertoireGrid from "@/components/common/repertoire-grid";
+import ProgrammeProfile from "@/components/common/programme-profile";
+import { getProgrammeProfile } from "@/lib/programme-profile";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 
 // ISR: cached HTML revalidated every 5 minutes. The repertoire filters
 // (city, genres, dates, search) are applied client-side in
@@ -93,11 +96,14 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
 
   // Full unfiltered repertoire - DirectorRepertoire narrows it down
   // client-side based on the URL params / preferred city.
-  const [moviesResponse, allGenres, screenings] = await Promise.all([
-    getMoviesByDirector(director.id),
-    getGenres(),
-    getScreeningsByDirector(director.id),
-  ]);
+  const [moviesResponse, allGenres, screenings, profile, indexable] =
+    await Promise.all([
+      getMoviesByDirector(director.id),
+      getGenres(),
+      getScreeningsByDirector(director.id),
+      getProgrammeProfile({ directorSlug: director.slug }),
+      getIndexableSlugs(),
+    ]);
 
   const movies = moviesResponse.data;
   const moviesCount = moviesResponse.meta.total || movies.length;
@@ -209,6 +215,13 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
           }
         />
       </RepertoireSection>
+
+      <ProgrammeProfile
+        heading={<>{director.name} w&nbsp;kinach studyjnych w&nbsp;liczbach</>}
+        profile={profile}
+        subject={{ kind: "director", directorName: director.name }}
+        indexable={indexable}
+      />
 
       {movies.length > 0 && (
         <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-16 md:pb-24">

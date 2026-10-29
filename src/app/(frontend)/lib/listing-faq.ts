@@ -1,5 +1,7 @@
 import { IRecentScreening, IScreeningGroup } from "@/interfaces/IScreenings";
+import { IProgrammeProfile } from "@/interfaces/IProgrammeProfile";
 import { formatPlDate, inPlace, pluralPl } from "./seo";
+import { hasProfileContent, sinceMonth } from "./programme-profile";
 
 /**
  * Data-driven FAQ entries for city and cinema pages. Every answer is built
@@ -34,6 +36,31 @@ const repertoireSummary = (groups: IScreeningGroup[]): string => {
   return `${groups.length} ${pluralPl(groups.length, "film", "filmy", "filmów")} i ${screenings} ${pluralPl(screenings, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")}, m.in. ${joinNames(quoted(groups.map((g) => g.movie.title)))}`;
 };
 
+/**
+ * "What does this place usually show?" answered from screening history: the
+ * most screened films and genres so far. Left out when the history is too
+ * thin to say anything.
+ */
+const profileAnswer = (profile: IProgrammeProfile | null | undefined): string | null => {
+  if (!profile || !hasProfileContent(profile)) return null;
+  const films = profile.topMovies.slice(0, 3).map((m) => m.title);
+  if (films.length === 0) return null;
+  const played = films.length === 1 ? "grany był" : "grane były";
+  const lead = profile.since
+    ? `${sinceMonth(profile.since).replace(/^o/, "O")} najczęściej ${played}`
+    : `Najczęściej ${played}`;
+  const parts = [`${lead} ${joinNames(quoted(films))}.`];
+  if (profile.topGenres.length >= 2) {
+    parts.push(
+      `Przeważają gatunki: ${joinNames(profile.topGenres.slice(0, 3).map((g) => g.name.toLocaleLowerCase("pl")))}.`
+    );
+  }
+  parts.push(
+    `Łącznie ${profile.screenings} ${pluralPl(profile.screenings, "seans", "seanse", "seansów")} i ${profile.movies} ${pluralPl(profile.movies, "film", "filmy", "filmów")}.`
+  );
+  return parts.join(" ");
+};
+
 // "29 października": the API date is a Warsaw calendar date, read as UTC
 // so no zone shift moves it to the neighbouring day.
 const formatDayMonth = (isoDate: string): string =>
@@ -61,6 +88,7 @@ interface CityFaqInput {
   chainNames: string[];
   screenings: IScreeningGroup[];
   lastUpdated: Date | null;
+  profile?: IProgrammeProfile | null;
 }
 
 export const buildCityFaq = ({
@@ -69,6 +97,7 @@ export const buildCityFaq = ({
   chainNames,
   screenings,
   lastUpdated,
+  profile,
 }: CityFaqInput): FaqItem[] => {
   const place = inPlace(cityLocative);
   const questions: FaqItem[] = [];
@@ -125,6 +154,14 @@ export const buildCityFaq = ({
     });
   }
 
+  const cityHistory = profileAnswer(profile);
+  if (cityHistory) {
+    questions.push({
+      q: `Jakie filmy grają kina studyjne ${place}?`,
+      a: cityHistory,
+    });
+  }
+
   if (total > 0 && lastUpdated) {
     questions.push({
       q: `Jak często aktualizowany jest repertuar kin ${place}?`,
@@ -144,6 +181,7 @@ interface CinemaFaqInput {
   screenings: IScreeningGroup[];
   recent: IRecentScreening[];
   siblingNames: string[];
+  profile?: IProgrammeProfile | null;
 }
 
 // Questions keep the venue name in the nominative ("Co gra teraz Kino
@@ -157,6 +195,7 @@ export const buildCinemaFaq = ({
   screenings,
   recent,
   siblingNames,
+  profile,
 }: CinemaFaqInput): FaqItem[] => {
   const place = inPlace(cityLocative);
   const questions: FaqItem[] = [];
@@ -205,6 +244,14 @@ export const buildCinemaFaq = ({
     questions.push({
       q: `${cinemaName}: co było ostatnio w repertuarze?`,
       a: `W ostatnich tygodniach grane były m.in. ${joinNames(quoted(recent.map((r) => r.movie.title)))}.`,
+    });
+  }
+
+  const cinemaHistory = profileAnswer(profile);
+  if (cinemaHistory) {
+    questions.push({
+      q: `Jakie filmy pokazuje ${cinemaName}?`,
+      a: cinemaHistory,
     });
   }
 
