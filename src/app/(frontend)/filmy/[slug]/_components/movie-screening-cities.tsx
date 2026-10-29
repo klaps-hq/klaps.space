@@ -12,6 +12,7 @@ const REVIVAL_AGE_YEARS = 3;
 
 interface MovieScreeningCitiesProps {
   movieTitle: string;
+  productionYear: number;
   screenings: IScreening[];
 }
 
@@ -39,14 +40,12 @@ const formatDayMonth = (isoDate: string): string =>
 // synopsis on this page comes from TMDB and is shared with every other
 // site using it; this is the part only klaps.space has: where, in what
 // kind of venue and over which dates the film is shown.
-// Rendered by the page as the section lead, right under the heading.
-export const buildMovieScreeningContext = (
+const buildContext = (
   movieTitle: string,
   productionYear: number,
-  screenings: IScreening[]
-): string | null => {
-  if (screenings.length === 0) return null;
-  const citiesCount = new Set(screenings.map((s) => s.cinema.city.id)).size;
+  screenings: IScreening[],
+  citiesCount: number
+): string => {
   const sorted = [...screenings].sort((a, b) =>
     a.dateTime.localeCompare(b.dateTime)
   );
@@ -89,6 +88,7 @@ export const buildMovieScreeningContext = (
 // each city hub with the city name as anchor.
 const MovieScreeningCities: React.FC<MovieScreeningCitiesProps> = ({
   movieTitle,
+  productionYear,
   screenings,
 }) => {
   const byCity = new Map<number, CityCount>();
@@ -110,7 +110,10 @@ const MovieScreeningCities: React.FC<MovieScreeningCitiesProps> = ({
   const hidden = cities.length - shown.length;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
+      <p className="text-sm md:text-base text-white/65 leading-relaxed">
+        {buildContext(movieTitle, productionYear, screenings, cities.length)}
+      </p>
       <h3 className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
         {movieTitle} w kinach: {screenings.length}{" "}
         {pluralPl(screenings.length, "seans", "seanse", "seansów")} w{" "}
