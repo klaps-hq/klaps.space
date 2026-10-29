@@ -50,6 +50,7 @@ import ListingFaq from "@/components/common/listing-faq";
 import { buildCinemaFaq } from "@/lib/listing-faq";
 import Footer from "../../(home)/_components/footer";
 import CinemaMapLazy from "./_components/cinema-map-lazy";
+import CinemaDetails from "./_components/cinema-details";
 
 // ISR: cached HTML revalidated every 5 minutes. The repertoire filters
 // (genres, dates, search) are applied client-side in CinemaRepertoire,
@@ -423,6 +424,12 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
         profile={profile}
         subject={{ kind: "cinema" }}
         indexable={indexable}
+      />
+
+      <CinemaDetails
+        cinemaName={cinema.name}
+        cinemaSlug={cinema.slug}
+        details={cinema.details}
       />
 
       {siblingCinemas.length > 0 && (
