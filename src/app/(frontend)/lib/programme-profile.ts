@@ -1,7 +1,8 @@
 import { IProgrammeProfile } from "@/interfaces/IProgrammeProfile";
 import { apiFetch } from "./client";
 import { inMonth } from "./month-stats";
-import { inPlace, pluralPl } from "./seo";
+import { inPlace, pluralPl, wPrep } from "./seo";
+import { isChainCinema } from "./cinema-chains";
 
 export interface ProgrammeProfileScope {
   cinemaSlug?: string;
@@ -98,6 +99,10 @@ const screeningsPhrase = (count: number): string =>
 const percent = (part: number, whole: number): number =>
   Math.round((part / whole) * 100);
 
+/** Profile cinemas without multiplex chains, in ranking order. */
+export const studioCinemas = (profile: IProgrammeProfile) =>
+  profile.topCinemas.filter((cinema) => !isChainCinema(cinema.name));
+
 export type ProfileSubject =
   | { kind: "cinema" }
   | { kind: "city"; cityLocative: string }
@@ -142,7 +147,7 @@ export const buildProfileSentences = (
   } else if (subject.kind === "genre") {
     sentences.push(
       capitalize(
-        `${since}w kinach studyjnych ${happened} z gatunku ${lower(subject.genreName)}: ${films} w ${venues}${cities}.`
+        `${since}w polskich kinach ${happened} z gatunku ${lower(subject.genreName)}: ${films} w ${venues}${cities}.`
       )
     );
   } else {
@@ -150,15 +155,18 @@ export const buildProfileSentences = (
     // need declension data the API does not have.
     sentences.push(
       capitalize(
-        `${since}w kinach studyjnych ${happened} z tej filmografii: ${films} w ${venues}${cities}.`
+        `${since}w polskich kinach ${happened} z tej filmografii: ${films} w ${venues}${cities}.`
       )
     );
   }
 
-  if (subject.kind === "city" && profile.topCinemas.length > 1) {
-    const [first] = profile.topCinemas;
+  // Studio cinemas only: the city page is about them, and multiplexes,
+  // which often top the raw count, already have their own pages.
+  const studios = studioCinemas(profile);
+  if (subject.kind === "city" && studios.length > 1) {
+    const [first] = studios;
     sentences.push(
-      `Najwięcej seansów specjalnych w mieście: ${first.name}, ${screeningsPhrase(first.count)}, czyli ${percent(first.count, total)}% wszystkich.`
+      `Wśród kin studyjnych najwięcej seansów specjalnych miało ${first.name}: ${screeningsPhrase(first.count)}, czyli ${percent(first.count, total)}% wszystkich w mieście.`
     );
   }
   if (
@@ -224,7 +232,7 @@ export const buildProfileSentences = (
           ? "po południu"
           : "przed południem";
     sentences.push(
-      `Seanse wypadają najczęściej w ${joinPl(days)}, przeważnie ${time}.`
+      `Seanse wypadają najczęściej ${wPrep(days[0])} ${joinPl(days)}, przeważnie ${time}.`
     );
   }
 
