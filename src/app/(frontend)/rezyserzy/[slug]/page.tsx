@@ -217,7 +217,7 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
       </RepertoireSection>
 
       <ProgrammeProfile
-        heading={<>{director.name} w&nbsp;kinach studyjnych w&nbsp;liczbach</>}
+        heading={<>{director.name} na seansach specjalnych w&nbsp;liczbach</>}
         profile={profile}
         subject={{ kind: "director", directorName: director.name }}
         indexable={indexable}

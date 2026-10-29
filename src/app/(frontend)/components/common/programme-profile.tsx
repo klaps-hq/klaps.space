@@ -7,6 +7,7 @@ import {
   buildProfileSentences,
   hasProfileContent,
   sinceMonth,
+  studioCinemas,
 } from "@/lib/programme-profile";
 import { pluralPl } from "@/lib/seo";
 
@@ -125,8 +126,8 @@ const ProgrammeProfile = ({
   ];
   if (subject.kind === "city" || subject.kind === "genre" || subject.kind === "director") {
     lists.push({
-      title: "Kina z największą liczbą seansów",
-      items: profile.topCinemas.map((c) => ({
+      title: "Kina studyjne z największą liczbą seansów",
+      items: studioCinemas(profile).slice(0, 5).map((c) => ({
         key: c.slug,
         label: subject.kind === "city" ? c.name : `${c.name}, ${c.cityName}`,
         href: cinemaHref(c.slug),
@@ -190,9 +191,7 @@ const ProgrammeProfile = ({
         {heading}
       </h2>
       <p className="mt-4 md:mt-5 mb-8 md:mb-10 max-w-[64ch] text-sm md:text-base text-white/55 leading-relaxed">
-        Z historii repertuaru zbieranej przez Klaps
-        {profile.since ? <> {sinceMonth(profile.since)}</> : null}. Liczymy
-        tylko seanse, które już się odbyły.
+        {`Z historii repertuaru zbieranej przez Klaps${profile.since ? ` ${sinceMonth(profile.since)}` : ""}. Liczymy tylko seanse, które już się odbyły.`}
       </p>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 pt-px pl-px">

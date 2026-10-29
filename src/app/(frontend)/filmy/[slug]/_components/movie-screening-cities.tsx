@@ -3,6 +3,7 @@ import Link from "next/link";
 import { IScreening } from "@/interfaces/IScreenings";
 import { isChainCinema } from "@/lib/cinema-chains";
 import { pluralPl } from "@/lib/seo";
+import { cn } from "@/lib/utils";
 
 // Past this many the list stops being a scannable overview.
 const MAX_CITIES = 12;
@@ -12,8 +13,8 @@ const REVIVAL_AGE_YEARS = 3;
 
 interface MovieScreeningCitiesProps {
   movieTitle: string;
-  productionYear: number;
   screenings: IScreening[];
+  className?: string;
 }
 
 interface CityCount {
@@ -40,12 +41,14 @@ const formatDayMonth = (isoDate: string): string =>
 // synopsis on this page comes from TMDB and is shared with every other
 // site using it; this is the part only klaps.space has: where, in what
 // kind of venue and over which dates the film is shown.
-const buildContext = (
+// Rendered by the page as the section lead, right under the heading.
+export const buildMovieScreeningContext = (
   movieTitle: string,
   productionYear: number,
-  screenings: IScreening[],
-  citiesCount: number
-): string => {
+  screenings: IScreening[]
+): string | null => {
+  if (screenings.length === 0) return null;
+  const citiesCount = new Set(screenings.map((s) => s.cinema.city.id)).size;
   const sorted = [...screenings].sort((a, b) =>
     a.dateTime.localeCompare(b.dateTime)
   );
@@ -88,8 +91,8 @@ const buildContext = (
 // each city hub with the city name as anchor.
 const MovieScreeningCities: React.FC<MovieScreeningCitiesProps> = ({
   movieTitle,
-  productionYear,
   screenings,
+  className,
 }) => {
   const byCity = new Map<number, CityCount>();
   for (const { cinema } of screenings) {
@@ -110,16 +113,13 @@ const MovieScreeningCities: React.FC<MovieScreeningCitiesProps> = ({
   const hidden = cities.length - shown.length;
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-sm md:text-base text-white/65 leading-relaxed">
-        {buildContext(movieTitle, productionYear, screenings, cities.length)}
-      </p>
+    <div className={cn("flex flex-col gap-3", className)}>
       <h3 className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
         {movieTitle} w kinach: {screenings.length}{" "}
         {pluralPl(screenings.length, "seans", "seanse", "seansów")} w{" "}
         {cities.length} {pluralPl(cities.length, "mieście", "miastach", "miastach")}
       </h3>
-      <ul className="flex flex-col divide-y divide-white/10 border-y border-white/10">
+      <ul className="flex flex-col divide-y divide-white/10">
         {shown.map((city) => (
           <li key={city.slug}>
             <Link

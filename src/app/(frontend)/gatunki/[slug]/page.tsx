@@ -194,7 +194,7 @@ const GenrePage = async ({ params }: GenrePageProps) => {
       </RepertoireSection>
 
       <ProgrammeProfile
-        heading={<>{genre.name} w&nbsp;kinach studyjnych w&nbsp;liczbach</>}
+        heading={<>{genre.name} na seansach specjalnych w&nbsp;liczbach</>}
         profile={profile}
         subject={{ kind: "genre", genreName: genre.name }}
         indexable={indexable}
