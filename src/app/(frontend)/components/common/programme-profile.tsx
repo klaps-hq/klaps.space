@@ -224,14 +224,17 @@ const ProgrammeProfile = ({
             <figcaption className={`${META_CLASS} mb-4`}>
               Seanse według dnia tygodnia
             </figcaption>
-            <div className="flex items-end gap-2 h-32 md:h-40" aria-hidden="true">
+            <div className="flex items-end gap-4 md:gap-6 h-32 md:h-40" aria-hidden="true">
               {profile.weekdays.map((count, index) => (
                 <div
                   key={WEEKDAY_SHORT[index]}
                   className="flex-1 flex flex-col items-center justify-end gap-2 h-full"
                 >
+                  <span className="text-[10px] tabular-nums text-white/45">
+                    {count}
+                  </span>
                   <div
-                    className="w-full bg-white/80"
+                    className="w-full max-w-8 bg-white/80"
                     style={{
                       height: `${Math.max((count / maxWeekday) * 100, count > 0 ? 4 : 1)}%`,
                       opacity: count > 0 ? 1 : 0.15,
