@@ -23,7 +23,9 @@ import Breadcrumbs from "@/components/ui/breadcrumbs";
 import MovieHero from "./_components/movie-hero";
 import MovieAbout from "./_components/movie-about";
 import MovieScreenings from "./_components/movie-screenings";
-import MovieScreeningCities from "./_components/movie-screening-cities";
+import MovieScreeningCities, {
+  buildMovieScreeningContext,
+} from "./_components/movie-screening-cities";
 import MovieRecentVenues from "./_components/movie-recent-venues";
 import RelatedMovies from "./_components/related-movies";
 import { movieNextScreeningItems } from "@/lib/next-screening-items";
@@ -210,19 +212,32 @@ const MoviePage = async ({ params }: MoviePageProps) => {
           />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
-            <div className="lg:col-span-4 flex flex-col gap-8 md:gap-10">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white">
-                Seanse
-              </h2>
-              <NextScreening
-                preferCity
-                items={movieNextScreeningItems(screenings, movie)}
-              />
-              <MovieScreeningCities
-                movieTitle={movie.title}
-                productionYear={movie.productionYear}
-                screenings={screenings}
-              />
+            <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start flex flex-col gap-8 md:gap-10">
+              <div className="flex flex-col gap-5">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white">
+                  Seanse
+                </h2>
+                <p className="max-w-[60ch] text-sm md:text-base text-white/65 leading-relaxed">
+                  {buildMovieScreeningContext(
+                    movie.title,
+                    movie.productionYear,
+                    screenings
+                  )}
+                </p>
+              </div>
+              {/* Framed panel keeps the data blocks apart from the prose lead. */}
+              <div className="flex flex-col border border-white/15">
+                <NextScreening
+                  preferCity
+                  className="border-0 px-5 py-5"
+                  items={movieNextScreeningItems(screenings, movie)}
+                />
+                <MovieScreeningCities
+                  className="border-t border-white/15 px-5 pt-5 pb-2"
+                  movieTitle={movie.title}
+                  screenings={screenings}
+                />
+              </div>
             </div>
             <div className="lg:col-span-8">
               <MovieScreenings
