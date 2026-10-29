@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import SiteHeader from "@/components/common/site-header";
 import JsonLd from "@/components/common/json-ld";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
-import { SITE_URL } from "@/lib/site-config";
+import { FOUNDER_PATH, ORGANIZATION_ID, SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH, clampText, formatPlDate } from "@/lib/seo";
 import { getCover, getPostBySlug, getPublishedPosts } from "@/lib/posts";
 import { resolveScreeningBlocks } from "@/lib/post-screening-blocks";
@@ -87,10 +87,15 @@ const buildPostJsonLd = (post: Post) => {
       ? cover.url
       : `${SITE_URL}${cover.url}`
     : null;
-  const author =
-    typeof post.author === "object" && post.author?.name
-      ? { "@type": "Person", name: post.author.name }
-      : { "@type": "Organization", name: "Klaps", url: SITE_URL };
+  // Credited to the editorial team, not to the Payload user who published
+  // it: posts are drafted with AI, so naming a person as the author would
+  // overstate who wrote them. The founder is linked from the Organization.
+  const author = {
+    "@type": "Organization",
+    "@id": ORGANIZATION_ID,
+    name: "Klaps",
+    url: SITE_URL,
+  };
 
   return {
     "@context": "https://schema.org",
@@ -214,6 +219,16 @@ const PostPage = async ({ params }: PostPageProps) => {
           </div>
 
           <footer className="mt-14 border-t border-white/10 pt-8">
+            <p className="mb-8 max-w-[64ch] text-sm md:text-base text-white/50 leading-relaxed">
+              Opracowanie: redakcja klaps.space. Tekst powstał z&nbsp;pomocą AI,
+              na podstawie danych z&nbsp;serwisu i&nbsp;sprawdzonych źródeł.{" "}
+              <Link
+                href={FOUNDER_PATH}
+                className="text-white/75 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white transition-colors"
+              >
+                Kto stoi za serwisem
+              </Link>
+            </p>
             <Link
               href="/blog"
               className="text-base uppercase text-white border-b border-white/50 pb-0.5 hover:border-white transition-colors"
