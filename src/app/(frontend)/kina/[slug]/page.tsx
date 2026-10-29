@@ -30,6 +30,8 @@ import {
   isUsableCinemaDescription,
 } from "@/lib/listing-copy";
 import { isChainCinema } from "@/lib/cinema-chains";
+import { getProgrammeProfile } from "@/lib/programme-profile";
+import ProgrammeProfile from "@/components/common/programme-profile";
 import { cinemaGenitive } from "@/lib/cinema-name";
 import { todayDigest, todayDigestPhrases } from "@/lib/live-meta";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
@@ -217,7 +219,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
   // Sibling venues give each cinema page contextual internal links: /kina is
   // the only other place linking here, and it spreads its authority across
   // 900 links, which is why parts of this page group never get crawled.
-  const [screenings, siblingResponse, recentScreenings, indexable] =
+  const [screenings, siblingResponse, recentScreenings, indexable, profile] =
     await Promise.all([
     getScreenings({
       cinemaId: cinema.id.toString(),
@@ -228,6 +230,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
     })),
     getRecentScreenings({ cinemaId: cinema.id.toString() }),
     getIndexableSlugs(),
+    getProgrammeProfile({ cinemaSlug: cinema.slug }),
   ]);
 
   const siblingCinemas = siblingResponse.data
@@ -415,6 +418,13 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
         items={recentScreenings}
       />
 
+      <ProgrammeProfile
+        heading={<>Program {cinemaGenitive(cinema.name)} w&nbsp;liczbach</>}
+        profile={profile}
+        subject={{ kind: "cinema" }}
+        indexable={indexable}
+      />
+
       {siblingCinemas.length > 0 && (
         // Contextual links out of this page: they spread crawl paths across
         // the cinema group instead of funnelling everything through /kina,
@@ -466,6 +476,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
           screenings,
           recent: recentScreenings,
           siblingNames: siblingCinemas.map((item) => item.name),
+          profile,
         })}
       />
     </>

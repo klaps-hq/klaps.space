@@ -30,6 +30,8 @@ import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
 import RepertoireGrid from "@/components/common/repertoire-grid";
 import RecentRepertoire from "@/components/common/recent-repertoire";
+import { getProgrammeProfile } from "@/lib/programme-profile";
+import ProgrammeProfile from "@/components/common/programme-profile";
 import { LinkGrid } from "@/components/common/landing-page";
 import { OPEN_AIR_PATH } from "@/lib/landing-pages";
 import NearbyRepertoire from "@/components/common/nearby-repertoire";
@@ -258,6 +260,7 @@ const CityPage = async ({ params }: CityPageProps) => {
     lastUpdated,
     recentScreenings,
     indexable,
+    profile,
   ] = await Promise.all([
     getCinemas({ cityId: city.id.toString() }),
     getGenres(),
@@ -265,6 +268,7 @@ const CityPage = async ({ params }: CityPageProps) => {
     getScreeningsLastUpdated({ cityId: city.id.toString() }),
     getRecentScreenings({ cityId: city.id.toString() }),
     getIndexableSlugs(),
+    getProgrammeProfile({ citySlug: city.slug }),
   ]);
   const isCinemaLinked = (slug: string): boolean =>
     !indexable || indexable.cinemas.has(slug);
@@ -421,6 +425,17 @@ const CityPage = async ({ params }: CityPageProps) => {
         items={recentScreenings}
       />
 
+      <ProgrammeProfile
+        heading={
+          <>
+            Seanse specjalne {inPlace(cityForCopy)} w&nbsp;liczbach
+          </>
+        }
+        profile={profile}
+        subject={{ kind: "city", cityLocative: cityForCopy }}
+        indexable={indexable}
+      />
+
       {cinemas.some((cinema) => cinema.isOpenAir) && (
         <LinkGrid
           heading={<>Kino plenerowe {inPlace(cityForCopy)}</>}
@@ -442,6 +457,7 @@ const CityPage = async ({ params }: CityPageProps) => {
           chainNames: chainCinemas.map((c) => c.name),
           screenings,
           lastUpdated,
+          profile,
         })}
       />
 
