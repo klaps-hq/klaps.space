@@ -28,6 +28,42 @@ export interface ICinema {
   filmwebUrl: string;
   // The cinema's own official website; null when unknown.
   website: string | null;
+  // Researched venue details; absent on older API responses.
+  details?: ICinemaDetails;
+}
+
+export interface ICinemaRoom {
+  name: string;
+  seats: number | null;
+}
+
+export interface ICinemaAccessibility {
+  wheelchair: boolean | null;
+  hearingLoop: boolean | null;
+  note: string | null;
+}
+
+// Freely licensed photo (Wikimedia Commons) with its attribution.
+export interface ICinemaPhoto {
+  url: string;
+  sourceUrl: string;
+  author: string;
+  license: string;
+  licenseUrl: string | null;
+}
+
+export interface ICinemaDetails {
+  phone: string | null;
+  repertoireUrl: string | null;
+  bookingUrl: string | null;
+  facebookUrl: string | null;
+  instagramUrl: string | null;
+  operator: { name: string; url: string | null } | null;
+  screens: number | null;
+  rooms: ICinemaRoom[];
+  accessibility: ICinemaAccessibility | null;
+  logoUrl: string | null;
+  photos: ICinemaPhoto[];
 }
 
 export interface ICinemaGroup {

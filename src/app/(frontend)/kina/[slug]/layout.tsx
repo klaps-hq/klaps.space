@@ -36,8 +36,39 @@ const buildCinemaJsonLd = (cinema: ICinema) => {
 
   // Reference only the cinema's own official website. Filmweb is
   // intentionally not exposed anywhere on the cinema page.
-  if (cinema.website) {
-    jsonLd.sameAs = cinema.website;
+  const details = cinema.details;
+  const sameAs = [
+    cinema.website,
+    details?.facebookUrl,
+    details?.instagramUrl,
+  ].filter(Boolean) as string[];
+  if (sameAs.length === 1) jsonLd.sameAs = sameAs[0];
+  else if (sameAs.length > 1) jsonLd.sameAs = sameAs;
+
+  if (details?.phone) jsonLd.telephone = details.phone;
+  if (details?.screens) jsonLd.screenCount = details.screens;
+  if (details?.logoUrl) jsonLd.logo = details.logoUrl;
+  if (details?.photos.length) {
+    jsonLd.image = details.photos.map((photo) => ({
+      "@type": "ImageObject",
+      contentUrl: photo.url,
+      creditText: photo.author,
+      license: photo.licenseUrl ?? undefined,
+      acquireLicensePage: photo.sourceUrl,
+    }));
+  }
+  const totalSeats = details?.rooms.reduce<number | null>(
+    (sum, room) => (sum === null || room.seats === null ? null : sum + room.seats),
+    0
+  );
+  if (totalSeats) jsonLd.maximumAttendeeCapacity = totalSeats;
+  if (details?.accessibility?.wheelchair !== undefined &&
+      details.accessibility.wheelchair !== null) {
+    jsonLd.amenityFeature = {
+      "@type": "LocationFeatureSpecification",
+      name: "Dostęp dla osób na wózkach",
+      value: details.accessibility.wheelchair,
+    };
   }
 
   return jsonLd;
