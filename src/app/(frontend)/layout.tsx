@@ -12,7 +12,7 @@ import { CityProvider } from "@/contexts/city-context";
 import { SOCIAL_PROFILE_URLS } from "@/constants";
 import { getCities } from "@/lib/cities";
 import { FILTER_PENDING_SCRIPT } from "@/lib/filter-pending";
-import { SITE_URL } from "@/lib/site-config";
+import { FOUNDER, ORGANIZATION_ID, SITE_URL } from "@/lib/site-config";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -143,8 +143,15 @@ export default async function RootLayout({
           data={{
             "@context": "https://schema.org",
             "@type": "Organization",
+            "@id": ORGANIZATION_ID,
             name: "Klaps",
             url: SITE_URL,
+            founder: {
+              "@type": "Person",
+              "@id": FOUNDER.id,
+              name: FOUNDER.name,
+              url: FOUNDER.url,
+            },
             // Google requires an ImageObject (not a bare URL) for the
             // Organization logo rich result.
             logo: {

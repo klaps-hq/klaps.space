@@ -16,3 +16,22 @@ export const movieEntityId = (slug: string): string =>
   `${SITE_URL}/filmy/${slug}#film`;
 export const directorEntityId = (slug: string): string =>
   `${SITE_URL}/rezyserzy/${slug}#osoba`;
+
+export const ORGANIZATION_ID = `${SITE_URL}/#organizacja`;
+
+export const FOUNDER_PATH = "/o-tworcy";
+
+/**
+ * The person behind the site. Shown on the founder page and referenced as
+ * the Organization's founder in JSON-LD: a named, verifiable person behind
+ * the service is a trust signal, while blog posts stay credited to the
+ * editorial team because they are drafted with AI.
+ */
+export const FOUNDER = {
+  id: `${SITE_URL}${FOUNDER_PATH}#osoba`,
+  name: "Robert Siński",
+  jobTitle: "Twórca klaps.space",
+  url: `${SITE_URL}${FOUNDER_PATH}`,
+  image: `${SITE_URL}/images/autor/robert-sinski.jpg`,
+  sameAs: ["https://github.com/Biplo12", "https://www.robertsinski.dev/"],
+} as const;

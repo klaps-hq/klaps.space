@@ -74,6 +74,7 @@ const PRIMARY_SECTIONS = [
 
 const INFO_LINKS = [
   { label: "O projekcie", href: "/o-projekcie" },
+  { label: "O twórcy", href: "/o-tworcy" },
   { label: "FAQ", href: "/faq" },
   { label: "Kontakt", href: "/kontakt" },
   { label: "Dla kin", href: "/dla-kin" },
