@@ -12,6 +12,9 @@ import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
+import { getProgrammeProfile } from "@/lib/programme-profile";
+import ProgrammeProfile from "@/components/common/programme-profile";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import RepertoireGrid from "@/components/common/repertoire-grid";
 import Footer from "../../(home)/_components/footer";
 
@@ -101,9 +104,11 @@ const GenrePage = async ({ params }: GenrePageProps) => {
 
   // Nationwide, unfiltered repertoire - GenreRepertoire narrows it down
   // client-side (preferred city, dates, search).
-  const [allGenres, screenings] = await Promise.all([
+  const [allGenres, screenings, profile, indexable] = await Promise.all([
     getGenres(),
     getScreenings({ genreId: genre.id.toString() }),
+    getProgrammeProfile({ genreSlug: genre.slug }),
+    getIndexableSlugs(),
   ]);
 
   const relatedGenres = allGenres
@@ -187,6 +192,13 @@ const GenrePage = async ({ params }: GenrePageProps) => {
           }
         />
       </RepertoireSection>
+
+      <ProgrammeProfile
+        heading={<>{genre.name} w&nbsp;kinach studyjnych w&nbsp;liczbach</>}
+        profile={profile}
+        subject={{ kind: "genre", genreName: genre.name }}
+        indexable={indexable}
+      />
 
       {relatedGenres.length > 0 && (
         <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
