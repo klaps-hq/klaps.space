@@ -1,15 +1,28 @@
 import { apiFetch } from "./client";
 import { getScreenings } from "./screenings";
 import { ISitemapResponse } from "@/interfaces/ISitemap";
+import { MERGED_CINEMA_SLUGS, MERGED_CITY_SLUGS } from "./merged-slugs";
 
 /**
  * Lightweight payload for sitemap.xml: slugs + updatedAt for every
  * indexable resource in a single request.
  */
-export const getSitemapEntries = (): Promise<ISitemapResponse> =>
-  apiFetch<ISitemapResponse>("sitemap", {
+export const getSitemapEntries = async (): Promise<ISitemapResponse> => {
+  const entries = await apiFetch<ISitemapResponse>("sitemap", {
     next: { revalidate: 3600 },
   });
+  // Merged duplicates 301 to their canonical page, so they are neither
+  // advertised in the sitemap nor linked from the hubs.
+  return {
+    ...entries,
+    cinemas: entries.cinemas.filter(
+      (entry) => !(entry.slug in MERGED_CINEMA_SLUGS)
+    ),
+    cities: entries.cities.filter(
+      (entry) => !(entry.slug in MERGED_CITY_SLUGS)
+    ),
+  };
+};
 
 // One sub-sitemap per resource type. Shared between the generateSitemaps
 // metadata route (which serves each sub-sitemap at /sitemap/[id].xml) and

@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 import { withPayload } from "@payloadcms/next/withPayload";
+import {
+  MERGED_CINEMA_SLUGS,
+  MERGED_CITY_SLUGS,
+} from "./src/app/(frontend)/lib/merged-slugs";
 
 const PRODUCTION_URL = "https://klaps.space";
 // Mirrors the guard in robots.ts: only the production host gets the policy.
@@ -58,6 +62,17 @@ const nextConfig: NextConfig = {
         destination: "/filmy/imie-rozy-1986",
         permanent: true,
       },
+      // Duplicate venues and cities merged into one page (see merged-slugs).
+      ...Object.entries(MERGED_CINEMA_SLUGS).map(([from, to]) => ({
+        source: `/kina/${from}`,
+        destination: `/kina/${to}`,
+        permanent: true,
+      })),
+      ...Object.entries(MERGED_CITY_SLUGS).map(([from, to]) => ({
+        source: `/miasta/${from}`,
+        destination: `/miasta/${to}`,
+        permanent: true,
+      })),
       // Short link for the Instagram bio: Instagram shows the first link's
       // address on the profile, so the UTM-tagged URL lives here instead.
       // Temporary, so the target (or its tags) can change without browsers
