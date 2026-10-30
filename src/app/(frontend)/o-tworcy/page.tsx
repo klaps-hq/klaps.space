@@ -39,15 +39,15 @@ const PROFILE_LINKS: ProfileLink[] = [
 const CONTENT_SOURCES: ContentSource[] = [
   {
     title: "Repertuar",
-    body: "Zbiera go automat, który codziennie sprawdza repertuar ponad 560 kin i wyłuskuje z niego seanse specjalne: klasykę, retrospektywy, pokazy DKF i maratony.",
+    body: "Program kin pobieramy automatycznie i wybieramy z niego seanse specjalne: klasykę, retrospektywy, pokazy klubów filmowych i maratony. Zwykłe premiery zostawiamy multipleksom.",
   },
   {
     title: "Opisy kin",
-    body: "Powstają na podstawie stron samych kin, instytucji, które je prowadzą, i innych sprawdzalnych źródeł. Gdy informacji brakuje, opis zostaje krótki, zamiast zgadywać.",
+    body: "Opisy, liczbę sal, kontakt i dostępność sprawdzamy na stronie kina, u instytucji, która je prowadzi, albo w innych publicznych źródłach. Czego nie da się potwierdzić, tego nie piszemy.",
   },
   {
     title: "Blog",
-    body: "Wpisy przygotowuje redakcja klaps.space z pomocą AI, na podstawie danych z serwisu i sprawdzonych źródeł. Dlatego podpisujemy je jako redakcja, a nie jako autor.",
+    body: "Teksty powstają z pomocą AI, na podstawie danych z serwisu i sprawdzonych źródeł, a przed publikacją przechodzą redakcję. Dlatego podpisuje je klaps.space, a nie konkretna osoba.",
   },
 ];
 
