@@ -13,6 +13,7 @@ import PageHeading, {
 import SiteHeader from "@/components/common/site-header";
 import SiteSearch from "@/components/common/site-search";
 import EmptyState from "@/components/common/empty-state";
+import UncrawledLink from "@/components/common/uncrawled-link";
 import Footer from "../(home)/_components/footer";
 
 export const revalidate = 300;
@@ -63,8 +64,9 @@ const CitiesPage = async () => {
     getCities(),
     getIndexableSlugs(),
   ]);
-  // Cities whose page is noindex (no screenings for months) stay listed as
-  // plain text, so the hub spends its links on pages Google can index.
+  // Cities whose page is noindex (no screenings for months) stay clickable
+  // through UncrawledLink, which has no href, so the hub spends its crawlable
+  // links on indexable pages.
   const isCityLinked = (slug: string): boolean =>
     !indexable || indexable.cities.has(slug);
   const voivodeshipGroups = groupByVoivodeship(cities);
@@ -132,9 +134,13 @@ const CitiesPage = async () => {
                           {city.name}
                         </Link>
                       ) : (
-                        <span className="text-base md:text-lg text-white/35 block truncate">
+                        <UncrawledLink
+                          basePath="/miasta"
+                          slug={city.slug}
+                          className="text-base md:text-lg text-white/35 hover:text-white transition-colors block truncate"
+                        >
                           {city.name}
-                        </span>
+                        </UncrawledLink>
                       )}
                     </li>
                   ))}
