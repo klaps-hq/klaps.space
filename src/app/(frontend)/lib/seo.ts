@@ -159,10 +159,12 @@ export const cinemaWithCity = (cinemaName: string, cityName: string): string =>
 
 /**
  * Cinema page <title>, before the " - Klaps" template suffix.
- * Independent venues: "Kino Pod Baranami Kraków: repertuar i godziny
- * seansów". Chain venues keep the special-screenings angle: this site lists
- * only the special programme of a multiplex, so promising its full
- * repertoire would match the query and then disappoint the visitor.
+ * Independent venues: "Kino Pod Baranami Kraków: repertuar i seanse
+ * specjalne". "Godziny seansów" was dropped (content audit, October 2026):
+ * ~40% of cinema pages had nothing upcoming at any given time, so the title
+ * promised a timetable the page could not show. Chain venues keep the
+ * special-screenings angle: this site lists only the special programme of a
+ * multiplex, so promising its full repertoire would disappoint the visitor.
  * Degrades to a shorter suffix instead of letting the SERP cut it.
  */
 export const cinemaPageTitle = (
@@ -173,9 +175,29 @@ export const cinemaPageTitle = (
   const subject = cinemaWithCity(cinemaName, cityName);
   const [full, short] = isChain
     ? ["seanse specjalne i klasyka", "seanse specjalne"]
-    : ["repertuar i godziny seansów", "repertuar"];
+    : ["repertuar i seanse specjalne", "repertuar"];
   const fullTitle = `${subject}: ${full}`;
   return fullTitle.length <= MAX_SERP_TITLE_LENGTH
     ? fullTitle
     : `${subject}: ${short}`;
+};
+
+// The layout template appends " - Klaps" (8 chars) to every page title.
+const TEMPLATE_SUFFIX_LENGTH = 8;
+
+/**
+ * Movie page <title>, before the template suffix. "gdzie i kiedy" mirrors
+ * the dominant query pattern ("[tytuł] kiedy w kinie"), but with the year
+ * and the suffix it ran past ~60 chars on half the pages (content audit,
+ * October 2026), so it degrades to shorter forms instead of being cut.
+ */
+export const moviePageTitle = (title: string, year: number): string => {
+  const subject = `${title} (${year})`;
+  const budget = MAX_SERP_TITLE_LENGTH - TEMPLATE_SUFFIX_LENGTH;
+  const candidates = [
+    `${subject} - seanse: gdzie i kiedy w kinie`,
+    `${subject} - seanse w kinach`,
+    `${subject} w kinie`,
+  ];
+  return candidates.find((text) => text.length <= budget) ?? subject;
 };

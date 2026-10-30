@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { getCinemas } from "@/lib/cinemas";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
+import { isChainCinema } from "@/lib/cinema-chains";
 import { ICinemaGroup } from "@/interfaces/ICinema";
 import { SITE_URL } from "@/lib/site-config";
 import JsonLd from "@/components/common/json-ld";
@@ -91,6 +92,14 @@ const CinemasPage = async () => {
     0
   );
   const totalCities = sortedGroups.length;
+  // The lead used to call all ~570 venues "kina" under a "kina studyjne"
+  // heading; it now names the multiplexes and open-air spots apart.
+  const allCinemas = sortedGroups.flatMap((g) => g.cinemas);
+  const chainCount = allCinemas.filter((c) => isChainCinema(c.name)).length;
+  const openAirCount = allCinemas.filter(
+    (c) => !isChainCinema(c.name) && c.isOpenAir
+  ).length;
+  const independentCount = totalCinemas - chainCount - openAirCount;
 
   return (
     <main className="bg-black text-white min-h-screen">
@@ -111,12 +120,16 @@ const CinemasPage = async () => {
           </PageHeadingMuted>
         </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
-          Pełna lista {totalCinemas}{" "}
-          {formatPlural(totalCinemas, ["kina", "kin", "kin"])}{" "}
-          w&nbsp;{totalCities}{" "}
+          Pełna lista {totalCinemas} miejsc w&nbsp;{totalCities}{" "}
           {formatPlural(totalCities, ["mieście", "miastach", "miastach"])}{" "}
-          w&nbsp;Polsce, w&nbsp;których odbywają się seanse specjalne.
-          Przede wszystkim niezależne miejsca z&nbsp;autorskim repertuarem.
+          w&nbsp;Polsce, w&nbsp;których odbywają się seanse specjalne:{" "}
+          {independentCount}{" "}
+          {formatPlural(independentCount, ["kino studyjne", "kina studyjne", "kin studyjnych"])}
+          , {openAirCount}{" "}
+          {formatPlural(openAirCount, ["miejsce", "miejsca", "miejsc"])}{" "}
+          kina plenerowego i&nbsp;{chainCount}{" "}
+          {formatPlural(chainCount, ["kino sieciowe", "kina sieciowe", "kin sieciowych"])}
+          .
           Klasyka, retrospektywy, pokazy specjalne i&nbsp;cykle tematyczne.
           Zobacz też{" "}
           <Link

@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { getGenres } from "@/lib/genres";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
-import { getDirectors, DIRECTOR_INDEX_THRESHOLD } from "@/lib/directors";
+import { getDirectors, isDirectorIndexable } from "@/lib/directors";
 import { getPublishedPosts } from "@/lib/posts";
 import { IGenre } from "@/interfaces/IMovies";
 import { IDirector } from "@/interfaces/IDirectors";
@@ -144,7 +144,7 @@ const SiteMapPage = async () => {
   // just point at dead ends.
   const indexableDirectors = [...directorsResult.data]
     .filter(
-      (director) => director.upcomingScreeningsCount >= DIRECTOR_INDEX_THRESHOLD
+      (director) => isDirectorIndexable(director)
     )
     .sort((a, b) => a.name.localeCompare(b.name, "pl"));
 

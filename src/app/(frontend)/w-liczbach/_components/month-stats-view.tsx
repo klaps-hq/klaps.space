@@ -3,16 +3,21 @@ import Link from "next/link";
 import { IMonthStats, IMonthStatsMovie } from "@/interfaces/IMonthStats";
 import {
   archiveMonths,
+  FIRST_STATS_MONTH,
   formatCount,
+  getMonthStats,
   inMonth,
+  monthComparison,
   monthName,
   monthPath,
   monthStatsSummary,
   screeningsLabel,
+  shiftMonth,
 } from "@/lib/month-stats";
+import { CLASSIC_MIN_AGE_YEARS } from "@/lib/landing-pages";
 import { getScreenings } from "@/lib/screenings";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
-import { SITE_NAME, SITE_URL } from "@/lib/site-config";
+import { ORGANIZATION_ID, SITE_NAME, SITE_URL } from "@/lib/site-config";
 import { formatPlDate } from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
@@ -138,13 +143,28 @@ const buildDatasetJsonLd = (stats: IMonthStats, ongoing: boolean) => ({
   "@context": "https://schema.org",
   "@type": "Dataset",
   name: `Klaps w liczbach: ${monthName(stats.month)}`,
-  description: `${monthStatsSummary(stats, ongoing)} Liczba seansów filmów nakręconych przed 2000 rokiem w polskich kinach, z podziałem na miasta i kina.`,
+  description: `${monthStatsSummary(stats, ongoing)} Liczba seansów filmów sprzed co najmniej ${CLASSIC_MIN_AGE_YEARS} lat w polskich kinach, z podziałem na miasta i kina.`,
   url: `${SITE_URL}${ongoing ? "/w-liczbach" : monthPath(stats.month)}`,
+  // Stable id per month, also for the in-progress month on /w-liczbach, so
+  // the same dataset is not described twice under two URLs.
+  "@id": `${SITE_URL}${monthPath(stats.month)}#dataset`,
   temporalCoverage: stats.month,
   spatialCoverage: { "@type": "Country", name: "Polska" },
   inLanguage: "pl",
   isAccessibleForFree: true,
-  creator: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+  variableMeasured: [
+    "Liczba seansów klasyki",
+    "Liczba kin z seansami klasyki",
+    "Liczba miast z seansami klasyki",
+    "Najczęściej grane filmy",
+    "Ranking miast według liczby seansów klasyki",
+  ],
+  creator: {
+    "@type": "Organization",
+    "@id": ORGANIZATION_ID,
+    name: SITE_NAME,
+    url: SITE_URL,
+  },
 });
 
 const MonthStatsView = async ({
@@ -158,6 +178,13 @@ const MonthStatsView = async ({
     : { movies: null, cinemas: null, cities: null };
   const archive = archiveMonths().filter((m) => m !== month);
   const topCityCount = stats?.byCity[0]?.count ?? 0;
+  const previousMonth = shiftMonth(month, -1);
+  // A failed lookup only drops the comparison, never the page.
+  const previous =
+    hasData && previousMonth >= FIRST_STATS_MONTH
+      ? await getMonthStats(previousMonth).catch(() => null)
+      : null;
+  const comparison = hasData ? monthComparison(stats, previous, ongoing) : [];
 
   return (
     <main className="bg-black text-white min-h-screen">
@@ -232,6 +259,23 @@ const MonthStatsView = async ({
               ))}
             </dl>
           </section>
+
+          {comparison.length > 0 && (
+            <Section
+              title="Miesiąc do miesiąca"
+              note={
+                ongoing
+                  ? "Miesiąc w toku porównujemy z pełnym poprzednim, więc różnice jeszcze się zmienią."
+                  : undefined
+              }
+            >
+              <ul className="flex flex-col gap-3 max-w-[64ch] text-lg md:text-xl text-white/80 leading-snug">
+                {comparison.map((sentence) => (
+                  <li key={sentence}>{sentence}</li>
+                ))}
+              </ul>
+            </Section>
+          )}
 
           {stats.topMovie && (
             <Section title="Film miesiąca">
@@ -394,7 +438,8 @@ const MonthStatsView = async ({
       <Section title="Jak liczymy">
         <div className="flex flex-col gap-4 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
           <p>
-            Klasyka to filmy nakręcone przed 2000 rokiem. Liczymy każdy seans
+            Klasyka to filmy sprzed co najmniej {CLASSIC_MIN_AGE_YEARS} lat,
+            ta sama definicja co w&nbsp;dziale Klasyka w&nbsp;kinach. Liczymy każdy seans
             takiego filmu w&nbsp;repertuarach kin, które śledzi Klaps, od
             pierwszego do ostatniego dnia miesiąca. Miasto i&nbsp;kino trafiają
             do zestawienia, jeśli pokazały co najmniej jeden taki seans.

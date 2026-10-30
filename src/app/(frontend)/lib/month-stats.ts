@@ -123,6 +123,65 @@ const citiesLocative = (count: number): string =>
 const capitalize = (text: string): string =>
   text.charAt(0).toUpperCase() + text.slice(1);
 
+/** "o 12%" for a change against the previous month; null when not comparable. */
+const percentChange = (current: number, previous: number): number | null =>
+  previous > 0 ? Math.round(((current - previous) / previous) * 100) : null;
+
+/**
+ * Month-over-month comparison as quotable sentences: total change, the
+ * fastest-growing city in the top list and whether the top film changed.
+ * Only facts both months support; an empty list when the previous month has
+ * no data. The month in progress compares partial numbers, so callers flag
+ * it as such.
+ */
+export const monthComparison = (
+  stats: IMonthStats,
+  previous: IMonthStats | null,
+  ongoing = false
+): string[] => {
+  if (!previous || previous.screenings === 0) return [];
+  const sentences: string[] = [];
+  const prevLabel = inMonth(previous.month);
+
+  // A month in progress against a finished one always looks like a drop,
+  // and that percentage gets quoted without the caveat (content audit #4),
+  // so the totals comparison waits for the month to end.
+  const change = ongoing
+    ? null
+    : percentChange(stats.screenings, previous.screenings);
+  if (change !== null && change !== 0) {
+    sentences.push(
+      `Seansów klasyki było o ${Math.abs(change)}% ${change > 0 ? "więcej" : "mniej"} niż ${prevLabel} (${formatCount(previous.screenings)}).`
+    );
+  } else if (change === 0) {
+    sentences.push(`Seansów klasyki było tyle samo co ${prevLabel}.`);
+  }
+
+  const prevCities = new Map(previous.byCity.map((city) => [city.slug, city.count]));
+  const risers = stats.byCity
+    .map((city) => ({ city, before: prevCities.get(city.slug) ?? 0 }))
+    .filter(({ city, before }) => city.count - before >= 5)
+    .sort((a, b) => b.city.count - b.before - (a.city.count - a.before));
+  const riser = risers[0];
+  if (riser) {
+    // City names arrive in the nominative, so they only follow a colon.
+    sentences.push(
+      riser.before === 0
+        ? `Nowe miasto w czołówce: ${riser.city.name}, ${screeningsLabel(riser.city.count)}.`
+        : `Największy przyrost: ${riser.city.name}, z ${formatCount(riser.before)} do ${screeningsLabel(riser.city.count)}.`
+    );
+  }
+
+  if (stats.topMovie && previous.topMovie) {
+    sentences.push(
+      stats.topMovie.movie.id === previous.topMovie.movie.id
+        ? `Na czele drugi miesiąc z rzędu: „${stats.topMovie.movie.title}”.`
+        : `${capitalize(prevLabel)} na czele był „${previous.topMovie.movie.title}”.`
+    );
+  }
+  return sentences;
+};
+
 /**
  * One-sentence summary shared by the meta description, the OG subtitle and
  * the lead, so every surface quotes the same numbers. Built verb-free

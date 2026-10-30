@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -27,7 +26,6 @@ import {
   parsePageParam,
 } from "@/lib/seo";
 import ScreeningsPageSection from "./_components/screenings-page-section";
-import ScreeningsPageLoader from "./_components/screenings-page-loader";
 import ScreeningTypesSection from "./_components/screening-types-section";
 
 export const revalidate = 300;
@@ -263,10 +261,9 @@ const buildScreeningsJsonLd = (
 const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
   const params = await searchParams;
 
-  // The range guard has to run here, not in ScreeningsListing. notFound()
-  // inside the Suspense boundary below fires after the shell has been
-  // flushed, so the status line is already 200 and the visitor gets the
-  // not-found body under a success code - a soft 404.
+  // The range guard runs here, before any markup: when the listing still
+  // sat in a Suspense boundary, notFound() inside it fired after the shell
+  // had been flushed, so the status line was already 200 (a soft 404).
   //
   // Only the unfiltered listing is indexable, and generateMetadata already
   // awaits this exact call, so fetch memoization makes the guard free here.
@@ -331,9 +328,12 @@ const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
         Najbliższe seanse w&nbsp;kinach studyjnych
       </h2>
 
-      <Suspense fallback={<ScreeningsPageLoader />}>
-        <ScreeningsListing params={params} />
-      </Suspense>
+      {/* No Suspense boundary: a streamed boundary put the cards in a
+          hidden <div> after </main>, leaving "Ładowanie seansów…" inside
+          <main> for crawlers that do not run JS (GPTBot, ClaudeBot,
+          PerplexityBot). The listing data is the same cached call the page
+          already awaits for pagination, so blocking costs little. */}
+      <ScreeningsListing params={params} />
 
       <ScreeningTypesSection />
 

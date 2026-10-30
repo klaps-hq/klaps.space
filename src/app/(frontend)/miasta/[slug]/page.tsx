@@ -96,6 +96,13 @@ const CinemaCards: React.FC<CinemaCardsProps> = ({ cinemas, isLinked }) => (
   </div>
 );
 
+// Freshness label cut-off for the "Repertuar zaktualizowano" note.
+const FRESH_UPDATE_DAYS = 30;
+
+const isRecentUpdate = (date: Date | null): date is Date =>
+  date !== null &&
+  Date.now() - date.getTime() <= FRESH_UPDATE_DAYS * 24 * 60 * 60 * 1000;
+
 // Roughly what a SERP renders before truncating.
 const MAX_TITLE_LENGTH = 60;
 // Google truncates snippets past roughly this length.
@@ -127,7 +134,7 @@ export const generateMetadata = async ({
   params,
 }: CityPageProps): Promise<Metadata> => {
   const { slug } = await params;
-  const { city, screenings: rawScreenings } = await getCityBySlug(slug);
+  const { city } = await getCityBySlug(slug);
 
   // null means the call failed, which is not the same as "no cinemas": a
   // swallowed error used to noindex the page and ISR cached that verdict.
@@ -136,9 +143,10 @@ export const generateMetadata = async ({
   }).catch(() => null);
   const cinemasCount =
     cinemasResponse?.data.flatMap((g) => g.cinemas).length ?? 0;
-  const screeningGroups = Array.isArray(rawScreenings)
-    ? rawScreenings
-    : [...(rawScreenings?.data ?? [])];
+  // The body's own call (upcoming only, started showtimes dropped), so the
+  // snippet counts what the page lists. The raw city payload still held
+  // past showtimes: Toruń's meta said 97 upcoming, its FAQ 89 (audit #4).
+  const screeningGroups = await getScreenings({ cityId: city.id.toString() });
   const screeningsCount = screeningGroups.reduce(
     (sum, group) => sum + group.screenings.length,
     0
@@ -155,10 +163,18 @@ export const generateMetadata = async ({
   // Long city names ("Międzyrzeczu Podlaskim") push the full form past the
   // ~60 chars a SERP renders, so the suffix degrades instead of being
   // truncated mid-phrase. The target keyword stays first either way.
-  const titleBase = `Kina studyjne ${prep} ${city.nameDeclinated}`;
+  const allVenues = cinemasResponse?.data.flatMap((g) => g.cinemas) ?? [];
+  // A city with only chain multiplexes (Iława, content audit #4) has no
+  // "kina studyjne"; the title says what the page actually lists.
+  const hasIndependent = splitByChain(allVenues).independent.length > 0;
+  const titleBase =
+    hasIndependent || allVenues.length === 0
+      ? `Kina studyjne ${prep} ${city.nameDeclinated}`
+      : `Kina ${prep} ${city.nameDeclinated}`;
   // Colon form shared with the cinema titles ("[kino] [miasto]: repertuar
-  // i godziny seansów"), so the keyword phrase reads as one unit.
-  const titleFull = `${titleBase}: repertuar i godziny seansów`;
+  // i seanse specjalne"), so the keyword phrase reads as one unit. No
+  // "godziny seansów": many cities have nothing upcoming at a given time.
+  const titleFull = `${titleBase}: repertuar i seanse specjalne`;
   const title =
     titleFull.length <= MAX_TITLE_LENGTH
       ? titleFull
@@ -175,10 +191,12 @@ export const generateMetadata = async ({
   // Świętokrzyskim") pushed the full form past the snippet limit on ~45
   // pages (Ahrefs, October 2026), so Google cut it mid-sentence. The first
   // candidate that fits wins.
-  const { independent, chain } = splitByChain(
-    cinemasResponse?.data.flatMap((g) => g.cinemas) ?? []
-  );
-  const venueNames = [...independent, ...chain].map((c) => c.name);
+  const { independent, chain } = splitByChain(allVenues);
+  // Year-round venues lead: a seasonal open-air series named first ("Kino
+  // Letnie") misdescribed the city's arthouse scene in the snippet.
+  const yearRound = independent.filter((c) => !c.isOpenAir);
+  const openAir = independent.filter((c) => c.isOpenAir);
+  const venueNames = [...yearRound, ...chain, ...openAir].map((c) => c.name);
   const venues =
     venueNames.length > 2
       ? `${venueNames.slice(0, 2).join(", ")} i inne kina`
@@ -228,8 +246,11 @@ export const generateMetadata = async ({
           () => null
         )
       : null;
+  // A city with only chain multiplexes has no "kina studyjne" to describe;
+  // the API leaves such cities out of the sitemap as well.
   const noindex =
     (cinemasResponse !== null && cinemasCount === 0) ||
+    (cinemasResponse !== null && independent.length === 0) ||
     recentScreenings?.length === 0;
 
   return {
@@ -290,6 +311,11 @@ const CityPage = async ({ params }: CityPageProps) => {
   const cityForCopy = city.nameDeclinated ?? city.name;
   const { independent: independentCinemas, chain: chainCinemas } =
     splitByChain(cinemas);
+  // Seasonal open-air series get their own list: mixed in, ~19 summer
+  // screening spots outnumbered Warsaw's year-round arthouse cinemas under
+  // the "kina studyjne" heading (content audit, October 2026).
+  const yearRoundCinemas = independentCinemas.filter((c) => !c.isOpenAir);
+  const openAirCinemas = independentCinemas.filter((c) => c.isOpenAir);
   // Open-air series have no rooms; the comparison covers year-round venues.
   const venues = summarizeCityVenues(
     independentCinemas.filter((cinema) => !cinema.isOpenAir)
@@ -320,7 +346,10 @@ const CityPage = async ({ params }: CityPageProps) => {
             the correct w/we preposition. Multiplexes in the list below sit
             under their own heading, so this one stays accurate. */}
         <PageHeading variant="detail" className="max-w-[20ch]">
-          Kina studyjne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+          {independentCinemas.length > 0 || cinemasCount === 0
+            ? "Kina studyjne"
+            : "Kina"}{" "}
+          {wPrep(cityForCopy)}&nbsp;{cityForCopy}
         </PageHeading>
         {city.description ? (
           <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
@@ -341,10 +370,13 @@ const CityPage = async ({ params }: CityPageProps) => {
             </p>
           )
         )}
-        {cinemasCount > 0 && (
-          // Visible freshness signal: newest screening updatedAt for this city.
+        {cinemasCount > 0 && isRecentUpdate(lastUpdated) && (
+          // Visible freshness signal: newest screening updatedAt for this
+          // city. Hidden when unknown or stale: the old fallback printed
+          // today's date for a missing value, and a weeks-old date on a
+          // repertoire page reads as abandoned (content audit #4).
           <p className="mt-5 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
-            Repertuar zaktualizowano: {formatPlDate(lastUpdated ?? new Date())}
+            Repertuar zaktualizowano: {formatPlDate(lastUpdated)}
           </p>
         )}
       </header>
@@ -355,13 +387,25 @@ const CityPage = async ({ params }: CityPageProps) => {
               search for ("kina studyjne w [miasto]"); chain venues keep
               their own heading so neither label misdescribes the rows
               underneath it. */}
-          {independentCinemas.length > 0 && (
+          {yearRoundCinemas.length > 0 && (
             <div>
               <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
                 Kina studyjne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
               </h2>
               <CinemaCards
-                cinemas={independentCinemas}
+                cinemas={yearRoundCinemas}
+                isLinked={isCinemaLinked}
+              />
+            </div>
+          )}
+          {openAirCinemas.length > 0 && (
+            <div>
+              <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
+                Kino plenerowe i&nbsp;letnie {wPrep(cityForCopy)}&nbsp;
+                {cityForCopy}
+              </h2>
+              <CinemaCards
+                cinemas={openAirCinemas}
                 isLinked={isCinemaLinked}
               />
             </div>
@@ -486,7 +530,7 @@ const CityPage = async ({ params }: CityPageProps) => {
         heading={<>Pytania o&nbsp;kina {inPlace(cityForCopy)}</>}
         questions={buildCityFaq({
           cityLocative: cityForCopy,
-          independentNames: independentCinemas.map((c) => c.name),
+          independentNames: yearRoundCinemas.map((c) => c.name),
           chainNames: chainCinemas.map((c) => c.name),
           screenings,
           lastUpdated,

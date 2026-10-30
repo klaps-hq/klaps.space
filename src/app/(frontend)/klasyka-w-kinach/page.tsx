@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { getGenres } from "@/lib/genres";
 import { SITE_URL } from "@/lib/site-config";
 import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
-import { classicFallbackIntro } from "@/lib/listing-copy";
+import { classicFacts, classicFallbackIntro } from "@/lib/listing-copy";
 import {
   CLASSIC_MIN_AGE_YEARS,
   CLASSIC_PATH,
@@ -65,6 +65,7 @@ const ClassicPage = async () => {
   ]);
   const screenings = groups ?? [];
   const intro = storedIntro ?? classicFallbackIntro(null, screenings);
+  const facts = classicFacts(screenings);
 
   return (
     <main className="bg-black text-white min-h-screen">
@@ -79,7 +80,7 @@ const ClassicPage = async () => {
       <LandingHeader
         breadcrumbs={[{ name: "Klasyka w kinach", href: CLASSIC_PATH }]}
         title={<>Klasyka w&nbsp;kinach</>}
-        intro={intro}
+        intro={facts ? `${intro} ${facts}` : intro}
       />
 
       <LinkGrid
@@ -110,6 +111,13 @@ const ClassicPage = async () => {
           { href: "/gatunki", label: "Gatunki" },
           { href: "/rezyserzy", label: "Reżyserzy" },
           { href: OPEN_AIR_PATH, label: "Kino plenerowe" },
+          // The hub answers "where", the post answers "why"; linked both
+          // ways so the two stop competing for the same query.
+          {
+            href: "/blog/dlaczego-warto-ogladac-klasyke-kina-na-duzym-ekranie",
+            label: "Dlaczego klasyka na dużym ekranie",
+          },
+          { href: "/w-liczbach", label: "Klasyka w liczbach" },
         ]}
       />
 

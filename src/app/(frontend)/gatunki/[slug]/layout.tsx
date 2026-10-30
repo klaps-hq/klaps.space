@@ -22,16 +22,19 @@ const buildGenreJsonLd = (genre: IGenre, movies: readonly IMovieSummary[]) => ({
   ...(newestUpdatedAtIso(movies) && {
     dateModified: newestUpdatedAtIso(movies),
   }),
-  mainEntity: {
-    "@type": "ItemList",
-    numberOfItems: movies.length,
-    itemListElement: movies.map((movie, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      url: `${SITE_URL}/filmy/${movie.slug}`,
-      name: movie.title,
-    })),
-  },
+  // Omitted when nothing is upcoming: an empty list says nothing.
+  ...(movies.length > 0 && {
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: movies.length,
+      itemListElement: movies.map((movie, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${SITE_URL}/filmy/${movie.slug}`,
+        name: movie.title,
+      })),
+    },
+  }),
 });
 
 export default async function GenreLayout({

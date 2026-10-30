@@ -52,10 +52,13 @@ const profileAnswer = (profile: IProgrammeProfile | null | undefined): string | 
   if (!profile || !hasProfileContent(profile)) return null;
   const films = profile.topMovies.slice(0, 3).map((m) => m.title);
   if (films.length === 0) return null;
-  const played = films.length === 1 ? "grany był" : "grane były";
+  // Noun-led, so no verb has to agree with a title ("Auta" is plural,
+  // "grany był „Auta”" read as broken Polish; content audit #4).
+  const label =
+    films.length === 1 ? "najczęściej grany tytuł" : "najczęściej grane tytuły";
   const lead = profile.since
-    ? `${sinceMonth(profile.since).replace(/^o/, "O")} najczęściej ${played}`
-    : `Najczęściej ${played}`;
+    ? `${sinceMonth(profile.since).replace(/^o/, "O")} ${label}:`
+    : `${label.charAt(0).toUpperCase()}${label.slice(1)}:`;
   const parts = [`${lead} ${joinNames(quoted(films))}.`];
   if (profile.topGenres.length >= 2) {
     parts.push(

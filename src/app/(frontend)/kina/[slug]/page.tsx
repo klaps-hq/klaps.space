@@ -162,14 +162,14 @@ export const generateMetadata = async ({
   // The API leaves the same venues out of the sitemap. Only a confirmed
   // empty result counts, so an API failure never noindexes a page.
   const isChain = isChainCinema(cinema.name);
-  // Chain venues additionally need something upcoming: their recent history
-  // alone is not worth indexing. GSC, October 2026: chain pages drew ~80% of
-  // all impressions (people after the chain's own repertoire) and zero
-  // clicks, and they outnumber the arthouse pages this site is about. The
-  // API applies the same rule to the sitemap.
+  // Chain venues are never indexed. GSC, October 2026: chain pages drew
+  // ~87% of all impressions (people after the chain's own repertoire and
+  // tickets) and zero clicks, and even with only "upcoming" chains indexed
+  // they were a third of the cinema sitemap. The pages stay for visitors;
+  // the API leaves every chain venue out of the sitemap too.
   const noindex =
-    upcomingGroups?.length === 0 &&
-    (isChain || recentScreenings?.length === 0);
+    isChain ||
+    (upcomingGroups?.length === 0 && recentScreenings?.length === 0);
 
   // Locative city name ("w Krakowie", not "w Kraków") for natural phrasing.
   const cityName = cinema.city.nameDeclinated ?? cinema.city.name;

@@ -34,9 +34,17 @@ const buildDirectorJsonLd = (
     { updatedAt: director.updatedAt },
     ...movies,
   ]);
-  if (dateModified) jsonLd.dateModified = dateModified;
-
-  return jsonLd;
+  // dateModified is not a Person property: the page describing the person
+  // carries it, as a ProfilePage around the Person (content audit #5).
+  if (!dateModified) return jsonLd;
+  const { "@context": context, ...person } = jsonLd;
+  return {
+    "@context": context,
+    "@type": "ProfilePage",
+    url: `${SITE_URL}/rezyserzy/${director.slug}`,
+    dateModified,
+    mainEntity: person,
+  };
 };
 
 const buildFilmographyJsonLd = (

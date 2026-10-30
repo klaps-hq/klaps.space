@@ -5,11 +5,16 @@
 // "w Kinie Kijów"); any other name stays in the nominative after the noun.
 
 const KINO_TEATR = /^kino-teatr\s+/i;
+// "Kino Studyjne Iluzja": the adjective inflects too ("w Kinie Studyjnym
+// Iluzja", not "w Kinie Studyjne Iluzja"; content audit #4).
+const KINO_STUDYJNE = /^kino\s+studyjne\s+/i;
 const KINO = /^kino\s+/i;
 
 /** "kina Muranów", "Kina Pod Baranami", "Kina-Teatru Syrena". */
 export const cinemaGenitive = (name: string): string => {
   if (KINO_TEATR.test(name)) return name.replace(KINO_TEATR, "Kina-Teatru ");
+  if (KINO_STUDYJNE.test(name))
+    return name.replace(KINO_STUDYJNE, "Kina Studyjnego ");
   if (KINO.test(name)) return name.replace(KINO, "Kina ");
   return `kina ${name}`;
 };
@@ -17,6 +22,8 @@ export const cinemaGenitive = (name: string): string => {
 /** "kinie Muranów", "Kinie Kijów", "Kinie-Teatrze Syrena". */
 export const cinemaLocative = (name: string): string => {
   if (KINO_TEATR.test(name)) return name.replace(KINO_TEATR, "Kinie-Teatrze ");
+  if (KINO_STUDYJNE.test(name))
+    return name.replace(KINO_STUDYJNE, "Kinie Studyjnym ");
   if (KINO.test(name)) return name.replace(KINO, "Kinie ");
   return `kinie ${name}`;
 };

@@ -5,7 +5,7 @@ import {
   getDirectors,
   getMoviesByDirector,
   getScreeningsByDirector,
-  DIRECTOR_INDEX_THRESHOLD,
+  isDirectorIndexable,
 } from "@/lib/directors";
 import { getGenres } from "@/lib/genres";
 import { SITE_URL } from "@/lib/site-config";
@@ -40,7 +40,7 @@ export const generateStaticParams = async (): Promise<{ slug: string }[]> => {
   try {
     const { data } = await getDirectors();
     return data
-      .filter((d) => d.upcomingScreeningsCount >= DIRECTOR_INDEX_THRESHOLD)
+      .filter((d) => isDirectorIndexable(d))
       .map((d) => ({ slug: d.slug }));
   } catch {
     return [];
@@ -68,7 +68,7 @@ export const generateMetadata = async ({
   // grids - the repertoire and, below "Filmografia", the director's whole
   // back catalogue - so counting cards measures the catalogue, not what is
   // playing. Kieslowski renders 15 cards and has 1 film in the repertoire.
-  const noindex = director.upcomingScreeningsCount < DIRECTOR_INDEX_THRESHOLD;
+  const noindex = !isDirectorIndexable(director);
 
   return {
     title,
