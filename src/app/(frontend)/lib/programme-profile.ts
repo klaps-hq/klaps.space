@@ -9,6 +9,7 @@ export interface ProgrammeProfileScope {
   citySlug?: string;
   genreSlug?: string;
   directorSlug?: string;
+  movieSlug?: string;
 }
 
 /** Below this many past screenings the section is not rendered at all. */
@@ -33,6 +34,7 @@ export const getProgrammeProfile = async (
         citySlug: scope.citySlug ?? "",
         genreSlug: scope.genreSlug ?? "",
         directorSlug: scope.directorSlug ?? "",
+        movieSlug: scope.movieSlug ?? "",
       },
     });
   } catch (error) {
@@ -107,7 +109,8 @@ export type ProfileSubject =
   | { kind: "cinema" }
   | { kind: "city"; cityLocative: string }
   | { kind: "genre"; genreName: string }
-  | { kind: "director"; directorName: string };
+  | { kind: "director"; directorName: string }
+  | { kind: "movie" };
 
 /**
  * Plain-language facts for the "w liczbach" section, built from the
@@ -150,6 +153,12 @@ export const buildProfileSentences = (
         `${since}w polskich kinach ${happened} z gatunku ${lower(subject.genreName)}: ${films} w ${venues}${cities}.`
       )
     );
+  } else if (subject.kind === "movie") {
+    sentences.push(
+      capitalize(
+        `${since}film pokazano w polskich kinach jako seans specjalny łącznie ${total} ${pluralPl(total, "raz", "razy", "razy")}, w ${venues}${cities}.`
+      )
+    );
   } else {
     // No director name here: a genitive form ("filmów Kieślowskiego") would
     // need declension data the API does not have.
@@ -170,7 +179,9 @@ export const buildProfileSentences = (
     );
   }
   if (
-    (subject.kind === "genre" || subject.kind === "director") &&
+    (subject.kind === "genre" ||
+      subject.kind === "director" ||
+      subject.kind === "movie") &&
     profile.topCities.length > 1
   ) {
     sentences.push(
@@ -178,7 +189,11 @@ export const buildProfileSentences = (
     );
   }
 
-  if (subject.kind !== "director" && profile.topMovies.length > 0) {
+  if (
+    subject.kind !== "director" &&
+    subject.kind !== "movie" &&
+    profile.topMovies.length > 0
+  ) {
     const [top] = profile.topMovies;
     if (top.count > 1) {
       sentences.push(
