@@ -40,7 +40,7 @@ import { buildCityFaq } from "@/lib/listing-faq";
 import Footer from "../../(home)/_components/footer";
 import { summarizeCityVenues } from "@/lib/city-venues";
 import CityVenues from "./_components/city-venues";
-import CityGuide from "./_components/city-guide";
+import GuideSection from "@/components/common/guide-section";
 
 interface CinemaCardsProps {
   cinemas: { id: number; slug: string; name: string; street: string | null }[];
@@ -453,7 +453,7 @@ const CityPage = async ({ params }: CityPageProps) => {
         isLinked={isCinemaLinked}
       />
 
-      <CityGuide
+      <GuideSection
         heading={
           <>
             Kina {inPlace(cityForCopy)}: przewodnik
