@@ -1,5 +1,6 @@
 import { IRecentScreening, IScreeningGroup } from "@/interfaces/IScreenings";
 import { IProgrammeProfile } from "@/interfaces/IProgrammeProfile";
+import { ICinemaDetails } from "@/interfaces/ICinema";
 import { formatPlDate, inPlace, pluralPl } from "./seo";
 import { hasProfileContent, sinceMonth } from "./programme-profile";
 
@@ -182,7 +183,88 @@ interface CinemaFaqInput {
   recent: IRecentScreening[];
   siblingNames: string[];
   profile?: IProgrammeProfile | null;
+  /** Researched venue details; absent on older API responses. */
+  details?: ICinemaDetails;
 }
+
+const seatsPl = (seats: number): string =>
+  `${seats} ${pluralPl(seats, "miejsce", "miejsca", "miejsc")}`;
+
+/** Venue facts (rooms, booking, accessibility, operator) as FAQ entries. */
+const cinemaDetailsFaq = (
+  cinemaName: string,
+  details: ICinemaDetails | undefined
+): FaqItem[] => {
+  if (!details) return [];
+  const questions: FaqItem[] = [];
+  const { rooms, phone, bookingUrl, repertoireUrl, accessibility, operator } =
+    details;
+  const screens = details.screens ?? (rooms.length || null);
+
+  if (screens !== null) {
+    const known = rooms.filter((room) => room.seats !== null);
+    const total =
+      known.length === rooms.length && rooms.length > 0
+        ? known.reduce((sum, room) => sum + (room.seats ?? 0), 0)
+        : null;
+    const largest = [...known].sort((a, b) => (b.seats ?? 0) - (a.seats ?? 0))[0];
+    const parts = [
+      `${cinemaName} ma ${screens} ${pluralPl(screens, "salę", "sale", "sal")}`,
+      total !== null && screens > 1 ? `, łącznie ${seatsPl(total)}` : "",
+      total !== null && screens === 1 ? ` na ${seatsPl(total)}` : "",
+      ".",
+      largest && total !== null && screens > 1
+        ? ` Największa to ${largest.name} (${seatsPl(largest.seats ?? 0)}).`
+        : "",
+    ];
+    questions.push({
+      q: `Ile sal ma ${cinemaName}?`,
+      a: parts.join(""),
+    });
+  }
+
+  if (bookingUrl || phone) {
+    const ways = [
+      bookingUrl ? "online na stronie kina" : null,
+      phone ? `telefonicznie pod numerem ${phone}` : null,
+    ].filter(Boolean) as string[];
+    questions.push({
+      q: `${cinemaName}: jak zarezerwować miejsce na seans?`,
+      a: `Miejsca można zarezerwować ${ways.join(" lub ")}.${
+        repertoireUrl ? " Aktualne godziny seansów są też na stronie kina." : ""
+      }`,
+    });
+  }
+
+  if (accessibility) {
+    const facts = [
+      accessibility.wheelchair === true && "kino jest dostępne dla osób na wózkach",
+      accessibility.wheelchair === false && "kino nie jest przystosowane dla osób na wózkach",
+      accessibility.hearingLoop === true && "w kinie jest pętla indukcyjna",
+    ].filter(Boolean) as string[];
+    const lead = facts.length
+      ? `${facts[0][0].toUpperCase()}${facts.join(", ").slice(1)}.`
+      : "";
+    const answer = [lead, accessibility.note].filter(Boolean).join(" ");
+    if (answer) {
+      questions.push({
+        // Venue names vary in gender ("Muranów", "Kino Wisła"), so the
+        // question avoids agreeing an adjective with the name.
+        q: `${cinemaName}: czy kino jest dostępne dla osób z niepełnosprawnościami?`,
+        a: answer,
+      });
+    }
+  }
+
+  if (operator) {
+    questions.push({
+      q: `Kto prowadzi ${cinemaName}?`,
+      a: `Kino prowadzi ${operator.name}.`,
+    });
+  }
+
+  return questions;
+};
 
 // Questions keep the venue name in the nominative ("Co gra teraz Kino
 // Pod Baranami?"): API names arrive in the nominative and many already
@@ -196,6 +278,7 @@ export const buildCinemaFaq = ({
   recent,
   siblingNames,
   profile,
+  details,
 }: CinemaFaqInput): FaqItem[] => {
   const place = inPlace(cityLocative);
   const questions: FaqItem[] = [];
@@ -254,6 +337,8 @@ export const buildCinemaFaq = ({
       a: cinemaHistory,
     });
   }
+
+  questions.push(...cinemaDetailsFaq(cinemaName, details));
 
   // Streets arrive in the nominative, often without "ul." ("Rynek Główny
   // 27"), so "przy {street}" would not decline; a plain address line does.

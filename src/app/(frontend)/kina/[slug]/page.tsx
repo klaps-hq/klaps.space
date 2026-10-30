@@ -484,6 +484,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
           recent: recentScreenings,
           siblingNames: siblingCinemas.map((item) => item.name),
           profile,
+          details: cinema.details,
         })}
       />
     </>
