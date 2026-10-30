@@ -12,6 +12,7 @@ import PageHeading, {
 import SiteHeader from "@/components/common/site-header";
 import SiteSearch from "@/components/common/site-search";
 import EmptyState from "@/components/common/empty-state";
+import UncrawledLink from "@/components/common/uncrawled-link";
 import Footer from "../(home)/_components/footer";
 
 export const revalidate = 300;
@@ -76,8 +77,8 @@ const CinemasPage = async () => {
     getIndexableSlugs(),
   ]);
   // Venues whose page is noindex (no screenings for months, or a chain
-  // venue with nothing upcoming) stay listed but as plain text, so the hub
-  // spends its links on pages Google can index.
+  // venue with nothing upcoming) stay clickable through UncrawledLink, which
+  // has no href, so the hub spends its crawlable links on indexable pages.
   const isCinemaLinked = (slug: string): boolean =>
     !indexable || indexable.cinemas.has(slug);
   const isCityLinked = (slug: string): boolean =>
@@ -156,7 +157,13 @@ const CinemasPage = async () => {
                         {group.city.name}
                       </Link>
                     ) : (
-                      group.city.name
+                      <UncrawledLink
+                        basePath="/miasta"
+                        slug={group.city.slug}
+                        className="text-white/50 hover:text-white transition-colors"
+                      >
+                        {group.city.name}
+                      </UncrawledLink>
                     )}
                   </h2>
                 </div>
@@ -171,9 +178,13 @@ const CinemasPage = async () => {
                           {cinema.name}
                         </Link>
                       ) : (
-                        <span className="text-base md:text-lg text-white/35 block truncate">
+                        <UncrawledLink
+                          basePath="/kina"
+                          slug={cinema.slug}
+                          className="text-base md:text-lg text-white/35 hover:text-white transition-colors block truncate"
+                        >
                           {cinema.name}
-                        </span>
+                        </UncrawledLink>
                       )}
                     </li>
                   ))}

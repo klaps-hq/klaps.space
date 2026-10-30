@@ -96,7 +96,7 @@ const BlogArchivePage = async ({ params }: BlogArchivePageProps) => {
       </div>
 
       <section className="px-6 md:px-12 lg:px-16 pb-20 md:pb-28">
-        <div className="border-t border-white/10">
+        <div>
           {posts.map((post) => (
             <PostListItem key={post.id} post={post} />
           ))}

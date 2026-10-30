@@ -64,16 +64,24 @@ const SECTION_HEADING_CLASS =
   "text-3xl md:text-4xl xl:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white break-words";
 const LINK_CLASS =
   "underline decoration-white/25 underline-offset-4 hover:decoration-white transition-colors";
+// Ranked rows already carry a divider and a bar, so links there skip the underline
+const PLAIN_LINK_CLASS = "hover:text-white transition-colors";
 
 interface MaybeLinkProps {
   href: string;
   linked: boolean;
+  plain?: boolean;
   children: React.ReactNode;
 }
 
-const MaybeLink: React.FC<MaybeLinkProps> = ({ href, linked, children }) =>
+const MaybeLink: React.FC<MaybeLinkProps> = ({
+  href,
+  linked,
+  plain = false,
+  children,
+}) =>
   linked ? (
-    <Link href={href} className={LINK_CLASS}>
+    <Link href={href} className={plain ? PLAIN_LINK_CLASS : LINK_CLASS}>
       {children}
     </Link>
   ) : (
@@ -316,7 +324,7 @@ const MonthStatsView = async ({
                 {stats.byCity.map((city, index) => (
                   <li
                     key={city.slug}
-                    className="grid grid-cols-[2rem_1fr_auto] items-baseline gap-4 border-t border-white/10 last:border-b py-3 md:py-4"
+                    className="grid grid-cols-[2rem_1fr_auto] items-baseline gap-4 border-t border-white/10 first:border-t-0 first:pt-0 last:pb-0 py-3 md:py-4"
                   >
                     <span className="text-xs tabular-nums text-white/50">
                       {String(index + 1).padStart(2, "0")}
@@ -326,13 +334,14 @@ const MonthStatsView = async ({
                         <MaybeLink
                           href={`/miasta/${city.slug}`}
                           linked={canLink(linkable.cities, city.slug)}
+                          plain
                         >
                           {city.name}
                         </MaybeLink>
                       </span>
                       <span
                         aria-hidden="true"
-                        className="block h-px bg-white/40"
+                        className="block h-[3px] bg-white/40"
                         style={{
                           width: `${topCityCount > 0 ? Math.max((city.count / topCityCount) * 100, 2) : 0}%`,
                         }}
@@ -356,7 +365,7 @@ const MonthStatsView = async ({
                 {stats.topCinemas.map((cinema, index) => (
                   <li
                     key={cinema.slug}
-                    className="grid grid-cols-[2rem_1fr_auto] items-baseline gap-4 border-t border-white/10 last:border-b py-3 md:py-4"
+                    className="grid grid-cols-[2rem_1fr_auto] items-baseline gap-4 border-t border-white/10 first:border-t-0 first:pt-0 last:pb-0 py-3 md:py-4"
                   >
                     <span className="text-xs tabular-nums text-white/50">
                       {String(index + 1).padStart(2, "0")}
@@ -365,6 +374,7 @@ const MonthStatsView = async ({
                       <MaybeLink
                         href={`/kina/${cinema.slug}`}
                         linked={canLink(linkable.cinemas, cinema.slug)}
+                        plain
                       >
                         {cinema.name}
                       </MaybeLink>

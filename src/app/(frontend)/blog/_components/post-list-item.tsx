@@ -13,7 +13,7 @@ const PostListItem = ({ post }: PostListItemProps) => {
   const cover = getCover(post);
 
   return (
-    <article className="border-b border-white/10">
+    <article className="border-b border-white/10 last:border-b-0">
       <Link
         href={`/blog/${post.slug}`}
         className="group grid items-start gap-6 py-8 md:grid-cols-[1fr_280px] md:gap-10 md:py-10"

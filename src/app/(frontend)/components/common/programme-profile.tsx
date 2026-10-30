@@ -57,7 +57,7 @@ const RankedList = ({ title, items }: RankedListProps) => {
         {items.map((item) => (
           <li
             key={item.key}
-            className="flex items-baseline justify-between gap-4 border-t border-white/10 py-2.5 text-sm md:text-base"
+            className="flex items-baseline justify-between gap-4 border-t border-white/10 first:border-t-0 first:pt-0 last:pb-0 py-2.5 text-sm md:text-base"
           >
             {item.href ? (
               <Link
