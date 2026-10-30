@@ -16,6 +16,9 @@ import { getProgrammeProfile } from "@/lib/programme-profile";
 import ProgrammeProfile from "@/components/common/programme-profile";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import RepertoireGrid from "@/components/common/repertoire-grid";
+import GuideSection from "@/components/common/guide-section";
+import ListingFaq from "@/components/common/listing-faq";
+import { genreSearchName, getGenreGuide } from "@/lib/genre-guides";
 import Footer from "../../(home)/_components/footer";
 
 // ISR: cached HTML revalidated every 5 minutes. The repertoire filters
@@ -63,11 +66,15 @@ export const generateMetadata = async ({
   );
 
   const genreLower = genre.name.toLowerCase();
-  const title = `${genre.name} - filmy w kinach studyjnych`;
+  const guide = getGenreGuide(genre.slug);
+  const title = guide
+    ? `${genreSearchName(genre.slug, genre.name)} w kinie: klasyka i seanse specjalne`
+    : `${genre.name} - filmy w kinach studyjnych`;
   const description =
     moviesCount > 0
       ? `${moviesCount} ${pluralPl(moviesCount, "film", "filmy", "filmów")} i ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")} z gatunku ${genreLower} w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy - ${genreLower} na dużym ekranie.`
-      : `Filmy z gatunku ${genreLower} dostępne w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy.`;
+      : (guide?.intro ??
+        `Filmy z gatunku ${genreLower} dostępne w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy.`);
   const url = `${SITE_URL}/gatunki/${genre.slug}`;
 
   // A genre nobody is screening right now renders an empty grid; that is
@@ -117,6 +124,10 @@ const GenrePage = async ({ params }: GenrePageProps) => {
     .slice(0, 10);
 
   const genreNameLower = genre.name.toLowerCase();
+  const guide = getGenreGuide(genre.slug);
+  const searchName = genreSearchName(genre.slug, genre.name);
+  // Researched intro first; the API description is a generic one-liner.
+  const intro = guide?.intro ?? genre.description;
 
   return (
     <main className="bg-black text-white min-h-screen">
@@ -135,9 +146,9 @@ const GenrePage = async ({ params }: GenrePageProps) => {
         <PageHeading variant="detail" className="max-w-[20ch]">
           Filmy z&nbsp;gatunku {genreNameLower}
         </PageHeading>
-        {genre.description ? (
+        {intro ? (
           <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
-            {genre.description}
+            {intro}
           </p>
         ) : (
           <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
@@ -198,6 +209,16 @@ const GenrePage = async ({ params }: GenrePageProps) => {
         profile={profile}
         subject={{ kind: "genre", genreName: genre.name }}
         indexable={indexable}
+      />
+
+      <GuideSection
+        heading={<>{searchName} w&nbsp;kinie: przewodnik</>}
+        guide={guide?.guide}
+      />
+
+      <ListingFaq
+        heading={<>Pytania o&nbsp;{searchName.toLocaleLowerCase("pl")} w&nbsp;kinie</>}
+        questions={guide?.faq ?? []}
       />
 
       {relatedGenres.length > 0 && (
