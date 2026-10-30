@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 interface UncrawledLinkProps {
-  basePath: "/kina" | "/miasta";
+  basePath: "/kina" | "/miasta" | "/filmy" | "/gatunki" | "/rezyserzy";
   slug: string;
   className?: string;
   children: React.ReactNode;
@@ -26,14 +26,21 @@ const UncrawledLink: React.FC<UncrawledLinkProps> = ({
   children,
 }) => {
   const router = useRouter();
+  const [pending, startTransition] = useTransition();
   const href = `${basePath}/${slug}`;
+
+  // A real <Link> prefetches on its own; without href we warm the route on
+  // intent instead, so the click navigates at once rather than waiting for
+  // an on-demand render of a page that was not prebuilt.
+  const prefetch = () => router.prefetch(href);
+  const navigate = () => startTransition(() => router.push(href));
 
   const handleClick = (event: React.MouseEvent<HTMLSpanElement>) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey) {
       openInNewTab(href);
       return;
     }
-    router.push(href);
+    navigate();
   };
 
   const handleAuxClick = (event: React.MouseEvent<HTMLSpanElement>) => {
@@ -45,14 +52,19 @@ const UncrawledLink: React.FC<UncrawledLinkProps> = ({
     if (event.key !== "Enter") return;
     event.preventDefault();
     if (event.metaKey || event.ctrlKey) openInNewTab(href);
-    else router.push(href);
+    else navigate();
   };
 
   return (
     <span
       role="link"
       tabIndex={0}
-      className={className}
+      className={`${className ?? ""} ${pending ? "opacity-60 cursor-progress" : ""}`}
+      aria-busy={pending || undefined}
+      data-pending={pending || undefined}
+      onMouseEnter={prefetch}
+      onFocus={prefetch}
+      onTouchStart={prefetch}
       onClick={handleClick}
       onAuxClick={handleAuxClick}
       onKeyDown={handleKeyDown}

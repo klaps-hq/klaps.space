@@ -41,6 +41,7 @@ import Footer from "../../(home)/_components/footer";
 import { summarizeCityVenues } from "@/lib/city-venues";
 import CityVenues from "./_components/city-venues";
 import GuideSection from "@/components/common/guide-section";
+import UncrawledLink from "@/components/common/uncrawled-link";
 
 interface CinemaCardsProps {
   cinemas: { id: number; slug: string; name: string; street: string | null }[];
@@ -74,16 +75,22 @@ const CinemaCards: React.FC<CinemaCardsProps> = ({ cinemas, isLinked }) => (
           )}
         </Link>
       ) : (
-        <div key={cinema.id} className={CARD_CLASS}>
-          <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/35">
+        // Noindex venue: clickable for people, no crawlable link.
+        <UncrawledLink
+          key={cinema.id}
+          basePath="/kina"
+          slug={cinema.slug}
+          className={`group cursor-pointer hover:bg-white/[0.04] transition-colors ${CARD_CLASS}`}
+        >
+          <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/45 group-hover:text-white transition-colors">
             {cinema.name}
           </span>
           {cinema.street && (
-            <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/30">
+            <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/40">
               {cinema.street}
             </span>
           )}
-        </div>
+        </UncrawledLink>
       )
     )}
   </div>
