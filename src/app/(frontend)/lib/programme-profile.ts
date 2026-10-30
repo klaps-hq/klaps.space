@@ -15,7 +15,10 @@ export interface ProgrammeProfileScope {
 /** Below this many past screenings the section is not rendered at all. */
 export const MIN_PROFILE_SCREENINGS = 3;
 // Weekday and time-of-day patterns are noise below this many screenings.
-const MIN_SCREENINGS_FOR_PATTERN = 8;
+// At 8, a small venue with 12 screenings got a weekday chart reading
+// "pn: 0, wt: 4" and a sentence about its "usual" days, generated-looking
+// filler on hundreds of near-identical pages.
+export const MIN_SCREENINGS_FOR_PATTERN = 20;
 // Dubbing is worth a sentence only when it shapes the programme.
 const MIN_DUBBED_SHARE = 0.25;
 
