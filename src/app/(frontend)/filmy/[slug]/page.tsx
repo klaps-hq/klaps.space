@@ -30,6 +30,8 @@ import MovieRecentVenues from "./_components/movie-recent-venues";
 import RelatedMovies from "./_components/related-movies";
 import { movieNextScreeningItems } from "@/lib/next-screening-items";
 import { pickRelatedMovies } from "@/lib/related-movies";
+import { getProgrammeProfile } from "@/lib/programme-profile";
+import ProgrammeProfile from "@/components/common/programme-profile";
 
 // ISR: cached HTML revalidated every 5 minutes. Reading cookies or
 // searchParams here would force per-request rendering - the preferred-city
@@ -162,6 +164,12 @@ const MoviePage = async ({ params }: MoviePageProps) => {
     screenings.length === 0
       ? await Promise.all([getRecentVenues(movie.id), getIndexableSlugs()])
       : [[], null];
+  // Screening history of this film across Polish cinemas: data no catalogue
+  // site has, so it is the film page's own content next to the TMDB facts.
+  const [profile, profileIndexable] = await Promise.all([
+    getProgrammeProfile({ movieSlug: movie.slug }),
+    indexable ?? getIndexableSlugs(),
+  ]);
   // Instant blurred preview baked into the cached HTML while the full-size
   // backdrop streams in; precomputed by the scraper, served by the API.
   const backdropBlurDataUrl = movie.backdropBlurDataUrl ?? null;
@@ -255,6 +263,13 @@ const MoviePage = async ({ params }: MoviePageProps) => {
         movieTitle={movie.title}
         venues={recentVenues}
         indexableCinemas={indexable?.cinemas ?? null}
+      />
+
+      <ProgrammeProfile
+        heading={<>{movie.title} w&nbsp;polskich kinach</>}
+        profile={profile}
+        subject={{ kind: "movie" }}
+        indexable={profileIndexable}
       />
 
       <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-16 md:pb-24">
