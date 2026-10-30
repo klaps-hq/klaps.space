@@ -6,6 +6,7 @@ import SiteHeader from "@/components/common/site-header";
 import JsonLd from "@/components/common/json-ld";
 import { getCinemas } from "@/lib/cinemas";
 import { SITE_URL } from "@/lib/site-config";
+import { CONTACT_EMAIL } from "@/constants";
 import Footer from "../(home)/_components/footer";
 import BadgeGenerator, {
   BadgeCinemaOption,
@@ -162,6 +163,19 @@ const ForCinemasPage = async () => {
               Napiszcie, poprawimy dane ręcznie.
             </p>
             <p>
+              Na stronie kina pokazujemy też sale z&nbsp;liczbą miejsc,
+              informacje o&nbsp;dostępności, logo i&nbsp;zdjęcia. Jeśli czegoś
+              brakuje albo się zmieniło, prześlijcie nam aktualne dane. Logo
+              i&nbsp;zdjęcia opublikujemy tylko za Waszą zgodą, z&nbsp;podpisem
+              autora.
+            </p>
+            <p className="flex flex-wrap gap-x-6 gap-y-2">
+              <a
+                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Dane kina na klaps.space")}`}
+                className="text-white underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors"
+              >
+                {CONTACT_EMAIL}
+              </a>
               <Link
                 href="/kontakt"
                 className="text-white underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors"
