@@ -6,10 +6,16 @@ import { notFound } from "next/navigation";
 import SiteHeader from "@/components/common/site-header";
 import JsonLd from "@/components/common/json-ld";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
-import { FOUNDER_PATH, ORGANIZATION_ID, SITE_URL } from "@/lib/site-config";
+import {
+  FOUNDER,
+  FOUNDER_PATH,
+  ORGANIZATION_ID,
+  SITE_URL,
+} from "@/lib/site-config";
 import { BASE_OPEN_GRAPH, clampText, formatPlDate } from "@/lib/seo";
 import { getCover, getPostBySlug, getPublishedPosts } from "@/lib/posts";
 import { resolveScreeningBlocks } from "@/lib/post-screening-blocks";
+import { extractPostFaq } from "@/lib/post-faq";
 import type { Post } from "@/payload-types";
 import RichText from "../_components/rich-text";
 import Footer from "../../(home)/_components/footer";
@@ -78,6 +84,33 @@ const clampModified = (post: Post): string => {
     : post.updatedAt;
 };
 
+// A post counts as updated when it changed at least a day after publishing;
+// the same-day edits right after a publish are not worth a visible label.
+const UPDATE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+
+const visibleUpdate = (post: Post): string | null => {
+  if (!post.publishedAt) return null;
+  const modified = clampModified(post);
+  return Date.parse(modified) - Date.parse(post.publishedAt) >=
+    UPDATE_THRESHOLD_MS
+    ? modified
+    : null;
+};
+
+const buildFaqJsonLd = (post: Post) => {
+  const items = extractPostFaq(post.content);
+  if (items.length === 0) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+};
+
 const buildPostJsonLd = (post: Post) => {
   const cover = getCover(post);
   // Local storage yields relative URLs (/media/...), the S3 adapter yields
@@ -120,8 +153,18 @@ const buildPostJsonLd = (post: Post) => {
         }
       : {}),
     author,
+    // The named person who edits and fact-checks the AI-assisted drafts
+    // (content audit, October 2026: an Organization-only byline was the
+    // weakest E-E-A-T signal). Authorship stays with the editorial team.
+    editor: {
+      "@type": "Person",
+      "@id": FOUNDER.id,
+      name: FOUNDER.name,
+      url: FOUNDER.url,
+    },
     publisher: {
       "@type": "Organization",
+      "@id": ORGANIZATION_ID,
       name: "Klaps",
       url: SITE_URL,
       logo: {
@@ -144,10 +187,13 @@ const PostPage = async ({ params }: PostPageProps) => {
   // converters are synchronous, so the showtimes would otherwise have to be
   // fetched after hydration and would not reach the server HTML.
   const screeningsByBlockId = await resolveScreeningBlocks(post.content);
+  const faqJsonLd = buildFaqJsonLd(post);
+  const updatedAt = visibleUpdate(post);
 
   return (
     <main className="bg-black text-white min-h-screen">
       <JsonLd data={buildPostJsonLd(post)} />
+      {faqJsonLd && <JsonLd data={faqJsonLd} />}
       <SiteHeader />
 
       <article className="px-6 md:px-12 lg:px-16">
@@ -163,12 +209,19 @@ const PostPage = async ({ params }: PostPageProps) => {
 
           <header>
             {post.publishedAt && (
-              <time
-                dateTime={post.publishedAt}
-                className="text-xs uppercase tracking-[0.2em] text-white/50"
-              >
-                {formatPlDate(new Date(post.publishedAt))}
-              </time>
+              <p className="flex flex-wrap gap-x-4 gap-y-1 text-xs uppercase tracking-[0.2em] text-white/50">
+                <time dateTime={post.publishedAt}>
+                  {formatPlDate(new Date(post.publishedAt))}
+                </time>
+                {updatedAt && (
+                  <span>
+                    Zaktualizowano{" "}
+                    <time dateTime={updatedAt}>
+                      {formatPlDate(new Date(updatedAt))}
+                    </time>
+                  </span>
+                )}
+              </p>
             )}
             <h1 className="mt-4 text-3xl md:text-5xl font-medium -tracking-[0.02em] leading-[1.05]">
               {post.title}
@@ -220,8 +273,9 @@ const PostPage = async ({ params }: PostPageProps) => {
 
           <footer className="mt-14 border-t border-white/10 pt-8">
             <p className="mb-8 max-w-[64ch] text-sm md:text-base text-white/50 leading-relaxed">
-              Opracowanie: redakcja klaps.space. Tekst powstał z&nbsp;pomocą AI,
-              na podstawie danych z&nbsp;serwisu i&nbsp;sprawdzonych źródeł.{" "}
+              Opracowanie: redakcja klaps.space, na podstawie danych
+              z&nbsp;serwisu i&nbsp;sprawdzonych źródeł. Redakcja
+              i&nbsp;weryfikacja faktów: {FOUNDER.name}.{" "}
               <Link
                 href={FOUNDER_PATH}
                 className="text-white/75 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white transition-colors"

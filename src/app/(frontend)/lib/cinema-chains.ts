@@ -21,6 +21,10 @@ const CHAIN_PATTERNS = [
   // An IMAX screen in Poland sits inside a chain multiplex, never in an
   // arthouse venue, so the brand name is a reliable chain marker too.
   /\bimax\b/i,
+  // Regional multiplex chains (Planet Cinema in Ełk and Oświęcim, GO KINO in
+  // Oława). Kept in sync with the API's src/cinemas/cinema-chains.ts.
+  /\bplanet\s?cinema\b/i,
+  /\bgo\s?kino\b/i,
 ];
 
 export const isChainCinema = (name: string): boolean =>

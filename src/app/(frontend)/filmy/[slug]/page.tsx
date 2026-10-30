@@ -11,6 +11,7 @@ import {
   BASE_OPEN_GRAPH,
   NOINDEX_FOLLOW,
   clampText,
+  moviePageTitle,
   pluralPl,
 } from "@/lib/seo";
 
@@ -122,9 +123,7 @@ export const generateMetadata = async ({
     MAX_DESCRIPTION_LENGTH
   );
 
-  // "gdzie i kiedy" mirrors the dominant query pattern for film titles
-  // ("[tytuł] kiedy w kinie"), which is what this page actually answers.
-  const title = `${movie.title} (${movie.productionYear}) - seanse: gdzie i kiedy w kinie`;
+  const title = moviePageTitle(movie.title, movie.productionYear);
   const url = `${SITE_URL}/filmy/${movie.slug}`;
 
   // Movies with neither upcoming nor recent screenings are thin TMDB

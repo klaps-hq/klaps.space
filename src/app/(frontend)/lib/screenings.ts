@@ -9,6 +9,7 @@ import { IGenre, IMovie, PaginatedResponse } from "@/interfaces/IMovies";
 import { ICinemaSummary } from "@/interfaces/ICinema";
 import { apiFetch } from "./client";
 import { dropPastScreeningGroups, dropPastScreenings } from "./screening-filters";
+import { isChainCinema } from "./cinema-chains";
 
 // The API embeds whole movie, genre, cinema and city records in every
 // screening: descriptions, ticket URLs, population. One popular film carried
@@ -74,8 +75,24 @@ const slimScreeningGroup = ({
   screenings: screenings.map(slimScreening),
 });
 
+const isIndependentScreening = (screening: IScreening): boolean =>
+  !isChainCinema(screening.cinema.name);
+
+/**
+ * Films shown in at least one independent venue lead, chain-only films
+ * follow, each part keeping the API's date order. Content audit, October
+ * 2026: in date order the homepage opened with a Halloween re-release
+ * playing in 190 multiplexes and the hero with a Helios showtime, so the
+ * site read as a multiplex aggregator rather than an arthouse guide. Chain
+ * screenings stay listed, just not first.
+ */
+const independentFirst = (groups: IScreeningGroup[]): IScreeningGroup[] => [
+  ...groups.filter((group) => group.screenings.some(isIndependentScreening)),
+  ...groups.filter((group) => !group.screenings.some(isIndependentScreening)),
+];
+
 const prepareGroups = (groups: IScreeningGroup[]): IScreeningGroup[] =>
-  dropPastScreeningGroups(groups).map(slimScreeningGroup);
+  independentFirst(dropPastScreeningGroups(groups).map(slimScreeningGroup));
 
 interface GetScreeningsParams {
   cityId?: string | null;
@@ -409,7 +426,11 @@ const HERO_ROTATION_WINDOW_MS = 5 * 60 * 1000;
  */
 export const getFeaturedHeroScreening =
   async (): Promise<IRandomScreening | null> => {
-    const pool = (await getScreenings()).slice(0, HERO_POOL_SIZE);
+    // Only films with an independent screening qualify: the hero is the
+    // site's first impression and used to feature multiplex showtimes.
+    const pool = (await getScreenings())
+      .filter((group) => group.screenings.some(isIndependentScreening))
+      .slice(0, HERO_POOL_SIZE);
     if (pool.length === 0) {
       return null;
     }
@@ -428,7 +449,7 @@ export const getFeaturedHeroScreening =
     // dropped to its flat fallback with no image at all.
     for (let step = 0; step < pool.length; step += 1) {
       const group = pool[(startIndex + step) % pool.length];
-      const screening = group.screenings[0];
+      const screening = group.screenings.find(isIndependentScreening);
       if (!screening) continue;
 
       try {

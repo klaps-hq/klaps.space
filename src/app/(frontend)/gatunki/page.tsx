@@ -15,6 +15,9 @@ import Footer from "../(home)/_components/footer";
 
 export const revalidate = 300;
 
+const PROSE_LINK_CLASS =
+  "text-white/80 underline underline-offset-4 decoration-white/25 hover:text-white hover:decoration-white transition-colors";
+
 const buildGenresJsonLd = (genres: readonly IGenre[]) => ({
   "@context": "https://schema.org",
   "@type": "CollectionPage",
@@ -91,6 +94,51 @@ const GenresPage = async () => {
           </div>
         )}
       </div>
+
+      {/* Hub prose: the grid alone left this page at ~140 words, too little
+          for Google to tell what the hub is about (content audit, October
+          2026). */}
+      <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-24 md:pb-32">
+        <h2 className="mb-6 md:mb-8 text-2xl md:text-4xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
+          Jak korzystać z&nbsp;gatunków
+        </h2>
+        <div className="flex flex-col gap-4 max-w-[64ch] text-base md:text-lg text-white/60 leading-relaxed">
+          <p>
+            Gatunek przypisujemy na podstawie danych o&nbsp;filmie, więc jeden
+            tytuł może trafić do kilku kategorii. Każda strona gatunku pokazuje
+            nadchodzące seanse w&nbsp;całej Polsce, krótki przewodnik po tym,
+            jak dany gatunek wygląda na dużym ekranie, oraz liczby z&nbsp;historii
+            repertuaru: ile seansów się odbyło, w&nbsp;których miastach
+            i&nbsp;z&nbsp;jakich dekad pochodzą grane filmy.
+          </p>
+          <p>
+            W kinach studyjnych najczęściej trafisz na{" "}
+            <Link href="/gatunki/dramat" className={PROSE_LINK_CLASS}>
+              dramaty
+            </Link>
+            , w&nbsp;tym klasykę europejską i&nbsp;polską. Jesienią przybywa
+            seansów{" "}
+            <Link href="/gatunki/horror" className={PROSE_LINK_CLASS}>
+              horroru
+            </Link>
+            , często w&nbsp;formie maratonów, a&nbsp;festiwale i&nbsp;cykle
+            tematyczne podnoszą liczbę pokazów{" "}
+            <Link href="/gatunki/dokumentalny" className={PROSE_LINK_CLASS}>
+              filmów dokumentalnych
+            </Link>
+            . Jeśli szukasz konkretnej epoki, a&nbsp;nie gatunku, zajrzyj do
+            działu{" "}
+            <Link href="/klasyka-w-kinach" className={PROSE_LINK_CLASS}>
+              Klasyka w&nbsp;kinach
+            </Link>
+            . Twórców, których filmy wracają na ekrany, zebraliśmy na stronie{" "}
+            <Link href="/rezyserzy" className={PROSE_LINK_CLASS}>
+              reżyserów
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
 
       <Footer />
     </main>

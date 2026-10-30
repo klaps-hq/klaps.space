@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getCinemas } from "@/lib/cinemas";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
+import { isChainCinema } from "@/lib/cinema-chains";
 
 const TOP_CITIES_LIMIT = 8;
 const CINEMAS_PER_CITY = 6;
@@ -17,7 +18,16 @@ const Cinemas = async () => {
   const isCinemaLinked = (slug: string): boolean =>
     !indexable || indexable.cinemas.has(slug);
 
-  const topCities = [...groups]
+  // The section is headed "Kina studyjne", so it lists year-round
+  // independent venues only: chains and open-air series used to fill the
+  // per-city slots (content audit, October 2026).
+  const topCities = groups
+    .map((g) => ({
+      ...g,
+      cinemas: g.cinemas.filter(
+        (c) => !isChainCinema(c.name) && !c.isOpenAir
+      ),
+    }))
     .filter((g) => g.cinemas.length > 0)
     .sort((a, b) => b.cinemas.length - a.cinemas.length)
     .slice(0, TOP_CITIES_LIMIT);

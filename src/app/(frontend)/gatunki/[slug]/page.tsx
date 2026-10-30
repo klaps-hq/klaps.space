@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { getGenrePageData, getGenres } from "@/lib/genres";
 import { fetchScreenings, getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
+import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, clampText, pluralPl } from "@/lib/seo";
 import { genreFallbackIntro } from "@/lib/listing-copy";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
@@ -73,8 +73,11 @@ export const generateMetadata = async ({
   const description =
     moviesCount > 0
       ? `${moviesCount} ${pluralPl(moviesCount, "film", "filmy", "filmów")} i ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")} z gatunku ${genreLower} w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy - ${genreLower} na dużym ekranie.`
-      : (guide?.intro ??
-        `Filmy z gatunku ${genreLower} dostępne w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy.`);
+      : // The guide intro is a full paragraph (293 chars on /gatunki/dramat),
+        // so it is clamped to snippet length instead of cut by Google.
+        guide?.intro
+        ? clampText(guide.intro, 160)
+        : `Filmy z gatunku ${genreLower} dostępne w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy.`;
   const url = `${SITE_URL}/gatunki/${genre.slug}`;
 
   // A genre nobody is screening right now renders an empty grid; that is

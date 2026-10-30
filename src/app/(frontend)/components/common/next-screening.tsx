@@ -18,7 +18,8 @@ export interface NextScreeningItem {
   cityId: number;
   /** Main line: the movie on a cinema page, the cinema on a movie page. */
   primary: string;
-  primaryHref: string;
+  /** null renders plain text (a noindex page, e.g. a chain venue). */
+  primaryHref: string | null;
   secondary?: string | null;
   calendar: {
     title: string;
@@ -87,12 +88,16 @@ const NextScreening: React.FC<NextScreeningProps> = ({
             {dayLabel} · {next.time}
           </span>
           <span className="min-w-0 text-[11px] md:text-xs uppercase tracking-[0.2em] text-white/60">
-            <Link
-              href={next.primaryHref}
-              className="text-white/80 hover:text-white underline-offset-4 hover:underline transition-colors"
-            >
-              {next.primary}
-            </Link>
+            {next.primaryHref ? (
+              <Link
+                href={next.primaryHref}
+                className="text-white/80 hover:text-white underline-offset-4 hover:underline transition-colors"
+              >
+                {next.primary}
+              </Link>
+            ) : (
+              <span className="text-white/80">{next.primary}</span>
+            )}
             {next.secondary ? ` · ${next.secondary}` : ""}
           </span>
         </span>

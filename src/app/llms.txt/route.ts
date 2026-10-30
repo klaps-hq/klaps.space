@@ -2,22 +2,34 @@ import { getCinemas } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site-config";
 import { inPlace, pluralPl } from "@/lib/seo";
+import { isChainCinema } from "@/lib/cinema-chains";
+import { getPublishedPosts } from "@/lib/posts";
+import { archiveMonths, monthName, monthPath } from "@/lib/month-stats";
 
 // llms.txt - a machine-readable site guide for AI search crawlers
 // (ChatGPT, Claude, Perplexity, Google AI). https://llmstxt.org/
 export const revalidate = 3600;
 
 export async function GET() {
-  const [cinemasResult, genresResult] = await Promise.allSettled([
+  const [cinemasResult, genresResult, postsResult] = await Promise.allSettled([
     getCinemas({ limit: 1000 }),
     getGenres(),
+    getPublishedPosts(),
   ]);
 
   const cinemaGroups =
     cinemasResult.status === "fulfilled" ? cinemasResult.value.data : [];
   const genres = genresResult.status === "fulfilled" ? genresResult.value : [];
 
+  // Year-round independent venues only: the section is "kina studyjne", and
+  // counting multiplexes and open-air spots overstated small cities.
   const citiesWithCinemas = cinemaGroups
+    .map((group) => ({
+      ...group,
+      cinemas: group.cinemas.filter(
+        (cinema) => !isChainCinema(cinema.name) && !cinema.isOpenAir
+      ),
+    }))
     .filter((group) => group.cinemas.length > 0)
     .sort((a, b) => a.city.name.localeCompare(b.city.name, "pl"));
 
@@ -33,6 +45,16 @@ export async function GET() {
       (genre) =>
         `- [Filmy z gatunku ${genre.name.toLowerCase()}](${SITE_URL}/gatunki/${genre.slug})`
     );
+
+  const posts = postsResult.status === "fulfilled" ? postsResult.value : [];
+  const postLines = posts.flatMap((post) =>
+    post.slug
+      ? [`- [${post.title}](${SITE_URL}/blog/${post.slug})${post.excerpt ? `: ${post.excerpt}` : ""}`]
+      : []
+  );
+  const monthLines = archiveMonths().map(
+    (month) => `- [Klaps w liczbach: ${monthName(month)}](${SITE_URL}${monthPath(month)})`
+  );
 
   const body = `# ${SITE_NAME}
 
@@ -52,6 +74,19 @@ Klaps to ogólnopolski przewodnik po seansach specjalnych w kinach studyjnych: k
 - [FAQ](${SITE_URL}/faq): najczęstsze pytania o serwis i kina studyjne
 - [O projekcie](${SITE_URL}/o-projekcie): czym jest Klaps i jak działa
 - [Dla kin](${SITE_URL}/dla-kin): darmowa odznaka z linkiem do strony kina na klaps.space
+- [O twórcy](${SITE_URL}/o-tworcy): kto prowadzi serwis i redaguje treści
+- [Blog](${SITE_URL}/blog): przewodniki po rodzajach seansów i kinach studyjnych
+
+## Dane do cytowania
+
+Miesięczne zestawienia seansów klasyki (filmy sprzed co najmniej 25 lat) w polskich kinach: liczba seansów, kin i miast, najczęściej grane filmy i rankingi miast. Dane można cytować z podaniem źródła: Klaps (klaps.space).
+
+- [Klaps w liczbach: bieżący miesiąc](${SITE_URL}/w-liczbach)
+${monthLines.join("\n")}
+
+## Wpisy na blogu
+
+${postLines.join("\n")}
 
 ## Miasta z kinami studyjnymi
 

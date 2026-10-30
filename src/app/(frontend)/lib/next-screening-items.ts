@@ -1,6 +1,7 @@
 import type { NextScreeningItem } from "@/components/common/next-screening";
 import { IScreening, IScreeningGroup } from "@/interfaces/IScreenings";
 import { SITE_URL } from "./site-config";
+import { isChainCinema } from "./cinema-chains";
 
 // Enough to survive showtimes passing while the ISR page is cached, and to
 // find one in the visitor's city on a movie page, without shipping the
@@ -34,7 +35,10 @@ export const movieNextScreeningItems = (
       time: s.time,
       cityId: s.cinema.city.id,
       primary: s.cinema.name,
-      primaryHref: `/kina/${s.cinema.slug}`,
+      // Chain venue pages are noindex, so they get no crawlable link.
+      primaryHref: isChainCinema(s.cinema.name)
+        ? null
+        : `/kina/${s.cinema.slug}`,
       secondary: s.cinema.city.name,
       calendar: {
         title: `${movie.title} - ${s.cinema.name}`,

@@ -307,3 +307,30 @@ export const classicFallbackIntro = (
 
   return bindOrphans(`${first} ${second}`.trim());
 };
+
+/**
+ * Data sentences appended to the classic hub intro: the oldest film on the
+ * bill and the decade with most titles. The stored AI intro reads the same
+ * on every visit ("Repertuar obejmuje dzieła z różnych dekad"); these facts
+ * change with the repertoire and are the part no other site has.
+ */
+export const classicFacts = (groups: IScreeningGroup[]): string => {
+  if (groups.length === 0) return "";
+  const oldest = groups.reduce((best, group) =>
+    group.movie.productionYear < best.movie.productionYear ? group : best
+  );
+  const byDecade = new Map<number, number>();
+  for (const group of groups) {
+    const decade = Math.floor(group.movie.productionYear / 10) * 10;
+    byDecade.set(decade, (byDecade.get(decade) ?? 0) + 1);
+  }
+  const [topDecade, topCount] = [...byDecade.entries()].sort(
+    (a, b) => b[1] - a[1] || a[0] - b[0]
+  )[0];
+  return bindOrphans(
+    `Najstarszy film w najbliższym repertuarze to ${oldest.movie.title} ` +
+      `z ${oldest.movie.productionYear} roku. Najwięcej tytułów pochodzi ` +
+      `z lat ${topDecade}-${topDecade + 9} (${topCount} ` +
+      `${pluralPl(topCount, "film", "filmy", "filmów")}).`
+  );
+};

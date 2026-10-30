@@ -2,6 +2,12 @@ import { apiFetch } from "./client";
 import { getScreenings } from "./screenings";
 import { ISitemapResponse } from "@/interfaces/ISitemap";
 import { MERGED_CINEMA_SLUGS, MERGED_CITY_SLUGS } from "./merged-slugs";
+import { isChainCinema } from "./cinema-chains";
+
+// Slugs are the slugified venue name ("cinema-city-bonarka"), so the chain
+// patterns match them once the hyphens are spaces again.
+const isChainSlug = (slug: string): boolean =>
+  isChainCinema(slug.replace(/-/g, " "));
 
 /**
  * Lightweight payload for sitemap.xml: slugs + updatedAt for every
@@ -12,11 +18,13 @@ export const getSitemapEntries = async (): Promise<ISitemapResponse> => {
     next: { revalidate: 3600 },
   });
   // Merged duplicates 301 to their canonical page, so they are neither
-  // advertised in the sitemap nor linked from the hubs.
+  // advertised in the sitemap nor linked from the hubs. Chain venues are
+  // noindex on the page itself, so they are dropped here too, even while an
+  // older API still lists them (content audit #4).
   return {
     ...entries,
     cinemas: entries.cinemas.filter(
-      (entry) => !(entry.slug in MERGED_CINEMA_SLUGS)
+      (entry) => !(entry.slug in MERGED_CINEMA_SLUGS) && !isChainSlug(entry.slug)
     ),
     cities: entries.cities.filter(
       (entry) => !(entry.slug in MERGED_CITY_SLUGS)

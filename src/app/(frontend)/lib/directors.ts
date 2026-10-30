@@ -11,6 +11,22 @@ import { apiFetch, fetchOrNotFound } from "./client";
  */
 export const DIRECTOR_INDEX_THRESHOLD = 3;
 
+/**
+ * Whether a director page is indexable. Counts only screenings outside chain
+ * multiplexes, like the API sitemap: mass multiplex re-releases (Avengers,
+ * The Hunger Games) made blockbuster directors indexable "special
+ * screenings" pages (content audit, October 2026). Falls back to all
+ * upcoming screenings on an API without the independent count.
+ */
+export const isDirectorIndexable = (
+  director: Pick<
+    IDirector,
+    "upcomingScreeningsCount" | "upcomingIndependentScreeningsCount"
+  >
+): boolean =>
+  (director.upcomingIndependentScreeningsCount ??
+    director.upcomingScreeningsCount) >= DIRECTOR_INDEX_THRESHOLD;
+
 interface GetDirectorsParams {
   page?: number;
   /** Omit to receive every director in a single page (meta.totalPages = 1). */
