@@ -19,7 +19,7 @@ export interface GenreGuide {
 // not read as a subject. These are the forms people search for, used in
 // the title and the guide heading ("Filmy dokumentalne w kinie").
 const SEARCH_NAMES: Record<string, string> = {
-  akcja: "Kino akcji",
+  akcja: "Filmy akcji",
   animacja: "Animacje",
   dokumentalny: "Filmy dokumentalne",
   dramat: "Dramaty",
