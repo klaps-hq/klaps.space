@@ -4,6 +4,8 @@ import { getCinemasWithCoordinates } from "@/lib/cinemas";
 import { isChainCinema } from "@/lib/cinema-chains";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { pluralPl } from "@/lib/seo";
+import { getScreenings } from "@/lib/screenings";
+import type { MapCinema } from "./_components/poland-dot-map";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, {
   PageHeadingMuted,
@@ -21,10 +23,32 @@ const PROSE_LINK_CLASS =
   "text-white/80 underline underline-offset-4 decoration-white/25 hover:text-white hover:decoration-white transition-colors";
 
 const CinemaMapPage = async () => {
-  const [cinemas, indexable] = await Promise.all([
+  const [cinemas, indexable, screenings] = await Promise.all([
     getCinemasWithCoordinates(),
     getIndexableSlugs(),
+    getScreenings(),
   ]);
+  // Films with an upcoming screening per venue: how bright the map glows.
+  const filmsByCinema = new Map<number, Set<number>>();
+  for (const group of screenings) {
+    for (const { cinema } of group.screenings) {
+      const films = filmsByCinema.get(cinema.id) ?? new Set<number>();
+      films.add(group.movie.id);
+      filmsByCinema.set(cinema.id, films);
+    }
+  }
+  // Only the fields the map draws cross into the client bundle.
+  const mapCinemas: MapCinema[] = cinemas.map((c) => ({
+    slug: c.slug,
+    name: c.name,
+    city: c.city.name,
+    street: c.street,
+    lat: c.latitude as number,
+    lon: c.longitude as number,
+    films: filmsByCinema.get(c.id)?.size ?? 0,
+    isChain: isChainCinema(c.name),
+    isOpenAir: Boolean(c.isOpenAir),
+  }));
   // The map also pins multiplexes hosting special screenings, so the lead
   // counts them apart instead of calling every pin "niezależny".
   // Open-air series are seasonal screening spots, not cinemas, and Łódź
@@ -93,7 +117,7 @@ const CinemaMapPage = async () => {
         {cinemas.length === 0 ? (
           <EmptyState description="Brak kin z danymi lokalizacji do wyświetlenia na mapie." />
         ) : (
-          <CinemaMapLazy cinemas={cinemas} />
+          <CinemaMapLazy cinemas={mapCinemas} />
         )}
       </section>
 
