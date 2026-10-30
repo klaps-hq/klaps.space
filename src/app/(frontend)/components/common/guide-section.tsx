@@ -1,13 +1,13 @@
 import React from "react";
 
-interface CityGuideProps {
+interface GuideSectionProps {
   heading: React.ReactNode;
   /** Plain paragraphs separated by blank lines. */
   guide: string | null | undefined;
 }
 
-/** Long researched guide to the city's cinemas, history and film culture. */
-const CityGuide = ({ heading, guide }: CityGuideProps) => {
+/** Long researched guide (city cinemas, genre history) as plain paragraphs. */
+const GuideSection = ({ heading, guide }: GuideSectionProps) => {
   const paragraphs = (guide ?? "")
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
@@ -30,4 +30,4 @@ const CityGuide = ({ heading, guide }: CityGuideProps) => {
   );
 };
 
-export default CityGuide;
+export default GuideSection;
