@@ -16,7 +16,7 @@ import {
   getScreenings,
 } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
-import { getIndexableSlugs } from "@/lib/sitemap-entries";
+import { getIndexableSlugs, getSitemapEntries } from "@/lib/sitemap-entries";
 import {
   BASE_OPEN_GRAPH,
   NOINDEX_FOLLOW,
@@ -61,13 +61,14 @@ type CinemaPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-// Prebuild all cinema pages so bots never hit a cold render.
+// Prebuild the indexable cinemas (the ones in the sitemap) so crawlers never
+// hit a cold render. The noindex rest, about half of all venues, renders on
+// first request (dynamicParams defaults to true): prebuilding them doubled
+// the build time for pages search engines do not index.
 export const generateStaticParams = async (): Promise<{ slug: string }[]> => {
   try {
-    const { data: groups } = await getCinemas();
-    return groups.flatMap((group) =>
-      group.cinemas.map((cinema) => ({ slug: cinema.slug }))
-    );
+    const { cinemas } = await getSitemapEntries();
+    return cinemas.map((cinema) => ({ slug: cinema.slug }));
   } catch {
     return [];
   }
