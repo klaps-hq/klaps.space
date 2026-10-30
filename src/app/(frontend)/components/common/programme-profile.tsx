@@ -10,6 +10,7 @@ import {
   studioCinemas,
 } from "@/lib/programme-profile";
 import { pluralPl } from "@/lib/seo";
+import UncrawledLink from "@/components/common/uncrawled-link";
 
 interface ProgrammeProfileProps {
   /** Content of the section's H2. */
@@ -25,9 +26,21 @@ interface StatProps {
   label: string;
 }
 
+interface UncrawledTarget {
+  basePath: "/kina" | "/miasta" | "/filmy" | "/gatunki" | "/rezyserzy";
+  slug: string;
+}
+
 interface RankedListProps {
   title: string;
-  items: { key: string; label: string; href: string | null; count: number }[];
+  items: {
+    key: string;
+    label: string;
+    href: string | null;
+    /** Noindex target: clickable for people, invisible to crawlers. */
+    uncrawled?: UncrawledTarget;
+    count: number;
+  }[];
 }
 
 const WEEKDAY_SHORT = ["pn", "wt", "śr", "cz", "pt", "sb", "nd"];
@@ -66,6 +79,14 @@ const RankedList = ({ title, items }: RankedListProps) => {
               >
                 {item.label}
               </Link>
+            ) : item.uncrawled ? (
+              <UncrawledLink
+                basePath={item.uncrawled.basePath}
+                slug={item.uncrawled.slug}
+                className="cursor-pointer text-white/75 hover:text-white transition-colors"
+              >
+                {item.label}
+              </UncrawledLink>
             ) : (
               <span className="text-white/75">{item.label}</span>
             )}
@@ -120,6 +141,7 @@ const ProgrammeProfile = ({
         key: m.slug,
         label: `${m.title} (${m.productionYear})`,
         href: null,
+        uncrawled: { basePath: "/filmy", slug: m.slug },
         count: m.count,
       })),
     },
@@ -131,6 +153,7 @@ const ProgrammeProfile = ({
         key: c.slug,
         label: subject.kind === "city" ? c.name : `${c.name}, ${c.cityName}`,
         href: cinemaHref(c.slug),
+        uncrawled: { basePath: "/kina", slug: c.slug },
         count: c.count,
       })),
     });
@@ -142,6 +165,7 @@ const ProgrammeProfile = ({
         key: g.slug,
         label: g.name,
         href: genreHref(g.slug),
+        uncrawled: { basePath: "/gatunki", slug: g.slug },
         count: g.count,
       })),
     });
@@ -153,6 +177,7 @@ const ProgrammeProfile = ({
         key: d.slug,
         label: d.name,
         href: directorHref(d.slug),
+        uncrawled: { basePath: "/rezyserzy", slug: d.slug },
         count: d.count,
       })),
     });
@@ -166,6 +191,7 @@ const ProgrammeProfile = ({
         key: c.slug,
         label: `${c.name}, ${c.cityName}`,
         href: cinemaHref(c.slug),
+        uncrawled: { basePath: "/kina", slug: c.slug },
         count: c.count,
       })),
     });
@@ -181,6 +207,7 @@ const ProgrammeProfile = ({
         key: c.slug,
         label: c.name,
         href: cityHref(c.slug),
+        uncrawled: { basePath: "/miasta", slug: c.slug },
         count: c.count,
       })),
     });
