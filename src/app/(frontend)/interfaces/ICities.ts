@@ -11,6 +11,8 @@ export interface ICity {
   /** Canonical lowercase name (e.g. "mazowieckie"); null when unknown. */
   voivodeship: string | null;
   updatedAt?: string | null;
+  /** Long researched guide to the city's cinemas; city detail only. */
+  guide?: string | null;
 }
 
 /**

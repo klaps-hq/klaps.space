@@ -13,6 +13,8 @@ export interface ICinemaSummary {
   updatedAt?: string | null;
   // Open-air venue (summer cinema series); absent on older API responses.
   isOpenAir?: boolean;
+  // Venue details; only on city-filtered cinema lists.
+  details?: ICinemaDetails;
 }
 
 export interface ICinema {

@@ -1,6 +1,12 @@
 import { IRecentScreening, IScreeningGroup } from "@/interfaces/IScreenings";
 import { IProgrammeProfile } from "@/interfaces/IProgrammeProfile";
 import { ICinemaDetails } from "@/interfaces/ICinema";
+import {
+  CityVenueSummary,
+  roomLabel,
+  screensPl,
+  seatsPl,
+} from "./city-venues";
 import { formatPlDate, inPlace, pluralPl } from "./seo";
 import { hasProfileContent, sinceMonth } from "./programme-profile";
 
@@ -90,7 +96,53 @@ interface CityFaqInput {
   screenings: IScreeningGroup[];
   lastUpdated: Date | null;
   profile?: IProgrammeProfile | null;
+  /** Rooms and accessibility of the year-round independent venues. */
+  venues?: CityVenueSummary;
 }
+
+/** Venue comparison questions; each needs the data behind its answer. */
+const cityVenuesFaq = (place: string, venues: CityVenueSummary): FaqItem[] => {
+  const questions: FaqItem[] = [];
+  const { largest } = venues;
+
+  if (largest && venues.rows.length > 1) {
+    questions.push({
+      q: `Które kino studyjne ${place} ma największą salę?`,
+      a: `Największa sala to ${roomLabel(largest.roomName)} w kinie ${largest.cinemaName}: ${seatsPl(largest.seats)}.`,
+    });
+  }
+
+  if (venues.venuesWithScreens > 0) {
+    const scope =
+      venues.venuesWithScreens === venues.rows.length
+        ? `Kina studyjne ${place} mają`
+        : `Kina studyjne ${place}, które podają te dane (${venues.venuesWithScreens} z ${venues.rows.length}), mają`;
+    const seats =
+      venues.venuesWithSeats === venues.venuesWithScreens &&
+      venues.venuesWithSeats > 0
+        ? ` i ${seatsPl(venues.seats)}`
+        : "";
+    questions.push({
+      q: `Ile sal mają kina studyjne ${place}?`,
+      a: `${scope} łącznie ${screensPl(venues.screens)}${seats}.`,
+    });
+  }
+
+  if (venues.wheelchair.length > 0 || venues.hearingLoop.length > 0) {
+    const parts = [
+      venues.wheelchair.length > 0 &&
+        `Dostępność dla osób na wózkach deklarują: ${joinNames(venues.wheelchair)}.`,
+      venues.hearingLoop.length > 0 &&
+        `Pętlę indukcyjną ma: ${joinNames(venues.hearingLoop)}.`,
+    ].filter(Boolean);
+    questions.push({
+      q: `Które kina ${place} są dostępne dla osób z niepełnosprawnościami?`,
+      a: `${parts.join(" ")} Szczegóły są na stronach poszczególnych kin.`,
+    });
+  }
+
+  return questions;
+};
 
 export const buildCityFaq = ({
   cityLocative,
@@ -99,6 +151,7 @@ export const buildCityFaq = ({
   screenings,
   lastUpdated,
   profile,
+  venues,
 }: CityFaqInput): FaqItem[] => {
   const place = inPlace(cityLocative);
   const questions: FaqItem[] = [];
@@ -163,6 +216,8 @@ export const buildCityFaq = ({
     });
   }
 
+  if (venues) questions.push(...cityVenuesFaq(place, venues));
+
   if (total > 0 && lastUpdated) {
     questions.push({
       q: `Jak często aktualizowany jest repertuar kin ${place}?`,
@@ -186,9 +241,6 @@ interface CinemaFaqInput {
   /** Researched venue details; absent on older API responses. */
   details?: ICinemaDetails;
 }
-
-const seatsPl = (seats: number): string =>
-  `${seats} ${pluralPl(seats, "miejsce", "miejsca", "miejsc")}`;
 
 /** Venue facts (rooms, booking, accessibility, operator) as FAQ entries. */
 const cinemaDetailsFaq = (
