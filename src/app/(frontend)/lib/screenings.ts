@@ -5,9 +5,77 @@ import {
   IRecentScreening,
   IRecentVenue,
 } from "@/interfaces/IScreenings";
-import { IMovie, PaginatedResponse } from "@/interfaces/IMovies";
+import { IGenre, IMovie, PaginatedResponse } from "@/interfaces/IMovies";
+import { ICinemaSummary } from "@/interfaces/ICinema";
 import { apiFetch } from "./client";
 import { dropPastScreeningGroups, dropPastScreenings } from "./screening-filters";
+
+// The API embeds whole movie, genre, cinema and city records in every
+// screening: descriptions, ticket URLs, population. One popular film carried
+// 161 copies of the Warsaw city guide, and these groups are serialized into
+// the RSC payload of every listing (430 KB of the 705 KB homepage), where
+// hydrating them cost ~850 ms of main-thread time on mobile. Only the fields
+// the interfaces declare are kept; descriptions are nulled because listings
+// never render them (entity pages read their own endpoints).
+const slimGenre = ({ id, slug, name }: IGenre): IGenre => ({
+  id,
+  slug,
+  name,
+  description: null,
+});
+
+const slimCinema = (cinema: ICinemaSummary): ICinemaSummary => ({
+  id: cinema.id,
+  slug: cinema.slug,
+  name: cinema.name,
+  street: cinema.street,
+  city: {
+    id: cinema.city.id,
+    slug: cinema.city.slug,
+    name: cinema.city.name,
+    nameDeclinated: cinema.city.nameDeclinated,
+    numberOfCinemas: cinema.city.numberOfCinemas,
+    description: null,
+    voivodeship: cinema.city.voivodeship,
+  },
+  latitude: cinema.latitude,
+  longitude: cinema.longitude,
+  updatedAt: cinema.updatedAt,
+  isOpenAir: cinema.isOpenAir,
+});
+
+const slimScreening = (screening: IScreening): IScreening => ({
+  id: screening.id,
+  date: screening.date,
+  time: screening.time,
+  dateTime: screening.dateTime,
+  isDubbing: screening.isDubbing,
+  isSubtitled: screening.isSubtitled,
+  cinema: slimCinema(screening.cinema),
+});
+
+const slimScreeningGroup = ({
+  movie,
+  summary,
+  screenings,
+}: IScreeningGroup): IScreeningGroup => ({
+  movie: {
+    id: movie.id,
+    slug: movie.slug,
+    title: movie.title,
+    titleOriginal: movie.titleOriginal,
+    productionYear: movie.productionYear,
+    duration: movie.duration,
+    posterUrl: movie.posterUrl,
+    genres: movie.genres.map(slimGenre),
+    updatedAt: movie.updatedAt,
+  },
+  summary,
+  screenings: screenings.map(slimScreening),
+});
+
+const prepareGroups = (groups: IScreeningGroup[]): IScreeningGroup[] =>
+  dropPastScreeningGroups(groups).map(slimScreeningGroup);
 
 interface GetScreeningsParams {
   cityId?: string | null;
@@ -72,7 +140,7 @@ export const fetchScreenings = async (
     },
   });
 
-  return dropPastScreeningGroups(
+  return prepareGroups(
     Array.isArray(response) ? response : [...response.data]
   );
 };
@@ -103,7 +171,7 @@ export const getMovieScreenings = async (
 
   return dropPastScreenings(
     Array.isArray(response) ? response : [...response.data]
-  );
+  ).map(slimScreening);
 };
 
 export const getPaginatedScreenings = async (
@@ -126,8 +194,8 @@ export const getPaginatedScreenings = async (
       },
     });
 
-    if (Array.isArray(response)) return dropPastScreeningGroups(response);
-    return { ...response, data: dropPastScreeningGroups([...response.data]) };
+    if (Array.isArray(response)) return prepareGroups(response);
+    return { ...response, data: prepareGroups([...response.data]) };
   } catch (error) {
     console.warn("Falling back to empty paginated screenings list:", error);
     return {

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getScreenings } from "@/lib/screenings";
 import { pluralPl } from "@/lib/seo";
 import { isVoivodeship, voivodeshipLocative } from "@/lib/voivodeships";
+import { isChainCinema } from "@/lib/cinema-chains";
 
 const MAX_CINEMAS = 6;
 
@@ -56,10 +57,15 @@ const NearbyRepertoire = async ({
     }
   }
 
+  // Independents rank above chain multiplexes: sorted by film count alone,
+  // the block under an arthouse cinema led with Helios and Multikino, which
+  // pulled the page's topic towards the chains. Chains still fill the slots
+  // when a region has too few independents with screenings.
   const cinemas = [...byCinema.values()]
     .sort(
       (a, b) =>
         Number(b.cityId === cityId) - Number(a.cityId === cityId) ||
+        Number(isChainCinema(a.name)) - Number(isChainCinema(b.name)) ||
         b.movies - a.movies
     )
     .slice(0, MAX_CINEMAS);

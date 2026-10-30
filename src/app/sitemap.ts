@@ -121,24 +121,6 @@ const toPages = (
       };
     });
 
-// Movie pages without upcoming screenings render with a noindex meta;
-// submitting them would conflict with that signal ("Submitted URL marked
-// noindex" in Search Console). Cross-check against the screenings feed.
-// An empty feed means a backend hiccup, not zero screenings nationwide -
-// keep the full list then instead of emptying the sitemap.
-const filterMoviesWithScreenings = async (
-  movies: ISitemapEntry[]
-): Promise<ISitemapEntry[]> => {
-  try {
-    const groups = await getScreenings();
-    if (groups.length === 0) return movies;
-    const slugsWithScreenings = new Set(groups.map((g) => g.movie.slug));
-    return movies.filter((m) => slugsWithScreenings.has(m.slug));
-  } catch {
-    return movies;
-  }
-};
-
 // Genre pages with no upcoming screenings are noindex - same conflict guard.
 //
 // The count has to come from the screenings feed, not the movie catalogue:
@@ -351,15 +333,19 @@ const sitemap = async ({
 
   switch (sitemapId) {
     case "filmy": {
-      // Cross-checked against the screenings feed (noindex guard); poster
-      // URLs ride along as <image:image>. On a poster-map failure movie
-      // entries simply ship without an image.
-      const [movies, posters] = await Promise.all([
-        filterMoviesWithScreenings(entries.movies),
-        getMoviePosterMap().catch(() => new Map<string, string>()),
-      ]);
+      // Movies arrive pre-filtered by the API to the ones with upcoming or
+      // recent screenings, the same rule as the movie page's noindex. This
+      // used to be cross-checked against upcoming screenings only, which
+      // left indexable movies between runs out of the sitemap. Poster URLs
+      // ride along as <image:image>; on a poster-map failure movie entries
+      // simply ship without an image.
+      const posters = await getMoviePosterMap().catch(
+        () => new Map<string, string>()
+      );
       return dedupeByUrl(
-        toPages(movies, "filmy", "daily", 0.7, (slug) => posters.get(slug))
+        toPages(entries.movies, "filmy", "daily", 0.7, (slug) =>
+          posters.get(slug)
+        )
       );
     }
     case "kina":

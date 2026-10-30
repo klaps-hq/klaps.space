@@ -6,6 +6,7 @@ import {
   ProfileSubject,
   buildProfileSentences,
   hasProfileContent,
+  MIN_SCREENINGS_FOR_PATTERN,
   sinceMonth,
   studioCinemas,
 } from "@/lib/programme-profile";
@@ -44,8 +45,6 @@ interface RankedListProps {
 }
 
 const WEEKDAY_SHORT = ["pn", "wt", "śr", "cz", "pt", "sb", "nd"];
-// Same threshold as the weekday sentence in buildProfileSentences.
-const MIN_SCREENINGS_FOR_CHART = 8;
 
 const CELL_CLASS =
   "border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1";
@@ -121,7 +120,7 @@ const ProgrammeProfile = ({
   const sentences = buildProfileSentences(profile, subject);
   const maxWeekday = Math.max(...profile.weekdays);
   const showChart =
-    profile.screenings >= MIN_SCREENINGS_FOR_CHART && maxWeekday > 0;
+    profile.screenings >= MIN_SCREENINGS_FOR_PATTERN && maxWeekday > 0;
 
   const genreHref = (slug: string) =>
     indexable && (!indexable.genres || indexable.genres.has(slug))

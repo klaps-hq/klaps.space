@@ -143,20 +143,24 @@ jobs:
       # Rarely visited ones stayed empty for hours after a release (October
       # 2026: /sitemap/blog.xml and /sitemap/tematy.xml). The prerendered
       # copies count as fresh for the first revalidate window (300 s), so
-      # requests before that only get the empty copy back: poll the blog
-      # sitemap until it lists URLs, which means the window has passed and
-      # regeneration works. Then two passes: the first marks every page stale
-      # and triggers the regeneration, the second picks the fresh copy up.
-      # Best effort: never fails the deploy.
+      # requests before that only get the empty copy back. The app's
+      # revalidate-after-deploy route drops those copies on demand as soon as
+      # the container answers; the blog sitemap poll stays as a fallback for
+      # when that call fails. Then two passes: the first marks every page
+      # stale and triggers the regeneration, the second picks the fresh copy
+      # up. Best effort: never fails the deploy.
       - name: Warm ISR caches
         continue-on-error: true
         env:
           SITE: https://${{ env.DOMAIN }}
+          INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
         run: |
           for i in $(seq 1 36); do
             curl -fsS -o /dev/null "$SITE/" && break
             sleep 5
           done
+          curl -fsS -X POST -H "x-internal-api-key: $INTERNAL_API_KEY" \
+            "$SITE/api/revalidate-after-deploy" || echo "on-demand revalidation failed"
           for i in $(seq 1 30); do
             urls=$(curl -s "$SITE/sitemap/blog.xml" | grep -c '<loc>' || true)
             echo "poll $i: blog sitemap URLs: $urls"
