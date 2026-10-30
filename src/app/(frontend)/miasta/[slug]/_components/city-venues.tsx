@@ -8,6 +8,7 @@ import {
   seatsPl,
 } from "@/lib/city-venues";
 import { pluralPl } from "@/lib/seo";
+import UncrawledLink from "@/components/common/uncrawled-link";
 
 interface CityVenuesProps {
   heading: React.ReactNode;
@@ -104,7 +105,13 @@ const CityVenues = ({ heading, summary, isLinked }: CityVenuesProps) => {
                       {row.name}
                     </Link>
                   ) : (
-                    row.name
+                    <UncrawledLink
+                      basePath="/kina"
+                      slug={row.slug}
+                      className="cursor-pointer hover:text-white underline-offset-4 hover:underline"
+                    >
+                      {row.name}
+                    </UncrawledLink>
                   )}
                 </th>
                 <td className="py-3 pr-4 tabular-nums text-white/70">

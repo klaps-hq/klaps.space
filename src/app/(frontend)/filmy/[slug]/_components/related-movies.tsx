@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { IMovieSummary } from "@/interfaces/IMovies";
 import MoviePoster from "@/components/common/movie-poster";
+import UncrawledLink from "@/components/common/uncrawled-link";
 
 interface RelatedMoviesProps {
   movies: IMovieSummary[];
@@ -75,9 +76,15 @@ const RelatedMovies: React.FC<RelatedMoviesProps> = ({
             <RelatedMovieCard movie={movie} />
           </Link>
         ) : (
-          <div key={movie.id} className="flex flex-col gap-3 opacity-60">
+          // Noindex film: clickable for people, no crawlable link.
+          <UncrawledLink
+            key={movie.id}
+            basePath="/filmy"
+            slug={movie.slug}
+            className="group flex cursor-pointer flex-col gap-3"
+          >
             <RelatedMovieCard movie={movie} />
-          </div>
+          </UncrawledLink>
         )
       )}
     </div>

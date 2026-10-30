@@ -3,6 +3,7 @@ import Link from "next/link";
 import { IRecentVenue } from "@/interfaces/IScreenings";
 import { RECENT_SCREENINGS_DAYS } from "@/lib/screenings";
 import { formatPlDate, pluralPl } from "@/lib/seo";
+import UncrawledLink from "@/components/common/uncrawled-link";
 
 interface MovieRecentVenuesProps {
   movieTitle: string;
@@ -56,7 +57,7 @@ const MovieRecentVenues = ({
           const body = (
             <>
               <span
-                className={`${TITLE_CLASS} ${linked ? "group-hover:text-white" : ""}`}
+                className={`${TITLE_CLASS} group-hover:text-white`}
               >
                 {venue.cinema.name}
               </span>
@@ -78,7 +79,13 @@ const MovieRecentVenues = ({
                   {body}
                 </Link>
               ) : (
-                <div className={`w-full bg-black ${CELL_CLASS}`}>{body}</div>
+                <UncrawledLink
+                  basePath="/kina"
+                  slug={venue.cinema.slug}
+                  className={`group w-full cursor-pointer bg-black hover:bg-white/[0.04] transition-colors ${CELL_CLASS}`}
+                >
+                  {body}
+                </UncrawledLink>
               )}
             </li>
           );
