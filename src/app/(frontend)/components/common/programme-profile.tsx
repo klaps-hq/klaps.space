@@ -157,7 +157,24 @@ const ProgrammeProfile = ({
       })),
     });
   }
-  if (subject.kind === "genre" || subject.kind === "director") {
+  if (subject.kind === "movie") {
+    // One film: its own top film, genre and director lists say nothing.
+    // Where it played is the point, chains included.
+    lists.splice(0, lists.length, {
+      title: "Kina, które najczęściej go grały",
+      items: profile.topCinemas.slice(0, 8).map((c) => ({
+        key: c.slug,
+        label: `${c.name}, ${c.cityName}`,
+        href: cinemaHref(c.slug),
+        count: c.count,
+      })),
+    });
+  }
+  if (
+    subject.kind === "genre" ||
+    subject.kind === "director" ||
+    subject.kind === "movie"
+  ) {
     lists.push({
       title: "Miasta",
       items: profile.topCities.map((c) => ({
