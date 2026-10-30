@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import { ICinemaDetails } from "@/interfaces/ICinema";
 import { pluralPl } from "@/lib/seo";
 import TrackedCinemaLink from "@/components/common/tracked-cinema-link";
+import { CONTACT_EMAIL } from "@/constants";
 
 interface CinemaDetailsProps {
   cinemaName: string;
@@ -53,17 +54,46 @@ const seatsLabel = (seats: number) =>
 const roomLabel = (name: string) =>
   /^(sala|studio|scena)\b/i.test(name) ? name : `Sala ${name}`;
 
+interface DataRequestProps {
+  cinemaName: string;
+  className?: string;
+}
+
+/**
+ * Asks the venue itself for missing or outdated data. Cinemas are the only
+ * source for logos, photos and seat counts we cannot verify elsewhere, and
+ * the contact is a natural opening for a link back to klaps.space.
+ */
+const DataRequest = ({ cinemaName, className }: DataRequestProps) => (
+  <p className={`max-w-[68ch] text-sm md:text-base text-white/55 leading-relaxed ${className ?? ""}`}>
+    Prowadzicie to kino? Jeśli brakuje danych albo coś się zmieniło,
+    prześlijcie nam liczbę sal i&nbsp;miejsc, informacje o&nbsp;dostępności,
+    logo lub zdjęcia (opublikujemy je tylko za Waszą zgodą):{" "}
+    <a
+      href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Dane kina: ${cinemaName}`)}`}
+      className="text-white/80 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white transition-colors"
+    >
+      {CONTACT_EMAIL}
+    </a>
+    .
+  </p>
+);
+
 /**
  * Researched venue facts (rooms, contact, links, accessibility, photos).
- * Renders nothing when the research found nothing, so pages of venues
- * without data look exactly as before.
+ * Without any researched data only the request for data is shown.
  */
 const CinemaDetails = ({
   cinemaName,
   cinemaSlug,
   details,
 }: CinemaDetailsProps) => {
-  if (!details) return null;
+  const requestOnly = (
+    <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-10 md:pt-12 pb-12 md:pb-16">
+      <DataRequest cinemaName={cinemaName} />
+    </section>
+  );
+  if (!details) return requestOnly;
   const {
     phone,
     repertoireUrl,
@@ -98,7 +128,7 @@ const CinemaDetails = ({
     accessibilityItems.length > 0 ||
     accessibility?.note ||
     photos.length > 0;
-  if (!hasAnything) return null;
+  if (!hasAnything) return requestOnly;
 
   return (
     <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
@@ -252,6 +282,8 @@ const CinemaDetails = ({
           ))}
         </div>
       )}
+
+      <DataRequest cinemaName={cinemaName} className="mt-10 md:mt-12" />
     </section>
   );
 };
