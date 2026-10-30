@@ -38,6 +38,9 @@ import NearbyRepertoire from "@/components/common/nearby-repertoire";
 import ListingFaq from "@/components/common/listing-faq";
 import { buildCityFaq } from "@/lib/listing-faq";
 import Footer from "../../(home)/_components/footer";
+import { summarizeCityVenues } from "@/lib/city-venues";
+import CityVenues from "./_components/city-venues";
+import CityGuide from "./_components/city-guide";
 
 interface CinemaCardsProps {
   cinemas: { id: number; slug: string; name: string; street: string | null }[];
@@ -280,6 +283,10 @@ const CityPage = async ({ params }: CityPageProps) => {
   const cityForCopy = city.nameDeclinated ?? city.name;
   const { independent: independentCinemas, chain: chainCinemas } =
     splitByChain(cinemas);
+  // Open-air series have no rooms; the comparison covers year-round venues.
+  const venues = summarizeCityVenues(
+    independentCinemas.filter((cinema) => !cinema.isOpenAir)
+  );
 
   return (
     <main className="bg-black text-white min-h-screen">
@@ -436,6 +443,25 @@ const CityPage = async ({ params }: CityPageProps) => {
         indexable={indexable}
       />
 
+      <CityVenues
+        heading={
+          <>
+            Sale i&nbsp;kina {inPlace(cityForCopy)}
+          </>
+        }
+        summary={venues}
+        isLinked={isCinemaLinked}
+      />
+
+      <CityGuide
+        heading={
+          <>
+            Kina {inPlace(cityForCopy)}: przewodnik
+          </>
+        }
+        guide={city.guide}
+      />
+
       {cinemas.some((cinema) => cinema.isOpenAir) && (
         <LinkGrid
           heading={<>Kino plenerowe {inPlace(cityForCopy)}</>}
@@ -458,6 +484,7 @@ const CityPage = async ({ params }: CityPageProps) => {
           screenings,
           lastUpdated,
           profile,
+          venues,
         })}
       />
 
