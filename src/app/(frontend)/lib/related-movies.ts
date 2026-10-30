@@ -1,5 +1,6 @@
 import { IMovie, IMovieSummary } from "@/interfaces/IMovies";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
+import { isChainCinema } from "./cinema-chains";
 
 const RELATED_LIMIT = 6;
 
@@ -24,7 +25,9 @@ const pairHash = (a: string, b: string): number => {
  * - genre overlap as Jaccard, so a candidate tagged with five genres no
  *   longer matches everything,
  * - closeness in production year (same decade counts most),
- * - playing in a city where this movie plays too.
+ * - playing in a city where this movie plays too,
+ * - playing in an independent venue: a chain-only re-release scored as
+ *   "similar" on genre and decade alone (Rocky next to Kiarostami).
  */
 export const pickRelatedMovies = (
   movie: Pick<IMovie, "id" | "slug" | "productionYear" | "genres">,
@@ -52,6 +55,9 @@ export const pickRelatedMovies = (
       const sharesCity = group.summary.cities.some((name) =>
         movieCityNames.has(name)
       );
+      const inIndependentVenue = group.screenings.some(
+        (screening) => !isChainCinema(screening.cinema.name)
+      );
 
       return {
         candidate,
@@ -60,6 +66,7 @@ export const pickRelatedMovies = (
           genreScore * 4 +
           eraScore * 1.5 +
           (sharesCity ? 1 : 0) +
+          (inIndependentVenue ? 1.5 : 0) +
           pairHash(movie.slug, candidate.slug) * 0.5,
       };
     })

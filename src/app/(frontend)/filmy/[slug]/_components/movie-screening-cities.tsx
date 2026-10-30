@@ -54,9 +54,15 @@ export const buildMovieScreeningContext = (
   );
   const cinemas = [...new Map(sorted.map((s) => [s.cinema.id, s.cinema])).values()];
   const arthouse = cinemas.filter((c) => !isChainCinema(c.name));
+  // Chain venues share a bare brand name ("Helios"), which read as
+  // "Helios, Helios i Helios" (content audit #4); repeated names get the city.
+  const nameCounts = new Map<string, number>();
+  for (const c of cinemas) nameCounts.set(c.name, (nameCounts.get(c.name) ?? 0) + 1);
   const named = (arthouse.length > 0 ? arthouse : cinemas)
     .slice(0, MAX_CINEMA_NAMES)
-    .map((c) => c.name);
+    .map((c) =>
+      (nameCounts.get(c.name) ?? 0) > 1 ? `${c.name} (${c.city.name})` : c.name
+    );
   const moreCinemas = cinemas.length - named.length;
 
   const isRevival =
@@ -65,7 +71,7 @@ export const buildMovieScreeningContext = (
     ? `${movieTitle} z ${productionYear} roku wraca na duży ekran`
     : `${movieTitle} można zobaczyć w kinach`;
   const where =
-    `${joinPl(named)}${moreCinemas > 0 ? ` i ${moreCinemas} ${pluralPl(moreCinemas, "inne kino", "inne kina", "innych kin")}` : ""}`;
+    `${joinPl(named)}${moreCinemas > 0 ? ` oraz ${moreCinemas} ${pluralPl(moreCinemas, "inne kino", "inne kina", "innych kin")}` : ""}`;
   const venueKind =
     arthouse.length === cinemas.length
       ? "w kinach studyjnych"
@@ -75,6 +81,13 @@ export const buildMovieScreeningContext = (
 
   const first = sorted[0].date;
   const last = sorted[sorted.length - 1].date;
+  // A round anniversary is often why a classic is back on screen, and it is
+  // a fact no copied synopsis carries.
+  const age = Number(first.slice(0, 4)) - productionYear;
+  const anniversary =
+    isRevival && age > 0 && age % 5 === 0
+      ? ` W ${first.slice(0, 4)} roku mija ${age} lat od premiery.`
+      : "";
   const dates =
     first === last
       ? `Seanse zapowiedziano na ${formatDayMonth(first)}.`
@@ -82,7 +95,7 @@ export const buildMovieScreeningContext = (
 
   // No pronoun for the film: titles have every grammatical gender.
   const label = cinemas.length === 1 ? "Kino z seansami" : "Kina z seansami";
-  return `${opening} ${venueKind} w ${citiesCount} ${pluralPl(citiesCount, "mieście", "miastach", "miastach")}. ${label}: ${where}. ${dates}`;
+  return `${opening} ${venueKind} w ${citiesCount} ${pluralPl(citiesCount, "mieście", "miastach", "miastach")}.${anniversary} ${label}: ${where}. ${dates}`;
 };
 
 // Server-rendered overview of where the movie plays. The screenings list

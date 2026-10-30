@@ -97,8 +97,10 @@ export const hasVenueFacts = (summary: CityVenueSummary): boolean =>
 export const seatsPl = (seats: number): string =>
   `${seats} ${pluralPl(seats, "miejsce", "miejsca", "miejsc")}`;
 
+// Accusative: every caller puts it after "mają (łącznie)", where one room
+// reads "1 salę", not "1 sala".
 export const screensPl = (screens: number): string =>
-  `${screens} ${pluralPl(screens, "sala", "sale", "sal")}`;
+  `${screens} ${pluralPl(screens, "salę", "sale", "sal")}`;
 
 /** "Sala Gerard" stays as is, a bare "Gerard" reads better with the prefix. */
 export const roomLabel = (name: string): string =>

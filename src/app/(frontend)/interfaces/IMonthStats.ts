@@ -12,7 +12,7 @@ export interface IMonthStatsMovie {
 }
 
 /**
- * "Klaps w liczbach": classic screenings (films made before 2000) in one
+ * "Klaps w liczbach": classic screenings (films at least 25 years old) in one
  * calendar month, from GET /socials/series/stats. The endpoint also sends
  * `alreadyPublished` for the Instagram bot; the site ignores it.
  */

@@ -1,6 +1,6 @@
 import { getCityBySlug } from "@/lib/cities";
-import { getCinemas } from "@/lib/cinemas";
-import { getScreeningsLastUpdated } from "@/lib/screenings";
+import { fetchCinemas } from "@/lib/cinemas";
+import { getScreenings, getScreeningsLastUpdated } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { inPlace, pluralPl } from "@/lib/seo";
 import { ICity } from "@/interfaces/ICities";
@@ -14,7 +14,7 @@ type CityLayoutProps = {
 
 const buildCityJsonLd = (
   city: ICity,
-  cinemasCount: number,
+  cinemasCount: number | null,
   screeningsCount: number,
   screeningGroups: IScreeningGroup[],
   lastUpdated: Date | null
@@ -23,23 +23,26 @@ const buildCityJsonLd = (
   "@type": "CollectionPage",
   name: `Kina i seanse ${inPlace(city.nameDeclinated ?? city.name)}`,
   url: `${SITE_URL}/miasta/${city.slug}`,
-  description: `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ${screeningsCount} ${pluralPl(screeningsCount, "seans specjalny", "seanse specjalne", "seansów specjalnych")} ${inPlace(city.nameDeclinated ?? city.name)}.`,
+  description: `${cinemasCount !== null ? `${cinemasCount} ${pluralPl(cinemasCount, "kino", "kina", "kin")} i ` : ""}${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")} ${inPlace(city.nameDeclinated ?? city.name)}.`,
   // Freshness signal for AI Overviews: newest screening `updatedAt` for this
   // city (mirrors the visible "Repertuar zaktualizowano" note), i.e. a real
   // data change rather than render time. Omitted when the date is unknown.
   ...(lastUpdated && { dateModified: lastUpdated.toISOString() }),
   // The visible repertoire mirrored as an ItemList, so AI search gets
   // a machine-readable "what's playing in this city" list.
-  mainEntity: {
-    "@type": "ItemList",
-    numberOfItems: screeningGroups.length,
-    itemListElement: screeningGroups.map((group, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      url: `${SITE_URL}/filmy/${group.movie.slug}`,
-      name: `${group.movie.title} (${group.movie.productionYear})`,
-    })),
-  },
+  // Omitted when nothing is upcoming: an empty list says nothing.
+  ...(screeningGroups.length > 0 && {
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: screeningGroups.length,
+      itemListElement: screeningGroups.map((group, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${SITE_URL}/filmy/${group.movie.slug}`,
+        name: `${group.movie.title} (${group.movie.productionYear})`,
+      })),
+    },
+  }),
 });
 
 export default async function CityLayout({
@@ -47,18 +50,20 @@ export default async function CityLayout({
   params,
 }: Readonly<CityLayoutProps>) {
   const { slug } = await params;
-  const { city, screenings: rawScreenings } = await getCityBySlug(slug);
+  const { city } = await getCityBySlug(slug);
 
-  const [cinemasResponse, lastUpdated] = await Promise.all([
-    getCinemas({ cityId: city.id.toString() }),
+  // Same calls as the page body (deduped by the fetch cache), so the
+  // structured data counts what the visitor sees. The raw city payload
+  // still held already-started showtimes, and a swallowed cinemas error
+  // read as "0 kin" (content audit #4).
+  const [cinemasResponse, screenings, lastUpdated] = await Promise.all([
+    fetchCinemas({ cityId: city.id.toString() }).catch(() => null),
+    getScreenings({ cityId: city.id.toString() }),
     getScreeningsLastUpdated({ cityId: city.id.toString() }),
   ]);
 
-  const screenings = Array.isArray(rawScreenings)
-    ? rawScreenings
-    : [...(rawScreenings?.data ?? [])];
-
-  const cinemasCount = cinemasResponse.data.flatMap((g) => g.cinemas).length;
+  const cinemasCount =
+    cinemasResponse?.data.flatMap((g) => g.cinemas).length ?? null;
   const screeningsCount = screenings.reduce(
     (sum, group) => sum + group.screenings.length,
     0

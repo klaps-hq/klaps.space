@@ -4,8 +4,11 @@ import { getScreenings } from "@/lib/screenings";
 import { pluralPl } from "@/lib/seo";
 import { isVoivodeship, voivodeshipLocative } from "@/lib/voivodeships";
 import { isChainCinema } from "@/lib/cinema-chains";
+import UncrawledLink from "./uncrawled-link";
 
 const MAX_CINEMAS = 6;
+// Chains only fill in when the region has fewer independents than this.
+const MIN_INDEPENDENT = 3;
 
 interface NearbyRepertoireProps {
   /** Canonical lowercase voivodeship of the empty page; null renders nothing. */
@@ -59,14 +62,21 @@ const NearbyRepertoire = async ({
 
   // Independents rank above chain multiplexes: sorted by film count alone,
   // the block under an arthouse cinema led with Helios and Multikino, which
-  // pulled the page's topic towards the chains. Chains still fill the slots
-  // when a region has too few independents with screenings.
-  const cinemas = [...byCinema.values()]
+  // pulled the page's topic towards the chains. Chains appear only when a
+  // region has too few independents with screenings (content audit, October
+  // 2026: a small-town arthouse page still listed three multiplexes).
+  const all = [...byCinema.values()];
+  const independentCount = all.filter((c) => !isChainCinema(c.name)).length;
+  const cinemas = all
+    .filter(
+      (cinema) =>
+        independentCount < MIN_INDEPENDENT || !isChainCinema(cinema.name),
+    )
     .sort(
       (a, b) =>
         Number(b.cityId === cityId) - Number(a.cityId === cityId) ||
         Number(isChainCinema(a.name)) - Number(isChainCinema(b.name)) ||
-        b.movies - a.movies
+        b.movies - a.movies,
     )
     .slice(0, MAX_CINEMAS);
   if (cinemas.length === 0) return null;
@@ -77,21 +87,40 @@ const NearbyRepertoire = async ({
         Seanse w kinach w województwie {voivodeshipLocative(voivodeship)}
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 pt-px pl-px">
-        {cinemas.map((cinema) => (
-          <Link
-            key={cinema.id}
-            href={`/kina/${cinema.slug}`}
-            className="group bg-black hover:bg-white/[0.04] transition-colors border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1"
-          >
-            <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
-              {cinema.name}
-            </span>
-            <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
-              {cinema.cityName} · {cinema.movies}{" "}
-              {pluralPl(cinema.movies, "film", "filmy", "filmów")}
-            </span>
-          </Link>
-        ))}
+        {cinemas.map((cinema) =>
+          // Chain pages are noindex: they stay clickable without a crawlable
+          // href (content audit #5).
+          isChainCinema(cinema.name) ? (
+            <UncrawledLink
+              key={cinema.id}
+              basePath="/kina"
+              slug={cinema.slug}
+              className="cursor-pointer group bg-black hover:bg-white/[0.04] transition-colors border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1"
+            >
+              <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
+                {cinema.name}
+              </span>
+              <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
+                {cinema.cityName} · {cinema.movies}{" "}
+                {pluralPl(cinema.movies, "film", "filmy", "filmów")}
+              </span>
+            </UncrawledLink>
+          ) : (
+            <Link
+              key={cinema.id}
+              href={`/kina/${cinema.slug}`}
+              className="group bg-black hover:bg-white/[0.04] transition-colors border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1"
+            >
+              <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
+                {cinema.name}
+              </span>
+              <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
+                {cinema.cityName} · {cinema.movies}{" "}
+                {pluralPl(cinema.movies, "film", "filmy", "filmów")}
+              </span>
+            </Link>
+          ),
+        )}
       </div>
     </div>
   );

@@ -32,6 +32,8 @@ export interface ICinema {
   website: string | null;
   // Researched venue details; absent on older API responses.
   details?: ICinemaDetails;
+  // Open-air venue (summer cinema series); absent on older API responses.
+  isOpenAir?: boolean;
 }
 
 export interface ICinemaRoom {

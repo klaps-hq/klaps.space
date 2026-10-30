@@ -12,6 +12,8 @@ import { useNow } from "@/hooks/use-now";
 import { dropPastScreenings } from "@/lib/screening-filters";
 import { groupScreeningsByCinema } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
+import { isChainCinema } from "@/lib/cinema-chains";
+import UncrawledLink from "@/components/common/uncrawled-link";
 import { formatDateLabel, cn, WARSAW_TZ } from "@/lib/utils";
 import { wallTimeToInstant } from "@/lib/warsaw-time";
 import { voivodeshipLocative } from "@/lib/voivodeships";
@@ -90,7 +92,7 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
   if (!first) return null;
 
   const sorted = [...screenings].sort((a, b) =>
-    a.dateTime.localeCompare(b.dateTime)
+    a.dateTime.localeCompare(b.dateTime),
   );
 
   // Deep link back to this exact view: the ?city/?date params preselect
@@ -120,12 +122,25 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-8 py-5 md:py-6">
       <div className="flex flex-col gap-1 min-w-0">
-        <Link
-          href={`/kina/${first.cinema.slug}`}
-          className="w-fit text-xl md:text-2xl lg:text-3xl font-medium uppercase -tracking-[0.01em] leading-tight text-white hover:text-white/70 transition-colors"
-        >
-          {first.cinema.name}
-        </Link>
+        {/* Chain venue pages are noindex, so their rows navigate without a
+            crawlable href (a Halloween re-release put 31 multiplex links
+            on one film page; content audit #5). */}
+        {isChainCinema(first.cinema.name) ? (
+          <UncrawledLink
+            basePath="/kina"
+            slug={first.cinema.slug}
+            className="w-fit cursor-pointer text-xl md:text-2xl lg:text-3xl font-medium uppercase -tracking-[0.01em] leading-tight text-white hover:text-white/70 transition-colors"
+          >
+            {first.cinema.name}
+          </UncrawledLink>
+        ) : (
+          <Link
+            href={`/kina/${first.cinema.slug}`}
+            className="w-fit text-xl md:text-2xl lg:text-3xl font-medium uppercase -tracking-[0.01em] leading-tight text-white hover:text-white/70 transition-colors"
+          >
+            {first.cinema.name}
+          </Link>
+        )}
         <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/50">
           {/* py/-my widen the ~12px text to a usable tap target. */}
           <Link
@@ -148,7 +163,11 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
           <AddToCalendarButton
             title={`${movieTitle} - ${first.cinema.name}`}
             durationMinutes={movieDuration}
-            location={[first.cinema.name, first.cinema.street, first.cinema.city.name]
+            location={[
+              first.cinema.name,
+              first.cinema.street,
+              first.cinema.city.name,
+            ]
               .filter(Boolean)
               .join(", ")}
             url={movieUrl}
@@ -167,7 +186,11 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
             variant="labeled"
             title={`${movieTitle} - ${first.cinema.name}`}
             durationMinutes={movieDuration}
-            location={[first.cinema.name, first.cinema.street, first.cinema.city.name]
+            location={[
+              first.cinema.name,
+              first.cinema.street,
+              first.cinema.city.name,
+            ]
               .filter(Boolean)
               .join(", ")}
             url={movieUrl}
@@ -199,7 +222,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
   // started since; drop them once the client clock is known.
   const upcomingScreenings = useMemo(
     () => (now === null ? screenings : dropPastScreenings(screenings, now)),
-    [screenings, now]
+    [screenings, now],
   );
 
   // Resolve voivodeship from the canonical cities list (the same source
@@ -225,9 +248,15 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
       return upcomingScreenings.filter((s) => s.cinema.city.id === cityId);
     }
     return upcomingScreenings.filter(
-      (s) => voivodeshipByCityId.get(s.cinema.city.id) === voivodeship
+      (s) => voivodeshipByCityId.get(s.cinema.city.id) === voivodeship,
     );
-  }, [upcomingScreenings, cityId, voivodeship, isHydrated, voivodeshipByCityId]);
+  }, [
+    upcomingScreenings,
+    cityId,
+    voivodeship,
+    isHydrated,
+    voivodeshipByCityId,
+  ]);
 
   // The stored location is a soft preference here: visitors often arrive
   // from a cinema, city or search result elsewhere in the country, and an
@@ -243,7 +272,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
     ...new Set(visibleScreenings.map((s) => s.date)),
   ].sort();
   const [selectedDate, setSelectedDate] = useState<string | null>(
-    () => availableDates[0] ?? null
+    () => availableDates[0] ?? null,
   );
 
   // Shared screening links carry ?date= - preselect that day when it
@@ -308,7 +337,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
       : availableDates[0];
 
   const groups = groupScreeningsByCinema(
-    visibleScreenings.filter((s) => s.date === activeDate)
+    visibleScreenings.filter((s) => s.date === activeDate),
   );
 
   return (
@@ -329,7 +358,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
                   "shrink-0 pb-1 text-[11px] uppercase tracking-wider border-b transition-colors whitespace-nowrap",
                   active
                     ? "text-white border-white"
-                    : "text-white/55 border-transparent hover:text-white hover:border-white/40"
+                    : "text-white/55 border-transparent hover:text-white hover:border-white/40",
                 )}
               >
                 {formatFullDateLabel(date)}

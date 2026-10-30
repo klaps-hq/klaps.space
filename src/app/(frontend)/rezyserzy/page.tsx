@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import { DIRECTOR_INDEX_THRESHOLD, getDirectors } from "@/lib/directors";
+import { getDirectors, isDirectorIndexable } from "@/lib/directors";
 import { IDirector } from "@/interfaces/IDirectors";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
@@ -78,7 +78,7 @@ const toBrowserItem = (director: IDirector): DirectorsBrowserItem => ({
   upcomingScreeningsCount: director.upcomingScreeningsCount,
   // Below the threshold the page is noindex, so the card is shown but not
   // linked (the hub used to send crawlers to ~50 such pages).
-  linked: director.upcomingScreeningsCount >= DIRECTOR_INDEX_THRESHOLD,
+  linked: isDirectorIndexable(director),
 });
 
 const DirectorsPage = async () => {
@@ -98,8 +98,7 @@ const DirectorsPage = async () => {
         <JsonLd
           data={buildDirectorsJsonLd(
             withRepertoire.filter(
-              (director) =>
-                director.upcomingScreeningsCount >= DIRECTOR_INDEX_THRESHOLD
+              (director) => isDirectorIndexable(director)
             )
           )}
         />

@@ -9,7 +9,10 @@ import Genres from "./_components/genres";
 import Cinemas from "./_components/cinemas";
 import Blog from "./_components/blog";
 import About from "./_components/about";
-import { getFeaturedHeroScreening, fetchHomeScreenings } from "@/lib/screenings";
+import {
+  getFeaturedHeroScreening,
+  fetchHomeScreenings,
+} from "@/lib/screenings";
 import { getGenres } from "@/lib/genres";
 import { SITE_URL } from "@/lib/site-config";
 
@@ -57,46 +60,50 @@ const HomePage = async () => {
       {/* Hidden at the top (the hero carries its own nav), revealed as a
           floating glass bar while scrolling back up. */}
       <SiteHeader overlay />
-      <Hero
-        screening={heroScreening}
-        backdropBlurDataUrl={backdropBlurDataUrl}
-        posterBlurDataUrl={posterBlurDataUrl}
-      />
-      {/* The default screenings grid is rendered on the server (passed as
+      {/* Every other page has a <main>; the homepage had none, so extractors
+          that read the main landmark found nothing (content audit #4). */}
+      <main>
+        <Hero
+          screening={heroScreening}
+          backdropBlurDataUrl={backdropBlurDataUrl}
+          posterBlurDataUrl={posterBlurDataUrl}
+        />
+        {/* The default screenings grid is rendered on the server (passed as
           children) so it lives in the static HTML, crawlable without JS.
           The interactive filter controls read useSearchParams inside their
           own Suspense island in HomeScreenings; the client only swaps the
           grid for active filters or the stored preferred city. */}
-      {screeningsItemList && <JsonLd data={screeningsItemList} />}
-      <HomeScreenings
-        genres={genres}
-        hasMore={homeScreenings.hasMore}
-        hasDefaultResults={homeScreenings.screenings.length > 0}
-        seeAllHref="/seanse"
-      >
-        <ScreeningsGrid
-          screenings={homeScreenings.screenings}
+        {screeningsItemList && <JsonLd data={screeningsItemList} />}
+        <HomeScreenings
           genres={genres}
-          selectedGenreIds={[]}
-          dateFrom={null}
-          dateTo={null}
-          search={null}
-        />
-      </HomeScreenings>
-      {/* Each below-the-fold section streams on its own so a slow data fetch
+          hasMore={homeScreenings.hasMore}
+          hasDefaultResults={homeScreenings.screenings.length > 0}
+          seeAllHref="/seanse"
+        >
+          <ScreeningsGrid
+            screenings={homeScreenings.screenings}
+            genres={genres}
+            selectedGenreIds={[]}
+            dateFrom={null}
+            dateTo={null}
+            search={null}
+          />
+        </HomeScreenings>
+        {/* Each below-the-fold section streams on its own so a slow data fetch
           (e.g. the cinemas list) never blocks the hero shell or the others.
           The page is statically prerendered, so crawlers still get the fully
           baked HTML; the boundaries only matter on dev/revalidation renders. */}
-      <Suspense fallback={null}>
-        <Genres />
-      </Suspense>
-      <Suspense fallback={null}>
-        <Cinemas />
-      </Suspense>
-      <Suspense fallback={null}>
-        <Blog />
-      </Suspense>
-      <About />
+        <Suspense fallback={null}>
+          <Genres />
+        </Suspense>
+        <Suspense fallback={null}>
+          <Cinemas />
+        </Suspense>
+        <Suspense fallback={null}>
+          <Blog />
+        </Suspense>
+        <About />
+      </main>
       <Footer />
     </>
   );

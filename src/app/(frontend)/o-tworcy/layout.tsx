@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { FOUNDER, SITE_URL } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "Robert Siński - twórca Klaps",
+  title: "Robert Siński, twórca serwisu",
   description:
     "Kto stoi za klaps.space: Robert Siński, programista z Katowic, który zbudował przewodnik po seansach specjalnych i klasyce w kinach studyjnych.",
   alternates: {
