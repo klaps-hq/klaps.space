@@ -296,7 +296,7 @@ const AboutPage = () => {
             {AUDIENCE.map((item, index) => (
               <li
                 key={item}
-                className="group flex items-baseline gap-5 md:gap-8 border-t border-white/10 last:border-b py-5 md:py-7"
+                className="group flex items-baseline gap-5 md:gap-8 border-t border-white/10 first:border-t-0 first:pt-0 last:pb-0 py-5 md:py-7"
               >
                 <span className="shrink-0 text-xs md:text-sm tabular-nums text-white/50 leading-none">
                   {String(index + 1).padStart(2, "0")}

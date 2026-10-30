@@ -95,7 +95,7 @@ const BlogPage = async () => {
       <section className="px-6 md:px-12 lg:px-16 pb-20 md:pb-28">
         {posts.length > 0 ? (
           <>
-            <div className="border-t border-white/10">
+            <div>
               {posts.map((post) => (
                 <PostListItem key={post.id} post={post} />
               ))}
