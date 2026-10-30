@@ -1,5 +1,7 @@
 const API_URL = process.env.API_URL;
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY;
+const MAX_RETRIES = 3;
+const RETRY_BASE_MS = 500;
 
 const getApiBaseUrl = (): string => {
   if (!API_URL) {
@@ -48,15 +50,33 @@ export async function apiFetch<T>(
       });
     }
 
-    const res = await fetch(url.toString(), {
-      ...options,
-      headers: {
-        ...options.headers,
-        ...(INTERNAL_API_KEY && { "x-internal-api-key": INTERNAL_API_KEY }),
-      },
-      // Default 5-minute cache; callers can override via options.next.
-      next: { revalidate: 300, ...options.next },
-    });
+    const request = () =>
+      fetch(url.toString(), {
+        ...options,
+        headers: {
+          ...options.headers,
+          ...(INTERNAL_API_KEY && { "x-internal-api-key": INTERNAL_API_KEY }),
+        },
+        // Default 5-minute cache; callers can override via options.next.
+        next: { revalidate: 300, ...options.next },
+      });
+
+    // The production build prerenders hundreds of pages against the live
+    // API at once; a momentary 5xx there used to abort the whole build
+    // (October 2026: /miasta/jarocin). Server errors and dropped
+    // connections get a few retries with backoff; 4xx answers are final.
+    let res: Response | undefined;
+    for (let attempt = 0; ; attempt++) {
+      try {
+        res = await request();
+        if (res.status < 500 || attempt >= MAX_RETRIES) break;
+      } catch (error) {
+        if (attempt >= MAX_RETRIES) throw error;
+      }
+      await new Promise((resolve) =>
+        setTimeout(resolve, RETRY_BASE_MS * 2 ** attempt)
+      );
+    }
 
     if (!res.ok) {
       if (res.status === 404) {
