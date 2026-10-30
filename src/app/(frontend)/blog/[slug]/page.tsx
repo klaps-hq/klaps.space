@@ -273,9 +273,9 @@ const PostPage = async ({ params }: PostPageProps) => {
 
           <footer className="mt-14 border-t border-white/10 pt-8">
             <p className="mb-8 max-w-[64ch] text-sm md:text-base text-white/50 leading-relaxed">
-              Opracowanie: redakcja klaps.space. Tekst powstał z&nbsp;pomocą AI,
-              na podstawie danych z&nbsp;serwisu i&nbsp;sprawdzonych źródeł.
-              Redakcja i&nbsp;weryfikacja faktów: {FOUNDER.name}.{" "}
+              Opracowanie: redakcja klaps.space, na podstawie danych
+              z&nbsp;serwisu i&nbsp;sprawdzonych źródeł. Redakcja
+              i&nbsp;weryfikacja faktów: {FOUNDER.name}.{" "}
               <Link
                 href={FOUNDER_PATH}
                 className="text-white/75 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white transition-colors"
