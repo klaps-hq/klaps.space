@@ -1,6 +1,7 @@
 import React from "react";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import ScreeningCard from "../../(home)/_components/screenings/screening-card";
+import { toClientScreeningGroups } from "@/lib/screenings";
 
 // Roughly the first row across breakpoints. Enough to cover the LCP
 // candidate without flooding the browser with high-priority requests.
@@ -25,7 +26,8 @@ const RepertoireGrid: React.FC<RepertoireGridProps> = ({
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-12">
-      {screenings.map((group, index) => (
+      {/* Cards are client components: only the fields they read cross. */}
+      {toClientScreeningGroups(screenings).map((group, index) => (
         <ScreeningCard
           key={group.movie.id}
           group={group}

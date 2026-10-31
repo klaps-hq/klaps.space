@@ -547,3 +547,39 @@ export const groupScreeningsByCinema = (
 
   return Array.from(grouped.values());
 };
+
+/**
+ * Screening groups cut down to what client components read (filters, cards):
+ * per screening its time and the cinema's id, name and city. Groups cross
+ * into client components (ScreeningCard, the filter island) and are
+ * serialized into the page; every screening used to carry the full cinema
+ * and city records, which made /klasyka-w-kinach/listopad-2026 weigh
+ * ~1.3 MB of HTML (audit #10).
+ */
+export const toClientScreeningGroups = (groups: IScreeningGroup[]): IScreeningGroup[] =>
+  groups.map((group) => ({
+    ...group,
+    screenings: group.screenings.map((screening) => ({
+      id: screening.id,
+      date: screening.date,
+      time: screening.time,
+      dateTime: screening.dateTime,
+      isDubbing: screening.isDubbing,
+      isSubtitled: screening.isSubtitled,
+      cinema: {
+        id: screening.cinema.id,
+        slug: screening.cinema.slug,
+        name: screening.cinema.name,
+        street: null,
+        city: {
+          id: screening.cinema.city.id,
+          slug: screening.cinema.city.slug,
+          name: screening.cinema.city.name,
+          nameDeclinated: screening.cinema.city.name,
+          numberOfCinemas: 0,
+          description: null,
+          voivodeship: screening.cinema.city.voivodeship,
+        },
+      },
+    })),
+  }));

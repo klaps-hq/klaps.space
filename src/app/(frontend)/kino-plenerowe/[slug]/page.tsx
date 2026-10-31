@@ -4,7 +4,13 @@ import { notFound } from "next/navigation";
 import { getGenres } from "@/lib/genres";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, inPlace, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
+import {
+  BASE_OPEN_GRAPH,
+  formatPlDate,
+  inPlace,
+  NOINDEX_FOLLOW,
+  pluralPl,
+} from "@/lib/seo";
 import { openAirFallbackIntro } from "@/lib/listing-copy";
 import {
   CLASSIC_PATH,
@@ -103,6 +109,16 @@ const OpenAirCityPage = async ({ params }: OpenAirCityPageProps) => {
   const seasonItems = season ?? [];
 
   const where = inPlace(city.nameDeclinated);
+  // Off season the page says when the last season ended, from the data:
+  // "nothing scheduled" alone left visitors guessing whether it is over
+  // for good (audit #10).
+  const lastSeasonDay = seasonItems.reduce<string | null>(
+    (latest, item) =>
+      latest === null || item.lastScreeningDate > latest
+        ? item.lastScreeningDate
+        : latest,
+    null
+  );
   const path = `${OPEN_AIR_PATH}/${city.slug}`;
   const intro =
     storedIntro ??
@@ -139,9 +155,16 @@ const OpenAirCityPage = async ({ params }: OpenAirCityPageProps) => {
         heading={<>Seanse plenerowe {where}</>}
         emptyDescription={
           <>
-            Nie ma teraz zapowiedzianych seansów plenerowych {where}. Kina
-            letnie publikują repertuar przed sezonem, a my dodajemy go na
-            bieżąco.
+            Nie ma teraz zapowiedzianych seansów plenerowych {where}.
+            {lastSeasonDay && (
+              <>
+                {" "}
+                Ostatni pokaz poprzedniego sezonu odbył się{" "}
+                {formatPlDate(new Date(`${lastSeasonDay}T12:00:00Z`))}.
+              </>
+            )}{" "}
+            Kina letnie publikują program przed kolejnym sezonem, a my
+            dodajemy go tutaj od razu po ogłoszeniu.
           </>
         }
         cta={{ href: OPEN_AIR_PATH, label: "Kino plenerowe w Polsce" }}

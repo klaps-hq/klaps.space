@@ -123,7 +123,12 @@ export const generateMetadata = async ({
     MAX_DESCRIPTION_LENGTH
   );
 
-  const title = moviePageTitle(movie.title, movie.productionYear);
+  // A failed lookup (null) keeps the default wording.
+  const title = moviePageTitle(
+    movie.title,
+    movie.productionYear,
+    upcoming === null || upcoming.length > 0
+  );
   const url = `${SITE_URL}/filmy/${movie.slug}`;
 
   // Movies with neither upcoming nor recent screenings are thin TMDB
