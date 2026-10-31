@@ -94,6 +94,46 @@ const independentFirst = (groups: IScreeningGroup[]): IScreeningGroup[] => [
 const prepareGroups = (groups: IScreeningGroup[]): IScreeningGroup[] =>
   independentFirst(dropPastScreeningGroups(groups).map(slimScreeningGroup));
 
+// The unfiltered feed is ~6.6 MB on production, over the 2 MB limit of the
+// Next.js data cache, so its fetch was never cached: the October 2026
+// production build pulled it ~880 times (once per prerendered page, via
+// getIndexableSlugs and the movie pages) and spent 8 of its 10 minutes on
+// that. Slimmed groups are kept in process memory instead, so each build
+// worker and each server process downloads a given feed once per window.
+// The window is short so runtime pages never trail the API by more than
+// this. Past showtimes are dropped after the lookup, so a cached feed never
+// lists a screening that has already started.
+const SCREENINGS_MEMO_TTL_MS = 60 * 1000;
+
+interface ScreeningsMemoEntry {
+  expiresAt: number;
+  groups: Promise<IScreeningGroup[]>;
+}
+
+const screeningsMemo = new Map<string, ScreeningsMemoEntry>();
+
+const memoizedScreeningGroups = (
+  params: Record<string, string>,
+  load: () => Promise<IScreeningGroup[]>
+): Promise<IScreeningGroup[]> => {
+  const now = Date.now();
+  for (const [key, entry] of screeningsMemo) {
+    if (entry.expiresAt <= now) screeningsMemo.delete(key);
+  }
+
+  const key = JSON.stringify(params);
+  const cached = screeningsMemo.get(key);
+  if (cached) return cached.groups;
+
+  const groups = load();
+  screeningsMemo.set(key, { expiresAt: now + SCREENINGS_MEMO_TTL_MS, groups });
+  // A failed request must not be served from memory for the whole window.
+  groups.catch(() => {
+    if (screeningsMemo.get(key)?.groups === groups) screeningsMemo.delete(key);
+  });
+  return groups;
+};
+
 interface GetScreeningsParams {
   cityId?: string | null;
   // The API prioritizes city over voivodeship - callers send one of them.
@@ -139,27 +179,30 @@ interface GetLastUpdatedParams {
 export const fetchScreenings = async (
   params: GetScreeningsParams = {}
 ): Promise<IScreeningGroup[]> => {
-  const response = await apiFetch<
-    IScreeningGroup[] | PaginatedResponse<IScreeningGroup>
-  >("/screenings", {
-    params: {
-      cityId: params.cityId ?? "",
-      voivodeship: params.voivodeship ?? "",
-      cinemaId: params.cinemaId ?? "",
-      genreId: params.genreId ?? "",
-      dateFrom: params.dateFrom ?? "",
-      dateTo: params.dateTo ?? "",
-      search: params.search ?? "",
-      limit: params.limit ? params.limit.toString() : "",
-      citySlug: params.citySlug ?? "",
-      openAir: params.openAir ? "true" : "",
-      classic: params.classic ? "true" : "",
-    },
+  const query = {
+    cityId: params.cityId ?? "",
+    voivodeship: params.voivodeship ?? "",
+    cinemaId: params.cinemaId ?? "",
+    genreId: params.genreId ?? "",
+    dateFrom: params.dateFrom ?? "",
+    dateTo: params.dateTo ?? "",
+    search: params.search ?? "",
+    limit: params.limit ? params.limit.toString() : "",
+    citySlug: params.citySlug ?? "",
+    openAir: params.openAir ? "true" : "",
+    classic: params.classic ? "true" : "",
+  };
+
+  const groups = await memoizedScreeningGroups(query, async () => {
+    const response = await apiFetch<
+      IScreeningGroup[] | PaginatedResponse<IScreeningGroup>
+    >("/screenings", { params: query });
+    return (Array.isArray(response) ? response : [...response.data]).map(
+      slimScreeningGroup
+    );
   });
 
-  return prepareGroups(
-    Array.isArray(response) ? response : [...response.data]
-  );
+  return independentFirst(dropPastScreeningGroups(groups));
 };
 
 export const getScreenings = async (
@@ -504,3 +547,39 @@ export const groupScreeningsByCinema = (
 
   return Array.from(grouped.values());
 };
+
+/**
+ * Screening groups cut down to what client components read (filters, cards):
+ * per screening its time and the cinema's id, name and city. Groups cross
+ * into client components (ScreeningCard, the filter island) and are
+ * serialized into the page; every screening used to carry the full cinema
+ * and city records, which made /klasyka-w-kinach/listopad-2026 weigh
+ * ~1.3 MB of HTML (audit #10).
+ */
+export const toClientScreeningGroups = (groups: IScreeningGroup[]): IScreeningGroup[] =>
+  groups.map((group) => ({
+    ...group,
+    screenings: group.screenings.map((screening) => ({
+      id: screening.id,
+      date: screening.date,
+      time: screening.time,
+      dateTime: screening.dateTime,
+      isDubbing: screening.isDubbing,
+      isSubtitled: screening.isSubtitled,
+      cinema: {
+        id: screening.cinema.id,
+        slug: screening.cinema.slug,
+        name: screening.cinema.name,
+        street: null,
+        city: {
+          id: screening.cinema.city.id,
+          slug: screening.cinema.city.slug,
+          name: screening.cinema.city.name,
+          nameDeclinated: screening.cinema.city.name,
+          numberOfCinemas: 0,
+          description: null,
+          voivodeship: screening.cinema.city.voivodeship,
+        },
+      },
+    })),
+  }));

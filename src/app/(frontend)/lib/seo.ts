@@ -208,13 +208,25 @@ const TEMPLATE_SUFFIX_LENGTH = 8;
  * and the suffix it ran past ~60 chars on half the pages (content audit,
  * October 2026), so it degrades to shorter forms instead of being cut.
  */
-export const moviePageTitle = (title: string, year: number): string => {
+export const moviePageTitle = (
+  title: string,
+  year: number,
+  hasUpcoming = true
+): string => {
   const subject = `${title} (${year})`;
   const budget = MAX_SERP_TITLE_LENGTH - TEMPLATE_SUFFIX_LENGTH;
-  const candidates = [
-    `${subject} - seanse: gdzie i kiedy w kinie`,
-    `${subject} - seanse w kinach`,
-    `${subject} w kinie`,
-  ];
+  // Without upcoming screenings the page shows where the film played last,
+  // so the title stops promising showtimes (audit #10).
+  const candidates = hasUpcoming
+    ? [
+        `${subject} - seanse: gdzie i kiedy w kinie`,
+        `${subject} - seanse w kinach`,
+        `${subject} w kinie`,
+      ]
+    : [
+        `${subject} - gdzie grano w kinach studyjnych`,
+        `${subject} w kinach studyjnych`,
+        `${subject} w kinie`,
+      ];
   return candidates.find((text) => text.length <= budget) ?? subject;
 };
