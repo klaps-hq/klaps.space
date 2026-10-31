@@ -70,6 +70,11 @@ const PRIMARY_SECTIONS = [
     href: "/w-liczbach",
     hint: "Miesięczne zestawienie seansów klasyki w polskich kinach.",
   },
+  {
+    label: "Rok Wajdy w liczbach",
+    href: "/rok-wajdy",
+    hint: "Filmy Andrzeja Wajdy w polskich kinach w 2026 roku.",
+  },
 ] as const;
 
 const INFO_LINKS = [

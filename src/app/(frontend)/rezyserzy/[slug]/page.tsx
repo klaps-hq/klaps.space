@@ -1,5 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import {
   getDirectorPageData,
   getDirectors,
@@ -23,6 +25,7 @@ import RepertoireGrid from "@/components/common/repertoire-grid";
 import ProgrammeProfile from "@/components/common/programme-profile";
 import { getProgrammeProfile } from "@/lib/programme-profile";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
+import { WAJDA_SLUG, WAJDA_YEAR, WAJDA_YEAR_PATH } from "@/lib/wajda-year";
 
 // ISR: cached HTML revalidated every 5 minutes. The repertoire filters
 // (city, genres, dates, search) are applied client-side in
@@ -222,6 +225,29 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
         subject={{ kind: "director", directorName: director.name }}
         indexable={indexable}
       />
+
+      {director.slug === WAJDA_SLUG && (
+        <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 py-10 md:py-14">
+          <Link
+            href={WAJDA_YEAR_PATH}
+            className="group flex items-center justify-between gap-6 text-white"
+          >
+            <span className="flex flex-col gap-2">
+              <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/50">
+                Rok Andrzeja Wajdy {WAJDA_YEAR}
+              </span>
+              <span className="text-2xl md:text-4xl font-medium -tracking-[0.02em] leading-tight underline decoration-white/25 underline-offset-4 group-hover:decoration-white transition-colors">
+                Rok Wajdy w&nbsp;liczbach: seanse miesiąc po miesiącu, miasta
+                i&nbsp;kina
+              </span>
+            </span>
+            <ArrowRight
+              aria-hidden="true"
+              className="shrink-0 size-6 md:size-8 text-white/50 group-hover:text-white transition-colors"
+            />
+          </Link>
+        </section>
+      )}
 
       {movies.length > 0 && (
         <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-16 md:pb-24">

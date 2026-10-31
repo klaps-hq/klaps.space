@@ -43,5 +43,11 @@ export interface IProgrammeProfile {
   topGenres: IProfileRanked[];
   topDirectors: IProfileRanked[];
   topCinemas: IProfileCinema[];
+  /** Top five cities, or every city when requested with `allCities`. */
   topCities: IProfileRanked[];
+  /**
+   * Screenings per month (YYYY-MM), oldest first, gaps filled with zero.
+   * Optional: an API deployed before the monthly breakdown omits it.
+   */
+  byMonth?: { month: string; screenings: number }[];
 }
