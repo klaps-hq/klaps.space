@@ -120,7 +120,7 @@ const cinemasLocative = (count: number): string =>
 const citiesLocative = (count: number): string =>
   `${formatCount(count)} ${count === 1 ? "mieście" : "miastach"}`;
 
-const capitalize = (text: string): string =>
+export const capitalize = (text: string): string =>
   text.charAt(0).toUpperCase() + text.slice(1);
 
 /** "o 12%" for a change against the previous month; null when not comparable. */

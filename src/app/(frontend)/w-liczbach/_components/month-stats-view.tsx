@@ -14,6 +14,13 @@ import {
   screeningsLabel,
   shiftMonth,
 } from "@/lib/month-stats";
+import {
+  buildCinemaBadgeSnippet,
+  CINEMA_BADGE_HEIGHT,
+  CINEMA_BADGE_WIDTH,
+  cinemaBadgePath,
+  getCinemasOfTheMonth,
+} from "@/lib/cinema-of-the-month";
 import { CLASSIC_MIN_AGE_YEARS } from "@/lib/landing-pages";
 import { getScreenings } from "@/lib/screenings";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
@@ -26,6 +33,7 @@ import EmptyState from "@/components/common/empty-state";
 import JsonLd from "@/components/common/json-ld";
 import MoviePoster from "@/components/common/movie-poster";
 import Footer from "../../(home)/_components/footer";
+import CinemaBadgeCode from "./cinema-badge-code";
 
 interface MonthStatsViewProps {
   month: string;
@@ -190,6 +198,10 @@ const MonthStatsView = async ({
       ? await getMonthStats(previousMonth).catch(() => null)
       : null;
   const comparison = hasData ? monthComparison(stats, previous, ongoing) : [];
+  // Finished months award the badge and rank independents only; the month
+  // in progress keeps the plain ranking of all venues.
+  const cinemasOfMonth =
+    hasData && !ongoing ? getCinemasOfTheMonth(stats) : [];
 
   return (
     <main className="bg-black text-white min-h-screen">
@@ -405,7 +417,57 @@ const MonthStatsView = async ({
             </Section>
           )}
 
-          {stats.topCinemas.length > 0 && (
+          {cinemasOfMonth.length > 0 ? (
+            <Section
+              title="Kina klasyki miesiąca"
+              note={`Kina spoza sieci multipleksów z największą liczbą seansów klasyki ${inMonth(month)}. Każde może wkleić na swoją stronę odznakę z miejscem w zestawieniu.`}
+            >
+              <ol className="flex flex-col">
+                {cinemasOfMonth.map((cinema) => (
+                  <li
+                    key={cinema.slug}
+                    className="grid grid-cols-[2rem_1fr_auto] items-baseline gap-4 border-t border-white/10 first:border-t-0 first:pt-0 last:pb-0 py-3 md:py-4"
+                  >
+                    <span className="text-xs tabular-nums text-white/50">
+                      {String(cinema.rank).padStart(2, "0")}
+                    </span>
+                    <span className="min-w-0 text-lg md:text-xl text-white/85">
+                      <MaybeLink
+                        href={`/kina/${cinema.slug}`}
+                        linked={canLink(linkable.cinemas, cinema.slug)}
+                        plain
+                      >
+                        {cinema.name}
+                      </MaybeLink>
+                      <span className="text-white/45">, {cinema.city}</span>
+                    </span>
+                    <span className="text-lg md:text-xl tabular-nums text-white">
+                      {formatCount(cinema.count)}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-12 md:mt-16">
+                <CinemaBadgeCode
+                  badges={cinemasOfMonth.map((cinema) => ({
+                    slug: cinema.slug,
+                    name: cinema.name,
+                    rank: cinema.rank,
+                    src: {
+                      dark: cinemaBadgePath(month, cinema.slug, "dark"),
+                      light: cinemaBadgePath(month, cinema.slug, "light"),
+                    },
+                    snippet: {
+                      dark: buildCinemaBadgeSnippet(month, cinema, "dark"),
+                      light: buildCinemaBadgeSnippet(month, cinema, "light"),
+                    },
+                  }))}
+                  width={CINEMA_BADGE_WIDTH}
+                  height={CINEMA_BADGE_HEIGHT}
+                />
+              </div>
+            </Section>
+          ) : stats.topCinemas.length > 0 && (
             <Section
               title="Kina"
               note="Kina, które pokazały najwięcej seansów klasyki."
