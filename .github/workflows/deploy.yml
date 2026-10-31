@@ -52,11 +52,21 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # Layer cache in the GitHub Actions cache, scoped per environment:
+      # the deps stage (bun install + the node_modules copy into the
+      # builder, ~25 s) is reused while bun.lock is unchanged. The build
+      # summary and record upload only feed the Actions UI and cost ~25 s
+      # in the post step, so both are off.
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
+        env:
+          DOCKER_BUILD_SUMMARY: false
+          DOCKER_BUILD_RECORD_UPLOAD: false
         with:
           context: .
           push: true
+          cache-from: type=gha,scope=${{ needs.setup.outputs.env_suffix }}
+          cache-to: type=gha,mode=max,scope=${{ needs.setup.outputs.env_suffix }},ignore-error=true
           build-args: |
             NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
             NEXT_PUBLIC_TMDB_IMAGE_BASE_URL=${{ vars.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL }}
