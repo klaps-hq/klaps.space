@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, Maximize2 } from "lucide-react";
+import { PrefetchKind } from "next/dist/client/components/router-reducer/router-reducer-types";
 import { pluralPl } from "@/lib/seo";
 
 export interface MapCinema {
@@ -22,18 +23,41 @@ interface PolandDotMapProps {
   cinemas: MapCinema[];
 }
 
-// Simplified outline of Poland (lon, lat), the same one the studio panel
-// uses. Good enough for a dot map, not a survey-grade border.
+// Outline of Poland (lon, lat) from Natural Earth 1:50m, simplified to
+// ~0.01 degrees: finer than the dot grid, so the coast and the mountain
+// border read as they should.
 const BORDER: [number, number][] = [
-  [14.2, 53.92], [14.6, 54.0], [15.4, 54.17], [16.2, 54.33], [16.9, 54.58], [17.6, 54.78],
-  [18.35, 54.83], [18.55, 54.6], [18.65, 54.4], [19.0, 54.35], [19.63, 54.45], [20.5, 54.4],
-  [21.5, 54.33], [22.79, 54.36], [23.5, 54.0], [23.5, 53.9], [23.9, 53.15], [23.6, 52.6],
-  [23.2, 52.3], [23.6, 52.1], [23.5, 51.7], [23.6, 51.5], [24.1, 50.85], [23.7, 50.4],
-  [23.2, 50.2], [22.6, 49.5], [22.86, 49.0], [22.5, 49.1], [21.8, 49.4], [21.0, 49.4],
-  [20.3, 49.4], [20.0, 49.2], [19.4, 49.6], [18.85, 49.5], [18.6, 49.9], [18.0, 50.0],
-  [17.6, 50.15], [16.9, 50.4], [16.6, 50.15], [16.2, 50.4], [16.3, 50.7], [15.4, 50.8],
-  [14.82, 50.87], [15.0, 51.3], [14.7, 51.6], [14.6, 52.0], [14.7, 52.6], [14.2, 52.9],
-  [14.4, 53.3],
+  [23.61, 51.52], [23.68, 51.39], [23.66, 51.35], [23.66, 51.31], [23.86, 51.13], [23.99, 50.94],
+  [24.10, 50.87], [24.11, 50.84], [24.00, 50.81], [23.98, 50.79], [24.05, 50.72], [24.09, 50.62],
+  [24.09, 50.53], [23.97, 50.41], [23.71, 50.38], [23.04, 49.90], [22.71, 49.61], [22.65, 49.54],
+  [22.73, 49.30], [22.71, 49.17], [22.85, 49.08], [22.84, 49.04], [22.81, 49.02], [22.58, 49.08],
+  [22.47, 49.08], [22.02, 49.21], [21.97, 49.30], [21.89, 49.34], [21.64, 49.41], [21.35, 49.43],
+  [21.08, 49.42], [21.00, 49.34], [20.95, 49.32], [20.87, 49.31], [20.80, 49.33], [20.73, 49.37],
+  [20.62, 49.39], [20.36, 49.39], [20.16, 49.32], [20.11, 49.27], [20.06, 49.18], [19.92, 49.22],
+  [19.80, 49.19], [19.76, 49.20], [19.79, 49.27], [19.77, 49.37], [19.63, 49.41], [19.48, 49.58],
+  [19.44, 49.60], [19.25, 49.51], [19.15, 49.40], [18.97, 49.40], [18.94, 49.50], [18.83, 49.51],
+  [18.81, 49.61], [18.59, 49.76], [18.56, 49.88], [18.35, 49.93], [18.31, 49.91], [18.03, 50.04],
+  [17.98, 50.00], [17.87, 49.97], [17.83, 49.98], [17.68, 50.10], [17.63, 50.12], [17.59, 50.16],
+  [17.71, 50.19], [17.74, 50.23], [17.72, 50.30], [17.70, 50.31], [17.55, 50.26], [17.42, 50.25],
+  [17.15, 50.38], [16.88, 50.43], [16.87, 50.41], [16.99, 50.26], [16.99, 50.24], [16.84, 50.19],
+  [16.68, 50.10], [16.64, 50.10], [16.60, 50.12], [16.49, 50.25], [16.33, 50.37], [16.23, 50.39],
+  [16.21, 50.42], [16.28, 50.48], [16.38, 50.52], [16.41, 50.59], [16.28, 50.66], [16.01, 50.61],
+  [15.95, 50.67], [15.73, 50.74], [15.39, 50.80], [15.28, 50.88], [15.26, 50.96], [15.13, 50.99],
+  [14.99, 51.01], [14.98, 50.89], [14.81, 50.86], [14.96, 51.10], [15.02, 51.25], [14.94, 51.44],
+  [14.91, 51.46], [14.72, 51.52], [14.71, 51.54], [14.74, 51.63], [14.72, 51.66], [14.62, 51.77],
+  [14.60, 51.83], [14.67, 51.90], [14.75, 52.08], [14.70, 52.11], [14.69, 52.15], [14.71, 52.21],
+  [14.68, 52.25], [14.62, 52.28], [14.55, 52.36], [14.62, 52.53], [14.51, 52.65], [14.25, 52.78],
+  [14.13, 52.88], [14.14, 52.93], [14.19, 52.98], [14.29, 53.03], [14.37, 53.11], [14.41, 53.20],
+  [14.41, 53.28], [14.30, 53.56], [14.26, 53.73], [14.58, 53.64], [14.55, 53.71], [14.56, 53.82],
+  [14.21, 53.87], [14.20, 53.92], [14.21, 53.95], [14.25, 53.93], [14.38, 53.92], [14.72, 54.02],
+  [15.29, 54.14], [16.19, 54.29], [16.56, 54.55], [16.89, 54.60], [17.26, 54.73], [17.84, 54.82],
+  [18.32, 54.84], [18.76, 54.68], [18.80, 54.63], [18.50, 54.74], [18.44, 54.74], [18.59, 54.51],
+  [18.67, 54.43], [18.84, 54.37], [18.98, 54.35], [19.41, 54.39], [19.60, 54.46], [20.21, 54.42],
+  [22.17, 54.36], [22.73, 54.35], [22.82, 54.40], [22.98, 54.37], [23.02, 54.35], [23.04, 54.30],
+  [23.17, 54.28], [23.37, 54.20], [23.45, 54.14], [23.48, 54.08], [23.48, 53.96], [23.60, 53.60],
+  [23.79, 53.27], [23.89, 53.03], [23.91, 52.90], [23.90, 52.70], [23.84, 52.66], [23.41, 52.52],
+  [23.20, 52.34], [23.18, 52.29], [23.20, 52.26], [23.46, 52.17], [23.60, 52.10], [23.65, 52.04],
+  [23.65, 51.97], [23.61, 51.88], [23.63, 51.81], [23.54, 51.71], [23.54, 51.62],
 ];
 
 const LON0 = 13.9;
@@ -49,6 +73,8 @@ const MAX_ZOOM = 16;
 // From this zoom on, individual cinemas and city names are drawn.
 const DETAIL_ZOOM = 2.4;
 const LABEL_ZOOM = 2.4;
+// Below LABEL_ZOOM only the biggest programmes are named, for orientation.
+const OVERVIEW_LABELS = 8;
 const HIT_PX = 14;
 
 const project = (lon: number, lat: number): [number, number] => [
@@ -106,8 +132,8 @@ type Hover =
 const reachOf = (p: MapCinema): number =>
   p.films > 0 ? Math.min(5 + Math.sqrt(p.films) * 1.6, 15) : 3.5;
 
-const weightOf = (p: MapCinema): number =>
-  p.isChain ? 0.35 : p.films > 0 ? 1 : 0.4;
+// Multiplexes barely count, so the glow shows the arthouse programme.
+const weightOf = (p: MapCinema): number => (p.isChain ? 0.15 : 1);
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
@@ -130,6 +156,22 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
   const viewRef = useRef(view);
   viewRef.current = view;
   const animRef = useRef<number | null>(null);
+  const [hint, setHint] = useState(false);
+  const hintTimer = useRef<number | null>(null);
+  const [modifier, setModifier] = useState("Ctrl");
+
+  useEffect(() => {
+    if (/Mac|iPhone|iPad/.test(navigator.userAgent)) setModifier("⌘");
+    return () => {
+      if (hintTimer.current) window.clearTimeout(hintTimer.current);
+    };
+  }, []);
+
+  const flashHint = useCallback(() => {
+    setHint(true);
+    if (hintTimer.current) window.clearTimeout(hintTimer.current);
+    hintTimer.current = window.setTimeout(() => setHint(false), 1400);
+  }, []);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const dragRef = useRef<{ moved: boolean; pinch: number | null }>({
     moved: false,
@@ -162,20 +204,27 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
     }));
   }, [points]);
 
+  const cityFilms = useMemo(
+    () =>
+      new Map(
+        cities.map((c) => [
+          c.key,
+          c.cinemas.reduce((s, p) => s + p.films * weightOf(p), 0),
+        ])
+      ),
+    [cities]
+  );
+
   // Dot brightness depends only on the data, so it is computed once. Like
   // the studio map, the glow belongs to a city: its reach grows with the
-  // films its venues show (chains count for a third), so a city reads as
-  // one lit area instead of a few scattered dots.
+  // films its venues show, so a city reads as one lit area instead of a few
+  // scattered dots. Cities with nothing upcoming stay dark: lighting all
+  // 300+ towns turned the country into noise with no visible hot spots.
   const dotAlpha = useMemo(() => {
-    const glows = cities.map((c) => {
-      const films = c.cinemas.reduce((s, p) => s + p.films * weightOf(p), 0);
-      return {
-        x: c.x,
-        y: c.y,
-        films,
-        r: films > 0 ? Math.min(9 + Math.sqrt(films) * 2.2, 42) : 5,
-      };
-    });
+    const glows = cities
+      .map((c) => ({ x: c.x, y: c.y, films: cityFilms.get(c.key) ?? 0 }))
+      .filter((g) => g.films > 0)
+      .map((g) => ({ ...g, r: Math.min(8 + Math.sqrt(g.films) * 2.6, 40) }));
     const max = Math.max(...glows.map((g) => g.films), 1);
     const alpha = new Float32Array(GRID.length);
     GRID.forEach(([x, y], i) => {
@@ -188,16 +237,14 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
         if (d > g.r) continue;
         const falloff = 1 - d / g.r;
         const value =
-          g.films > 0
-            ? (0.3 + 0.7 * Math.min(1, falloff * 1.6)) *
-              (0.45 + 0.55 * Math.sqrt(g.films / max))
-            : 0.22;
+          (0.3 + 0.7 * Math.min(1, falloff * 1.5)) *
+          (0.35 + 0.65 * Math.sqrt(g.films / max));
         if (value > best) best = value;
       }
       alpha[i] = best;
     });
     return alpha;
-  }, [cities]);
+  }, [cities, cityFilms]);
 
   // Fit the whole country into the container at zoom 1.
   const base = useMemo(() => {
@@ -343,11 +390,19 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
       }
     }
 
-    if (view.k >= LABEL_ZOOM) {
+    {
       ctx.font = "500 10px Inter, system-ui, sans-serif";
       ctx.textBaseline = "middle";
       const taken: [number, number, number, number][] = [];
-      const ordered = [...cities].sort((a, b) => b.cinemas.length - a.cinemas.length);
+      const ordered =
+        view.k >= LABEL_ZOOM
+          ? [...cities].sort((a, b) => b.cinemas.length - a.cinemas.length)
+          : [...cities]
+              .sort(
+                (a, b) =>
+                  (cityFilms.get(b.key) ?? 0) - (cityFilms.get(a.key) ?? 0)
+              )
+              .slice(0, OVERVIEW_LABELS);
       for (const c of ordered) {
         const [sx, sy] = toScreen(c.x, c.y, view);
         if (sx < 0 || sy < 0 || sx > size.w || sy > size.h) continue;
@@ -364,7 +419,7 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
         ctx.fillText(label, sx + 10, sy);
       }
     }
-  }, [base, cities, dotAlpha, hover, points, size, toScreen, view]);
+  }, [base, cities, cityFilms, dotAlpha, hover, points, size, toScreen, view]);
 
   const pick = useCallback(
     (sx: number, sy: number): Hover => {
@@ -401,19 +456,37 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
     return [e.clientX - rect.left, e.clientY - rect.top];
   };
 
-  // Wheel zoom needs a non-passive listener to stop the page from scrolling.
+  // A plain wheel scrolls the page: zooming on it trapped the scroll for
+  // anyone passing over a map that fills most of the screen. Ctrl (or Cmd)
+  // plus wheel zooms, which is also what a trackpad pinch sends; a plain
+  // wheel only flashes the hint. Non-passive, so the zoom can stop the
+  // browser's own page zoom.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey && !e.metaKey) {
+        flashHint();
+        return;
+      }
       e.preventDefault();
+      // Lenis skips ctrl+wheel on its own, but would scroll on cmd+wheel.
+      e.stopPropagation();
       const [sx, sy] = localPoint(e);
       if (animRef.current) cancelAnimationFrame(animRef.current);
       setView(zoomAt(Math.exp(-e.deltaY * 0.0015), sx, sy));
     };
     canvas.addEventListener("wheel", onWheel, { passive: false });
     return () => canvas.removeEventListener("wheel", onWheel);
-  }, [zoomAt]);
+  }, [flashHint, zoomAt]);
+
+  // Warm the cinema page while its tooltip is open, so the click is instant.
+  const hoveredSlug = hover?.kind === "cinema" ? hover.point.slug : null;
+  useEffect(() => {
+    if (hoveredSlug) {
+      router.prefetch(`/kina/${hoveredSlug}`, { kind: PrefetchKind.FULL });
+    }
+  }, [hoveredSlug, router]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -454,6 +527,13 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
     const v = viewRef.current;
     setView(clampView({ k: v.k, tx: v.tx + dx, ty: v.ty + dy }));
     setHover(null);
+  };
+
+  // The browser took over the gesture (a page scroll on touch): forget the
+  // pointer, but never treat it as a tap.
+  const onPointerCancel = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    pointers.current.delete(e.pointerId);
+    if (pointers.current.size < 2) dragRef.current.pinch = null;
   };
 
   const onPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -526,18 +606,23 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
         // instead of a tall frame with empty bands above and below it.
         className="relative w-full h-[105vw] max-h-[72vh] min-h-[320px] sm:h-[72vh] sm:min-h-[420px] sm:max-h-[860px] border border-white/10 overflow-hidden select-none"
         data-nosnippet
-        data-lenis-prevent
       >
         <canvas
           ref={canvasRef}
-          className={`absolute inset-0 h-full w-full touch-none ${hover ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"}`}
-          style={{ width: size.w, height: size.h }}
+          className={`absolute inset-0 h-full w-full ${hover ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"}`}
+          // At full view one finger scrolls the page past the map and two
+          // fingers zoom it; once zoomed in, one finger pans the map.
+          style={{
+            width: size.w,
+            height: size.h,
+            touchAction: view.k > 1.01 ? "none" : "pan-y",
+          }}
           role="img"
           aria-label="Mapa kin studyjnych w Polsce. Lista miast z kinami jest pod mapą."
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
+          onPointerCancel={onPointerCancel}
           onPointerLeave={(e) => e.pointerType === "mouse" && setHover(null)}
           onDoubleClick={(e) => {
             const [sx, sy] = localPoint(e);
@@ -587,8 +672,20 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
           </button>
         </div>
 
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/60 transition-opacity duration-200 ${hint ? "opacity-100" : "opacity-0"}`}
+        >
+          <p className="px-6 text-center text-xs uppercase tracking-[0.22em] text-white">
+            {modifier} + przewijanie przybliża mapę
+          </p>
+        </div>
+
         <p className="pointer-events-none absolute left-4 bottom-3 hidden sm:block text-[10px] uppercase tracking-[0.22em] text-white/40">
-          Przewiń lub uszczypnij, aby przybliżyć. Przeciągnij, aby przesunąć.
+          {modifier} + przewijanie przybliża. Przeciągnij, aby przesunąć.
+        </p>
+        <p className="pointer-events-none absolute left-4 bottom-3 sm:hidden text-[10px] uppercase tracking-[0.22em] text-white/40">
+          Dwa palce przybliżają mapę
         </p>
       </div>
 
