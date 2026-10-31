@@ -212,6 +212,11 @@ const ProgrammeProfile = ({
     });
   }
 
+  // A film page, or a director with one film in the history.
+  const singleFilm =
+    subject.kind === "movie" ||
+    (subject.kind === "director" && profile.movies === 1);
+
   const venueStat =
     subject.kind === "cinema"
       ? {
@@ -242,16 +247,37 @@ const ProgrammeProfile = ({
           value={profile.screenings}
           label={pluralPl(profile.screenings, "seans", "seanse", "seansów")}
         />
-        <Stat
-          value={profile.movies}
-          label={pluralPl(profile.movies, "film", "filmy", "filmów")}
-        />
-        <Stat value={venueStat.value} label={venueStat.label} />
-        {profile.oldestMovie && (
+        {/* One film: "1 film" and its own year as "the oldest film" are
+            template noise, so count cities and months instead. */}
+        {singleFilm ? (
           <Stat
-            value={profile.oldestMovie.productionYear}
-            label="rok najstarszego filmu"
+            value={profile.cities}
+            label={pluralPl(profile.cities, "miasto", "miasta", "miast")}
           />
+        ) : (
+          <Stat
+            value={profile.movies}
+            label={pluralPl(profile.movies, "film", "filmy", "filmów")}
+          />
+        )}
+        <Stat value={venueStat.value} label={venueStat.label} />
+        {singleFilm ? (
+          <Stat
+            value={profile.monthsActive}
+            label={pluralPl(
+              profile.monthsActive,
+              "miesiąc z seansami",
+              "miesiące z seansami",
+              "miesięcy z seansami"
+            )}
+          />
+        ) : (
+          profile.oldestMovie && (
+            <Stat
+              value={profile.oldestMovie.productionYear}
+              label="rok najstarszego filmu"
+            />
+          )
         )}
       </div>
 

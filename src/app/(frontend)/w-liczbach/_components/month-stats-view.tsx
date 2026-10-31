@@ -155,6 +155,8 @@ const buildDatasetJsonLd = (stats: IMonthStats, ongoing: boolean) => ({
   spatialCoverage: { "@type": "Country", name: "Polska" },
   inLanguage: "pl",
   isAccessibleForFree: true,
+  // Matches the on-page note that the data may be cited with attribution.
+  license: "https://creativecommons.org/licenses/by/4.0/",
   variableMeasured: [
     "Liczba seansów klasyki",
     "Liczba kin z seansami klasyki",
@@ -448,8 +450,17 @@ const MonthStatsView = async ({
             do zestawienia, jeśli pokazały co najmniej jeden taki seans.
           </p>
           <p>
-            Dane można cytować z&nbsp;podaniem źródła: Klaps (klaps.space).
-            Zestawienie za bieżący miesiąc aktualizujemy co godzinę.
+            Dane udostępniamy na licencji{" "}
+            <a
+              href="https://creativecommons.org/licenses/by/4.0/deed.pl"
+              rel="license noopener"
+              target="_blank"
+              className="underline underline-offset-4 hover:text-white transition-colors"
+            >
+              CC BY 4.0
+            </a>
+            : można je cytować i&nbsp;wykorzystywać z&nbsp;podaniem źródła: Klaps
+            (klaps.space). Zestawienie za bieżący miesiąc aktualizujemy co godzinę.
           </p>
         </div>
       </Section>

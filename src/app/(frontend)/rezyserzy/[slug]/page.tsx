@@ -56,7 +56,7 @@ export const generateMetadata = async ({
   const title = `${director.name} - filmy i seanse w kinach studyjnych`;
   const description = director.bio
     ? clampToSentences(director.bio)
-    : `Filmy w reżyserii ${director.name} na seansach specjalnych w kinach studyjnych w Polsce. Retrospektywy, klasyka filmowa i kino autorskie na dużym ekranie.`;
+    : `${director.name}: filmy na seansach specjalnych w kinach studyjnych w Polsce. Retrospektywy, klasyka filmowa i kino autorskie na dużym ekranie.`;
   const url = `${SITE_URL}/rezyserzy/${director.slug}`;
 
   // Thin until the director has enough upcoming screenings; keep those pages
