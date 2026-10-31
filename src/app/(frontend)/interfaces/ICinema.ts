@@ -52,7 +52,9 @@ export interface ICinemaPhoto {
   url: string;
   sourceUrl: string;
   author: string;
-  license: string;
+  // Missing before the API started returning it: Commons.
+  source?: "commons" | "website";
+  license: string | null;
   licenseUrl: string | null;
 }
 
