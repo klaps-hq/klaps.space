@@ -33,6 +33,12 @@ const CSP_REPORT_ONLY = [
 const nextConfig: NextConfig = {
   output: "standalone",
   reactCompiler: true,
+  experimental: {
+    // Static generation workers. The default (CPU count - 1) gives 3 on the
+    // 4 vCPU GitHub runner, but prerendering mostly waits on the repertoire
+    // API rather than the CPU, so extra workers overlap that wait.
+    cpus: 6,
+  },
   // Compression moved to Traefik (compress middleware): it can serve
   // brotli/zstd, while the built-in Node pipeline only does gzip. With
   // this enabled Traefik would pass the already-gzipped body through
