@@ -5,6 +5,7 @@ import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import JsonLd from "@/components/common/json-ld";
 import { getCinemas } from "@/lib/cinemas";
+import { archiveMonths, monthPath } from "@/lib/month-stats";
 import { SITE_URL } from "@/lib/site-config";
 import { CONTACT_EMAIL } from "@/constants";
 import Footer from "../(home)/_components/footer";
@@ -57,6 +58,8 @@ const ForCinemasPage = async () => {
       }))
     )
     .sort((a, b) => a.name.localeCompare(b.name, "pl"));
+  // The newest finished month, where the latest awarded cinemas are listed.
+  const [latestMonth] = archiveMonths();
 
   return (
     <main className="bg-black text-white min-h-screen">
@@ -144,6 +147,20 @@ const ForCinemasPage = async () => {
               Prowadzi prosto do strony Waszego kina na klaps.space. Plik jest
               lekki, nie śledzi odwiedzających i nie ładuje żadnych skryptów.
             </p>
+            {latestMonth && (
+              <p className="mt-4 max-w-[40ch] text-sm md:text-base text-white/55 leading-relaxed">
+                Co miesiąc kina z&nbsp;największą liczbą seansów klasyki
+                dostają też odznakę Kino klasyki miesiąca. Znajdziecie ją
+                w&nbsp;
+                <Link
+                  href={monthPath(latestMonth)}
+                  className="text-white underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors"
+                >
+                  miesięcznym zestawieniu
+                </Link>
+                .
+              </p>
+            )}
           </div>
           <div className="lg:col-span-8">
             <BadgeGenerator cinemas={cinemas} />

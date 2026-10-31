@@ -23,6 +23,11 @@ import {
   isClassicIndexable,
   OPEN_AIR_PATH,
 } from "@/lib/landing-pages";
+import {
+  CHRISTMAS_PATH,
+  fetchChristmasScreenings,
+  isChristmasIndexable,
+} from "@/lib/christmas";
 
 /**
  * Five minutes, matching the listing pages rather than the hour a sitemap
@@ -162,6 +167,7 @@ const staticPages: MetadataRoute.Sitemap = [
   { url: `${SITE_URL}/rezyserzy`, changeFrequency: "weekly", priority: 0.6 },
   { url: `${SITE_URL}/blog`, changeFrequency: "weekly", priority: 0.6 },
   { url: `${SITE_URL}/w-liczbach`, changeFrequency: "daily", priority: 0.6 },
+  { url: `${SITE_URL}/rok-wajdy`, changeFrequency: "daily", priority: 0.6 },
   { url: `${SITE_URL}/mapa-witryny`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/o-projekcie`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/o-tworcy`, changeFrequency: "monthly", priority: 0.3 },
@@ -268,6 +274,7 @@ const buildLandingPages = async (): Promise<MetadataRoute.Sitemap> => {
       fetchClassicScreenings(classicMonthRange(month)).catch(() => null)
     ),
   ]);
+  const christmas = await fetchChristmasScreenings().catch(() => null);
 
   return [
     ...(known(openAirHub.indexable) ? [page(OPEN_AIR_PATH, 0.6)] : []),
@@ -282,6 +289,9 @@ const buildLandingPages = async (): Promise<MetadataRoute.Sitemap> => {
         ? [page(`${CLASSIC_PATH}/${month.slug}`, 0.5)]
         : []
     ),
+    ...(known(isChristmasIndexable(christmas))
+      ? [page(CHRISTMAS_PATH, 0.6)]
+      : []),
   ];
 };
 

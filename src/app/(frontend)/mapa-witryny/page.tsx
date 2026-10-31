@@ -61,6 +61,11 @@ const PRIMARY_SECTIONS = [
     hint: "Letnie pokazy pod gołym niebem w polskich miastach.",
   },
   {
+    label: "Święta w kinie",
+    href: "/swieta-w-kinie",
+    hint: "Świąteczne hity na dużym ekranie od grudnia do Trzech Króli.",
+  },
+  {
     label: "Blog",
     href: "/blog",
     hint: "Teksty o kinie studyjnym, klasyce i seansach specjalnych.",
@@ -69,6 +74,11 @@ const PRIMARY_SECTIONS = [
     label: "Klaps w liczbach",
     href: "/w-liczbach",
     hint: "Miesięczne zestawienie seansów klasyki w polskich kinach.",
+  },
+  {
+    label: "Rok Wajdy w liczbach",
+    href: "/rok-wajdy",
+    hint: "Filmy Andrzeja Wajdy w polskich kinach w 2026 roku.",
   },
 ] as const;
 
