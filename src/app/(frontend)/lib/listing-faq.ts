@@ -8,6 +8,7 @@ import {
   seatsPl,
 } from "./city-venues";
 import { formatPlDate, inPlace, pluralPl } from "./seo";
+import { isChainCinema } from "./cinema-chains";
 import { hasProfileContent, sinceMonth } from "./programme-profile";
 
 /**
@@ -183,15 +184,31 @@ export const buildCityFaq = ({
     });
   }
 
-  if (screenings.length > 0) {
+  // Answers about "kina studyjne" count independent venues only: in mixed
+  // cities the full listing is mostly multiplex re-releases, and Toruń's
+  // answer quoted Cinema City under the arthouse label (audit #8). A city
+  // with nothing independent upcoming gets the plain "kina" wording.
+  const studioScreenings = screenings
+    .map((group) => ({
+      ...group,
+      screenings: group.screenings.filter(
+        (screening) => !isChainCinema(screening.cinema.name)
+      ),
+    }))
+    .filter((group) => group.screenings.length > 0);
+  const answerScreenings =
+    studioScreenings.length > 0 ? studioScreenings : screenings;
+  const venueLabel = studioScreenings.length > 0 ? "kina studyjne" : "kina";
+
+  if (answerScreenings.length > 0) {
     questions.push({
-      q: `Co grają teraz kina studyjne ${place}?`,
-      a: `W repertuarze: ${repertoireSummary(screenings)}.`,
+      q: `Co grają teraz ${venueLabel} ${place}?`,
+      a: `W repertuarze: ${repertoireSummary(answerScreenings)}.`,
     });
   }
 
   const byCinema = new Map<string, { screenings: number; movies: number }>();
-  for (const group of screenings) {
+  for (const group of answerScreenings) {
     const seen = new Set<string>();
     for (const { cinema } of group.screenings) {
       const entry = byCinema.get(cinema.name) ?? { screenings: 0, movies: 0 };
@@ -206,7 +223,7 @@ export const buildCityFaq = ({
       (a, b) => b[1].screenings - a[1].screenings
     )[0];
     questions.push({
-      q: `Które kino ${place} ma najwięcej seansów specjalnych?`,
+      q: `Które ${studioScreenings.length > 0 ? "kino studyjne" : "kino"} ${place} ma najwięcej seansów specjalnych?`,
       a: `Najwięcej nadchodzących seansów ma ${name}: ${top.screenings} ${pluralPl(top.screenings, "seans", "seanse", "seansów")}, ${top.movies} ${pluralPl(top.movies, "film", "filmy", "filmów")}.`,
     });
   }
@@ -351,7 +368,7 @@ export const buildCinemaFaq = ({
       .sort((a, b) => a.screening.dateTime.localeCompare(b.screening.dateTime));
     const next = all[0];
     questions.push({
-      q: `Kiedy jest najbliższy seans: ${cinemaName}?`,
+      q: `${cinemaName}: kiedy jest najbliższy seans?`,
       a: `Najbliższy zapowiedziany seans to „${next.title}”, ${formatDayMonth(next.screening.date)} o ${next.screening.time}.`,
     });
 

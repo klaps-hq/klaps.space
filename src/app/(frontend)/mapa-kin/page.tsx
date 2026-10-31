@@ -5,6 +5,8 @@ import { isChainCinema } from "@/lib/cinema-chains";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { pluralPl } from "@/lib/seo";
 import { getScreenings } from "@/lib/screenings";
+import { SITE_URL } from "@/lib/site-config";
+import JsonLd from "@/components/common/json-ld";
 import type { MapCinema } from "./_components/poland-dot-map";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, {
@@ -76,6 +78,29 @@ const CinemaMapPage = async () => {
 
   return (
     <main className="bg-black text-white min-h-screen">
+      {/* The map itself is a canvas, so the page describes its content as
+          a collection: the venue counts and the cities listed below it. */}
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Mapa kin studyjnych w Polsce",
+          url: `${SITE_URL}/mapa-kin`,
+          isPartOf: { "@id": `${SITE_URL}/#website` },
+          numberOfItems: cinemas.length,
+          ...(topCities.length > 0 && {
+            mainEntity: {
+              "@type": "ItemList",
+              itemListElement: topCities.map((city, index) => ({
+                "@type": "ListItem",
+                position: index + 1,
+                name: city.name,
+                url: `${SITE_URL}/miasta/${city.slug}`,
+              })),
+            },
+          }),
+        }}
+      />
       <SiteHeader />
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-4">

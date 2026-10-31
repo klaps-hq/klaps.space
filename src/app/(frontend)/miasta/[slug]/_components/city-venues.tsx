@@ -54,7 +54,8 @@ const CityVenues = ({ heading, summary, isLinked }: CityVenuesProps) => {
           value={rows.length}
           label={pluralPl(rows.length, "kino studyjne", "kina studyjne", "kin studyjnych")}
         />
-        {summary.venuesWithScreens > 0 && (
+        {/* With one venue the total just repeats its own row. */}
+          {summary.venuesWithScreens > 1 && (
           <Stat
             value={summary.screens}
             label={`${pluralPl(summary.screens, "sala", "sale", "sal")}${
@@ -139,7 +140,8 @@ const CityVenues = ({ heading, summary, isLinked }: CityVenuesProps) => {
         <p className="mt-8 max-w-[68ch] text-sm md:text-base text-white/55 leading-relaxed">
           Największa sala to {roomLabel(largest.roomName)} w&nbsp;kinie{" "}
           {largest.cinemaName} ({seatsPl(largest.seats)}).
-          {summary.venuesWithScreens > 0 &&
+          {/* With one venue the total just repeats its own row. */}
+          {summary.venuesWithScreens > 1 &&
             ` Kina, które podają liczbę sal, mają ich łącznie ${screensPl(summary.screens)}.`}{" "}
           Dane pochodzą ze stron kin i&nbsp;instytucji, które je prowadzą.
         </p>
