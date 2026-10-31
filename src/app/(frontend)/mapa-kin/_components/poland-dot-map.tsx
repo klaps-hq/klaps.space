@@ -75,6 +75,8 @@ const DETAIL_ZOOM = 2.4;
 const LABEL_ZOOM = 2.4;
 // Below LABEL_ZOOM only the biggest programmes are named, for orientation.
 const OVERVIEW_LABELS = 8;
+// From this zoom on, each venue is named next to its marker.
+const VENUE_LABEL_ZOOM = 6;
 const HIT_PX = 14;
 
 const project = (lon: number, lat: number): [number, number] => [
@@ -346,7 +348,15 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
     ctx.clearRect(0, 0, size.w, size.h);
 
     const spacing = STEP * base.s * view.k;
-    const radius = clamp(spacing * 0.28, 0.9, 3.2);
+    const detail = view.k >= DETAIL_ZOOM;
+    // Zoomed in, the grid is only texture: venues take over, and a grid dot
+    // as big and bright as a venue marker read as one (October 2026).
+    const radius = detail
+      ? clamp(spacing * 0.28, 0.9, 1.4)
+      : clamp(spacing * 0.28, 0.9, 3.2);
+    const gridFade = detail
+      ? clamp(1 - (view.k - DETAIL_ZOOM) / 3, 0.18, 0.6)
+      : 1;
     const hoverKey =
       hover?.kind === "city" ? hover.city.key : hover?.kind === "cinema" ? hover.point.city : null;
 
@@ -356,20 +366,20 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
       const a = dotAlpha[i];
       ctx.fillStyle =
         a > 0
-          ? `rgba(255,255,255,${(0.2 + 0.8 * a).toFixed(3)})`
-          : "rgba(255,255,255,0.08)";
+          ? `rgba(255,255,255,${((0.2 + 0.8 * a) * gridFade).toFixed(3)})`
+          : `rgba(255,255,255,${(0.08 * gridFade).toFixed(3)})`;
       ctx.beginPath();
       ctx.arc(sx, sy, a > 0.6 ? radius * 1.15 : radius, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    if (view.k >= DETAIL_ZOOM) {
+    if (detail) {
       for (const p of points) {
         const [sx, sy] = toScreen(p.x, p.y, view);
         if (sx < -10 || sy < -10 || sx > size.w + 10 || sy > size.h + 10) continue;
         const active = hover?.kind === "cinema" && hover.point.slug === p.slug;
         ctx.beginPath();
-        ctx.arc(sx, sy, active ? 6 : 4.5, 0, Math.PI * 2);
+        ctx.arc(sx, sy, active ? 7 : 5, 0, Math.PI * 2);
         if (p.isOpenAir) {
           ctx.strokeStyle = "rgba(255,255,255,0.85)";
           ctx.lineWidth = 1.5;
@@ -391,13 +401,40 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
     }
 
     {
-      ctx.font = "500 10px Inter, system-ui, sans-serif";
       ctx.textBaseline = "middle";
+      ctx.lineJoin = "round";
       // The zoom buttons sit on the canvas (bottom right, three 40 px
       // buttons), so their area counts as taken and labels skip it.
       const taken: [number, number, number, number][] = [
         [size.w - 60, size.h - 140, 60, 140],
       ];
+      const place = (box: [number, number, number, number]): boolean => {
+        if (box[0] < 0 || box[1] < 0) return false;
+        if (box[0] + box[2] > size.w || box[1] + box[3] > size.h) return false;
+        const overlaps = taken.some(
+          ([x, y, bw, bh]) =>
+            box[0] < x + bw && box[0] + box[2] > x && box[1] < y + bh && box[1] + box[3] > y
+        );
+        if (overlaps) return false;
+        taken.push(box);
+        return true;
+      };
+      // A black halo keeps text legible over markers and lit dots.
+      const drawLabel = (text: string, x: number, y: number, fill: string) => {
+        ctx.strokeStyle = "rgba(0,0,0,0.9)";
+        ctx.lineWidth = 3;
+        ctx.strokeText(text, x, y);
+        ctx.fillStyle = fill;
+        ctx.fillText(text, x, y);
+      };
+      // Venue markers are taken first, so no label covers one.
+      if (view.k >= VENUE_LABEL_ZOOM) {
+        for (const p of points) {
+          const [sx, sy] = toScreen(p.x, p.y, view);
+          taken.push([sx - 5, sy - 5, 10, 10]);
+        }
+      }
+      ctx.font = "600 10px Inter, system-ui, sans-serif";
       const ordered =
         view.k >= LABEL_ZOOM
           ? [...cities].sort((a, b) => b.cinemas.length - a.cinemas.length)
@@ -412,16 +449,35 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
         if (sx < 0 || sy < 0 || sx > size.w || sy > size.h) continue;
         const label = c.name.toUpperCase();
         const w = ctx.measureText(label).width + 6;
-        const box: [number, number, number, number] = [sx + 8, sy - 7, w, 14];
-        if (box[0] + box[2] > size.w) continue;
-        const overlaps = taken.some(
-          ([x, y, bw, bh]) =>
-            box[0] < x + bw && box[0] + box[2] > x && box[1] < y + bh && box[1] + box[3] > y
+        if (!place([sx + 8, sy - 7, w, 14])) continue;
+        drawLabel(label, sx + 10, sy, c.key === hoverKey ? "#fff" : "rgba(255,255,255,0.7)");
+      }
+
+      // Zoomed into a city, venues get their own names: the programme ones
+      // first, multiplexes last, each placed right of its marker or, when
+      // that is taken, left of it.
+      if (view.k >= VENUE_LABEL_ZOOM) {
+        ctx.font = "400 11px Inter, system-ui, sans-serif";
+        const rank = (p: Point) => (p.isChain ? 2 : p.films > 0 ? 0 : 1);
+        const venues = [...points].sort(
+          (a, b) => rank(a) - rank(b) || b.films - a.films
         );
-        if (overlaps) continue;
-        taken.push(box);
-        ctx.fillStyle = c.key === hoverKey ? "#fff" : "rgba(255,255,255,0.6)";
-        ctx.fillText(label, sx + 10, sy);
+        for (const p of venues) {
+          const [sx, sy] = toScreen(p.x, p.y, view);
+          if (sx < 0 || sy < 0 || sx > size.w || sy > size.h) continue;
+          const w = ctx.measureText(p.name).width + 4;
+          const active = hover?.kind === "cinema" && hover.point.slug === p.slug;
+          const fill = active
+            ? "#fff"
+            : p.isChain
+              ? "rgba(255,255,255,0.45)"
+              : "rgba(255,255,255,0.8)";
+          if (place([sx + 9, sy - 7, w, 14])) {
+            drawLabel(p.name, sx + 10, sy, fill);
+          } else if (place([sx - 9 - w, sy - 7, w, 14])) {
+            drawLabel(p.name, sx - 8 - w, sy, fill);
+          }
+        }
       }
     }
   }, [base, cities, cityFilms, dotAlpha, hover, points, size, toScreen, view]);
