@@ -14,7 +14,7 @@ import {
   fetchHomeScreenings,
 } from "@/lib/screenings";
 import { getGenres } from "@/lib/genres";
-import { toCardGroup } from "@/lib/client-screenings";
+import { toRepertoire } from "@/lib/client-screenings";
 import { SITE_URL } from "@/lib/site-config";
 
 // The homepage is static (ISR): no searchParams or cookies are read on the
@@ -82,7 +82,7 @@ const HomePage = async () => {
           seeAllHref="/seanse"
         >
           <ScreeningsGrid
-            screenings={homeScreenings.screenings.map(toCardGroup)}
+            repertoire={toRepertoire(homeScreenings.screenings)}
             genres={genres}
             selectedGenreIds={[]}
             dateFrom={null}

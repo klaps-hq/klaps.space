@@ -2,7 +2,7 @@
 
 import React, { Suspense, useState } from "react";
 import { IGenre } from "@/interfaces/IMovies";
-import { ICardGroup, IFilterableRepertoire } from "@/lib/client-screenings";
+import { IRepertoire } from "@/lib/client-screenings";
 import {
   ScreeningsTransitionProvider,
   useScreeningsTransition,
@@ -14,7 +14,7 @@ import RepertoireFilterIsland from "./repertoire-filter-island";
 import { ScreeningCardGrid } from "./repertoire-grid";
 
 export interface RepertoireSectionClientProps {
-  repertoire: IFilterableRepertoire;
+  repertoire: IRepertoire;
   genres: IGenre[];
   // Server-rendered heading, kept out of the filter island so it stays in
   // the static HTML together with the grid.
@@ -45,7 +45,7 @@ const RepertoireSectionInner: React.FC<RepertoireSectionClientProps> = ({
   const { isPending } = useScreeningsTransition();
   // null = default view (render the server-rendered children grid); an array
   // = active filter result, replacing the default.
-  const [override, setOverride] = useState<ICardGroup[] | null>(null);
+  const [override, setOverride] = useState<IRepertoire | null>(null);
 
   return (
     <section className={className}>
@@ -82,7 +82,7 @@ const RepertoireSectionInner: React.FC<RepertoireSectionClientProps> = ({
             {children}
           </FilterPendingGrid>
         ) : (
-          <ScreeningCardGrid groups={override} emptyState={emptyState} />
+          <ScreeningCardGrid repertoire={override} emptyState={emptyState} />
         )}
       </div>
     </section>

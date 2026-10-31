@@ -5,15 +5,19 @@ import Link from "next/link";
 import MoviePoster from "@/components/common/movie-poster";
 import { useNow } from "@/hooks/use-now";
 import {
-  ICardGroup,
+  IRepertoireCity,
+  IRepertoireGroup,
   screeningDate,
   screeningTime,
-  upcomingCardGroup,
+  upcomingRepertoireGroup,
 } from "@/lib/client-screenings";
 import { formatDateLabel } from "@/lib/utils";
 
 interface ScreeningCardProps {
-  group: ICardGroup;
+  group: IRepertoireGroup;
+  // The listing's shared city list (one array for every card), resolving
+  // the city ids in the group's screenings.
+  cities: IRepertoireCity[];
   // Set on the few cards above the fold: their poster is the LCP element,
   // and Next marks priority images eager with fetchpriority=high so the
   // browser stops discovering them only after layout.
@@ -22,13 +26,14 @@ interface ScreeningCardProps {
 
 const ScreeningCard: React.FC<ScreeningCardProps> = ({
   group,
+  cities,
   priority = false,
 }) => {
   // Cached listing HTML can outlive its showtimes (ISR serves stale pages
   // while revalidating), so started screenings are dropped again here once
   // the client clock is known, and a movie with nothing left disappears.
   const now = useNow();
-  const visibleGroup = now === null ? group : upcomingCardGroup(group, now);
+  const visibleGroup = now === null ? group : upcomingRepertoireGroup(group, now);
   if (!visibleGroup) return null;
 
   const { movie, screenings } = visibleGroup;
@@ -78,7 +83,7 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({
       <div className="mt-1 flex flex-col gap-1 border-t border-white/10 pt-2.5">
         {/* Two cinemas in one city can share a showtime, so the rows are
             keyed by position; the list is static per render. */}
-        {upcoming.map(([dateTime, city], index) => (
+        {upcoming.map(([dateTime, cityId], index) => (
           <div
             key={index}
             className="flex items-baseline justify-between gap-2 text-[10px] md:text-[11px] uppercase tracking-wider min-w-0"
@@ -91,7 +96,7 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({
               <span className="text-white/80">{screeningTime(dateTime)}</span>
             </span>
             <span className="text-white/50 truncate max-w-[55%] text-right shrink-0">
-              {city}
+              {cities.find((city) => city.id === cityId)?.name}
             </span>
           </div>
         ))}

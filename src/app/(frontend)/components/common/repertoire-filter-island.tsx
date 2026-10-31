@@ -5,17 +5,13 @@ import { useSearchParams } from "next/navigation";
 import { IGenre } from "@/interfaces/IMovies";
 import { usePreferredCity } from "@/contexts/city-context";
 import { parseGenreIdsParam } from "@/lib/screening-filters";
-import {
-  filterRepertoire,
-  ICardGroup,
-  IFilterableRepertoire,
-} from "@/lib/client-screenings";
+import { filterRepertoire, IRepertoire } from "@/lib/client-screenings";
 import { isVoivodeship } from "@/lib/voivodeships";
 import { clearFilterPending } from "@/lib/filter-pending";
 import FilterBar from "../../(home)/_components/screenings/filter-bar";
 
 interface RepertoireFilterIslandProps {
-  repertoire: IFilterableRepertoire;
+  repertoire: IRepertoire;
   genres: IGenre[];
   hideCity?: boolean;
   hideGenres?: boolean;
@@ -24,9 +20,9 @@ interface RepertoireFilterIslandProps {
   // are already scoped, so they leave this off.
   usePreferredLocation?: boolean;
   // Stable setter from the parent (a useState dispatcher): the filtered
-  // groups, or null for the default view, where the parent keeps showing
+  // repertoire, or null for the default view, where the parent keeps showing
   // the server-rendered grid.
-  onResult: (result: ICardGroup[] | null) => void;
+  onResult: (result: IRepertoire | null) => void;
 }
 
 // The interactive filter controls live here, isolated behind a Suspense

@@ -4,13 +4,13 @@ import React from "react";
 import { IGenre } from "@/interfaces/IMovies";
 import { formatDateLabel, formatDatePL } from "@/lib/utils";
 import { useNow } from "@/hooks/use-now";
-import { ICardGroup, upcomingCardGroup } from "@/lib/client-screenings";
+import { IRepertoire, upcomingRepertoireGroup } from "@/lib/client-screenings";
 import EmptyState from "@/components/common/empty-state";
 import ScreeningCard from "./screening-card";
 import ScreeningsEmptyState from "./empty-state";
 
 interface ScreeningsGridProps {
-  screenings: ICardGroup[];
+  repertoire: IRepertoire;
   genres: IGenre[];
   selectedGenreIds: number[];
   dateFrom: string | null;
@@ -48,7 +48,7 @@ const buildGenresLabel = (
 };
 
 const ScreeningsGrid: React.FC<ScreeningsGridProps> = ({
-  screenings,
+  repertoire,
   genres,
   selectedGenreIds,
   dateFrom,
@@ -59,12 +59,14 @@ const ScreeningsGrid: React.FC<ScreeningsGridProps> = ({
   // Same started-showtime pruning as ScreeningCard, done here as well so a
   // grid whose every movie has already played falls to the empty state.
   const now = useNow();
-  const visibleScreenings =
+  const visibleGroups =
     now === null
-      ? screenings
-      : screenings.flatMap((group) => upcomingCardGroup(group, now) ?? []);
+      ? repertoire.groups
+      : repertoire.groups.flatMap(
+          (group) => upcomingRepertoireGroup(group, now) ?? []
+        );
 
-  if (visibleScreenings.length === 0) {
+  if (visibleGroups.length === 0) {
     // Server-rendered default view: a static, hook-free empty state so the
     // page can be prerendered. (At build time the upstream data is empty, so
     // this branch is what renders into the static HTML.)
@@ -96,8 +98,12 @@ const ScreeningsGrid: React.FC<ScreeningsGridProps> = ({
       {/* No priority posters: on the homepage this grid sits below a
           full-viewport hero, and eager high-priority posters would compete
           with the hero image (the actual LCP element) for bandwidth. */}
-      {visibleScreenings.map((group) => (
-        <ScreeningCard key={group.movie.id} group={group} />
+      {visibleGroups.map((group) => (
+        <ScreeningCard
+          key={group.movie.id}
+          group={group}
+          cities={repertoire.cities}
+        />
       ))}
     </div>
   );

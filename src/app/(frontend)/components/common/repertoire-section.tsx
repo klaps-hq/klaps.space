@@ -1,6 +1,6 @@
 import React from "react";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
-import { toFilterableRepertoire } from "@/lib/client-screenings";
+import { toRepertoire } from "@/lib/client-screenings";
 import RepertoireSectionClient, {
   type RepertoireSectionClientProps,
 } from "./repertoire-section-client";
@@ -10,14 +10,15 @@ interface RepertoireSectionProps
   screenings: IScreeningGroup[];
 }
 
-// Server boundary: the filter island gets the compact repertoire (see
-// toFilterableRepertoire) instead of whole screening groups.
+// Server boundary: the filter island gets the compact repertoire instead of
+// whole screening groups; the same object as the card grid below (see
+// toRepertoire), so the payload carries it once.
 const RepertoireSection: React.FC<RepertoireSectionProps> = ({
   screenings,
   ...props
 }) => (
   <RepertoireSectionClient
-    repertoire={toFilterableRepertoire(screenings)}
+    repertoire={toRepertoire(screenings)}
     {...props}
   />
 );

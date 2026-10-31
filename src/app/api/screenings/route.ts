@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchHomeScreenings } from "@/lib/screenings";
-import { toCardGroup } from "@/lib/client-screenings";
+import { toRepertoire } from "@/lib/client-screenings";
 import { isVoivodeship } from "@/lib/voivodeships";
 
 // Proxy for the homepage screenings section - the upstream URL and API key
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
   });
 
   // Cards are all the client renders from this, so only their fields go out.
-  return NextResponse.json({ screenings: screenings.map(toCardGroup), hasMore }, {
+  return NextResponse.json({ repertoire: toRepertoire(screenings), hasMore }, {
     // Short shared cache: repertoire data upstream revalidates every 5
     // minutes anyway (apiFetch default), so repeat hits can be served
     // without re-rendering the route.

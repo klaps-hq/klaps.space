@@ -6,10 +6,12 @@ import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
 import { useMyCinemas } from "@/hooks/use-my-cinemas";
 import { filterScreeningGroups } from "@/lib/screening-filters";
-import { toCardGroup } from "@/lib/client-screenings";
+import { IRepertoire, toRepertoire } from "@/lib/client-screenings";
 import EmptyState from "@/components/common/empty-state";
 import SectionLoader from "@/components/ui/section-loader";
 import ScreeningsGrid from "../../(home)/_components/screenings/screenings-grid";
+
+const EMPTY_REPERTOIRE: IRepertoire = { cities: [], groups: [] };
 
 interface MyCinemasGridProps {
   genres: IGenre[];
@@ -60,13 +62,15 @@ const MyCinemasGrid: React.FC<MyCinemasGridProps> = ({
   const filtered = useMemo(
     () =>
       result
-        ? filterScreeningGroups(result.screenings, {
-            genreIds: selectedGenreIds,
-            dateFrom,
-            dateTo,
-            search,
-          }).map(toCardGroup)
-        : [],
+        ? toRepertoire(
+            filterScreeningGroups(result.screenings, {
+              genreIds: selectedGenreIds,
+              dateFrom,
+              dateTo,
+              search,
+            })
+          )
+        : EMPTY_REPERTOIRE,
     [result, selectedGenreIds, dateFrom, dateTo, search]
   );
 
@@ -108,7 +112,7 @@ const MyCinemasGrid: React.FC<MyCinemasGridProps> = ({
       ) : (
         <ScreeningsGrid
           interactive
-          screenings={filtered}
+          repertoire={filtered}
           genres={genres}
           selectedGenreIds={selectedGenreIds}
           dateFrom={dateFrom}
