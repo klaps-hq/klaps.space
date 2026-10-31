@@ -556,7 +556,23 @@ export const groupScreeningsByCinema = (
  * and city records, which made /klasyka-w-kinach/listopad-2026 weigh
  * ~1.3 MB of HTML (audit #10).
  */
-export const toClientScreeningGroups = (groups: IScreeningGroup[]): IScreeningGroup[] =>
+// Memoized per input array: callers pass the same groups to the filter
+// island and to the card grid, and React only serializes shared data once
+// when both receive the same array reference. Trimming twice produced two
+// copies and doubled the November classics page to 1.7 MB (audit #10).
+const clientGroupsCache = new WeakMap<IScreeningGroup[], IScreeningGroup[]>();
+
+export const toClientScreeningGroups = (
+  groups: IScreeningGroup[]
+): IScreeningGroup[] => {
+  const cached = clientGroupsCache.get(groups);
+  if (cached) return cached;
+  const trimmed = trimForClient(groups);
+  clientGroupsCache.set(groups, trimmed);
+  return trimmed;
+};
+
+const trimForClient = (groups: IScreeningGroup[]): IScreeningGroup[] =>
   groups.map((group) => ({
     ...group,
     screenings: group.screenings.map((screening) => ({
