@@ -21,8 +21,11 @@ ENV API_URL=$API_URL
 ARG MAINTENANCE_MODE
 ENV MAINTENANCE_MODE=$MAINTENANCE_MODE
 
+# .next/cache (fetch cache filled during prerendering) is not part of the
+# image, so dropping it keeps this layer small for the CI layer cache.
 RUN --mount=type=secret,id=internal_api_key \
-    INTERNAL_API_KEY="$(cat /run/secrets/internal_api_key)" npm run build
+    INTERNAL_API_KEY="$(cat /run/secrets/internal_api_key)" npm run build \
+    && rm -rf .next/cache
 
 # Stage 3: Production runner
 FROM node:22-alpine AS runner
