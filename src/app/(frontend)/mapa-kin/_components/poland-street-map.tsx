@@ -71,7 +71,9 @@ const LAYER = {
   clusterGlow: "klaps-cluster-glow",
   clusters: "klaps-clusters",
   clusterCount: "klaps-cluster-count",
+  pointGlow: "klaps-point-glow",
   points: "klaps-points",
+  pointCore: "klaps-point-core",
   labels: "klaps-labels",
 } as const;
 
@@ -225,32 +227,92 @@ const CinemaLayers: React.FC<CinemaLayersProps> = ({ data, onSelect }) => {
       },
       paint: { "text-color": "#000" },
     });
+    // Venue markers have to stand out from a dark grey basemap at every
+    // zoom, so kinds differ by shape (solid disc, ring, ring with a dot)
+    // rather than by shades of grey, and each sits in a soft glow.
+    // MapLibre accepts ["zoom"] only as the input of a top-level
+    // interpolate, so the scale and the per-kind size live in the stops.
+    const markerRadius = (
+      scale: number,
+      chainScale = scale
+    ): MapLibreGL.ExpressionSpecification => {
+      const at = (radius: number): MapLibreGL.ExpressionSpecification => [
+        "match",
+        ["get", "kind"],
+        "chain",
+        radius * chainScale,
+        radius * scale,
+      ];
+      return ["interpolate", ["linear"], ["zoom"], 6, at(7), 11, at(9), 16, at(12)];
+    };
+    const notCluster: MapLibreGL.FilterSpecification = [
+      "!",
+      ["has", "point_count"],
+    ];
+    map.addLayer({
+      id: LAYER.pointGlow,
+      type: "circle",
+      source: SOURCE,
+      filter: notCluster,
+      paint: {
+        "circle-color": "#fff",
+        "circle-opacity": [
+          "match",
+          ["get", "kind"],
+          "studio",
+          0.4,
+          "chain",
+          0.16,
+          0.28,
+        ],
+        "circle-blur": 0.75,
+        "circle-radius": markerRadius(2.4),
+      },
+    });
     map.addLayer({
       id: LAYER.points,
       type: "circle",
       source: SOURCE,
-      filter: ["!", ["has", "point_count"]],
+      filter: notCluster,
       paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 4.5, 15, 7],
+        "circle-radius": markerRadius(1, 0.85),
         "circle-color": [
           "match",
           ["get", "kind"],
           "studio",
           "#fff",
-          "idle",
-          "rgba(255,255,255,0.55)",
           "chain",
-          "rgba(255,255,255,0.3)",
+          "#a3a3a3",
           "#000",
         ],
         "circle-stroke-color": [
           "match",
           ["get", "kind"],
+          "idle",
+          "#fff",
           "openAir",
-          "rgba(255,255,255,0.9)",
+          "#fff",
           "#000",
         ],
-        "circle-stroke-width": 1.5,
+        "circle-stroke-width": [
+          "match",
+          ["get", "kind"],
+          "idle",
+          3,
+          "openAir",
+          3,
+          2,
+        ],
+      },
+    });
+    map.addLayer({
+      id: LAYER.pointCore,
+      type: "circle",
+      source: SOURCE,
+      filter: ["all", notCluster, ["==", ["get", "kind"], "openAir"]],
+      paint: {
+        "circle-color": "#fff",
+        "circle-radius": markerRadius(0.4),
       },
     });
     map.addLayer({
@@ -262,9 +324,9 @@ const CinemaLayers: React.FC<CinemaLayersProps> = ({ data, onSelect }) => {
       layout: {
         "text-field": ["get", "name"],
         "text-font": ["Montserrat Medium"],
-        "text-size": ["interpolate", ["linear"], ["zoom"], 11, 10.5, 16, 13],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 11, 12, 16, 14],
         "text-anchor": "left",
-        "text-offset": [0.9, 0],
+        "text-offset": [1.2, 0],
         "text-max-width": 14,
         "text-optional": true,
         // Programme venues win label collisions, multiplexes lose them.
@@ -285,11 +347,11 @@ const CinemaLayers: React.FC<CinemaLayersProps> = ({ data, onSelect }) => {
           "match",
           ["get", "kind"],
           "chain",
-          "rgba(255,255,255,0.5)",
-          "rgba(255,255,255,0.9)",
+          "rgba(255,255,255,0.65)",
+          "#fff",
         ],
         "text-halo-color": "#000",
-        "text-halo-width": 1.6,
+        "text-halo-width": 2,
       },
     });
 
@@ -465,19 +527,24 @@ const PolandStreetMap: React.FC<PolandStreetMapProps> = ({ cinemas }) => {
 
       <ul className="flex flex-wrap gap-x-6 gap-y-2 text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/55">
         <li className="flex items-center gap-2">
-          <span className="size-2.5 rounded-full bg-white" aria-hidden="true" />
+          <span className="size-3 rounded-full bg-white" aria-hidden="true" />
           Kino studyjne z repertuarem
         </li>
         <li className="flex items-center gap-2">
-          <span className="size-2.5 rounded-full bg-white/55" aria-hidden="true" />
+          <span className="size-3 rounded-full border-2 border-white" aria-hidden="true" />
           Bez zapowiedzianych seansów
         </li>
         <li className="flex items-center gap-2">
-          <span className="size-2.5 rounded-full border border-white/85" aria-hidden="true" />
+          <span
+            className="flex size-3 items-center justify-center rounded-full border-2 border-white"
+            aria-hidden="true"
+          >
+            <span className="size-1 rounded-full bg-white" />
+          </span>
           Kino plenerowe
         </li>
         <li className="flex items-center gap-2">
-          <span className="size-2.5 rounded-full bg-white/30" aria-hidden="true" />
+          <span className="size-3 rounded-full bg-[#a3a3a3]" aria-hidden="true" />
           Kino sieciowe
         </li>
         <li className="flex items-center gap-2">
