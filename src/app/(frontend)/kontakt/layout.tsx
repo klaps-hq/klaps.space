@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     canonical: `${SITE_URL}/kontakt`,
   },
   openGraph: {
+    locale: "pl_PL",
     title: "Kontakt - Klaps",
     description:
       "Skontaktuj się z zespołem Klaps. Współpraca z kinami studyjnymi, zgłoszenia i propozycje.",

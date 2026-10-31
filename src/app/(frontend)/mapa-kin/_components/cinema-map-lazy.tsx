@@ -1,25 +1,25 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { ICinema } from "@/interfaces/ICinema";
 import SectionLoader from "@/components/ui/section-loader";
+import type { MapCinema } from "./poland-dot-map";
 
-const CinemaMapView = dynamic(() => import("./cinema-map-view"), {
+const PolandDotMap = dynamic(() => import("./poland-dot-map"), {
   ssr: false,
   loading: () => (
     <SectionLoader
-      label="Ladowanie mapy"
-      className="min-h-0 h-[70vh] max-h-[800px]"
+      label="Ładowanie mapy"
+      className="min-h-0 h-[105vw] max-h-[72vh] sm:h-[72vh] sm:max-h-[860px]"
     />
   ),
 });
 
 interface CinemaMapLazyProps {
-  cinemas: ICinema[];
+  cinemas: MapCinema[];
 }
 
-const CinemaMapLazy: React.FC<CinemaMapLazyProps> = ({ cinemas }) => {
-  return <CinemaMapView cinemas={cinemas} />;
-};
+const CinemaMapLazy: React.FC<CinemaMapLazyProps> = ({ cinemas }) => (
+  <PolandDotMap cinemas={cinemas} />
+);
 
 export default CinemaMapLazy;

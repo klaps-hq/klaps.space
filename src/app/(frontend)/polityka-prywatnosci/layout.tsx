@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     canonical: `${SITE_URL}/polityka-prywatnosci`,
   },
   openGraph: {
+    locale: "pl_PL",
     title: "Polityka prywatności",
     description:
       "Polityka prywatności serwisu Klaps. Informacje o przetwarzaniu danych, plikach cookies i prawach użytkowników.",

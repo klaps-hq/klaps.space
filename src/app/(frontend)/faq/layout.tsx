@@ -29,6 +29,7 @@ export const metadata: Metadata = {
     canonical: `${SITE_URL}/faq`,
   },
   openGraph: {
+    locale: "pl_PL",
     title: "FAQ - pytania o kina studyjne i seanse specjalne",
     description:
       "Odpowiedzi na najczęstsze pytania o seanse specjalne, repertuar kin studyjnych i działanie serwisu Klaps.",

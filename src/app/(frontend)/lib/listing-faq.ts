@@ -1,13 +1,9 @@
 import { IRecentScreening, IScreeningGroup } from "@/interfaces/IScreenings";
 import { IProgrammeProfile } from "@/interfaces/IProgrammeProfile";
 import { ICinemaDetails } from "@/interfaces/ICinema";
-import {
-  CityVenueSummary,
-  roomLabel,
-  screensPl,
-  seatsPl,
-} from "./city-venues";
+import { CityVenueSummary, roomLabel, screensPl, seatsPl } from "./city-venues";
 import { formatPlDate, inPlace, pluralPl } from "./seo";
+import { isChainCinema } from "./cinema-chains";
 import { hasProfileContent, sinceMonth } from "./programme-profile";
 
 /**
@@ -48,7 +44,9 @@ const repertoireSummary = (groups: IScreeningGroup[]): string => {
  * most screened films and genres so far. Left out when the history is too
  * thin to say anything.
  */
-const profileAnswer = (profile: IProgrammeProfile | null | undefined): string | null => {
+const profileAnswer = (
+  profile: IProgrammeProfile | null | undefined,
+): string | null => {
   if (!profile || !hasProfileContent(profile)) return null;
   const films = profile.topMovies.slice(0, 3).map((m) => m.title);
   if (films.length === 0) return null;
@@ -60,13 +58,13 @@ const profileAnswer = (profile: IProgrammeProfile | null | undefined): string | 
     ? `${sinceMonth(profile.since).replace(/^o/, "O")} ${label}:`
     : `${label.charAt(0).toUpperCase()}${label.slice(1)}:`;
   const parts = [`${lead} ${joinNames(quoted(films))}.`];
-  if (profile.topGenres.length >= 2) {
+  if (profile.topGenres.length >= 2 && profile.movies >= 3) {
     parts.push(
-      `Przeważają gatunki: ${joinNames(profile.topGenres.slice(0, 3).map((g) => g.name.toLocaleLowerCase("pl")))}.`
+      `Przeważają gatunki: ${joinNames(profile.topGenres.slice(0, 3).map((g) => g.name.toLocaleLowerCase("pl")))}.`,
     );
   }
   parts.push(
-    `Łącznie ${profile.screenings} ${pluralPl(profile.screenings, "seans", "seanse", "seansów")} i ${profile.movies} ${pluralPl(profile.movies, "film", "filmy", "filmów")}.`
+    `Łącznie ${profile.screenings} ${pluralPl(profile.screenings, "seans", "seanse", "seansów")} i ${profile.movies} ${pluralPl(profile.movies, "film", "filmy", "filmów")}.`,
   );
   return parts.join(" ");
 };
@@ -116,10 +114,13 @@ const cityVenuesFaq = (place: string, venues: CityVenueSummary): FaqItem[] => {
   }
 
   if (venues.venuesWithScreens > 0) {
+    // One venue: name it, "łącznie" over a single row read as padding.
     const scope =
-      venues.venuesWithScreens === venues.rows.length
-        ? `Kina studyjne ${place} mają`
-        : `Kina studyjne ${place}, które podają te dane (${venues.venuesWithScreens} z ${venues.rows.length}), mają`;
+      venues.rows.length === 1
+        ? `${venues.rows[0].name} ma`
+        : venues.venuesWithScreens === venues.rows.length
+          ? `Kina studyjne ${place} mają`
+          : `Kina studyjne ${place}, które podają te dane (${venues.venuesWithScreens} z ${venues.rows.length}), mają`;
     const seats =
       venues.venuesWithSeats === venues.venuesWithScreens &&
       venues.venuesWithSeats > 0
@@ -127,7 +128,7 @@ const cityVenuesFaq = (place: string, venues: CityVenueSummary): FaqItem[] => {
         : "";
     questions.push({
       q: `Ile sal mają kina studyjne ${place}?`,
-      a: `${scope} łącznie ${screensPl(venues.screens)}${seats}.`,
+      a: `${scope}${venues.rows.length === 1 ? "" : " łącznie"} ${screensPl(venues.screens)}${seats}.`,
     });
   }
 
@@ -174,7 +175,7 @@ export const buildCityFaq = ({
       parts.push(
         chainNames.length === 1
           ? `Seanse specjalne gra też kino sieciowe ${chainNames[0]}.`
-          : `Seanse specjalne grają też kina sieciowe: ${joinNames(chainNames)}.`
+          : `Seanse specjalne grają też kina sieciowe: ${joinNames(chainNames)}.`,
       );
     }
     questions.push({
@@ -183,15 +184,36 @@ export const buildCityFaq = ({
     });
   }
 
-  if (screenings.length > 0) {
+  // Answers about "kina studyjne" count independent venues only: in mixed
+  // cities the full listing is mostly multiplex re-releases, and Toruń's
+  // answer quoted Cinema City under the arthouse label (audit #8). A city
+  // with nothing independent upcoming gets the plain "kina" wording.
+  const studioScreenings = screenings
+    .map((group) => ({
+      ...group,
+      screenings: group.screenings.filter(
+        (screening) => !isChainCinema(screening.cinema.name),
+      ),
+    }))
+    .filter((group) => group.screenings.length > 0);
+  const answerScreenings = studioScreenings;
+
+  if (studioScreenings.length > 0) {
     questions.push({
       q: `Co grają teraz kina studyjne ${place}?`,
-      a: `W repertuarze: ${repertoireSummary(screenings)}.`,
+      a: `W repertuarze: ${repertoireSummary(studioScreenings)}.`,
+    });
+  } else if (screenings.length > 0 && independentNames.length > 0) {
+    // Only multiplexes have something upcoming: say so instead of passing
+    // their re-releases off as the arthouse programme (audit #9, Toruń).
+    questions.push({
+      q: `Co grają teraz kina studyjne ${place}?`,
+      a: `${independentNames.length === 1 ? `${independentNames[0]} nie ma` : "Kina studyjne nie mają"} teraz zapowiedzianych seansów specjalnych. Nadchodzące seanse ${place} grają kina sieciowe: ${repertoireSummary(screenings)}.`,
     });
   }
 
   const byCinema = new Map<string, { screenings: number; movies: number }>();
-  for (const group of screenings) {
+  for (const group of answerScreenings) {
     const seen = new Set<string>();
     for (const { cinema } of group.screenings) {
       const entry = byCinema.get(cinema.name) ?? { screenings: 0, movies: 0 };
@@ -203,10 +225,10 @@ export const buildCityFaq = ({
   }
   if (byCinema.size >= 2) {
     const [name, top] = [...byCinema.entries()].sort(
-      (a, b) => b[1].screenings - a[1].screenings
+      (a, b) => b[1].screenings - a[1].screenings,
     )[0];
     questions.push({
-      q: `Które kino ${place} ma najwięcej seansów specjalnych?`,
+      q: `Które kino studyjne ${place} ma najwięcej seansów specjalnych?`,
       a: `Najwięcej nadchodzących seansów ma ${name}: ${top.screenings} ${pluralPl(top.screenings, "seans", "seanse", "seansów")}, ${top.movies} ${pluralPl(top.movies, "film", "filmy", "filmów")}.`,
     });
   }
@@ -248,7 +270,7 @@ interface CinemaFaqInput {
 /** Venue facts (rooms, booking, accessibility, operator) as FAQ entries. */
 const cinemaDetailsFaq = (
   cinemaName: string,
-  details: ICinemaDetails | undefined
+  details: ICinemaDetails | undefined,
 ): FaqItem[] => {
   if (!details) return [];
   const questions: FaqItem[] = [];
@@ -262,7 +284,9 @@ const cinemaDetailsFaq = (
       known.length === rooms.length && rooms.length > 0
         ? known.reduce((sum, room) => sum + (room.seats ?? 0), 0)
         : null;
-    const largest = [...known].sort((a, b) => (b.seats ?? 0) - (a.seats ?? 0))[0];
+    const largest = [...known].sort(
+      (a, b) => (b.seats ?? 0) - (a.seats ?? 0),
+    )[0];
     const parts = [
       `${cinemaName} ma ${screens} ${pluralPl(screens, "salę", "sale", "sal")}`,
       total !== null && screens > 1 ? `, łącznie ${seatsPl(total)}` : "",
@@ -293,8 +317,10 @@ const cinemaDetailsFaq = (
 
   if (accessibility) {
     const facts = [
-      accessibility.wheelchair === true && "kino jest dostępne dla osób na wózkach",
-      accessibility.wheelchair === false && "kino nie jest przystosowane dla osób na wózkach",
+      accessibility.wheelchair === true &&
+        "kino jest dostępne dla osób na wózkach",
+      accessibility.wheelchair === false &&
+        "kino nie jest przystosowane dla osób na wózkach",
       accessibility.hearingLoop === true && "w kinie jest pętla indukcyjna",
     ].filter(Boolean) as string[];
     const lead = facts.length
@@ -346,12 +372,15 @@ export const buildCinemaFaq = ({
 
     const all = screenings
       .flatMap((group) =>
-        group.screenings.map((screening) => ({ title: group.movie.title, screening }))
+        group.screenings.map((screening) => ({
+          title: group.movie.title,
+          screening,
+        })),
       )
       .sort((a, b) => a.screening.dateTime.localeCompare(b.screening.dateTime));
     const next = all[0];
     questions.push({
-      q: `Kiedy jest najbliższy seans: ${cinemaName}?`,
+      q: `${cinemaName}: kiedy jest najbliższy seans?`,
       a: `Najbliższy zapowiedziany seans to „${next.title}”, ${formatDayMonth(next.screening.date)} o ${next.screening.time}.`,
     });
 
