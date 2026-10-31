@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
-import { ICinemaDetails } from "@/interfaces/ICinema";
+import { ICinemaDetails, ICinemaPhoto } from "@/interfaces/ICinema";
 import { pluralPl } from "@/lib/seo";
 import TrackedCinemaLink from "@/components/common/tracked-cinema-link";
 import { CONTACT_EMAIL } from "@/constants";
@@ -68,7 +68,8 @@ const DataRequest = ({ cinemaName, className }: DataRequestProps) => (
   <p className={`max-w-[68ch] text-sm md:text-base text-white/55 leading-relaxed ${className ?? ""}`}>
     Prowadzicie to kino? Jeśli brakuje danych albo coś się zmieniło,
     prześlijcie nam liczbę sal i&nbsp;miejsc, informacje o&nbsp;dostępności,
-    logo lub zdjęcia (opublikujemy je tylko za Waszą zgodą):{" "}
+    logo lub lepsze zdjęcia. Jeśli któreś zdjęcie ma zniknąć, napiszcie, a&nbsp;usuniemy
+    je od ręki:{" "}
     <a
       href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Dane kina: ${cinemaName}`)}`}
       className="text-white/80 underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white transition-colors"
@@ -77,6 +78,52 @@ const DataRequest = ({ cinemaName, className }: DataRequestProps) => (
     </a>
     .
   </p>
+);
+
+const creditLinkClass = "hover:text-white/80 underline-offset-2 hover:underline";
+
+const hostname = (url: string): string => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+};
+
+/**
+ * Commons photos need author, licence and the source file (CC terms);
+ * photos from the cinema's own site name the author and link the page.
+ */
+const PhotoCredit = ({ photo }: { photo: ICinemaPhoto }) => (
+  <figcaption className="text-[11px] text-white/45 leading-snug">
+    Fot. {photo.author},{" "}
+    {photo.source === "website" ? (
+      <>
+        źródło:{" "}
+        <a href={photo.sourceUrl} target="_blank" rel="noopener nofollow" className={creditLinkClass}>
+          {hostname(photo.sourceUrl)}
+        </a>
+      </>
+    ) : (
+      <>
+        <a href={photo.sourceUrl} target="_blank" rel="noopener" className={creditLinkClass}>
+          Wikimedia Commons
+        </a>
+        {photo.license && (
+          <>
+            ,{" "}
+            {photo.licenseUrl ? (
+              <a href={photo.licenseUrl} target="_blank" rel="noopener license" className={creditLinkClass}>
+                {photo.license}
+              </a>
+            ) : (
+              photo.license
+            )}
+          </>
+        )}
+      </>
+    )}
+  </figcaption>
 );
 
 /**
@@ -252,32 +299,7 @@ const CinemaDetails = ({
                   className="object-cover grayscale hover:grayscale-0 transition duration-500"
                 />
               </div>
-              {/* Attribution required by the CC licences: author, licence
-                  with its link, and the source file. */}
-              <figcaption className="text-[11px] text-white/45 leading-snug">
-                Fot.{" "}
-                <a
-                  href={photo.sourceUrl}
-                  target="_blank"
-                  rel="noopener"
-                  className="hover:text-white/80 underline-offset-2 hover:underline"
-                >
-                  {photo.author}
-                </a>
-                , Wikimedia Commons,{" "}
-                {photo.licenseUrl ? (
-                  <a
-                    href={photo.licenseUrl}
-                    target="_blank"
-                    rel="noopener license"
-                    className="hover:text-white/80 underline-offset-2 hover:underline"
-                  >
-                    {photo.license}
-                  </a>
-                ) : (
-                  photo.license
-                )}
-              </figcaption>
+              <PhotoCredit photo={photo} />
             </figure>
           ))}
         </div>
