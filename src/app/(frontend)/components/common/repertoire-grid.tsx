@@ -1,14 +1,14 @@
 import React from "react";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import ScreeningCard from "../../(home)/_components/screenings/screening-card";
-import { toClientScreeningGroups } from "@/lib/screenings";
+import { IRepertoire, toRepertoire } from "@/lib/client-screenings";
 
 // Roughly the first row across breakpoints. Enough to cover the LCP
 // candidate without flooding the browser with high-priority requests.
 const PRIORITY_POSTERS = 6;
 
-interface RepertoireGridProps {
-  screenings: IScreeningGroup[];
+interface ScreeningCardGridProps {
+  repertoire: IRepertoire;
   // Shown when the list is empty. When this grid is rendered by the server
   // (the default, unfiltered view) the node must be hook-free, otherwise a
   // hook like useSearchParams would opt the page out of static prerendering.
@@ -18,24 +18,39 @@ interface RepertoireGridProps {
 // Hook-free so it renders on the server: the default repertoire lands in the
 // static HTML and crawlers read it without executing JS. The same component
 // is reused client-side for filtered views.
-const RepertoireGrid: React.FC<RepertoireGridProps> = ({
-  screenings,
+export const ScreeningCardGrid: React.FC<ScreeningCardGridProps> = ({
+  repertoire,
   emptyState,
 }) => {
-  if (screenings.length === 0) return <>{emptyState}</>;
+  if (repertoire.groups.length === 0) return <>{emptyState}</>;
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-12">
-      {/* Cards are client components: only the fields they read cross. */}
-      {toClientScreeningGroups(screenings).map((group, index) => (
+      {repertoire.groups.map((group, index) => (
         <ScreeningCard
           key={group.movie.id}
           group={group}
+          cities={repertoire.cities}
           priority={index < PRIORITY_POSTERS}
         />
       ))}
     </div>
   );
 };
+
+interface RepertoireGridProps {
+  screenings: IScreeningGroup[];
+  emptyState: React.ReactNode;
+}
+
+// Server entry point: cards are client components, so only the fields they
+// render cross. toRepertoire is memoized, so the filter island given the same
+// groups shares these objects and the payload carries them once.
+const RepertoireGrid: React.FC<RepertoireGridProps> = ({
+  screenings,
+  emptyState,
+}) => (
+  <ScreeningCardGrid repertoire={toRepertoire(screenings)} emptyState={emptyState} />
+);
 
 export default RepertoireGrid;

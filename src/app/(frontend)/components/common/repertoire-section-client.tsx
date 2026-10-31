@@ -1,8 +1,8 @@
 "use client";
 
 import React, { Suspense, useState } from "react";
-import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
+import { IRepertoire } from "@/lib/client-screenings";
 import {
   ScreeningsTransitionProvider,
   useScreeningsTransition,
@@ -11,10 +11,10 @@ import { cn } from "@/lib/utils";
 import FilterBarFallback from "../../(home)/_components/screenings/filter-bar-fallback";
 import FilterPendingGrid from "./filter-pending-grid";
 import RepertoireFilterIsland from "./repertoire-filter-island";
-import RepertoireGrid from "./repertoire-grid";
+import { ScreeningCardGrid } from "./repertoire-grid";
 
-export interface RepertoireSectionProps {
-  screenings: IScreeningGroup[];
+export interface RepertoireSectionClientProps {
+  repertoire: IRepertoire;
   genres: IGenre[];
   // Server-rendered heading, kept out of the filter island so it stays in
   // the static HTML together with the grid.
@@ -31,8 +31,8 @@ export interface RepertoireSectionProps {
   children: React.ReactNode;
 }
 
-const RepertoireSectionInner: React.FC<RepertoireSectionProps> = ({
-  screenings,
+const RepertoireSectionInner: React.FC<RepertoireSectionClientProps> = ({
+  repertoire,
   genres,
   heading,
   emptyState,
@@ -45,7 +45,7 @@ const RepertoireSectionInner: React.FC<RepertoireSectionProps> = ({
   const { isPending } = useScreeningsTransition();
   // null = default view (render the server-rendered children grid); an array
   // = active filter result, replacing the default.
-  const [override, setOverride] = useState<IScreeningGroup[] | null>(null);
+  const [override, setOverride] = useState<IRepertoire | null>(null);
 
   return (
     <section className={className}>
@@ -57,7 +57,7 @@ const RepertoireSectionInner: React.FC<RepertoireSectionProps> = ({
             stays server-rendered in the static HTML. */}
         <Suspense fallback={<FilterBarFallback />}>
           <RepertoireFilterIsland
-            screenings={screenings}
+            repertoire={repertoire}
             genres={genres}
             hideCity={hideCity}
             hideGenres={hideGenres}
@@ -82,14 +82,14 @@ const RepertoireSectionInner: React.FC<RepertoireSectionProps> = ({
             {children}
           </FilterPendingGrid>
         ) : (
-          <RepertoireGrid screenings={override} emptyState={emptyState} />
+          <ScreeningCardGrid repertoire={override} emptyState={emptyState} />
         )}
       </div>
     </section>
   );
 };
 
-const RepertoireSection: React.FC<RepertoireSectionProps> = (props) => (
+const RepertoireSection: React.FC<RepertoireSectionClientProps> = (props) => (
   <ScreeningsTransitionProvider>
     <RepertoireSectionInner {...props} />
   </ScreeningsTransitionProvider>

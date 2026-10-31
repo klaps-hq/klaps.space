@@ -2,7 +2,7 @@
 
 import React, { useLayoutEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { IScreeningGroup } from "@/interfaces/IScreenings";
+import { IRepertoire } from "@/lib/client-screenings";
 import { IGenre } from "@/interfaces/IMovies";
 import { usePreferredCity } from "@/contexts/city-context";
 import { clearFilterPending, takeHomePrefetch } from "@/lib/filter-pending";
@@ -12,7 +12,7 @@ import FilterBar from "./filter-bar";
 // default, unfiltered view, for which the parent shows the server-rendered
 // grid instead of any client-fetched data.
 export interface FilteredResult {
-  screenings: IScreeningGroup[];
+  repertoire: IRepertoire;
   hasMore: boolean;
   seeAllHref: string;
   selectedGenreIds: number[];
@@ -30,7 +30,7 @@ interface ScreeningsFilterControllerProps {
 }
 
 interface HomeScreeningsData {
-  screenings: IScreeningGroup[];
+  repertoire: IRepertoire;
   hasMore: boolean;
 }
 
@@ -154,9 +154,14 @@ const ScreeningsFilterController: React.FC<ScreeningsFilterControllerProps> = ({
     request
       .then((data) => {
         if (controller.signal.aborted) return;
+        // A response cached by the browser before the October 2026 format
+        // change has no repertoire; treat it like a failed request.
+        if (!Array.isArray(data.repertoire?.groups)) {
+          throw new Error("Unexpected /api/screenings response");
+        }
         resultCache.set(query, { data, at: Date.now() });
         onResult({
-          screenings: data.screenings,
+          repertoire: data.repertoire,
           hasMore: data.hasMore,
           ...filterMeta,
         });
@@ -166,7 +171,11 @@ const ScreeningsFilterController: React.FC<ScreeningsFilterControllerProps> = ({
       .catch((error) => {
         if (controller.signal.aborted) return;
         console.warn("Falling back to empty home screenings:", error);
-        onResult({ screenings: [], hasMore: false, ...filterMeta });
+        onResult({
+          repertoire: { cities: [], groups: [] },
+          hasMore: false,
+          ...filterMeta,
+        });
         onUpdating(false);
         clearFilterPending();
       });
