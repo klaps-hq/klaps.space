@@ -114,8 +114,20 @@ const nextConfig: NextConfig = {
       { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
       { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
     ];
+    // Badges are embedded on cinema sites. CORP same-origin makes browsers
+    // refuse to draw them there, so these paths opt back into cross-origin
+    // use; a later rule overrides the same key from an earlier one.
+    const embeddableBadges = ["/badges/:path*", "/odznaki/:path*"].map(
+      (source) => ({
+        source,
+        headers: [{ key: "Cross-Origin-Resource-Policy", value: "cross-origin" }],
+      })
+    );
     if (!isProduction) {
-      return [{ source: "/:path*", headers: securityHeaders }];
+      return [
+        { source: "/:path*", headers: securityHeaders },
+        ...embeddableBadges,
+      ];
     }
     return [
       {
@@ -128,6 +140,7 @@ const nextConfig: NextConfig = {
           ...securityHeaders,
         ],
       },
+      ...embeddableBadges,
     ];
   },
   images: {
