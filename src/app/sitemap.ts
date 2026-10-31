@@ -23,6 +23,11 @@ import {
   isClassicIndexable,
   OPEN_AIR_PATH,
 } from "@/lib/landing-pages";
+import {
+  CHRISTMAS_PATH,
+  fetchChristmasScreenings,
+  isChristmasIndexable,
+} from "@/lib/christmas";
 
 /**
  * Five minutes, matching the listing pages rather than the hour a sitemap
@@ -268,6 +273,7 @@ const buildLandingPages = async (): Promise<MetadataRoute.Sitemap> => {
       fetchClassicScreenings(classicMonthRange(month)).catch(() => null)
     ),
   ]);
+  const christmas = await fetchChristmasScreenings().catch(() => null);
 
   return [
     ...(known(openAirHub.indexable) ? [page(OPEN_AIR_PATH, 0.6)] : []),
@@ -282,6 +288,9 @@ const buildLandingPages = async (): Promise<MetadataRoute.Sitemap> => {
         ? [page(`${CLASSIC_PATH}/${month.slug}`, 0.5)]
         : []
     ),
+    ...(known(isChristmasIndexable(christmas))
+      ? [page(CHRISTMAS_PATH, 0.6)]
+      : []),
   ];
 };
 

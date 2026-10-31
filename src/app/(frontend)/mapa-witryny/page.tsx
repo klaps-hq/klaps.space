@@ -61,6 +61,11 @@ const PRIMARY_SECTIONS = [
     hint: "Letnie pokazy pod gołym niebem w polskich miastach.",
   },
   {
+    label: "Święta w kinie",
+    href: "/swieta-w-kinie",
+    hint: "Świąteczne hity na dużym ekranie od grudnia do Trzech Króli.",
+  },
+  {
     label: "Blog",
     href: "/blog",
     hint: "Teksty o kinie studyjnym, klasyce i seansach specjalnych.",
