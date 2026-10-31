@@ -236,7 +236,13 @@ export const buildProfileSentences = (
     );
   }
 
-  if (subject.kind !== "director" && profile.topDirectors.length > 0) {
+  // On a film page the only director is the film's own, so "whose films
+  // came back most often" is a tautology there.
+  if (
+    subject.kind !== "director" &&
+    subject.kind !== "movie" &&
+    profile.topDirectors.length > 0
+  ) {
     const repeated = profile.topDirectors.filter((d) => d.count > 1);
     if (repeated.length > 0) {
       const names = repeated.slice(0, 3).map((d) => d.name);
