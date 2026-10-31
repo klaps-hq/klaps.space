@@ -1,17 +1,16 @@
 "use client";
 
 import React from "react";
-import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
 import { formatDateLabel, formatDatePL } from "@/lib/utils";
 import { useNow } from "@/hooks/use-now";
-import { dropPastScreeningGroups } from "@/lib/screening-filters";
+import { ICardGroup, upcomingCardGroup } from "@/lib/client-screenings";
 import EmptyState from "@/components/common/empty-state";
 import ScreeningCard from "./screening-card";
 import ScreeningsEmptyState from "./empty-state";
 
 interface ScreeningsGridProps {
-  screenings: IScreeningGroup[];
+  screenings: ICardGroup[];
   genres: IGenre[];
   selectedGenreIds: number[];
   dateFrom: string | null;
@@ -61,7 +60,9 @@ const ScreeningsGrid: React.FC<ScreeningsGridProps> = ({
   // grid whose every movie has already played falls to the empty state.
   const now = useNow();
   const visibleScreenings =
-    now === null ? screenings : dropPastScreeningGroups(screenings, now);
+    now === null
+      ? screenings
+      : screenings.flatMap((group) => upcomingCardGroup(group, now) ?? []);
 
   if (visibleScreenings.length === 0) {
     // Server-rendered default view: a static, hook-free empty state so the

@@ -2,14 +2,18 @@
 
 import React from "react";
 import Link from "next/link";
-import { IScreeningGroup } from "@/interfaces/IScreenings";
 import MoviePoster from "@/components/common/movie-poster";
 import { useNow } from "@/hooks/use-now";
-import { upcomingScreeningGroup } from "@/lib/screening-filters";
+import {
+  ICardGroup,
+  screeningDate,
+  screeningTime,
+  upcomingCardGroup,
+} from "@/lib/client-screenings";
 import { formatDateLabel } from "@/lib/utils";
 
 interface ScreeningCardProps {
-  group: IScreeningGroup;
+  group: ICardGroup;
   // Set on the few cards above the fold: their poster is the LCP element,
   // and Next marks priority images eager with fetchpriority=high so the
   // browser stops discovering them only after layout.
@@ -24,12 +28,12 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({
   // while revalidating), so started screenings are dropped again here once
   // the client clock is known, and a movie with nothing left disappears.
   const now = useNow();
-  const visibleGroup = now === null ? group : upcomingScreeningGroup(group, now);
+  const visibleGroup = now === null ? group : upcomingCardGroup(group, now);
   if (!visibleGroup) return null;
 
-  const { movie, screenings, summary } = visibleGroup;
+  const { movie, screenings } = visibleGroup;
   const upcoming = screenings.slice(0, 2);
-  const remaining = Math.max(0, summary.screeningsCount - upcoming.length);
+  const remaining = screenings.length - upcoming.length;
 
   return (
     <Link
@@ -72,20 +76,22 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({
       </div>
 
       <div className="mt-1 flex flex-col gap-1 border-t border-white/10 pt-2.5">
-        {upcoming.map((s) => (
+        {/* Two cinemas in one city can share a showtime, so the rows are
+            keyed by position; the list is static per render. */}
+        {upcoming.map(([dateTime, city], index) => (
           <div
-            key={s.id}
+            key={index}
             className="flex items-baseline justify-between gap-2 text-[10px] md:text-[11px] uppercase tracking-wider min-w-0"
           >
             <span className="truncate min-w-0">
-              <span className="text-white">{formatDateLabel(s.date)}</span>
+              <span className="text-white">{formatDateLabel(screeningDate(dateTime))}</span>
               <span className="mx-1 text-white/30" aria-hidden="true">
                 ·
               </span>
-              <span className="text-white/80">{s.time}</span>
+              <span className="text-white/80">{screeningTime(dateTime)}</span>
             </span>
             <span className="text-white/50 truncate max-w-[55%] text-right shrink-0">
-              {s.cinema.city.name}
+              {city}
             </span>
           </div>
         ))}

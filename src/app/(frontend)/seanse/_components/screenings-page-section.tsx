@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import { IScreeningGroup } from "@/interfaces/IScreenings";
+import { ICardGroup } from "@/lib/client-screenings";
 import { IGenre } from "@/interfaces/IMovies";
 import {
   ScreeningsTransitionProvider,
@@ -16,7 +16,7 @@ import { MY_CINEMAS_PARAM } from "../../(home)/_components/screenings/my-cinemas
 import MyCinemasGrid from "./my-cinemas-grid";
 
 interface ScreeningsPageSectionProps {
-  screenings: IScreeningGroup[];
+  screenings: ICardGroup[];
   genres: IGenre[];
   selectedGenreIds: number[];
   dateFrom: string | null;

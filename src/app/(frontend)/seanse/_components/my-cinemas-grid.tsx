@@ -6,6 +6,7 @@ import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
 import { useMyCinemas } from "@/hooks/use-my-cinemas";
 import { filterScreeningGroups } from "@/lib/screening-filters";
+import { toCardGroup } from "@/lib/client-screenings";
 import EmptyState from "@/components/common/empty-state";
 import SectionLoader from "@/components/ui/section-loader";
 import ScreeningsGrid from "../../(home)/_components/screenings/screenings-grid";
@@ -64,7 +65,7 @@ const MyCinemasGrid: React.FC<MyCinemasGridProps> = ({
             dateFrom,
             dateTo,
             search,
-          })
+          }).map(toCardGroup)
         : [],
     [result, selectedGenreIds, dateFrom, dateTo, search]
   );

@@ -2,7 +2,7 @@
 
 import React, { useLayoutEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { IScreeningGroup } from "@/interfaces/IScreenings";
+import { ICardGroup } from "@/lib/client-screenings";
 import { IGenre } from "@/interfaces/IMovies";
 import { usePreferredCity } from "@/contexts/city-context";
 import { clearFilterPending, takeHomePrefetch } from "@/lib/filter-pending";
@@ -12,7 +12,7 @@ import FilterBar from "./filter-bar";
 // default, unfiltered view, for which the parent shows the server-rendered
 // grid instead of any client-fetched data.
 export interface FilteredResult {
-  screenings: IScreeningGroup[];
+  screenings: ICardGroup[];
   hasMore: boolean;
   seeAllHref: string;
   selectedGenreIds: number[];
@@ -30,7 +30,7 @@ interface ScreeningsFilterControllerProps {
 }
 
 interface HomeScreeningsData {
-  screenings: IScreeningGroup[];
+  screenings: ICardGroup[];
   hasMore: boolean;
 }
 

@@ -13,6 +13,7 @@ import {
   getScreeningsLastUpdated,
 } from "@/lib/screenings";
 import { getGenres } from "@/lib/genres";
+import { toCardGroup } from "@/lib/client-screenings";
 import { getPreferredLocation } from "@/lib/get-preferred-city";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { PaginatedResponse } from "@/interfaces/IMovies";
@@ -209,7 +210,7 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
         )}
       />
       <ScreeningsPageSection
-        screenings={screenings}
+        screenings={screenings.map(toCardGroup)}
         genres={genres}
         selectedGenreIds={genreIds.map(Number)}
         dateFrom={params.dateFrom ?? null}
