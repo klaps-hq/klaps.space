@@ -221,9 +221,11 @@ export const directorFallbackIntro = (
   moviesCount: number,
   movies: readonly IMovieSummary[]
 ): string => {
+  // The name stays in the nominative: "w reżyserii Sam Raimi" needs a
+  // genitive the API has no declension data for, so phrase around it.
   if (moviesCount === 0) {
     return bindOrphans(
-      `Filmy w reżyserii ${name} pokazywane w polskich kinach studyjnych. ` +
+      `${name}: filmografia i seanse w polskich kinach studyjnych. ` +
         `Sprawdź filmografię oraz aktualny repertuar seansów specjalnych, ` +
         `retrospektyw i klasyki filmowej.`
     );
@@ -234,8 +236,8 @@ export const directorFallbackIntro = (
     .map((movie) => `${movie.title} (${movie.productionYear})`);
 
   const lead =
-    `W repertuarze polskich kin studyjnych znajdziesz ${moviesCount} ` +
-    `${pluralPl(moviesCount, "film", "filmy", "filmów")} w reżyserii ${name}`;
+    `${name} ma w repertuarze polskich kin studyjnych ${moviesCount} ` +
+    `${pluralPl(moviesCount, "film", "filmy", "filmów")}`;
   const first =
     titles.length > 0 ? `${lead}, w tym ${joinPl(titles)}.` : `${lead}.`;
   const second =

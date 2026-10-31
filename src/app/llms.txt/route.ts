@@ -79,7 +79,7 @@ Klaps to ogólnopolski przewodnik po seansach specjalnych w kinach studyjnych: k
 
 ## Dane do cytowania
 
-Miesięczne zestawienia seansów klasyki (filmy sprzed co najmniej 25 lat) w polskich kinach: liczba seansów, kin i miast, najczęściej grane filmy i rankingi miast. Dane można cytować z podaniem źródła: Klaps (klaps.space).
+Miesięczne zestawienia seansów klasyki (filmy sprzed co najmniej 25 lat) w polskich kinach: liczba seansów, kin i miast, najczęściej grane filmy i rankingi miast. Dane udostępniamy na licencji CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/): można je cytować i wykorzystywać z podaniem źródła: Klaps (klaps.space).
 
 - [Klaps w liczbach: bieżący miesiąc](${SITE_URL}/w-liczbach)
 ${monthLines.join("\n")}
