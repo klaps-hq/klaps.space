@@ -29,7 +29,9 @@ Klaps is a Polish nationwide guide to special screenings, classic cinema, and re
 | Styling         | [Tailwind CSS 4](https://tailwindcss.com)                                                                           |
 | Components      | [Shadcn/ui](https://ui.shadcn.com) (new-york), [Radix UI](https://www.radix-ui.com), [Base UI](https://base-ui.com) |
 | Icons           | [Lucide](https://lucide.dev)                                                                                        |
-| Maps            | [Leaflet](https://leafletjs.com) + [React Leaflet](https://react-leaflet.js.org)                                    |
+| Maps            | [MapLibre GL JS](https://maplibre.org) with [CARTO](https://carto.com/basemaps) basemaps                            |
+| CMS             | [Payload 3](https://payloadcms.com) (blog), media on S3-compatible storage                                          |
+| Smooth scroll   | [Lenis](https://lenis.dev)                                                                                          |
 | Package Manager | [Bun](https://bun.sh)                                                                                               |
 | Runtime         | [Node.js 22](https://nodejs.org)                                                                                    |
 | Deployment      | Docker (standalone) via GitHub Actions to GHCR                                                                      |
@@ -38,7 +40,11 @@ Klaps is a Polish nationwide guide to special screenings, classic cinema, and re
 
 - **Screening listings** - browse and filter special screenings by city, genre, date, and keyword
 - **Movie catalog** - detailed movie pages with descriptions, cast, directors, and trailers
-- **Cinema directory** - cinema pages with address, interactive map (Leaflet), and current screenings
+- **Cinema directory** - cinema pages with address, interactive map, programme profile and current screenings
+- **Cinema map** - every art-house and local cinema in Poland on one map ([klaps.space/mapa-kin](https://klaps.space/mapa-kin))
+- **Klaps in numbers** - monthly statistics of classic screenings in Polish cinemas, published under CC BY 4.0 ([klaps.space/w-liczbach](https://klaps.space/w-liczbach))
+- **City guides and blog** - researched guides to cinema culture in Polish cities, editorial posts managed in Payload
+- **Badge for cinemas** - a lightweight, script-free badge cinemas can embed ([klaps.space/dla-kin](https://klaps.space/dla-kin))
 - **City pages** - per-city overview with cinema counts, screening stats, and listings
 - **Genre pages** - paginated movie collections by genre
 - **Smart filtering** - persistent city preference (cookie + URL sync), date tabs, genre and search filters
