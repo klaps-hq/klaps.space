@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { getCinemasWithCoordinates } from "@/lib/cinemas";
+import { getCinemas, getCinemasWithCoordinates } from "@/lib/cinemas";
 import { isChainCinema } from "@/lib/cinema-chains";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { pluralPl } from "@/lib/seo";
@@ -25,10 +25,11 @@ const PROSE_LINK_CLASS =
   "text-white/80 underline underline-offset-4 decoration-white/25 hover:text-white hover:decoration-white transition-colors";
 
 const CinemaMapPage = async () => {
-  const [cinemas, indexable, screenings] = await Promise.all([
+  const [cinemas, indexable, screenings, catalog] = await Promise.all([
     getCinemasWithCoordinates(),
     getIndexableSlugs(),
     getScreenings(),
+    getCinemas({ limit: 1000 }),
   ]);
   // Films with an upcoming screening per venue: how bright the map glows.
   const filmsByCinema = new Map<number, Set<number>>();
@@ -51,16 +52,25 @@ const CinemaMapPage = async () => {
     isChain: isChainCinema(c.name),
     isOpenAir: Boolean(c.isOpenAir),
   }));
-  // The map also pins multiplexes hosting special screenings, so the lead
-  // counts them apart instead of calling every pin "niezależny".
-  // Open-air series are seasonal screening spots, not cinemas, and Łódź
-  // alone has dozens of them, so they are counted on their own as well.
-  const openAirCount = cinemas.filter((c) => c.isOpenAir).length;
+  // Year-round studio venues on the map, for the city ranking below it.
+  // Open-air series are seasonal spots (Łódź alone has dozens) and chains
+  // are not "kina studyjne", so both are left out of it.
   const independent = cinemas.filter(
     (c) => !isChainCinema(c.name) && !c.isOpenAir
   );
-  const chainCount = cinemas.filter((c) => isChainCinema(c.name)).length;
-  const cityCount = new Set(cinemas.map((c) => c.city.id)).size;
+  // The lead quotes the whole catalogue, the same numbers as /kina; the
+  // map can only pin venues with coordinates (audit #10: /kina said 383
+  // studio cinemas, the map 380).
+  const catalogCinemas = catalog.data.flatMap((g) =>
+    g.cinemas.map((c) => ({ ...c, cityId: g.city.id }))
+  );
+  const catalogChain = catalogCinemas.filter((c) => isChainCinema(c.name)).length;
+  const catalogOpenAir = catalogCinemas.filter(
+    (c) => !isChainCinema(c.name) && c.isOpenAir
+  ).length;
+  const catalogStudio = catalogCinemas.length - catalogChain - catalogOpenAir;
+  const catalogCities = new Set(catalogCinemas.map((c) => c.cityId)).size;
+  const unpinned = Math.max(0, catalogCinemas.length - cinemas.length);
   const byCity = new Map<number, { slug: string; name: string; count: number }>();
   for (const cinema of independent) {
     const entry = byCity.get(cinema.city.id) ?? {
@@ -115,24 +125,33 @@ const CinemaMapPage = async () => {
           </PageHeadingMuted>
         </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
-          {independent.length}{" "}
-          {pluralPl(independent.length, "kino studyjne", "kina studyjne", "kin studyjnych")}
-          {openAirCount > 0 && (
+          {catalogStudio}{" "}
+          {pluralPl(catalogStudio, "kino studyjne", "kina studyjne", "kin studyjnych")}
+          {catalogOpenAir > 0 && (
             <>
-              , {openAirCount}{" "}
-              {pluralPl(openAirCount, "miejsce", "miejsca", "miejsc")} kina
+              , {catalogOpenAir}{" "}
+              {pluralPl(catalogOpenAir, "miejsce", "miejsca", "miejsc")} kina
               plenerowego
             </>
           )}
-          {chainCount > 0 && (
+          {catalogChain > 0 && (
             <>
               {" "}
-              i&nbsp;{chainCount}{" "}
-              {pluralPl(chainCount, "kino sieciowe", "kina sieciowe", "kin sieciowych")}{" "}
+              i&nbsp;{catalogChain}{" "}
+              {pluralPl(catalogChain, "kino sieciowe", "kina sieciowe", "kin sieciowych")}{" "}
               z&nbsp;seansami specjalnymi
             </>
           )}{" "}
-          w&nbsp;{cityCount} miastach z&nbsp;całej Polski. Kliknij pin, żeby
+          w&nbsp;{catalogCities} miastach z&nbsp;całej Polski.
+          {unpinned > 0 && (
+            <>
+              {" "}
+              Na mapie jest {cinemas.length} z&nbsp;nich, {unpinned}{" "}
+              {pluralPl(unpinned, "nie ma", "nie mają", "nie ma")} jeszcze
+              współrzędnych.
+            </>
+          )}{" "}
+          Kliknij pin, żeby
           zobaczyć szczegóły miejsca i&nbsp;jego aktualny repertuar.
           Przesuwaj i&nbsp;przybliżaj mapę, żeby zawęzić obszar.
         </p>

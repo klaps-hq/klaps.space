@@ -22,7 +22,7 @@ import {
 } from "@/lib/seo";
 import { todayDigest, todayDigestPhrases } from "@/lib/live-meta";
 import { cityFallbackIntro } from "@/lib/listing-copy";
-import { splitByChain } from "@/lib/cinema-chains";
+import { isChainCinema, splitByChain } from "@/lib/cinema-chains";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
@@ -196,17 +196,33 @@ export const generateMetadata = async ({
   // Letnie") misdescribed the city's arthouse scene in the snippet.
   const yearRound = independent.filter((c) => !c.isOpenAir);
   const openAir = independent.filter((c) => c.isOpenAir);
-  const venueNames = [...yearRound, ...chain, ...openAir].map((c) => c.name);
+  // Studio venues name the snippet on their own; multiplexes only show up
+  // when the city has nothing else (audit #10: Toruń's snippet opened with
+  // "Kino Centrum, Cinema City Plaza").
+  const namedVenues = yearRound.length > 0 ? yearRound : [...chain, ...openAir];
+  const venueNames = namedVenues.map((c) => c.name);
+  const hasMoreVenues = allVenues.length > Math.min(venueNames.length, 2);
   const venues =
-    venueNames.length > 2
+    venueNames.length > 2 || (hasMoreVenues && venueNames.length > 0)
       ? `${venueNames.slice(0, 2).join(", ")} i inne kina`
       : venueNames.join(" i ");
-  const firstTitle = screeningGroups[0]?.movie.title;
+  // Today's digest and the sample title come from studio screenings when
+  // there are any, for the same reason.
+  const studioGroups = screeningGroups
+    .map((group) => ({
+      ...group,
+      screenings: group.screenings.filter(
+        (screening) => !isChainCinema(screening.cinema.name)
+      ),
+    }))
+    .filter((group) => group.screenings.length > 0);
+  const snippetGroups = studioGroups.length > 0 ? studioGroups : screeningGroups;
+  const firstTitle = snippetGroups[0]?.movie.title;
   const titlePart = firstTitle ? `, m.in. „${firstTitle}”` : "";
   const lead = `${venues} ${prep} ${city.nameDeclinated}`;
   // Today's screenings lead when there are any: a live, dated fact that
   // keeps the snippet unique and current (see live-meta).
-  const digest = todayDigest(screeningGroups);
+  const digest = todayDigest(snippetGroups);
   const todayCandidates = digest
     ? todayDigestPhrases(digest).map(
         (phrase) => `${lead}: ${phrase}. Sprawdź repertuar.`
