@@ -59,6 +59,22 @@ interface MovieAboutProps {
   movie: IMovie;
 }
 
+const LANGUAGE_NAMES = new Intl.DisplayNames(["pl"], { type: "language" });
+
+// TMDB stores ISO 639-1 codes ("ga"); show the Polish name ("irlandzki"),
+// falling back to the raw code when ICU does not know it.
+const formatLanguage = (code?: string | null): string => {
+  // "xx" is TMDB's "no language" (silent films, music-only shorts).
+  if (!code || code.toLowerCase() === "xx") return "";
+  try {
+    const name = LANGUAGE_NAMES.of(code);
+    if (name && name.toLowerCase() !== code.toLowerCase()) return name;
+  } catch {
+    // Invalid tag: fall through to the code.
+  }
+  return code.toUpperCase();
+};
+
 const MovieAbout: React.FC<MovieAboutProps> = ({ movie }) => {
   const directorNodes = renderPeopleLinks(movie.directors);
   const scriptwriters = formatNames(movie.scriptwriters ?? movie.screenwriters);
@@ -78,7 +94,7 @@ const MovieAbout: React.FC<MovieAboutProps> = ({ movie }) => {
       value: movie.duration ? formatDuration(movie.duration) : "",
     },
     { label: "Produkcja", value: countries ?? "" },
-    { label: "Język", value: movie.language?.toUpperCase() ?? "" },
+    { label: "Język", value: formatLanguage(movie.language) },
     { label: "Premiera w Polsce", value: premierePL ?? "" },
   ].filter((i) => i.value.trim() !== "");
 
