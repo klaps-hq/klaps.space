@@ -68,12 +68,9 @@ const MASK_SOURCE = "klaps-poland-mask";
 const LAYER = {
   mask: "klaps-mask",
   border: "klaps-border",
-  clusterGlow: "klaps-cluster-glow",
   clusters: "klaps-clusters",
   clusterCount: "klaps-cluster-count",
-  pointGlow: "klaps-point-glow",
   points: "klaps-points",
-  pointCore: "klaps-point-core",
   labels: "klaps-labels",
 } as const;
 
@@ -178,8 +175,9 @@ const CinemaLayers: React.FC<CinemaLayersProps> = ({ data, onSelect }) => {
       clusterMaxZoom: 11,
       clusterRadius: 40,
     });
-    // A cluster is a solid white disc that grows with its venue count,
-    // inside a soft glow: bigger scenes read as brighter spots.
+    // One visual language: every venue and every cluster is a plain disc.
+    // Rings, inner dots and glows per venue kind read as noise (October
+    // 2026); the popup says what kind of venue it is.
     const clusterRadius: MapLibreGL.ExpressionSpecification = [
       "interpolate",
       ["linear"],
@@ -189,20 +187,8 @@ const CinemaLayers: React.FC<CinemaLayersProps> = ({ data, onSelect }) => {
       3,
       12,
       9,
-      22,
+      20,
     ];
-    map.addLayer({
-      id: LAYER.clusterGlow,
-      type: "circle",
-      source: SOURCE,
-      filter: ["has", "point_count"],
-      paint: {
-        "circle-color": "#fff",
-        "circle-opacity": 0.12,
-        "circle-blur": 0.6,
-        "circle-radius": ["*", clusterRadius, 2.1],
-      },
-    });
     map.addLayer({
       id: LAYER.clusters,
       type: "circle",
@@ -211,6 +197,8 @@ const CinemaLayers: React.FC<CinemaLayersProps> = ({ data, onSelect }) => {
       paint: {
         "circle-color": "#fff",
         "circle-radius": clusterRadius,
+        "circle-stroke-color": "#000",
+        "circle-stroke-width": 2,
       },
     });
     map.addLayer({
@@ -227,92 +215,17 @@ const CinemaLayers: React.FC<CinemaLayersProps> = ({ data, onSelect }) => {
       },
       paint: { "text-color": "#000" },
     });
-    // Venue markers have to stand out from a dark grey basemap at every
-    // zoom, so kinds differ by shape (solid disc, ring, ring with a dot)
-    // rather than by shades of grey, and each sits in a soft glow.
-    // MapLibre accepts ["zoom"] only as the input of a top-level
-    // interpolate, so the scale and the per-kind size live in the stops.
-    const markerRadius = (
-      scale: number,
-      chainScale = scale
-    ): MapLibreGL.ExpressionSpecification => {
-      const at = (radius: number): MapLibreGL.ExpressionSpecification => [
-        "match",
-        ["get", "kind"],
-        "chain",
-        radius * chainScale,
-        radius * scale,
-      ];
-      return ["interpolate", ["linear"], ["zoom"], 6, at(7), 11, at(9), 16, at(12)];
-    };
-    const notCluster: MapLibreGL.FilterSpecification = [
-      "!",
-      ["has", "point_count"],
-    ];
-    map.addLayer({
-      id: LAYER.pointGlow,
-      type: "circle",
-      source: SOURCE,
-      filter: notCluster,
-      paint: {
-        "circle-color": "#fff",
-        "circle-opacity": [
-          "match",
-          ["get", "kind"],
-          "studio",
-          0.4,
-          "chain",
-          0.16,
-          0.28,
-        ],
-        "circle-blur": 0.75,
-        "circle-radius": markerRadius(2.4),
-      },
-    });
     map.addLayer({
       id: LAYER.points,
       type: "circle",
       source: SOURCE,
-      filter: notCluster,
+      filter: ["!", ["has", "point_count"]],
       paint: {
-        "circle-radius": markerRadius(1, 0.85),
-        "circle-color": [
-          "match",
-          ["get", "kind"],
-          "studio",
-          "#fff",
-          "chain",
-          "#a3a3a3",
-          "#000",
-        ],
-        "circle-stroke-color": [
-          "match",
-          ["get", "kind"],
-          "idle",
-          "#fff",
-          "openAir",
-          "#fff",
-          "#000",
-        ],
-        "circle-stroke-width": [
-          "match",
-          ["get", "kind"],
-          "idle",
-          3,
-          "openAir",
-          3,
-          2,
-        ],
-      },
-    });
-    map.addLayer({
-      id: LAYER.pointCore,
-      type: "circle",
-      source: SOURCE,
-      filter: ["all", notCluster, ["==", ["get", "kind"], "openAir"]],
-      paint: {
-        "circle-color": "#fff",
-        "circle-radius": markerRadius(0.4),
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 5, 12, 6.5, 16, 8],
+        // Multiplexes are the same dot in grey: listed, not featured.
+        "circle-color": ["match", ["get", "kind"], "chain", "#8f8f8f", "#fff"],
+        "circle-stroke-color": "#000",
+        "circle-stroke-width": 2,
       },
     });
     map.addLayer({
@@ -527,29 +440,16 @@ const PolandStreetMap: React.FC<PolandStreetMapProps> = ({ cinemas }) => {
 
       <ul className="flex flex-wrap gap-x-6 gap-y-2 text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/55">
         <li className="flex items-center gap-2">
-          <span className="size-3 rounded-full bg-white" aria-hidden="true" />
-          Kino studyjne z repertuarem
+          <span className="size-2.5 rounded-full bg-white" aria-hidden="true" />
+          Kino studyjne lub plenerowe
         </li>
         <li className="flex items-center gap-2">
-          <span className="size-3 rounded-full border-2 border-white" aria-hidden="true" />
-          Bez zapowiedzianych seansów
-        </li>
-        <li className="flex items-center gap-2">
-          <span
-            className="flex size-3 items-center justify-center rounded-full border-2 border-white"
-            aria-hidden="true"
-          >
-            <span className="size-1 rounded-full bg-white" />
-          </span>
-          Kino plenerowe
-        </li>
-        <li className="flex items-center gap-2">
-          <span className="size-3 rounded-full bg-[#a3a3a3]" aria-hidden="true" />
+          <span className="size-2.5 rounded-full bg-white/55" aria-hidden="true" />
           Kino sieciowe
         </li>
         <li className="flex items-center gap-2">
           <span
-            className="flex size-4 items-center justify-center rounded-full bg-white text-[8px] font-semibold text-black shadow-[0_0_0_4px_rgba(255,255,255,0.12)]"
+            className="flex size-4 items-center justify-center rounded-full bg-white text-[8px] font-semibold text-black"
             aria-hidden="true"
           >
             5
