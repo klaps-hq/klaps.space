@@ -44,7 +44,7 @@ export const SITEMAP_IDS = [
   "gatunki",
   "rezyserzy",
   "blog",
-  // Long-tail landing pages: /kino-plenerowe, /klasyka-w-kinach.
+  // Long-tail landing pages: /kino-plenerowe, /klasyka-w-kinach, /swieta-w-kinie.
   "tematy",
 ] as const;
 export type SitemapId = (typeof SITEMAP_IDS)[number];

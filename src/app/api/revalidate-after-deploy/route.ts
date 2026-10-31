@@ -15,6 +15,7 @@ const BUILD_EMPTY_PATHS = [
   "/sitemap/tematy.xml",
   "/kino-plenerowe",
   "/klasyka-w-kinach",
+  "/swieta-w-kinie",
 ];
 
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY ?? "";
