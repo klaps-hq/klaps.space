@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import { getImageProps } from "next/image";
-import { m, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { m, useScroll, useTransform } from "framer-motion";
 import {
   tmdbBackdropLoader,
   tmdbCdnFallbackSrc,
@@ -33,6 +33,10 @@ interface HeroParallaxProps {
 // the landscape backdrop. Must stay in sync with the blur divs below.
 const MOBILE_MEDIA = "(max-width: 767px)";
 
+const GRAIN_BACKGROUND = `url("data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#g)"/></svg>'
+)}")`;
+
 const HeroParallax: React.FC<HeroParallaxProps> = ({
   backdropUrl,
   posterSrc,
@@ -52,7 +56,6 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
     : tmdbImageSrc(backdropUrl, "original");
   const poster =
     useFallback && posterFallbackSrc ? posterFallbackSrc : posterSrc;
-  const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -124,24 +127,11 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
           )}
           {/* Slow, continuous ken-burns drift on the artwork. It starts at
               scale 1 (no opacity:0 / no initial), so the LCP hero image is
-              painted at full size from the first frame; the motion only adds
-              a gentle zoom afterwards. Skipped for prefers-reduced-motion. */}
-          <m.div
-            className="absolute inset-0"
-            animate={
-              prefersReducedMotion ? undefined : { scale: [1, 1.08], y: ["0%", "-2.5%"] }
-            }
-            transition={
-              prefersReducedMotion
-                ? undefined
-                : {
-                    duration: 24,
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                  }
-            }
-          >
+              painted at full size from the first frame. A CSS transform
+              animation runs on the compositor; the previous framer loop
+              ticked on the main thread forever and dominated TBT on mobile.
+              globals.css skips it for prefers-reduced-motion. */}
+          <div className="absolute inset-0 kx-ken-burns">
             {/* Keyed on both sources: swapping to the CDN has to remount the
                 whole <picture>, otherwise the browser keeps the <source> it
                 already resolved and the mobile poster never retries. */}
@@ -167,28 +157,18 @@ const HeroParallax: React.FC<HeroParallaxProps> = ({
                 }}
               />
             </picture>
-          </m.div>
+          </div>
         </m.div>
       </div>
 
-      <div className="pointer-events-none absolute inset-0 opacity-[0.08] mix-blend-soft-light">
-        <svg
-          className="w-full h-full"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <filter id="hero-grain-filter">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.9"
-              numOctaves="3"
-              stitchTiles="stitch"
-            />
-            <feColorMatrix type="saturate" values="0" />
-          </filter>
-          <rect width="100%" height="100%" filter="url(#hero-grain-filter)" />
-        </svg>
-      </div>
+      {/* Film grain as a small tiled background image: the browser
+          rasterizes the turbulence once instead of re-running an inline SVG
+          filter over the full hero. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.08] mix-blend-soft-light"
+        style={{ backgroundImage: GRAIN_BACKGROUND, backgroundSize: "200px 200px" }}
+      />
 
       <div className="absolute inset-0 bg-gradient-to-t from-black from-[6%] via-black/50 via-50% to-black/30" />
 

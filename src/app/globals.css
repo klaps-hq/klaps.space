@@ -124,7 +124,21 @@
   }
 }
 
+/* Hero artwork drift (see hero-parallax.tsx). Transform only, so it stays
+   on the compositor. */
+@keyframes kx-ken-burns {
+  from {
+    transform: translateY(0) scale(1);
+  }
+  to {
+    transform: translateY(-2.5%) scale(1.08);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  .kx-ken-burns {
+    animation: kx-ken-burns 24s ease-in-out infinite alternate;
+  }
   .kx-rise {
     animation: kx-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
