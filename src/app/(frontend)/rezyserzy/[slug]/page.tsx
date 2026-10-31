@@ -9,7 +9,7 @@ import {
 } from "@/lib/directors";
 import { getGenres } from "@/lib/genres";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, clampText } from "@/lib/seo";
+import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, clampToSentences } from "@/lib/seo";
 import { directorFallbackIntro } from "@/lib/listing-copy";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
@@ -55,7 +55,7 @@ export const generateMetadata = async ({
 
   const title = `${director.name} - filmy i seanse w kinach studyjnych`;
   const description = director.bio
-    ? clampText(director.bio)
+    ? clampToSentences(director.bio)
     : `Filmy w reżyserii ${director.name} na seansach specjalnych w kinach studyjnych w Polsce. Retrospektywy, klasyka filmowa i kino autorskie na dużym ekranie.`;
   const url = `${SITE_URL}/rezyserzy/${director.slug}`;
 

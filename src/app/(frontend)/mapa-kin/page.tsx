@@ -87,10 +87,10 @@ const CinemaMapPage = async () => {
           name: "Mapa kin studyjnych w Polsce",
           url: `${SITE_URL}/mapa-kin`,
           isPartOf: { "@id": `${SITE_URL}/#website` },
-          numberOfItems: cinemas.length,
           ...(topCities.length > 0 && {
             mainEntity: {
               "@type": "ItemList",
+              numberOfItems: topCities.length,
               itemListElement: topCities.map((city, index) => ({
                 "@type": "ListItem",
                 position: index + 1,
