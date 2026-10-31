@@ -22,7 +22,7 @@ ARG MAINTENANCE_MODE
 ENV MAINTENANCE_MODE=$MAINTENANCE_MODE
 
 RUN --mount=type=secret,id=internal_api_key \
-    INTERNAL_API_KEY="$(cat /run/secrets/internal_api_key)" npm run build \
+    INTERNAL_API_KEY="$(cat /run/secrets/internal_api_key)" npm run build
 
 # Stage 3: Production runner
 FROM node:22-alpine AS runner
