@@ -7,7 +7,7 @@ import { pluralPl } from "@/lib/seo";
 import { getScreenings } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import JsonLd from "@/components/common/json-ld";
-import type { MapCinema } from "./_components/poland-dot-map";
+import type { MapCinema } from "./_components/poland-street-map";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, {
   PageHeadingMuted,
@@ -31,7 +31,7 @@ const CinemaMapPage = async () => {
     getScreenings(),
     getCinemas({ limit: 1000 }),
   ]);
-  // Films with an upcoming screening per venue: how bright the map glows.
+  // Films with an upcoming screening per venue, shown in the map popup.
   const filmsByCinema = new Map<number, Set<number>>();
   for (const group of screenings) {
     for (const { cinema } of group.screenings) {
@@ -151,9 +151,10 @@ const CinemaMapPage = async () => {
               współrzędnych.
             </>
           )}{" "}
-          Kliknij pin, żeby
-          zobaczyć szczegóły miejsca i&nbsp;jego aktualny repertuar.
-          Przesuwaj i&nbsp;przybliżaj mapę, żeby zawęzić obszar.
+          Kliknij punkt, żeby
+          zobaczyć szczegóły miejsca i&nbsp;jego aktualny repertuar, albo
+          liczbę, żeby przybliżyć skupisko kin. Po przybliżeniu widać ulice
+          i&nbsp;budynki w&nbsp;okolicy kina.
         </p>
       </header>
 

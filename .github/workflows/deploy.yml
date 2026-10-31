@@ -11,30 +11,13 @@ permissions:
   packages: write
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      environment: ${{ steps.set-env.outputs.environment }}
-      image_tag: ${{ steps.set-env.outputs.image_tag }}
-      env_suffix: ${{ steps.set-env.outputs.env_suffix }}
-    steps:
-      - name: Determine environment
-        id: set-env
-        run: |
-          if [[ "${{ github.ref_name }}" == "main" ]]; then
-            echo "environment=production" >> $GITHUB_OUTPUT
-            echo "image_tag=latest" >> $GITHUB_OUTPUT
-            echo "env_suffix=prod" >> $GITHUB_OUTPUT
-          else
-            echo "environment=development" >> $GITHUB_OUTPUT
-            echo "image_tag=dev" >> $GITHUB_OUTPUT
-            echo "env_suffix=dev" >> $GITHUB_OUTPUT
-          fi
-
+  # Environment, image tag and deploy suffix come from the branch: main
+  # deploys production (:latest, prod), dev deploys development (:dev, dev).
+  # Computed inline in each job rather than in a setup job, which cost ~17 s
+  # of runner start-up before the build could begin.
   build-and-push:
     runs-on: ubuntu-latest
-    needs: setup
-    environment: ${{ needs.setup.outputs.environment }}
+    environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -76,17 +59,17 @@ jobs:
           secrets: |
             internal_api_key=${{ secrets.INTERNAL_API_KEY }}
           tags: |
-            ${{ secrets.DOCKER_IMAGE }}:${{ needs.setup.outputs.image_tag }}
+            ${{ secrets.DOCKER_IMAGE }}:${{ github.ref_name == 'main' && 'latest' || 'dev' }}
             ${{ secrets.DOCKER_IMAGE }}:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [setup, build-and-push]
-    environment: ${{ needs.setup.outputs.environment }}
+    needs: build-and-push
+    environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
     env:
-      DEPLOY_DIR: ${{ secrets.PROJECT_DIR || secrets.DEPLOY_DIR }}/frontend/${{ needs.setup.outputs.env_suffix }}
-      IMAGE_TAG: ${{ needs.setup.outputs.image_tag }}
-      ENV_SUFFIX: ${{ needs.setup.outputs.env_suffix }}
+      DEPLOY_DIR: ${{ secrets.PROJECT_DIR || secrets.DEPLOY_DIR }}/frontend/${{ github.ref_name == 'main' && 'prod' || 'dev' }}
+      IMAGE_TAG: ${{ github.ref_name == 'main' && 'latest' || 'dev' }}
+      ENV_SUFFIX: ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
       DOMAIN: ${{ secrets.DOMAIN }}
     steps:
       - name: Checkout code
@@ -148,9 +131,8 @@ jobs:
 
             docker image prune -f || true
 
-      # `next build` runs without the API and the CMS, so ISR pages and
-      # sub-sitemaps fed by them (blog, feed, landing pages, sitemaps) ship
-      # empty and only refill on a request after their revalidate window.
+      # `next build` runs without the CMS, so ISR pages and sub-sitemaps fed
+      # by it (blog, feed, landing pages, sitemaps) ship empty and only refill on a request after their revalidate window.
       # Rarely visited ones stayed empty for hours after a release (October
       # 2026: /sitemap/blog.xml and /sitemap/tematy.xml). The prerendered
       # copies count as fresh for the first revalidate window (300 s), so
@@ -159,7 +141,8 @@ jobs:
       # the container answers; the blog sitemap poll stays as a fallback for
       # when that call fails. Then two passes: the first marks every page
       # stale and triggers the regeneration, the second picks the fresh copy
-      # up. Best effort: never fails the deploy.
+      # up. Each pass requests its paths in parallel. Best effort: never
+      # fails the deploy.
       - name: Warm ISR caches
         continue-on-error: true
         env:
@@ -179,11 +162,11 @@ jobs:
             sleep 20
           done
           paths="/ /seanse /kina /miasta /gatunki /rezyserzy /blog /blog/feed.xml /kino-plenerowe /klasyka-w-kinach /w-liczbach /sitemap.xml /sitemap/static.xml /sitemap/filmy.xml /sitemap/kina.xml /sitemap/miasta.xml /sitemap/gatunki.xml /sitemap/rezyserzy.xml /sitemap/blog.xml /sitemap/tematy.xml /llms.txt"
-          for pass in 1 2; do
-            for path in $paths; do
-              code=$(curl -s -o /dev/null -w "%{http_code}" "$SITE$path" || true)
-              echo "pass $pass $code $path"
-            done
-            sleep 20
-          done
+          warm_pass() {
+            printf '%s\n' $paths | xargs -P 6 -I{} \
+              curl -s -o /dev/null -w "pass $1 %{http_code} {}\n" "$SITE{}" || true
+          }
+          warm_pass 1
+          sleep 20
+          warm_pass 2
           echo "blog sitemap URLs: $(curl -s "$SITE/sitemap/blog.xml" | grep -c '<loc>' || true)"
