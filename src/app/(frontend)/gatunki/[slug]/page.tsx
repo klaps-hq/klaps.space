@@ -72,7 +72,7 @@ export const generateMetadata = async ({
     : `${genre.name} - filmy w kinach studyjnych`;
   const description =
     moviesCount > 0
-      ? `${moviesCount} ${pluralPl(moviesCount, "film", "filmy", "filmów")} i ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")} z gatunku ${genreLower} w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy - ${genreLower} na dużym ekranie.`
+      ? `${moviesCount} ${pluralPl(moviesCount, "film", "filmy", "filmów")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")} z gatunku ${genreLower} w kinach w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy - ${genreLower} na dużym ekranie.`
       : // The guide intro is a full paragraph (293 chars on /gatunki/dramat),
         // so it is clamped to snippet length instead of cut by Google.
         guide?.intro

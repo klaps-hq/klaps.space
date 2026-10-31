@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     canonical: `${SITE_URL}/o-projekcie`,
   },
   openGraph: {
+    locale: "pl_PL",
     title: "O projekcie Klaps - przewodnik po kinach studyjnych",
     description:
       "Czym jest Klaps i dlaczego kino klasyczne zasługuje na jedno, czytelne miejsce w sieci.",

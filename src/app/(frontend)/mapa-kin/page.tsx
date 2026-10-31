@@ -4,6 +4,10 @@ import { getCinemasWithCoordinates } from "@/lib/cinemas";
 import { isChainCinema } from "@/lib/cinema-chains";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { pluralPl } from "@/lib/seo";
+import { getScreenings } from "@/lib/screenings";
+import { SITE_URL } from "@/lib/site-config";
+import JsonLd from "@/components/common/json-ld";
+import type { MapCinema } from "./_components/poland-dot-map";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, {
   PageHeadingMuted,
@@ -21,10 +25,32 @@ const PROSE_LINK_CLASS =
   "text-white/80 underline underline-offset-4 decoration-white/25 hover:text-white hover:decoration-white transition-colors";
 
 const CinemaMapPage = async () => {
-  const [cinemas, indexable] = await Promise.all([
+  const [cinemas, indexable, screenings] = await Promise.all([
     getCinemasWithCoordinates(),
     getIndexableSlugs(),
+    getScreenings(),
   ]);
+  // Films with an upcoming screening per venue: how bright the map glows.
+  const filmsByCinema = new Map<number, Set<number>>();
+  for (const group of screenings) {
+    for (const { cinema } of group.screenings) {
+      const films = filmsByCinema.get(cinema.id) ?? new Set<number>();
+      films.add(group.movie.id);
+      filmsByCinema.set(cinema.id, films);
+    }
+  }
+  // Only the fields the map draws cross into the client bundle.
+  const mapCinemas: MapCinema[] = cinemas.map((c) => ({
+    slug: c.slug,
+    name: c.name,
+    city: c.city.name,
+    street: c.street,
+    lat: c.latitude as number,
+    lon: c.longitude as number,
+    films: filmsByCinema.get(c.id)?.size ?? 0,
+    isChain: isChainCinema(c.name),
+    isOpenAir: Boolean(c.isOpenAir),
+  }));
   // The map also pins multiplexes hosting special screenings, so the lead
   // counts them apart instead of calling every pin "niezależny".
   // Open-air series are seasonal screening spots, not cinemas, and Łódź
@@ -52,6 +78,29 @@ const CinemaMapPage = async () => {
 
   return (
     <main className="bg-black text-white min-h-screen">
+      {/* The map itself is a canvas, so the page describes its content as
+          a collection: the venue counts and the cities listed below it. */}
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Mapa kin studyjnych w Polsce",
+          url: `${SITE_URL}/mapa-kin`,
+          isPartOf: { "@id": `${SITE_URL}/#website` },
+          ...(topCities.length > 0 && {
+            mainEntity: {
+              "@type": "ItemList",
+              numberOfItems: topCities.length,
+              itemListElement: topCities.map((city, index) => ({
+                "@type": "ListItem",
+                position: index + 1,
+                name: city.name,
+                url: `${SITE_URL}/miasta/${city.slug}`,
+              })),
+            },
+          }),
+        }}
+      />
       <SiteHeader />
 
       <div className="px-6 md:px-12 lg:px-16 pt-8 md:pt-10 pb-4">
@@ -93,7 +142,7 @@ const CinemaMapPage = async () => {
         {cinemas.length === 0 ? (
           <EmptyState description="Brak kin z danymi lokalizacji do wyświetlenia na mapie." />
         ) : (
-          <CinemaMapLazy cinemas={cinemas} />
+          <CinemaMapLazy cinemas={mapCinemas} />
         )}
       </section>
 

@@ -299,7 +299,7 @@ const CityPage = async ({ params }: CityPageProps) => {
     getScreeningsLastUpdated({ cityId: city.id.toString() }),
     getRecentScreenings({ cityId: city.id.toString() }),
     getIndexableSlugs(),
-    getProgrammeProfile({ citySlug: city.slug }),
+    getProgrammeProfile({ citySlug: city.slug, independentOnly: true }),
   ]);
   const isCinemaLinked = (slug: string): boolean =>
     !indexable || indexable.cinemas.has(slug);
@@ -458,7 +458,9 @@ const CityPage = async ({ params }: CityPageProps) => {
                 className="pb-12 md:pb-16"
                 description={
                   <>
-                    Kina {wPrep(cityForCopy)}&nbsp;{cityForCopy} nie mają teraz
+                    {cinemasCount === 1 ? "Kino" : "Kina"}{" "}
+                    {wPrep(cityForCopy)}&nbsp;{cityForCopy}{" "}
+                    {cinemasCount === 1 ? "nie ma" : "nie mają"} teraz
                     zapowiedzianych seansów specjalnych. Repertuar uzupełniamy
                     na bieżąco, zajrzyj ponownie wkrótce.
                   </>
@@ -486,7 +488,8 @@ const CityPage = async ({ params }: CityPageProps) => {
       <ProgrammeProfile
         heading={
           <>
-            Seanse specjalne {inPlace(cityForCopy)} w&nbsp;liczbach
+            {/* The profile counts independent cinemas only. */}
+            Kina studyjne {inPlace(cityForCopy)} w&nbsp;liczbach
           </>
         }
         profile={profile}

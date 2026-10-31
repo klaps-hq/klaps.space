@@ -69,7 +69,7 @@ const ForCinemasPage = async () => {
           description:
             "Darmowa odznaka klaps.space z linkiem do repertuaru seansów specjalnych kina.",
           inLanguage: "pl-PL",
-          isPartOf: { "@type": "WebSite", name: "Klaps", url: SITE_URL },
+          isPartOf: { "@id": `${SITE_URL}/#website` },
         }}
       />
       <SiteHeader />

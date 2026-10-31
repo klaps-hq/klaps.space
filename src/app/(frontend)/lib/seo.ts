@@ -26,7 +26,7 @@ export const pluralPl = (
   count: number,
   one: string,
   few: string,
-  many: string
+  many: string,
 ): string => {
   if (count === 1) return one;
   const mod10 = count % 10;
@@ -42,7 +42,7 @@ export const pluralPl = (
  * fabricated date when nothing carries a timestamp.
  */
 export const newestUpdatedAtIso = (
-  items: ReadonlyArray<{ updatedAt?: string | null }>
+  items: ReadonlyArray<{ updatedAt?: string | null }>,
 ): string | undefined => {
   let newest = 0;
   for (const item of items) {
@@ -64,6 +64,25 @@ export const clampText = (text: string, max = 160): string => {
   const lastSpace = cut.lastIndexOf(" ");
   const trimmed = lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut;
   return `${trimmed.trimEnd()}…`;
+};
+
+/**
+ * Whole sentences up to `max` characters; falls back to clampText when even
+ * the first sentence is too long. Bios cut mid-sentence by clampText read as
+ * broken snippets (audit #9: Jewison, Miyazaki).
+ */
+export const clampToSentences = (text: string, max = 160): string => {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (normalized.length <= max) return normalized;
+  const sentences = normalized.match(/[^.!?]+[.!?]+(\s|$)/g) ?? [];
+  let result = "";
+  for (const sentence of sentences) {
+    if ((result + sentence).trim().length > max) break;
+    result += sentence;
+  }
+  return result.trim().length >= max * 0.5
+    ? result.trim()
+    : clampText(normalized, max);
 };
 
 /** Date in Polish long form, e.g. "7 czerwca 2026". Used for the visible
@@ -102,12 +121,10 @@ export const hasFilterParams = (
   // Accepts plain interfaces (no index signature) - values are read
   // through a Record cast.
   params: object | null | undefined,
-  keys: readonly string[] = SCREENING_FILTER_PARAM_KEYS
+  keys: readonly string[] = SCREENING_FILTER_PARAM_KEYS,
 ): boolean =>
   params != null &&
-  keys.some((key) =>
-    isNonEmptyParam((params as Record<string, unknown>)[key])
-  );
+  keys.some((key) => isNonEmptyParam((params as Record<string, unknown>)[key]));
 
 /** Page number from a `?page=` param: a positive integer, anything else is 1. */
 export const parsePageParam = (raw: string | undefined): number => {
@@ -123,7 +140,7 @@ export const parsePageParam = (raw: string | undefined): number => {
 export const buildPaginationMeta = (
   baseUrl: string,
   currentPage: number,
-  totalPages: number
+  totalPages: number,
 ): {
   canonical: string;
   pagination: { previous?: string; next?: string };
@@ -170,7 +187,7 @@ export const cinemaWithCity = (cinemaName: string, cityName: string): string =>
 export const cinemaPageTitle = (
   cinemaName: string,
   cityName: string,
-  isChain: boolean
+  isChain: boolean,
 ): string => {
   const subject = cinemaWithCity(cinemaName, cityName);
   const [full, short] = isChain

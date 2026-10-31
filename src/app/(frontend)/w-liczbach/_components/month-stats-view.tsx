@@ -149,6 +149,9 @@ const buildDatasetJsonLd = (stats: IMonthStats, ongoing: boolean) => ({
   // the same dataset is not described twice under two URLs.
   "@id": `${SITE_URL}${monthPath(stats.month)}#dataset`,
   temporalCoverage: stats.month,
+  // A finished month is complete on the first day of the next one; the
+  // month in progress has no publication date yet.
+  ...(!ongoing && { datePublished: `${shiftMonth(stats.month, 1)}-01` }),
   spatialCoverage: { "@type": "Country", name: "Polska" },
   inLanguage: "pl",
   isAccessibleForFree: true,
