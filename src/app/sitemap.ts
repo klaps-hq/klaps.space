@@ -167,6 +167,7 @@ const staticPages: MetadataRoute.Sitemap = [
   { url: `${SITE_URL}/rezyserzy`, changeFrequency: "weekly", priority: 0.6 },
   { url: `${SITE_URL}/blog`, changeFrequency: "weekly", priority: 0.6 },
   { url: `${SITE_URL}/w-liczbach`, changeFrequency: "daily", priority: 0.6 },
+  { url: `${SITE_URL}/rok-wajdy`, changeFrequency: "daily", priority: 0.6 },
   { url: `${SITE_URL}/mapa-witryny`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/o-projekcie`, changeFrequency: "monthly", priority: 0.3 },
   { url: `${SITE_URL}/o-tworcy`, changeFrequency: "monthly", priority: 0.3 },
