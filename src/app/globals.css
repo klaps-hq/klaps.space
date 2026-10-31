@@ -76,6 +76,20 @@
   .maplibregl-popup-tip {
     @apply hidden!;
   }
+  /* The OSM/Carto credit is required, but its default white box glared on
+     the dark basemap. */
+  .maplibregl-ctrl.maplibregl-ctrl-attrib {
+    @apply bg-black/75! text-white/55! text-[10px]!;
+  }
+  .maplibregl-ctrl-attrib a {
+    @apply text-white/70!;
+  }
+  .maplibregl-ctrl-attrib .maplibregl-ctrl-attrib-button {
+    @apply invert;
+  }
+  .maplibregl-cooperative-gesture-screen {
+    @apply bg-black/70! text-xs! uppercase tracking-[0.22em];
+  }
 }
 
 /* Entrance reveals in pure CSS. The element is visible by default (no JS,
