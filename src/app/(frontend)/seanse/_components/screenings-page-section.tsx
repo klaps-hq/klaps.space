@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import { IScreeningGroup } from "@/interfaces/IScreenings";
+import { IRepertoire } from "@/lib/client-screenings";
 import { IGenre } from "@/interfaces/IMovies";
 import {
   ScreeningsTransitionProvider,
@@ -16,7 +16,7 @@ import { MY_CINEMAS_PARAM } from "../../(home)/_components/screenings/my-cinemas
 import MyCinemasGrid from "./my-cinemas-grid";
 
 interface ScreeningsPageSectionProps {
-  screenings: IScreeningGroup[];
+  repertoire: IRepertoire;
   genres: IGenre[];
   selectedGenreIds: number[];
   dateFrom: string | null;
@@ -27,7 +27,7 @@ interface ScreeningsPageSectionProps {
 }
 
 const Inner: React.FC<ScreeningsPageSectionProps> = ({
-  screenings,
+  repertoire,
   genres,
   selectedGenreIds,
   dateFrom,
@@ -79,7 +79,7 @@ const Inner: React.FC<ScreeningsPageSectionProps> = ({
         ) : (
           <>
             <ScreeningsGrid
-              screenings={screenings}
+              repertoire={repertoire}
               genres={genres}
               selectedGenreIds={selectedGenreIds}
               dateFrom={dateFrom}
@@ -87,7 +87,7 @@ const Inner: React.FC<ScreeningsPageSectionProps> = ({
               search={search}
             />
 
-            {totalPages > 1 && screenings.length > 0 && (
+            {totalPages > 1 && repertoire.groups.length > 0 && (
               <div className="mt-16 md:mt-20">
                 <PaginatedNav
                   currentPage={currentPage}

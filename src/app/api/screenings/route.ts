@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  fetchHomeScreenings,
-  HomeScreeningsResult,
-} from "@/lib/screenings";
+import { fetchHomeScreenings } from "@/lib/screenings";
+import { toRepertoire } from "@/lib/client-screenings";
 import { isVoivodeship } from "@/lib/voivodeships";
 
 // Proxy for the homepage screenings section - the upstream URL and API key
@@ -37,7 +35,7 @@ export async function GET(request: NextRequest) {
   const search =
     params.get("search")?.trim().slice(0, MAX_SEARCH_LENGTH) || undefined;
 
-  const body: HomeScreeningsResult = await fetchHomeScreenings({
+  const { screenings, hasMore } = await fetchHomeScreenings({
     cityId,
     voivodeship,
     genreIds,
@@ -46,7 +44,8 @@ export async function GET(request: NextRequest) {
     search,
   });
 
-  return NextResponse.json(body, {
+  // Cards are all the client renders from this, so only their fields go out.
+  return NextResponse.json({ repertoire: toRepertoire(screenings), hasMore }, {
     // Short shared cache: repertoire data upstream revalidates every 5
     // minutes anyway (apiFetch default), so repeat hits can be served
     // without re-rendering the route.

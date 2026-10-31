@@ -393,7 +393,11 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
     {
       ctx.font = "500 10px Inter, system-ui, sans-serif";
       ctx.textBaseline = "middle";
-      const taken: [number, number, number, number][] = [];
+      // The zoom buttons sit on the canvas (bottom right, three 40 px
+      // buttons), so their area counts as taken and labels skip it.
+      const taken: [number, number, number, number][] = [
+        [size.w - 60, size.h - 140, 60, 140],
+      ];
       const ordered =
         view.k >= LABEL_ZOOM
           ? [...cities].sort((a, b) => b.cinemas.length - a.cinemas.length)
@@ -409,6 +413,7 @@ const PolandDotMap: React.FC<PolandDotMapProps> = ({ cinemas }) => {
         const label = c.name.toUpperCase();
         const w = ctx.measureText(label).width + 6;
         const box: [number, number, number, number] = [sx + 8, sy - 7, w, 14];
+        if (box[0] + box[2] > size.w) continue;
         const overlaps = taken.some(
           ([x, y, bw, bh]) =>
             box[0] < x + bw && box[0] + box[2] > x && box[1] < y + bh && box[1] + box[3] > y

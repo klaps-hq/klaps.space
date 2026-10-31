@@ -2,19 +2,16 @@
 
 import React, { useLayoutEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre } from "@/interfaces/IMovies";
 import { usePreferredCity } from "@/contexts/city-context";
-import {
-  filterScreeningGroups,
-  parseGenreIdsParam,
-} from "@/lib/screening-filters";
+import { parseGenreIdsParam } from "@/lib/screening-filters";
+import { filterRepertoire, IRepertoire } from "@/lib/client-screenings";
 import { isVoivodeship } from "@/lib/voivodeships";
 import { clearFilterPending } from "@/lib/filter-pending";
 import FilterBar from "../../(home)/_components/screenings/filter-bar";
 
 interface RepertoireFilterIslandProps {
-  screenings: IScreeningGroup[];
+  repertoire: IRepertoire;
   genres: IGenre[];
   hideCity?: boolean;
   hideGenres?: boolean;
@@ -23,9 +20,9 @@ interface RepertoireFilterIslandProps {
   // are already scoped, so they leave this off.
   usePreferredLocation?: boolean;
   // Stable setter from the parent (a useState dispatcher): the filtered
-  // groups, or null for the default view, where the parent keeps showing
+  // repertoire, or null for the default view, where the parent keeps showing
   // the server-rendered grid.
-  onResult: (result: IScreeningGroup[] | null) => void;
+  onResult: (result: IRepertoire | null) => void;
 }
 
 // The interactive filter controls live here, isolated behind a Suspense
@@ -34,7 +31,7 @@ interface RepertoireFilterIslandProps {
 // the server as a sibling and therefore stays in the static HTML. Filtering
 // is in-memory because the page is cached (ISR) with the full data set.
 const RepertoireFilterIsland: React.FC<RepertoireFilterIslandProps> = ({
-  screenings,
+  repertoire,
   genres,
   hideCity = false,
   hideGenres = false,
@@ -97,7 +94,7 @@ const RepertoireFilterIsland: React.FC<RepertoireFilterIslandProps> = ({
     }
 
     onResult(
-      filterScreeningGroups(screenings, {
+      filterRepertoire(repertoire, {
         genreIds: parseGenreIdsParam(genresParam),
         cityId,
         voivodeship,
@@ -107,7 +104,7 @@ const RepertoireFilterIsland: React.FC<RepertoireFilterIslandProps> = ({
       })
     );
   }, [
-    screenings,
+    repertoire,
     genresParam,
     dateFrom,
     dateTo,

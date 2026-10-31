@@ -60,7 +60,7 @@ const HomeScreeningsInner: React.FC<HomeScreeningsProps> = ({
   const showingDefault = override === null;
   const showSeeAll = showingDefault
     ? hasMore && hasDefaultResults
-    : override.hasMore && override.screenings.length > 0;
+    : override.hasMore && override.repertoire.groups.length > 0;
   const activeSeeAllHref = showingDefault ? seeAllHref : override.seeAllHref;
 
   return (
@@ -99,7 +99,7 @@ const HomeScreeningsInner: React.FC<HomeScreeningsProps> = ({
           </FilterPendingGrid>
         ) : (
           <ScreeningsGrid
-            screenings={override.screenings}
+            repertoire={override.repertoire}
             genres={genres}
             selectedGenreIds={override.selectedGenreIds}
             dateFrom={override.dateFrom}
