@@ -2,14 +2,14 @@
 
 import dynamic from "next/dynamic";
 import SectionLoader from "@/components/ui/section-loader";
-import type { MapCinema } from "./poland-dot-map";
+import type { MapCinema } from "./poland-street-map";
 
-const PolandDotMap = dynamic(() => import("./poland-dot-map"), {
+const PolandStreetMap = dynamic(() => import("./poland-street-map"), {
   ssr: false,
   loading: () => (
     <SectionLoader
       label="Ładowanie mapy"
-      className="min-h-0 h-[105vw] max-h-[72vh] sm:h-[72vh] sm:max-h-[860px]"
+      className="min-h-[360px] h-[110vw] max-h-[78vh] sm:h-[78vh] sm:min-h-[480px] sm:max-h-[900px]"
     />
   ),
 });
@@ -19,7 +19,7 @@ interface CinemaMapLazyProps {
 }
 
 const CinemaMapLazy: React.FC<CinemaMapLazyProps> = ({ cinemas }) => (
-  <PolandDotMap cinemas={cinemas} />
+  <PolandStreetMap cinemas={cinemas} />
 );
 
 export default CinemaMapLazy;
