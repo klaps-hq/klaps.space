@@ -10,6 +10,12 @@ export interface ProgrammeProfileScope {
   genreSlug?: string;
   directorSlug?: string;
   movieSlug?: string;
+  /**
+   * City scope: count independent cinemas only, so a "Kina studyjne w
+   * [mieście]" page does not quote multiplex numbers (audit #7: Toruń's
+   * figures were mostly Cinema City).
+   */
+  independentOnly?: boolean;
 }
 
 /** Below this many past screenings the section is not rendered at all. */
@@ -38,6 +44,7 @@ export const getProgrammeProfile = async (
         genreSlug: scope.genreSlug ?? "",
         directorSlug: scope.directorSlug ?? "",
         movieSlug: scope.movieSlug ?? "",
+        independentOnly: scope.independentOnly ? "true" : "",
       },
     });
   } catch (error) {
@@ -217,7 +224,13 @@ export const buildProfileSentences = (
     );
   }
 
-  if (subject.kind !== "genre" && profile.topGenres.length >= 2) {
+  // With one or two films the "dominant genres" are just those films'
+  // tags, padding rather than a fact (audit #7).
+  if (
+    subject.kind !== "genre" &&
+    profile.topGenres.length >= 2 &&
+    profile.movies >= 3
+  ) {
     sentences.push(
       `Dominujące gatunki: ${joinPl(profile.topGenres.slice(0, 3).map((g) => lower(g.name)))}.`
     );

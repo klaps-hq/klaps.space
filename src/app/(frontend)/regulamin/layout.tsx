@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     canonical: `${SITE_URL}/regulamin`,
   },
   openGraph: {
+    locale: "pl_PL",
     title: "Regulamin",
     description:
       "Regulamin korzystania z serwisu Klaps. Zasady, odpowiedzialność, prawa autorskie i dane kontaktowe.",

@@ -60,7 +60,7 @@ const profileAnswer = (profile: IProgrammeProfile | null | undefined): string | 
     ? `${sinceMonth(profile.since).replace(/^o/, "O")} ${label}:`
     : `${label.charAt(0).toUpperCase()}${label.slice(1)}:`;
   const parts = [`${lead} ${joinNames(quoted(films))}.`];
-  if (profile.topGenres.length >= 2) {
+  if (profile.topGenres.length >= 2 && profile.movies >= 3) {
     parts.push(
       `Przeważają gatunki: ${joinNames(profile.topGenres.slice(0, 3).map((g) => g.name.toLocaleLowerCase("pl")))}.`
     );

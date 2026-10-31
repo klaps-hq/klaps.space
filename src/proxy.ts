@@ -19,6 +19,7 @@ const SLUG_ROUTES: Record<string, string> = {
 };
 
 const IS_NUMERIC = /^\d+$/;
+const OLD_DIRECTOR_SLUG = /^rezyser-\d+$/;
 const NOINDEX_QUERY_PREFIXES = new Set([
   "filmy",
   "kina",
@@ -125,6 +126,19 @@ export async function proxy(request: NextRequest) {
     // sitemap and Google's index) get a 301 to the screenings list.
     if (routePrefix === "seanse" && IS_NUMERIC.test(segment)) {
       return NextResponse.redirect(new URL("/seanse", request.url), 301);
+    }
+
+    // Directors once had "rezyser-<tmdbId>" slugs for non-Latin names; the
+    // API resolves the old slug to the current one. The page's own
+    // permanentRedirect() lost its Location header once ISR cached the 308
+    // (audit #7), so the redirect is answered here, before the cache.
+    if (routePrefix === "rezyserzy" && OLD_DIRECTOR_SLUG.test(segment)) {
+      const slug = await fetchSlugById("directors", segment);
+      if (slug && slug !== segment) {
+        const destination = new URL(`/rezyserzy/${slug}`, request.url);
+        destination.search = search;
+        return NextResponse.redirect(destination, 308);
+      }
     }
 
     const apiEntity = SLUG_ROUTES[routePrefix];

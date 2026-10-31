@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     canonical: `${SITE_URL}/o-tworcy`,
   },
   openGraph: {
+    locale: "pl_PL",
     type: "profile",
     title: "Robert Siński - twórca Klaps",
     description:

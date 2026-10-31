@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     canonical: `${SITE_URL}/dla-kin`,
   },
   openGraph: {
+    locale: "pl_PL",
     title: "Dla kin - odznaka klaps.space",
     description:
       "Darmowa odznaka z linkiem do repertuaru seansów specjalnych Waszego kina na klaps.space.",

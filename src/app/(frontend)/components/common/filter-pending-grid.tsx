@@ -38,9 +38,13 @@ const FilterPendingGrid: React.FC<FilterPendingGridProps> = ({
           loading ? "flex" : "hidden"
         )}
       >
+        {/* The label only renders client-side while a filter loads: in the
+            server HTML it sat next to the real cards on ~30 pages, where
+            text extractors and AI crawlers read "Ładowanie seansów" as
+            content (audit #7). Before hydration the spinner alone shows. */}
         <SectionLoader
           className="min-h-0 py-16 md:py-24"
-          label="Ładowanie seansów"
+          label={loading ? "Ładowanie seansów" : undefined}
         />
       </div>
     </div>

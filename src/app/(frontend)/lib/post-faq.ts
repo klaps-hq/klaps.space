@@ -5,7 +5,8 @@ import type { Post } from "@/payload-types";
  * FAQPage JSON-LD. Posts write that section as an H2 whose text mentions
  * "pytania", followed by question paragraphs (bold only, ending with "?")
  * each followed by one or more answer paragraphs, until the next H2; or as
- * paragraphs that open with the bold question and go on with the answer. The
+ * paragraphs that open with the bold question and go on with the answer; or
+ * as H3 questions with answer paragraphs below. The
  * answers are the exact paragraph texts, as Google requires the markup to
  * match visible content. An empty list when a post has no such section.
  */
@@ -81,7 +82,15 @@ export const extractPostFaq = (content: Post["content"]): PostFaqItem[] => {
   for (const node of nodes.slice(start + 1)) {
     if (node.type === "heading" && node.tag === "h2") break;
     const inline = inlineQuestion(node);
-    if (inline) {
+    if (
+      node.type === "heading" &&
+      node.tag === "h3" &&
+      nodeText(node).trim().endsWith("?")
+    ) {
+      // Third style: the question as an H3, answer paragraphs below it.
+      flush();
+      current = { q: nodeText(node).trim(), answer: [] };
+    } else if (inline) {
       // Question and answer in one paragraph: a pair of its own.
       flush();
       current = null;
