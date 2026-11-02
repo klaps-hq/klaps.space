@@ -38,7 +38,12 @@ const DetailRow = ({ label, children }: DetailRowProps) => (
 );
 
 const OutboundLink = ({ href, cinemaSlug, children }: OutboundLinkProps) => (
-  <TrackedCinemaLink href={href} cinemaSlug={cinemaSlug} className={LINK_CLASS}>
+  <TrackedCinemaLink
+    href={href}
+    cinemaSlug={cinemaSlug}
+    placement="cinema_details"
+    className={LINK_CLASS}
+  >
     {children}
     <ArrowUpRight
       aria-hidden="true"

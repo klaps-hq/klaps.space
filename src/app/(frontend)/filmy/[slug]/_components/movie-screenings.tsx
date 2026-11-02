@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { IScreening } from "@/interfaces/IScreenings";
 import CityField from "@/app/(home)/_components/screenings/city-field";
 import AddToCalendarButton from "@/components/common/add-to-calendar-button";
@@ -14,6 +14,7 @@ import { groupScreeningsByCinema } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { isChainCinema } from "@/lib/cinema-chains";
 import UncrawledLink from "@/components/common/uncrawled-link";
+import TrackedCinemaLink from "@/components/common/tracked-cinema-link";
 import { formatDateLabel, cn, WARSAW_TZ } from "@/lib/utils";
 import { wallTimeToInstant } from "@/lib/warsaw-time";
 import { voivodeshipLocative } from "@/lib/voivodeships";
@@ -23,6 +24,8 @@ interface MovieScreeningsProps {
   movieTitle: string;
   movieSlug: string;
   movieDuration: number | null;
+  // Outbound cinema URLs keyed by cinema slug (see getCinemaOutboundUrls).
+  cinemaUrls?: Record<string, string>;
 }
 
 interface ScreeningTimeProps {
@@ -70,7 +73,44 @@ interface CinemaRowProps {
   movieSlug: string;
   movieDuration: number | null;
   activeDate: string;
+  cinemaUrl: string | undefined;
 }
+
+interface CinemaSiteActionProps {
+  href: string;
+  cinemaSlug: string;
+  cinemaName: string;
+  movieSlug: string;
+  movieTitle: string;
+  className: string;
+}
+
+// Secondary click-out next to the hour chips (which stay plain text). The
+// conversion of the whole guide: the visitor checks the screening, and books
+// it, on the cinema's own site.
+const CinemaSiteAction: React.FC<CinemaSiteActionProps> = ({
+  href,
+  cinemaSlug,
+  cinemaName,
+  movieSlug,
+  movieTitle,
+  className,
+}) => (
+  <TrackedCinemaLink
+    href={href}
+    cinemaSlug={cinemaSlug}
+    movieSlug={movieSlug}
+    placement="movie_screening"
+    aria-label={`Sprawdź seans filmu ${movieTitle} na stronie kina ${cinemaName} (otwiera się w nowej karcie)`}
+    className={cn("group", className)}
+  >
+    Na stronie kina
+    <ArrowUpRight
+      aria-hidden="true"
+      className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+    />
+  </TrackedCinemaLink>
+);
 
 // Weekday + numeric date for the share message, e.g. "czw., 12.06".
 const formatShareDate = (dateStr: string): string =>
@@ -87,6 +127,7 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
   movieSlug,
   movieDuration,
   activeDate,
+  cinemaUrl,
 }) => {
   const first = screenings[0];
   if (!first) return null;
@@ -161,6 +202,16 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
         </div>
         {/* Desktop: quiet icon actions behind a divider. */}
         <div className="hidden md:flex items-center gap-5 self-stretch border-l border-white/10 pl-7">
+          {cinemaUrl && (
+            <CinemaSiteAction
+              href={cinemaUrl}
+              cinemaSlug={first.cinema.slug}
+              cinemaName={first.cinema.name}
+              movieSlug={movieSlug}
+              movieTitle={movieTitle}
+              className="inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] uppercase tracking-[0.2em] text-white/70 hover:text-white border-b border-white/20 hover:border-white/60 pb-0.5 transition-colors"
+            />
+          )}
           <AddToCalendarButton
             title={`${movieTitle} - ${first.cinema.name}`}
             durationMinutes={movieDuration}
@@ -183,6 +234,18 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
         </div>
         {/* Mobile: right-aligned column of labeled buttons with tall touch targets. */}
         <div className="flex md:hidden flex-col items-start gap-y-2 ml-auto">
+          {cinemaUrl && (
+            // Same flat labeled style and 44px target as the other mobile
+            // actions, listed first as the primary one.
+            <CinemaSiteAction
+              href={cinemaUrl}
+              cinemaSlug={first.cinema.slug}
+              cinemaName={first.cinema.name}
+              movieSlug={movieSlug}
+              movieTitle={movieTitle}
+              className="inline-flex items-center min-h-11 gap-2 py-2 text-[10px] uppercase tracking-[0.2em] text-white hover:text-white/70 transition-colors"
+            />
+          )}
           <AddToCalendarButton
             variant="labeled"
             title={`${movieTitle} - ${first.cinema.name}`}
@@ -214,6 +277,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
   movieTitle,
   movieSlug,
   movieDuration,
+  cinemaUrls,
 }) => {
   const { cityId, voivodeship, locationLabel, isHydrated, cities } =
     usePreferredCity();
@@ -390,6 +454,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
               movieSlug={movieSlug}
               movieDuration={movieDuration}
               activeDate={activeDate}
+              cinemaUrl={cinemaUrls?.[cinemaScreenings[0].cinema.slug]}
             />
           </li>
         ))}

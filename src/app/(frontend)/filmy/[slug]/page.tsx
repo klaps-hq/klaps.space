@@ -6,6 +6,7 @@ import {
   getScreenings,
 } from "@/lib/screenings";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
+import { getCinemaOutboundUrls } from "@/lib/cinemas";
 import { SITE_URL } from "@/lib/site-config";
 import {
   BASE_OPEN_GRAPH,
@@ -170,9 +171,11 @@ const MoviePage = async ({ params }: MoviePageProps) => {
       : [[], null];
   // Screening history of this film across Polish cinemas: data no catalogue
   // site has, so it is the film page's own content next to the TMDB facts.
-  const [profile, profileIndexable] = await Promise.all([
+  // Cinema sites for the "na stronie kina" action on each screening row.
+  const [profile, profileIndexable, cinemaUrls] = await Promise.all([
     getProgrammeProfile({ movieSlug: movie.slug }),
     indexable ?? getIndexableSlugs(),
+    getCinemaOutboundUrls(screenings.map((s) => s.cinema.slug)),
   ]);
   // Instant blurred preview baked into the cached HTML while the full-size
   // backdrop streams in; precomputed by the scraper, served by the API.
@@ -221,6 +224,7 @@ const MoviePage = async ({ params }: MoviePageProps) => {
             movieTitle={movie.title}
             movieSlug={movie.slug}
             movieDuration={movie.duration}
+            cinemaUrls={cinemaUrls}
           />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
@@ -257,6 +261,7 @@ const MoviePage = async ({ params }: MoviePageProps) => {
                 movieTitle={movie.title}
                 movieSlug={movie.slug}
                 movieDuration={movie.duration}
+                cinemaUrls={cinemaUrls}
               />
             </div>
           </div>

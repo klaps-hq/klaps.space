@@ -67,6 +67,38 @@ export const getCinemaBySlug = async (slug: string): Promise<ICinema> => {
   return fetchOrNotFound(() => apiFetch<ICinema>(`/cinemas/${slug}`));
 };
 
+/**
+ * Where a "check it on the cinema's site" action should land: the venue's
+ * own repertoire page when known (one click from the programme), otherwise
+ * its homepage. Booking URLs are left out on purpose, the site does not
+ * broker reservations.
+ */
+export const cinemaOutboundUrl = (
+  cinema: Pick<ICinema, "website" | "details">
+): string | null => cinema.details?.repertoireUrl ?? cinema.website ?? null;
+
+/**
+ * Outbound URLs keyed by cinema slug, for listings whose screening data
+ * carries only cinema summaries. One cached /cinemas/:slug call per venue
+ * (the same URL the cinema page fetches, so the data cache shares it);
+ * a failed lookup just leaves that venue without the action.
+ */
+export const getCinemaOutboundUrls = async (
+  slugs: string[]
+): Promise<Record<string, string>> => {
+  const unique = [...new Set(slugs)];
+  const results = await Promise.allSettled(
+    unique.map((slug) => apiFetch<ICinema>(`/cinemas/${slug}`))
+  );
+  const urls: Record<string, string> = {};
+  results.forEach((result, index) => {
+    if (result.status !== "fulfilled") return;
+    const url = cinemaOutboundUrl(result.value);
+    if (url) urls[unique[index]] = url;
+  });
+  return urls;
+};
+
 // Poland bounding box, used to drop cinemas with wrongly geocoded
 // coordinates that would otherwise render outside the country.
 const POLAND_BOUNDS = {
