@@ -10,13 +10,14 @@ import { SITE_URL } from "@/lib/site-config";
 import {
   BASE_OPEN_GRAPH,
   NOINDEX_FOLLOW,
+  clampExcerpt,
   clampText,
   moviePageTitle,
   pluralPl,
 } from "@/lib/seo";
 
-// Google truncates snippets past roughly this length.
-const MAX_DESCRIPTION_LENGTH = 160;
+// Google truncates snippets past roughly 160 chars; 155 leaves a margin.
+const MAX_DESCRIPTION_LENGTH = 155;
 import Footer from "@/app/(home)/_components/footer";
 import SiteHeader from "@/components/common/site-header";
 import NextScreening from "@/components/common/next-screening";
@@ -84,14 +85,16 @@ export const generateMetadata = async ({
   // Real screening counts and city names in the description improve SERP
   // CTR and uniqueness. Cities stay in the nominative inside parentheses
   // (no preposition, so no declension needed).
-  const cityNames = [
-    ...new Set(screenings.map((s) => s.cinema.city.name)),
-  ].slice(0, 2);
-  const citiesPart = cityNames.length > 0 ? ` (m.in. ${cityNames.join(", ")})` : "";
-  const recentCities = [
-    ...new Set(recentVenues.map((v) => v.cinema.city.name)),
-  ].slice(0, 2);
-  const recentSuffix = `Ostatnio w ${recentVenues.length} ${pluralPl(recentVenues.length, "kinie", "kinach", "kinach")} (m.in. ${recentCities.join(", ")}). Sprawdź, kiedy wróci.`;
+  // "m.in." only when the list is actually cut: "Ostatnio w 1 kinie (m.in.
+  // Wrocław)" promised more than there was.
+  const cityList = (names: string[]): string => {
+    const unique = [...new Set(names)];
+    const shown = unique.slice(0, 2).join(", ");
+    return unique.length > 2 ? `m.in. ${shown}` : shown;
+  };
+  const cityNames = screenings.map((s) => s.cinema.city.name);
+  const citiesPart = cityNames.length > 0 ? ` (${cityList(cityNames)})` : "";
+  const recentSuffix = `Ostatnio w ${recentVenues.length} ${pluralPl(recentVenues.length, "kinie", "kinach", "kinach")} (${cityList(recentVenues.map((v) => v.cinema.city.name))}). Sprawdź, kiedy wróci.`;
   const screeningsSuffix =
     screeningsCount > 0
       ? `Sprawdź ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")} w kinach${citiesPart} - daty i godziny.`
@@ -113,9 +116,10 @@ export const generateMetadata = async ({
   // worth keeping whole, and the pair has to land under the SERP snippet
   // limit or Google truncates it mid-sentence.
   const excerptBudget = MAX_DESCRIPTION_LENGTH - screeningsSuffix.length - 1;
+  // Whole sentences when one fits, so the synopsis does not stop mid-thought.
   const excerpt =
     movie.description && excerptBudget > 40
-      ? clampText(movie.description, excerptBudget)
+      ? clampExcerpt(movie.description, excerptBudget)
       : null;
 
   const description = clampText(

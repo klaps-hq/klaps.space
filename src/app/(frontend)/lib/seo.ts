@@ -17,9 +17,29 @@ export const NOINDEX_FOLLOW = {
 export const wPrep = (locative: string): "w" | "we" =>
   /^[wWfF][bcćdfghjklłmnńprsśtwzźż]/.test(locative) ? "we" : "w";
 
+/**
+ * Collapses runs of whitespace and trims. API names occasionally carry
+ * doubled or padding spaces ("Kina studyjne w   Ostrzeszowie" in a title),
+ * so every name interpolated into copy goes through this.
+ */
+export const squashSpaces = (text: string): string =>
+  text.replace(/\s+/g, " ").trim();
+
 /** "w Krakowie" / "we Wrocławiu" - preposition plus the locative name. */
-export const inPlace = (locative: string): string =>
-  `${wPrep(locative)} ${locative}`;
+export const inPlace = (locative: string): string => {
+  const name = squashSpaces(locative);
+  return `${wPrep(name)} ${name}`;
+};
+
+/**
+ * inPlace with a non-breaking space, as one string. Headings render it as a
+ * single text node, so text extractors see one space instead of the run of
+ * separators that adjacent JSX fragments produced.
+ */
+export const inPlaceNbsp = (locative: string): string => {
+  const name = squashSpaces(locative);
+  return `${wPrep(name)} ${name}`;
+};
 
 /** Polish noun declension after a numeral: pluralPl(3, "kino", "kina", "kin") → "kina". */
 export const pluralPl = (
@@ -82,6 +102,36 @@ export const clampToSentences = (text: string, max = 160): string => {
   }
   return result.trim().length >= max * 0.5
     ? result.trim()
+    : clampText(normalized, max);
+};
+
+/**
+ * Excerpt for a snippet that shares its budget with other text: whole
+ * sentences when at least one fits (even a short one), otherwise a cut at
+ * the last clause boundary, and only then at a word boundary. clampToSentences gives up on sentences below half the
+ * budget, which on film pages meant synopses cut mid-sentence
+ * ("...gdzie wykonuje swoje…", content audit November 2026).
+ */
+export const clampExcerpt = (text: string, max: number): string => {
+  const normalized = squashSpaces(text);
+  if (normalized.length <= max) return normalized;
+  const sentences = normalized.match(/[^.!?]+[.!?]+(\s|$)/g) ?? [];
+  let result = "";
+  for (const sentence of sentences) {
+    if ((result + sentence).trim().length > max) break;
+    result += sentence;
+  }
+  if (result.trim().length >= 40) return result.trim();
+  // No whole sentence fits: end on a clause (comma, semicolon, colon)
+  // rather than on an arbitrary word.
+  const cut = normalized.slice(0, max - 1);
+  const clauseEnd = Math.max(
+    cut.lastIndexOf(","),
+    cut.lastIndexOf(";"),
+    cut.lastIndexOf(":")
+  );
+  return clauseEnd >= 40
+    ? `${cut.slice(0, clauseEnd).trimEnd()}…`
     : clampText(normalized, max);
 };
 

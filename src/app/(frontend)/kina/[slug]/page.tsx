@@ -22,11 +22,13 @@ import {
   NOINDEX_FOLLOW,
   cinemaPageTitle,
   inPlace,
+  inPlaceNbsp,
   pluralPl,
-  wPrep,
+  squashSpaces,
 } from "@/lib/seo";
 import {
   cinemaFallbackIntro,
+  emptyCinemaSentence,
   isUsableCinemaDescription,
 } from "@/lib/listing-copy";
 import { isChainCinema } from "@/lib/cinema-chains";
@@ -125,10 +127,13 @@ const buildCinemaDescription = (
   const base = `Repertuar ${cinemaGenitive(cinemaName)} ${inPlace(cityName)}: ${counts}`;
   const suffix = ". Seanse specjalne, klasyka filmowa i retrospektywy.";
 
-  // Add an example title only when it fits the SERP snippet budget.
+  // Add an example title only when it fits the SERP snippet budget. Named
+  // as a film: a bare quoted title right after the cinema and city read as
+  // a fact about the venue ("Luna w Warszawie: ..., m.in. „Przy Planty
+  // 7/9”" looked like its address).
   const firstTitle = screeningGroups[0]?.movie.title;
   const withTitle = firstTitle
-    ? `${base}, m.in. „${firstTitle}”${suffix}`
+    ? `${base}, m.in. film „${squashSpaces(firstTitle)}”${suffix}`
     : `${base}${suffix}`;
 
   return withTitle.length <= MAX_DESCRIPTION_LENGTH
@@ -244,7 +249,9 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
     .slice(0, 12);
 
   const hasCoordinates = cinema.latitude !== null && cinema.longitude !== null;
-  const cityForCopy = cinema.city.nameDeclinated ?? cinema.city.name;
+  const cityForCopy = squashSpaces(
+    cinema.city.nameDeclinated ?? cinema.city.name
+  );
 
   // Outbound link in the header: the cinema's own website only. A followed
   // link with a referrer is a trust signal and lets cinemas notice
@@ -392,15 +399,9 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
             <div>
               <EmptyState
                 className="pb-12 md:pb-16"
-                description={
-                  <>
-                    {/* Bare name, no "Kino" prefix: many venues are already
-                        called "Kino X" and the prefix would double it. */}
-                    {cinema.name} nie ma teraz zapowiedzianych seansów
-                    specjalnych. Repertuar uzupełniamy na bieżąco, zajrzyj
-                    ponownie wkrótce.
-                  </>
-                }
+                // Wording varies by slug so empty venues do not share one
+                // sentence (see emptyCinemaSentence).
+                description={emptyCinemaSentence(cinema.name, cinema.slug)}
                 cta={{
                   href: `/miasta/${cinema.city.slug}`,
                   label: `Inne kina ${inPlace(cityForCopy)}`,
@@ -441,13 +442,13 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
         <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
           <div className="mb-8 md:mb-10 flex items-end justify-between gap-6 flex-wrap">
             <h2 className="text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
-              Inne kina {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+              Inne kina {inPlaceNbsp(cityForCopy)}
             </h2>
             <Link
               href={`/miasta/${cinema.city.slug}`}
               className="group inline-flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.28em] text-white/55 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
             >
-              Kina studyjne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+              Kina studyjne {inPlaceNbsp(cityForCopy)}
               <ArrowUpRight
                 aria-hidden="true"
                 className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"

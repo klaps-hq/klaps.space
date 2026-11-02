@@ -18,7 +18,7 @@ import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import RepertoireGrid from "@/components/common/repertoire-grid";
 import GuideSection from "@/components/common/guide-section";
 import ListingFaq from "@/components/common/listing-faq";
-import { genreSearchName, getGenreGuide } from "@/lib/genre-guides";
+import { getGenreForms, getGenreGuide } from "@/lib/genre-guides";
 import Footer from "../../(home)/_components/footer";
 
 // ISR: cached HTML revalidated every 5 minutes. The repertoire filters
@@ -65,19 +65,19 @@ export const generateMetadata = async ({
     0
   );
 
-  const genreLower = genre.name.toLowerCase();
+  const forms = getGenreForms(genre.slug, genre.name);
   const guide = getGenreGuide(genre.slug);
   const title = guide
-    ? `${genreSearchName(genre.slug, genre.name)} w kinie: klasyka i seanse specjalne`
-    : `${genre.name} - seanse specjalne w kinach`;
+    ? `${forms.plural} w kinie: klasyka i seanse specjalne`
+    : `${forms.plural} - seanse specjalne w kinach`;
   const description =
     moviesCount > 0
-      ? `${moviesCount} ${pluralPl(moviesCount, "film", "filmy", "filmów")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")} z gatunku ${genreLower} w kinach w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy - ${genreLower} na dużym ekranie.`
+      ? `${forms.plural}: ${moviesCount} ${pluralPl(moviesCount, "tytuł", "tytuły", "tytułów")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")} w kinach w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy na dużym ekranie.`
       : // The guide intro is a full paragraph (293 chars on /gatunki/dramat),
         // so it is clamped to snippet length instead of cut by Google.
         guide?.intro
         ? clampText(guide.intro, 160)
-        : `Filmy z gatunku ${genreLower} dostępne w kinach w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy.`;
+        : `${forms.plural} w kinach w Polsce: seanse specjalne, klasyka filmowa i retrospektywy.`;
   const url = `${SITE_URL}/gatunki/${genre.slug}`;
 
   // A genre nobody is screening right now renders an empty grid; that is
@@ -126,9 +126,9 @@ const GenrePage = async ({ params }: GenrePageProps) => {
     .sort((a, b) => a.name.localeCompare(b.name, "pl"))
     .slice(0, 10);
 
-  const genreNameLower = genre.name.toLowerCase();
+  const forms = getGenreForms(genre.slug, genre.name);
   const guide = getGenreGuide(genre.slug);
-  const searchName = genreSearchName(genre.slug, genre.name);
+  const searchName = forms.plural;
   // Researched intro first; the API description is a generic one-liner.
   const intro = guide?.intro ?? genre.description;
 
@@ -147,7 +147,7 @@ const GenrePage = async ({ params }: GenrePageProps) => {
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-8 pb-8 md:pb-12">
         <PageHeading variant="detail" className="max-w-[20ch]">
-          Filmy z&nbsp;gatunku {genreNameLower}
+          {`${forms.plural} w\u00a0kinach`}
         </PageHeading>
         {intro ? (
           <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
@@ -155,7 +155,7 @@ const GenrePage = async ({ params }: GenrePageProps) => {
           </p>
         ) : (
           <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
-            {genreFallbackIntro(genreNameLower, screenings)}
+            {genreFallbackIntro(forms, screenings)}
           </p>
         )}
       </header>
@@ -174,16 +174,15 @@ const GenrePage = async ({ params }: GenrePageProps) => {
           // Without this the page jumped H1 to the cards' H3, which breaks
           // heading order and left the listing unlabelled.
           <h2 className="mb-6 md:mb-8 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
-            Seanse z&nbsp;gatunku {genreNameLower}
+            {`Seanse ${forms.genitive}`}
           </h2>
         }
         emptyState={
           <EmptyState
             description={
               <>
-                Brak seansów z&nbsp;gatunku {genreNameLower} pasujących do
-                wybranych filtrów. Spróbuj zmienić zakres dat, miasto lub
-                frazę.
+                {`Brak seansów ${forms.genitive} pasujących do wybranych filtrów.`}{" "}
+                Spróbuj zmienić zakres dat, miasto lub frazę.
               </>
             }
             cta={{ href: "/gatunki", label: "Inne gatunki" }}
@@ -196,9 +195,8 @@ const GenrePage = async ({ params }: GenrePageProps) => {
             <EmptyState
               description={
                 <>
-                  Nie ma teraz zapowiedzianych seansów z&nbsp;gatunku{" "}
-                  {genreNameLower}. Repertuar uzupełniamy na bieżąco, zajrzyj
-                  ponownie wkrótce.
+                  {`Nie ma teraz zapowiedzianych seansów ${forms.genitive}.`}{" "}
+                  Repertuar uzupełniamy na bieżąco, zajrzyj ponownie wkrótce.
                 </>
               }
               cta={{ href: "/gatunki", label: "Inne gatunki" }}
@@ -208,9 +206,9 @@ const GenrePage = async ({ params }: GenrePageProps) => {
       </RepertoireSection>
 
       <ProgrammeProfile
-        heading={<>{genre.name} na seansach specjalnych w&nbsp;liczbach</>}
+        heading={<>{`${forms.plural} na seansach specjalnych w\u00a0liczbach`}</>}
         profile={profile}
-        subject={{ kind: "genre", genreName: genre.name }}
+        subject={{ kind: "genre", genreGenitive: forms.genitive }}
         indexable={indexable}
       />
 
