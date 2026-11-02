@@ -59,11 +59,13 @@
   }
   /* Hide the native cursor only where the custom cursor actually renders
      (fine pointer + md and up). Below md the custom cursor is hidden, so the
-     native one must stay visible - including in responsive emulation. */
+     native one must stay visible - including in responsive emulation.
+     Scoped to [data-custom-cursor], which CustomCursor sets once it is live
+     (it starts on idle), so the native cursor is never hidden before. */
   @media (pointer: fine) and (min-width: 768px) {
-    *,
-    *::before,
-    *::after {
+    html[data-custom-cursor] *,
+    html[data-custom-cursor] *::before,
+    html[data-custom-cursor] *::after {
       cursor: none !important;
     }
   }
@@ -197,5 +199,24 @@ html[data-filter-pending="location"] [data-filter-loader="location"] {
   }
   to {
     transform: translateX(0);
+  }
+}
+
+/* Transform-only variant of kx-fade-up for LCP candidates (hero headings
+   and descriptions). An element painted at opacity 0 is not an LCP
+   candidate, so a fade-in pushes LCP back until the animation has run;
+   sliding without the fade keeps the text painted from the first frame. */
+@keyframes kx-slide-up {
+  from {
+    transform: translateY(1.5rem);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .kx-slide-up {
+    animation: kx-slide-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }

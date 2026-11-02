@@ -28,10 +28,10 @@ interface OutboundLinkProps {
 
 const META_CLASS = SECTION_META_CLASS;
 const LINK_CLASS =
-  "group inline-flex items-center gap-1 text-white/80 hover:text-white transition-colors border-b border-white/20 hover:border-white/60 pb-0.5";
+  "group inline-flex items-center gap-1 text-white/80 hover:text-white transition-colors underline decoration-white/25 hover:decoration-white/70 underline-offset-4";
 
 const DetailRow = ({ label, children }: DetailRowProps) => (
-  <div className="grid grid-cols-1 sm:grid-cols-[11rem_1fr] gap-x-6 gap-y-1.5 border-t border-white/10 py-4">
+  <div className="grid grid-cols-1 sm:grid-cols-[11rem_1fr] gap-x-6 gap-y-1.5 border-t border-white/[0.06] first:border-t-0 first:pt-0 py-4">
     <dt className={`${META_CLASS} sm:pt-1`}>{label}</dt>
     <dd className="text-sm md:text-base text-white/80 leading-relaxed flex flex-wrap gap-x-5 gap-y-1.5 items-baseline">
       {children}
@@ -40,7 +40,12 @@ const DetailRow = ({ label, children }: DetailRowProps) => (
 );
 
 const OutboundLink = ({ href, cinemaSlug, children }: OutboundLinkProps) => (
-  <TrackedCinemaLink href={href} cinemaSlug={cinemaSlug} className={LINK_CLASS}>
+  <TrackedCinemaLink
+    href={href}
+    cinemaSlug={cinemaSlug}
+    placement="cinema_details"
+    className={LINK_CLASS}
+  >
     {children}
     <ArrowUpRight
       aria-hidden="true"
@@ -183,7 +188,7 @@ const CinemaDetails = ({
 
   return (
     <ContentSection heading={<>Informacje o&nbsp;kinie</>}>
-      <dl className="flex flex-col border-b border-white/10">
+      <dl className="flex flex-col">
         {logoUrl && (
           <DetailRow label="Logo">
             <span className="relative block h-14 w-28 md:h-16 md:w-32 bg-white rounded-sm">

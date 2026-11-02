@@ -3,8 +3,21 @@
 // in GA for each param that should be reportable.
 type AnalyticsEventParams = Record<string, string | number | boolean>;
 
+export type CinemaLinkPlacement =
+  | "cinema_header"
+  | "cinema_empty"
+  | "cinema_details"
+  | "movie_screening"
+  | "city_cinemas";
+
 interface AnalyticsEvents {
-  cinema_website_click: { cinema_slug: string };
+  cinema_website_click: {
+    cinema_slug: string;
+    // Where on the site the click-out happened (header, screening row...).
+    link_placement: CinemaLinkPlacement;
+    // Set when the click comes from a specific film's screening row.
+    movie_slug?: string;
+  };
   add_to_calendar: { method: "google" | "ics"; item_name: string };
   share: { method: "native" | "copy"; item_name: string };
   save_cinema: { cinema_slug: string; saved: boolean };
@@ -14,7 +27,8 @@ interface AnalyticsEvents {
 }
 
 // No-ops when gtag is missing (GA not configured, blocked, or server render).
-// Consent is handled by gtag Consent Mode, so callers never check it.
+// gtag is only defined once the visitor granted consent (AnalyticsLoader),
+// so callers never check it.
 export const trackEvent = <K extends keyof AnalyticsEvents>(
   name: K,
   params: AnalyticsEvents[K]

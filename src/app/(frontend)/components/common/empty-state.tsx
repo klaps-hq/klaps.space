@@ -14,16 +14,27 @@ interface EmptyStateProps {
   title?: React.ReactNode;
   description: React.ReactNode;
   cta?: EmptyStateCta;
+  /**
+   * Rendered before `cta` as the main way out, e.g. an outbound link that
+   * EmptyStateCta (internal next/link) cannot express. Style it with
+   * EMPTY_STATE_PRIMARY_CLASS; `cta` then reads as the secondary option.
+   */
+  primaryAction?: React.ReactNode;
   className?: string;
 }
 
 const ctaClassName =
   "group inline-flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.28em] text-white border border-white/25 hover:border-white hover:bg-white/[0.04] px-7 md:px-9 py-4 md:py-5 transition-colors";
 
+/** Filled counterpart of the bordered CTA, for `primaryAction`. */
+export const EMPTY_STATE_PRIMARY_CLASS =
+  "group inline-flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.28em] text-black bg-white border border-white hover:bg-white/85 px-7 md:px-9 py-4 md:py-5 transition-colors";
+
 const EmptyState: React.FC<EmptyStateProps> = ({
   title,
   description,
   cta,
+  primaryAction,
   className,
 }) => {
   const ctaContent = cta && (
@@ -56,14 +67,15 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       >
         {description}
       </p>
-      {cta && (
-        <div className="mt-10 md:mt-12">
-          {cta.href ? (
+      {(cta || primaryAction) && (
+        <div className="mt-10 md:mt-12 flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4">
+          {primaryAction}
+          {cta?.href ? (
             <Link href={cta.href} className={ctaClassName}>
               {ctaContent}
             </Link>
           ) : (
-            cta.onClick && (
+            cta?.onClick && (
               <button
                 type="button"
                 onClick={cta.onClick}

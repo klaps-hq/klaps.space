@@ -26,6 +26,11 @@ const buildDirectorJsonLd = (
   };
 
   if (image) jsonLd.image = image;
+  // sourceId is the TMDB person id: an external profile disambiguates
+  // directors who share a name.
+  if (director.sourceId) {
+    jsonLd.sameAs = `https://www.themoviedb.org/person/${director.sourceId}`;
+  }
   if (director.bio) jsonLd.description = director.bio;
 
   // Freshness signal: newest real data change across the director record and
@@ -41,6 +46,7 @@ const buildDirectorJsonLd = (
   return {
     "@context": context,
     "@type": "ProfilePage",
+    name: director.name,
     url: `${SITE_URL}/rezyserzy/${director.slug}`,
     dateModified,
     mainEntity: person,

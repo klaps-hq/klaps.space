@@ -2,6 +2,8 @@ import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IMovieSummary } from "@/interfaces/IMovies";
 import { inPlace, pluralPl } from "./seo";
 import { CLASSIC_MIN_AGE_YEARS } from "./landing-pages";
+import { cinemaGenitive, cinemaLocative } from "./cinema-name";
+import { genreLabel, type GenreForms } from "./genre-guides";
 
 /**
  * Auto-generated intro copy for taxonomy/listing pages that have no editorial
@@ -71,7 +73,9 @@ const topGenres = (groups: IScreeningGroup[], max: number): string[] => {
   const counts = new Map<string, number>();
   for (const group of groups) {
     for (const genre of group.movie.genres ?? []) {
-      const name = genre.name?.trim().toLowerCase();
+      const name = genre.name?.trim()
+        ? genreLabel(genre.slug, genre.name)
+        : "";
       if (!name) continue;
       counts.set(name, (counts.get(name) ?? 0) + 1);
     }
@@ -84,14 +88,14 @@ const topGenres = (groups: IScreeningGroup[], max: number): string[] => {
 
 /** Fallback intro for /gatunki/[slug] without an editorial description. */
 export const genreFallbackIntro = (
-  genreNameLower: string,
+  forms: GenreForms,
   groups: IScreeningGroup[]
 ): string => {
   const movieCount = groups.length;
   if (movieCount === 0) {
     return bindOrphans(
-      `Filmy z gatunku ${genreNameLower} pokazywane na seansach ` +
-        `specjalnych w polskich kinach. Filtruj po mieście, dacie lub frazie poniżej.`
+      `${forms.plural} pokazywane na seansach specjalnych w polskich ` +
+        `kinach. Filtruj po mieście, dacie lub frazie poniżej.`
     );
   }
 
@@ -100,9 +104,8 @@ export const genreFallbackIntro = (
   const totalCities = totalCityCount(groups);
 
   const lead =
-    `Na seansach specjalnych w polskich kinach znajdziesz ${movieCount} ` +
-    `${pluralPl(movieCount, "film", "filmy", "filmów")} z gatunku ` +
-    genreNameLower;
+    `${forms.plural} na seansach specjalnych w polskich kinach: ` +
+    `${movieCount} ${pluralPl(movieCount, "tytuł", "tytuły", "tytułów")}`;
   const first =
     titles.length > 0 ? `${lead}, w tym ${joinPl(titles)}.` : `${lead}.`;
 
@@ -335,4 +338,34 @@ export const classicFacts = (groups: IScreeningGroup[]): string => {
       `z lat ${topDecade}-${topDecade + 9} (${topCount} ` +
       `${pluralPl(topCount, "film", "filmy", "filmów")}).`
   );
+};
+
+// Deterministic string hash (djb2), so a page keeps its wording across
+// renders and ISR revalidations while neighbouring pages differ.
+const hashSlug = (slug: string): number => {
+  let hash = 5381;
+  for (let i = 0; i < slug.length; i += 1) {
+    hash = ((hash << 5) + hash + slug.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+};
+
+/**
+ * Empty-repertoire sentence on a cinema page. One identical sentence on
+ * every empty venue (kino-wilga, kino-baszta, kino-sck) read as boilerplate,
+ * so the wording varies by slug. No variant needs a verb to agree with the
+ * venue name, whose gender is unknown.
+ */
+export const emptyCinemaSentence = (
+  cinemaName: string,
+  slug: string
+): string => {
+  const genitive = cinemaGenitive(cinemaName);
+  const variants = [
+    `${cinemaName} nie ma teraz zapowiedzianych seansów specjalnych. Repertuar uzupełniamy na bieżąco, zajrzyj ponownie wkrótce.`,
+    `W ${cinemaLocative(cinemaName)} nie ma w tej chwili zapowiedzianych seansów specjalnych. Nowe pokazy dodajemy, gdy tylko kino je ogłosi.`,
+    `Kolejne seanse specjalne ${genitive} nie zostały jeszcze ogłoszone. Sprawdzamy repertuar regularnie, więc warto tu wrócić za kilka dni.`,
+    `Na razie brak zapowiedzi seansów specjalnych ${genitive}. Gdy pojawią się nowe terminy, znajdziesz je na tej stronie.`,
+  ];
+  return bindOrphans(variants[hashSlug(slug) % variants.length]);
 };

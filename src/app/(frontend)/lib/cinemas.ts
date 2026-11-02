@@ -3,6 +3,7 @@ import { ICinema, ICinemaGroup, ICinemaSummary } from "@/interfaces/ICinema";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { apiFetch, fetchOrNotFound } from "./client";
 import { getScreenings } from "./screenings";
+import { isChainCinema } from "./cinema-chains";
 
 interface GetCinemasParams {
   cityId?: string | null;
@@ -61,10 +62,104 @@ export const getCinemas = async (
   }
 };
 
+export interface CinemaCounts {
+  /** Every venue in the catalogue: studio, open-air and chain. */
+  total: number;
+  /** Cities with at least one venue of any kind. */
+  cities: number;
+  /** Year-round independent venues ("kina studyjne"). */
+  studio: number;
+  /** Cities with at least one studio venue. */
+  studioCities: number;
+  /** Non-chain open-air venues. */
+  openAir: number;
+  /** Multiplex-chain venues. */
+  chain: number;
+  /** Every venue except the chain ones (studio + open-air). */
+  nonChain: number;
+}
+
+/**
+ * The single source for catalogue counts shown in prose, metadata and
+ * JSON-LD, so /kina, /mapa-kin and static pages never disagree. The split
+ * follows isChainCinema and isOpenAir, same as the listing labels.
+ */
+export const countCinemas = (
+  groups: readonly ICinemaGroup[]
+): CinemaCounts => {
+  let total = 0;
+  let chain = 0;
+  let openAir = 0;
+  let cities = 0;
+  let studioCities = 0;
+  for (const group of groups) {
+    if (group.cinemas.length > 0) cities += 1;
+    let studioInCity = 0;
+    for (const cinema of group.cinemas) {
+      total += 1;
+      if (isChainCinema(cinema.name)) chain += 1;
+      else if (cinema.isOpenAir) openAir += 1;
+      else studioInCity += 1;
+    }
+    if (studioInCity > 0) studioCities += 1;
+  }
+  return {
+    total,
+    cities,
+    studio: total - chain - openAir,
+    studioCities,
+    openAir,
+    chain,
+    nonChain: total - chain,
+  };
+};
+
+/**
+ * Catalogue counts from the full cinema list. Same URL as the /kina hub's
+ * getCinemas call, so it shares one cached fetch. All zeros on failure:
+ * callers fall back to number-free copy.
+ */
+export const getCinemaCounts = async (): Promise<CinemaCounts> => {
+  const { data } = await getCinemas({ limit: 1000 });
+  return countCinemas(data);
+};
+
 export const getCinemaBySlug = async (slug: string): Promise<ICinema> => {
   // fetchOrNotFound: an unknown slug must yield a 404, not a 500
   // (this is called directly from generateMetadata).
   return fetchOrNotFound(() => apiFetch<ICinema>(`/cinemas/${slug}`));
+};
+
+/**
+ * Where a "check it on the cinema's site" action should land: the venue's
+ * own repertoire page when known (one click from the programme), otherwise
+ * its homepage. Booking URLs are left out on purpose, the site does not
+ * broker reservations.
+ */
+export const cinemaOutboundUrl = (
+  cinema: Pick<ICinema, "website" | "details">
+): string | null => cinema.details?.repertoireUrl ?? cinema.website ?? null;
+
+/**
+ * Outbound URLs keyed by cinema slug, for listings whose screening data
+ * carries only cinema summaries. One cached /cinemas/:slug call per venue
+ * (the same URL the cinema page fetches, so the data cache shares it);
+ * a failed lookup just leaves that venue without the action.
+ */
+export const getCinemaOutboundUrls = async (
+  slugs: string[]
+): Promise<Record<string, string>> => {
+  const unique = [...new Set(slugs)];
+  const results = await Promise.allSettled(
+    unique.map((slug) => apiFetch<ICinema>(`/cinemas/${slug}`))
+  );
+  const urls: Record<string, string> = {};
+  results.forEach((result, index) => {
+    if (result.status !== "fulfilled") return;
+    const url = cinemaOutboundUrl(result.value);
+    if (url) urls[unique[index]] = url;
+  });
+  return urls;
 };
 
 // Poland bounding box, used to drop cinemas with wrongly geocoded
@@ -76,7 +171,7 @@ const POLAND_BOUNDS = {
   maxLng: 24.2,
 };
 
-function isWithinPoland(latitude: number, longitude: number): boolean {
+export function isWithinPoland(latitude: number, longitude: number): boolean {
   return (
     latitude >= POLAND_BOUNDS.minLat &&
     latitude <= POLAND_BOUNDS.maxLat &&

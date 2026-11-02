@@ -52,7 +52,7 @@ const WEEKDAY_SHORT = ["pn", "wt", "śr", "cz", "pt", "sb", "nd"];
 const META_CLASS = SECTION_META_CLASS;
 
 const Stat = ({ value, label }: StatProps) => (
-  <div className="flex flex-col gap-1.5 border-t border-white/15 pt-4">
+  <div className="flex flex-col gap-1.5">
     <span className="text-3xl md:text-4xl font-light -tracking-[0.03em] text-white tabular-nums leading-none">
       {value}
     </span>
@@ -69,7 +69,7 @@ const RankedList = ({ title, items }: RankedListProps) => {
         {items.map((item) => (
           <li
             key={item.key}
-            className="flex items-baseline justify-between gap-4 border-t border-white/10 py-2 text-sm"
+            className="flex items-baseline justify-between gap-4 border-t border-white/[0.06] first:border-t-0 py-2 text-sm"
           >
             {item.href ? (
               <Link

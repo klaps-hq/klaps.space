@@ -7,6 +7,8 @@ import PageHeading from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
 import JsonLd from "@/components/common/json-ld";
 import { FOUNDER, ORGANIZATION_ID, SITE_URL } from "@/lib/site-config";
+import { getCinemaCounts } from "@/lib/cinemas";
+import { pluralPl } from "@/lib/seo";
 import Footer from "../(home)/_components/footer";
 
 interface ProfileLink {
@@ -51,7 +53,12 @@ const CONTENT_SOURCES: ContentSource[] = [
   },
 ];
 
-const FounderPage = () => {
+// The venue count comes from the same helper as /kina, so the two pages
+// never quote different numbers.
+export const revalidate = 3600;
+
+const FounderPage = async () => {
+  const counts = await getCinemaCounts();
   return (
     <main className="bg-black text-white min-h-screen">
       <JsonLd
@@ -116,9 +123,18 @@ const FounderPage = () => {
             <p>
               Robert Siński tworzy klaps.space, niekomercyjny przewodnik po
               seansach specjalnych w&nbsp;polskich kinach studyjnych. Zbudował
-              system, który codziennie automatycznie sprawdza repertuar ponad
-              560 kin i&nbsp;wyłuskuje z&nbsp;niego to, czego trudno szukać
-              gdzie indziej: klasykę, retrospektywy, pokazy DKF i&nbsp;maratony.
+              system, który codziennie automatycznie sprawdza repertuar{" "}
+              {counts.total > 0 ? (
+                <>
+                  {counts.total} kin i&nbsp;miejsc pokazów w&nbsp;
+                  {counts.cities}{" "}
+                  {pluralPl(counts.cities, "mieście", "miastach", "miastach")}
+                </>
+              ) : (
+                <>kin z&nbsp;całej Polski</>
+              )}{" "}
+              i&nbsp;wyłuskuje z&nbsp;niego to, czego trudno szukać gdzie
+              indziej: klasykę, retrospektywy, pokazy DKF i&nbsp;maratony.
             </p>
             <p>
               Na co dzień pracuje jako programista fullstack w&nbsp;Katowicach.

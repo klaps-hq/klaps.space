@@ -15,6 +15,7 @@ import {
 } from "@/lib/landing-pages";
 import SiteHeader from "@/components/common/site-header";
 import RecentRepertoire from "@/components/common/recent-repertoire";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import {
   LandingHeader,
   LandingJsonLd,
@@ -61,16 +62,16 @@ export const generateMetadata = async (): Promise<Metadata> => {
 };
 
 const OpenAirPage = async () => {
-  const [cities, { upcoming, season }, storedIntro, genres] = await Promise.all(
-    [
+  const [cities, { upcoming, season }, storedIntro, genres, indexableSlugs] =
+    await Promise.all([
       // Tolerated here (unlike on the city pages): the hub is prerendered
       // at build time, when there is no API.
       getOpenAirCities().catch(() => []),
       getOpenAirPageData(),
       getLandingIntro(landingIntroKeys.openAir),
       getGenres(),
-    ]
-  );
+      getIndexableSlugs(),
+    ]);
   const screenings = upcoming ?? [];
   const seasonItems = season ?? [];
 
@@ -125,6 +126,7 @@ const OpenAirPage = async () => {
         heading="Ostatni sezon"
         description="Filmy pokazywane w kinach plenerowych w ostatnich 12 miesiącach, od najnowszego seansu."
         items={seasonItems}
+        indexableMovies={indexableSlugs?.movies ?? null}
       />
 
       <Footer />

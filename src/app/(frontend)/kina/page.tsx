@@ -1,8 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import { getCinemas } from "@/lib/cinemas";
+import { countCinemas, getCinemas } from "@/lib/cinemas";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
-import { isChainCinema } from "@/lib/cinema-chains";
 import { ICinemaGroup } from "@/interfaces/ICinema";
 import { SITE_URL } from "@/lib/site-config";
 import JsonLd from "@/components/common/json-ld";
@@ -17,6 +16,10 @@ import UncrawledLink from "@/components/common/uncrawled-link";
 import Footer from "../(home)/_components/footer";
 
 export const revalidate = 300;
+
+// Links (<a>) are indexable cinemas, UncrawledLink (<span>) the rest.
+const CINEMA_LIST_CLASS =
+  "flex flex-col gap-3 [&>li>*]:block [&>li>*]:truncate [&>li>*]:text-base md:[&>li>*]:text-lg [&>li>*]:transition-colors [&>li>a]:text-white/65 [&>li>span]:text-white/35 [&>li>*:hover]:text-white";
 
 const formatPlural = (
   n: number,
@@ -40,13 +43,6 @@ const buildCinemasJsonLd = (
   const cinemas = cinemaGroups.flatMap((group) => group.cinemas);
   const listed = cinemas.filter((cinema) => isLinked(cinema.slug));
 
-  // Newest cinema updatedAt, i.e. a real data change rather than render
-  // time (ISR re-renders every 5 min, which would fake freshness).
-  const newestUpdatedAt = cinemas.reduce<string | null>((newest, cinema) => {
-    const updatedAt = cinema.updatedAt ?? null;
-    return updatedAt && (!newest || updatedAt > newest) ? updatedAt : newest;
-  }, null);
-
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -54,7 +50,8 @@ const buildCinemasJsonLd = (
     url: `${SITE_URL}/kina`,
     description:
       "Pełna lista kin studyjnych i niezależnych w Polsce wraz z repertuarem seansów specjalnych.",
-    ...(newestUpdatedAt && { dateModified: newestUpdatedAt }),
+    // No dateModified: cinema updatedAt is bumped by every scraper run, so
+    // the newest one always equals the last crawl and fakes freshness.
     mainEntity: {
       "@type": "ItemList",
       // The full count, even though the listed elements are capped. Only
@@ -87,19 +84,15 @@ const CinemasPage = async () => {
   const sortedGroups = [...cinemaGroups].sort((a, b) =>
     a.city.name.localeCompare(b.city.name, "pl")
   );
-  const totalCinemas = sortedGroups.reduce(
-    (acc, g) => acc + g.cinemas.length,
-    0
-  );
-  const totalCities = sortedGroups.length;
   // The lead used to call all ~570 venues "kina" under a "kina studyjne"
   // heading; it now names the multiplexes and open-air spots apart.
-  const allCinemas = sortedGroups.flatMap((g) => g.cinemas);
-  const chainCount = allCinemas.filter((c) => isChainCinema(c.name)).length;
-  const openAirCount = allCinemas.filter(
-    (c) => !isChainCinema(c.name) && c.isOpenAir
-  ).length;
-  const independentCount = totalCinemas - chainCount - openAirCount;
+  const {
+    total: totalCinemas,
+    cities: totalCities,
+    studio: independentCount,
+    openAir: openAirCount,
+    chain: chainCount,
+  } = countCinemas(sortedGroups);
 
   return (
     <main className="bg-black text-white min-h-screen">
@@ -180,21 +173,20 @@ const CinemasPage = async () => {
                     )}
                   </h2>
                 </div>
-                <ul className="flex flex-col gap-3">
+                {/* Item styles live on the list rather than on each of the
+                    ~570 links, where the class string was repeated in both
+                    the HTML and the RSC payload. */}
+                <ul className={CINEMA_LIST_CLASS}>
                   {group.cinemas.map((cinema) => (
                     <li key={cinema.id}>
                       {isCinemaLinked(cinema.slug) ? (
-                        <Link
-                          href={`/kina/${cinema.slug}`}
-                          className="text-base md:text-lg text-white/65 hover:text-white transition-colors block truncate"
-                        >
+                        <Link href={`/kina/${cinema.slug}`}>
                           {cinema.name}
                         </Link>
                       ) : (
                         <UncrawledLink
                           basePath="/kina"
                           slug={cinema.slug}
-                          className="text-base md:text-lg text-white/35 hover:text-white transition-colors block truncate"
                         >
                           {cinema.name}
                         </UncrawledLink>

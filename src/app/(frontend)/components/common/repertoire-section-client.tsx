@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import FilterBarFallback from "../../(home)/_components/screenings/filter-bar-fallback";
 import FilterPendingGrid from "./filter-pending-grid";
 import RepertoireFilterIsland from "./repertoire-filter-island";
-import { ScreeningCardGrid } from "./repertoire-grid";
+import { ScreeningCardGrid } from "./screening-card-grid";
 
 export interface RepertoireSectionClientProps {
   repertoire: IRepertoire;

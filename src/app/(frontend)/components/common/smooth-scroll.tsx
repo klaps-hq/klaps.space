@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import Lenis from "lenis";
+import type Lenis from "lenis";
+import { hasFinePointer, runWhenIdle } from "@/lib/idle";
 
 const SmoothScroll = () => {
   const lenisRef = useRef<Lenis | null>(null);
@@ -14,30 +15,41 @@ const SmoothScroll = () => {
   useEffect(() => {
     // Touch devices use native scrolling - skip Lenis and its RAF loop
     // entirely to save main-thread work on mobile.
-    const isFinePointer = window.matchMedia(
-      "(hover: hover) and (pointer: fine)"
-    ).matches;
-    if (!isFinePointer) return;
+    if (!hasFinePointer()) return;
 
-    const lenis = new Lenis({
-      lerp: 0.08,
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 1.4,
-      syncTouch: false,
+    let cancelled = false;
+    let lenis: Lenis | null = null;
+    let rafId: number | undefined;
+
+    // Native scrolling works until then, so the library is fetched and
+    // started on idle instead of during hydration, where it added long
+    // tasks of several hundred ms.
+    const cancelIdle = runWhenIdle(() => {
+      void import("lenis").then(({ default: LenisClass }) => {
+        if (cancelled) return;
+        const instance = new LenisClass({
+          lerp: 0.08,
+          smoothWheel: true,
+          wheelMultiplier: 1,
+          touchMultiplier: 1.4,
+          syncTouch: false,
+        });
+        lenis = instance;
+        lenisRef.current = instance;
+
+        const raf = (time: number) => {
+          instance.raf(time);
+          rafId = requestAnimationFrame(raf);
+        };
+        rafId = requestAnimationFrame(raf);
+      });
     });
-    lenisRef.current = lenis;
-
-    let rafId: number;
-    const raf = (time: number) => {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    };
-    rafId = requestAnimationFrame(raf);
 
     return () => {
-      cancelAnimationFrame(rafId);
-      lenis.destroy();
+      cancelled = true;
+      cancelIdle();
+      if (rafId !== undefined) cancelAnimationFrame(rafId);
+      lenis?.destroy();
       lenisRef.current = null;
     };
   }, []);

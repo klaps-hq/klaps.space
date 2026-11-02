@@ -4,38 +4,42 @@ import { SITE_URL } from "@/lib/site-config";
 import { newestUpdatedAtIso } from "@/lib/seo";
 import { IGenre, IMovieSummary } from "@/interfaces/IMovies";
 import JsonLd from "@/components/common/json-ld";
+import { getGenreForms } from "@/lib/genre-guides";
 
 type GenreLayoutProps = {
   children: React.ReactNode;
   params: Promise<{ slug: string }>;
 };
 
-const buildGenreJsonLd = (genre: IGenre, movies: readonly IMovieSummary[]) => ({
-  "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  name: `${genre.name} - Filmy`,
-  url: `${SITE_URL}/gatunki/${genre.slug}`,
-  description: `Filmy z gatunku ${genre.name.toLowerCase()} na seansach specjalnych w kinach.`,
-  // Freshness signal for AI Overviews: newest movie `updatedAt` in the set,
-  // i.e. a real data change. Omitted when no movie carries a timestamp,
-  // which beats fabricating render time.
-  ...(newestUpdatedAtIso(movies) && {
-    dateModified: newestUpdatedAtIso(movies),
-  }),
-  // Omitted when nothing is upcoming: an empty list says nothing.
-  ...(movies.length > 0 && {
-    mainEntity: {
-      "@type": "ItemList",
-      numberOfItems: movies.length,
-      itemListElement: movies.map((movie, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        url: `${SITE_URL}/filmy/${movie.slug}`,
-        name: movie.title,
-      })),
-    },
-  }),
-});
+const buildGenreJsonLd = (genre: IGenre, movies: readonly IMovieSummary[]) => {
+  const forms = getGenreForms(genre.slug, genre.name);
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${forms.plural} w kinach`,
+    url: `${SITE_URL}/gatunki/${genre.slug}`,
+    description: `${forms.plural} na seansach specjalnych w kinach w Polsce.`,
+    // Freshness signal for AI Overviews: newest movie `updatedAt` in the set,
+    // i.e. a real data change. Omitted when no movie carries a timestamp,
+    // which beats fabricating render time.
+    ...(newestUpdatedAtIso(movies) && {
+      dateModified: newestUpdatedAtIso(movies),
+    }),
+    // Omitted when nothing is upcoming: an empty list says nothing.
+    ...(movies.length > 0 && {
+      mainEntity: {
+        "@type": "ItemList",
+        numberOfItems: movies.length,
+        itemListElement: movies.map((movie, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: `${SITE_URL}/filmy/${movie.slug}`,
+          name: movie.title,
+        })),
+      },
+    }),
+  };
+};
 
 export default async function GenreLayout({
   children,

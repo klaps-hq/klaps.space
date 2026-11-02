@@ -29,7 +29,7 @@ const META_CLASS = SECTION_META_CLASS;
 
 // Same figures as the programme profile above it.
 const Stat = ({ value, label }: StatProps) => (
-  <div className="flex flex-col gap-1.5 border-t border-white/15 pt-4">
+  <div className="flex flex-col gap-1.5">
     <span className="text-3xl md:text-4xl font-light tabular-nums text-white -tracking-[0.03em] leading-none">
       {value}
     </span>
@@ -95,7 +95,7 @@ const CityVenues = ({ heading, summary, isLinked }: CityVenuesProps) => {
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.slug} className="border-t border-white/10 align-top">
+              <tr key={row.slug} className="border-t border-white/[0.06] align-top">
                 <th scope="row" className="py-2.5 pr-4 font-medium text-white/85">
                   {isLinked(row.slug) ? (
                     <Link

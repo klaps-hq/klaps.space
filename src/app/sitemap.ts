@@ -8,6 +8,7 @@ import {
   type SitemapId,
 } from "@/lib/sitemap-entries";
 import { getScreenings } from "@/lib/screenings";
+import { getDirectors, isDirectorIndexable } from "@/lib/directors";
 import { getMoviePosterMap } from "@/lib/movies";
 import { getPostsPage, getPublishedPosts } from "@/lib/posts";
 import { archiveMonths, monthPath, shiftMonth } from "@/lib/month-stats";
@@ -368,12 +369,21 @@ const sitemap = async ({
       const genres = await filterGenresWithScreenings(entries.genres);
       return dedupeByUrl(toPages(genres, "gatunki", "weekly", 0.5));
     }
-    case "rezyserzy":
-      // Directors arrive pre-filtered by the API (only those above the
-      // indexing threshold), so no noindex cross-check is needed here.
-      return dedupeByUrl(
-        toPages(entries.directors ?? [], "rezyserzy", "weekly", 0.5)
+    case "rezyserzy": {
+      // Directors arrive pre-filtered by the API on the screenings
+      // threshold only; the page also noindexes single-film directors, so
+      // they are cross-checked with the same predicate. An empty list means
+      // the call failed (getDirectors swallows errors), and then the API's
+      // list ships as is rather than an empty sub-sitemap.
+      const { data: directors } = await getDirectors();
+      const indexable = new Set(
+        directors.filter(isDirectorIndexable).map((d) => d.slug)
       );
+      const listed = (entries.directors ?? []).filter(
+        (entry) => directors.length === 0 || indexable.has(entry.slug)
+      );
+      return dedupeByUrl(toPages(listed, "rezyserzy", "weekly", 0.5));
+    }
     default:
       return [];
   }

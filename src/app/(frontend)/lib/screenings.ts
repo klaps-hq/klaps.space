@@ -4,6 +4,9 @@ import {
   IRandomScreening,
   IRecentScreening,
   IRecentVenue,
+  IMovieScreening,
+  IMovieScreeningCinema,
+  IMovieScreeningsPayload,
 } from "@/interfaces/IScreenings";
 import { IGenre, IMovie, PaginatedResponse } from "@/interfaces/IMovies";
 import { ICinemaSummary } from "@/interfaces/ICinema";
@@ -534,10 +537,10 @@ export const getFeaturedHeroScreening =
     return null;
   };
 
-export const groupScreeningsByCinema = (
-  screenings: IScreening[]
-): IScreening[][] => {
-  const grouped = new Map<number, IScreening[]>();
+export const groupScreeningsByCinema = <T extends { cinema: { id: number } }>(
+  screenings: T[]
+): T[][] => {
+  const grouped = new Map<number, T[]>();
 
   for (const screening of screenings) {
     const existing = grouped.get(screening.cinema.id) ?? [];
@@ -546,4 +549,47 @@ export const groupScreeningsByCinema = (
   }
 
   return Array.from(grouped.values());
+};
+
+/** Packs film page screenings for the client island (see IMovieScreeningsPayload). */
+export const toMovieScreeningsPayload = (
+  screenings: IScreening[]
+): IMovieScreeningsPayload => {
+  const cinemas = new Map<number, IMovieScreeningCinema>();
+  for (const { cinema } of screenings) {
+    if (cinemas.has(cinema.id)) continue;
+    cinemas.set(cinema.id, {
+      id: cinema.id,
+      slug: cinema.slug,
+      name: cinema.name,
+      street: cinema.street,
+      city: {
+        id: cinema.city.id,
+        slug: cinema.city.slug,
+        name: cinema.city.name,
+      },
+    });
+  }
+  return {
+    cinemas: [...cinemas.values()],
+    screenings: screenings.map((s) => [
+      s.id,
+      s.dateTime,
+      s.date,
+      s.time,
+      s.cinema.id,
+    ]),
+  };
+};
+
+/** Inverse of toMovieScreeningsPayload; runs in the client island. */
+export const fromMovieScreeningsPayload = ({
+  cinemas,
+  screenings,
+}: IMovieScreeningsPayload): IMovieScreening[] => {
+  const byId = new Map(cinemas.map((cinema) => [cinema.id, cinema]));
+  return screenings.flatMap(([id, dateTime, date, time, cinemaId]) => {
+    const cinema = byId.get(cinemaId);
+    return cinema ? [{ id, dateTime, date, time, cinema }] : [];
+  });
 };

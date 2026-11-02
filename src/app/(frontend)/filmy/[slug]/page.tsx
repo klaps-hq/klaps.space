@@ -4,19 +4,23 @@ import {
   getMovieScreenings,
   getRecentVenues,
   getScreenings,
+  toMovieScreeningsPayload,
 } from "@/lib/screenings";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
+import { hasIndependentUpcoming, isMovieIndexable } from "@/lib/indexability";
+import { getCinemaOutboundUrls } from "@/lib/cinemas";
 import { SITE_URL } from "@/lib/site-config";
 import {
   BASE_OPEN_GRAPH,
   NOINDEX_FOLLOW,
+  clampExcerpt,
   clampText,
   moviePageTitle,
   pluralPl,
 } from "@/lib/seo";
 
-// Google truncates snippets past roughly this length.
-const MAX_DESCRIPTION_LENGTH = 160;
+// Google truncates snippets past roughly 160 chars; 155 leaves a margin.
+const MAX_DESCRIPTION_LENGTH = 155;
 import Footer from "@/app/(home)/_components/footer";
 import SiteHeader from "@/components/common/site-header";
 import NextScreening from "@/components/common/next-screening";
@@ -69,9 +73,12 @@ export const generateMetadata = async ({
   }).catch(() => null);
   const screenings = upcoming ?? [];
   const screeningsCount = screenings.length;
-  // Only needed between screening runs; [] on failure keeps the old rule.
+  // Only needed while no independent cinema has the film coming up (the
+  // indexability rule then falls back to the 90-day window); [] on failure.
   const recentVenues =
-    upcoming?.length === 0 ? await getRecentVenues(movie.id) : [];
+    upcoming && !hasIndependentUpcoming(upcoming)
+      ? await getRecentVenues(movie.id)
+      : [];
 
   const genreNames = movie.genres.map((g) => g.name).join(", ");
   const directorNames = movie.directors?.map((d) => d.name).join(", ");
@@ -85,14 +92,16 @@ export const generateMetadata = async ({
   // Real screening counts and city names in the description improve SERP
   // CTR and uniqueness. Cities stay in the nominative inside parentheses
   // (no preposition, so no declension needed).
-  const cityNames = [
-    ...new Set(screenings.map((s) => s.cinema.city.name)),
-  ].slice(0, 2);
-  const citiesPart = cityNames.length > 0 ? ` (m.in. ${cityNames.join(", ")})` : "";
-  const recentCities = [
-    ...new Set(recentVenues.map((v) => v.cinema.city.name)),
-  ].slice(0, 2);
-  const recentSuffix = `Ostatnio w ${recentVenues.length} ${pluralPl(recentVenues.length, "kinie", "kinach", "kinach")} (m.in. ${recentCities.join(", ")}). Sprawdź, kiedy wróci.`;
+  // "m.in." only when the list is actually cut: "Ostatnio w 1 kinie (m.in.
+  // Wrocław)" promised more than there was.
+  const cityList = (names: string[]): string => {
+    const unique = [...new Set(names)];
+    const shown = unique.slice(0, 2).join(", ");
+    return unique.length > 2 ? `m.in. ${shown}` : shown;
+  };
+  const cityNames = screenings.map((s) => s.cinema.city.name);
+  const citiesPart = cityNames.length > 0 ? ` (${cityList(cityNames)})` : "";
+  const recentSuffix = `Ostatnio w ${recentVenues.length} ${pluralPl(recentVenues.length, "kinie", "kinach", "kinach")} (${cityList(recentVenues.map((v) => v.cinema.city.name))}). Sprawdź, kiedy wróci.`;
   const screeningsSuffix =
     screeningsCount > 0
       ? `Sprawdź ${screeningsCount} ${pluralPl(screeningsCount, "seans", "seanse", "seansów")} w kinach${citiesPart} - daty i godziny.`
@@ -114,9 +123,10 @@ export const generateMetadata = async ({
   // worth keeping whole, and the pair has to land under the SERP snippet
   // limit or Google truncates it mid-sentence.
   const excerptBudget = MAX_DESCRIPTION_LENGTH - screeningsSuffix.length - 1;
+  // Whole sentences when one fits, so the synopsis does not stop mid-thought.
   const excerpt =
     movie.description && excerptBudget > 40
-      ? clampText(movie.description, excerptBudget)
+      ? clampExcerpt(movie.description, excerptBudget)
       : null;
 
   const description = clampText(
@@ -132,14 +142,15 @@ export const generateMetadata = async ({
   );
   const url = `${SITE_URL}/filmy/${movie.slug}`;
 
-  // Movies with neither upcoming nor recent screenings are thin TMDB
-  // duplicates - keep them out of the index until they have showtimes
-  // again. Recent ones stay indexed: classics play in runs, and dropping
-  // the page between runs made it fall out of the index and come back
-  // (the "Ostatnio w kinach" list is their page-specific content). Same
-  // 90-day window as cinema and city pages. Query-param duplicates are
-  // handled by the canonical URL alone.
-  const noindex = upcoming?.length === 0 && recentVenues.length === 0;
+  // Movies with neither upcoming nor recent screenings in an independent
+  // cinema are thin TMDB duplicates or multiplex-only reissues - keep them
+  // out of the index. Recent ones stay indexed: classics play in runs, and
+  // dropping the page between runs made it fall out of the index and come
+  // back (the "Ostatnio w kinach" list is their page-specific content). The
+  // rule is shared with the film sitemap and the hubs, see isMovieIndexable.
+  // Query-param duplicates are handled by the canonical URL alone.
+  const noindex =
+    upcoming !== null && !isMovieIndexable({ upcoming, recentVenues });
 
   return {
     title,
@@ -171,13 +182,18 @@ const MoviePage = async ({ params }: MoviePageProps) => {
       : [[], null];
   // Screening history of this film across Polish cinemas: data no catalogue
   // site has, so it is the film page's own content next to the TMDB facts.
-  const [profile, profileIndexable] = await Promise.all([
+  // Cinema sites for the "na stronie kina" action on each screening row.
+  const [profile, profileIndexable, cinemaUrls] = await Promise.all([
     getProgrammeProfile({ movieSlug: movie.slug }),
     indexable ?? getIndexableSlugs(),
+    getCinemaOutboundUrls(screenings.map((s) => s.cinema.slug)),
   ]);
   // Instant blurred preview baked into the cached HTML while the full-size
   // backdrop streams in; precomputed by the scraper, served by the API.
   const backdropBlurDataUrl = movie.backdropBlurDataUrl ?? null;
+  // The screenings list is a client island; it gets each venue once instead
+  // of a full cinema record on every showtime.
+  const screeningsPayload = toMovieScreeningsPayload(screenings);
 
   // Internal linking: up to 6 similar movies, taken from the screenings feed
   // rather than the catalogue. Catalogue picks were mostly movies without
@@ -218,10 +234,11 @@ const MoviePage = async ({ params }: MoviePageProps) => {
       >
         {screenings.length === 0 ? (
           <MovieScreenings
-            screenings={screenings}
+            payload={screeningsPayload}
             movieTitle={movie.title}
             movieSlug={movie.slug}
             movieDuration={movie.duration}
+            cinemaUrls={cinemaUrls}
           />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
@@ -254,10 +271,11 @@ const MoviePage = async ({ params }: MoviePageProps) => {
             </div>
             <div className="lg:col-span-8">
               <MovieScreenings
-                screenings={screenings}
+                payload={screeningsPayload}
                 movieTitle={movie.title}
                 movieSlug={movie.slug}
                 movieDuration={movie.duration}
+                cinemaUrls={cinemaUrls}
               />
             </div>
           </div>
@@ -278,7 +296,10 @@ const MoviePage = async ({ params }: MoviePageProps) => {
       />
 
       <ContentSection heading="O filmie">
-        <MovieAbout movie={movie} />
+        <MovieAbout
+          movie={movie}
+          indexableDirectors={profileIndexable?.directors ?? null}
+        />
       </ContentSection>
 
       {relatedMovies.length > 0 && (
@@ -286,7 +307,10 @@ const MoviePage = async ({ params }: MoviePageProps) => {
           heading="Podobne filmy"
           lead="Gatunek, epoka i miasta, teraz w kinach."
         >
-          <RelatedMovies movies={relatedMovies} />
+          <RelatedMovies
+            movies={relatedMovies}
+            linkableSlugs={profileIndexable?.movies ?? undefined}
+          />
         </ContentSection>
       )}
 

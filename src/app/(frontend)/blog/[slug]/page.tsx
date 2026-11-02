@@ -18,6 +18,7 @@ import { resolveScreeningBlocks } from "@/lib/post-screening-blocks";
 import { extractPostFaq } from "@/lib/post-faq";
 import type { Post } from "@/payload-types";
 import RichText from "../_components/rich-text";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import Footer from "../../(home)/_components/footer";
 
 // ISR: posts change only on publish, so a 5 minute window keeps pages
@@ -120,14 +121,14 @@ const buildPostJsonLd = (post: Post) => {
       ? cover.url
       : `${SITE_URL}${cover.url}`
     : null;
-  // Credited to the editorial team, not to the Payload user who published
-  // it: posts are drafted with AI, so naming a person as the author would
-  // overstate who wrote them. The founder is linked from the Organization.
+  // The founder, who edits and fact-checks every post, is the author: a
+  // named Person with its own page is a stronger E-E-A-T signal than an
+  // Organization byline (KLA-63). Same @id as the Person on /o-tworcy.
   const author = {
-    "@type": "Organization",
-    "@id": ORGANIZATION_ID,
-    name: "Klaps",
-    url: SITE_URL,
+    "@type": "Person",
+    "@id": FOUNDER.id,
+    name: FOUNDER.name,
+    url: FOUNDER.url,
   };
 
   return {
@@ -136,7 +137,10 @@ const buildPostJsonLd = (post: Post) => {
     headline: post.title,
     description: post.excerpt,
     url: `${SITE_URL}/blog/${post.slug}`,
-    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}/blog/${post.slug}`,
+    },
     inLanguage: "pl-PL",
     ...(post.publishedAt ? { datePublished: post.publishedAt } : {}),
     dateModified: clampModified(post),
@@ -153,25 +157,9 @@ const buildPostJsonLd = (post: Post) => {
         }
       : {}),
     author,
-    // The named person who edits and fact-checks the AI-assisted drafts
-    // (content audit, October 2026: an Organization-only byline was the
-    // weakest E-E-A-T signal). Authorship stays with the editorial team.
-    editor: {
-      "@type": "Person",
-      "@id": FOUNDER.id,
-      name: FOUNDER.name,
-      url: FOUNDER.url,
-    },
-    publisher: {
-      "@type": "Organization",
-      "@id": ORGANIZATION_ID,
-      name: "Klaps",
-      url: SITE_URL,
-      logo: {
-        "@type": "ImageObject",
-        url: `${SITE_URL}/web-app-manifest-512x512.png`,
-      },
-    },
+    // The full Organization node (logo, sameAs) is emitted site-wide under
+    // this @id, so a reference is enough here.
+    publisher: { "@id": ORGANIZATION_ID },
   };
 };
 
@@ -186,7 +174,10 @@ const PostPage = async ({ params }: PostPageProps) => {
   // Resolved here rather than inside the converter: Lexical's JSX
   // converters are synchronous, so the showtimes would otherwise have to be
   // fetched after hydration and would not reach the server HTML.
-  const screeningsByBlockId = await resolveScreeningBlocks(post.content);
+  const [screeningsByBlockId, indexable] = await Promise.all([
+    resolveScreeningBlocks(post.content),
+    getIndexableSlugs(),
+  ]);
   const faqJsonLd = buildFaqJsonLd(post);
   const updatedAt = visibleUpdate(post);
 
@@ -239,6 +230,8 @@ const PostPage = async ({ params }: PostPageProps) => {
                   alt={cover.alt}
                   fill
                   priority
+                  // priority alone does not emit fetchpriority="high".
+                  fetchPriority="high"
                   sizes="(max-width: 1024px) 100vw, 896px"
                   className="object-cover"
                 />
@@ -268,6 +261,7 @@ const PostPage = async ({ params }: PostPageProps) => {
             <RichText
               data={post.content}
               screeningsByBlockId={screeningsByBlockId}
+              indexableMovies={indexable?.movies ?? null}
             />
           </div>
 

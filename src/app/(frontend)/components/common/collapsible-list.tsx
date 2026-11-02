@@ -11,9 +11,13 @@ interface CollapsibleListProps {
 }
 
 const LIST_CLASS = "grid grid-cols-1 sm:grid-cols-2 gap-x-10";
+// Lines run between rows only: the section divider already sits above the
+// first row, so the first row of each column drops its own.
+export const FIRST_ROW_CLASS =
+  "[&>li:first-child>*]:border-t-0 sm:[&>li:nth-child(2)>*]:border-t-0";
 
 export const ROW_CLASS =
-  "flex items-baseline justify-between gap-4 border-t border-white/10 py-3";
+  "flex items-baseline justify-between gap-4 border-t border-white/[0.06] py-3";
 
 /**
  * Two-column row list that folds long tails into <details>. The folded
@@ -33,7 +37,7 @@ const CollapsibleList = ({
 
   return (
     <div className={className}>
-      <ul className={LIST_CLASS}>{shown}</ul>
+      <ul className={`${LIST_CLASS} ${FIRST_ROW_CLASS}`}>{shown}</ul>
       {rest.length > 0 && (
         <details className="group">
           <summary className="mt-4 inline-flex cursor-pointer list-none items-center gap-2 text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-white/55 hover:text-white transition-colors group-open:hidden">
