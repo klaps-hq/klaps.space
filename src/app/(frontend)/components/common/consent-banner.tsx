@@ -3,8 +3,8 @@
 import React, { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 
-const CONSENT_STORAGE_KEY = "klaps-analytics-consent";
-const CONSENT_CHANGE_EVENT = "klaps-consent-change";
+export const CONSENT_STORAGE_KEY = "klaps-analytics-consent";
+export const CONSENT_CHANGE_EVENT = "klaps-consent-change";
 
 type ConsentValue = "granted" | "denied";
 

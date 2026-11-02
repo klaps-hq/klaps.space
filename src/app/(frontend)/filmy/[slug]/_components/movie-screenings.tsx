@@ -3,14 +3,20 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { IScreening } from "@/interfaces/IScreenings";
+import {
+  IMovieScreening,
+  IMovieScreeningsPayload,
+} from "@/interfaces/IScreenings";
 import CityField from "@/app/(home)/_components/screenings/city-field";
 import AddToCalendarButton from "@/components/common/add-to-calendar-button";
 import ShareButton from "@/components/common/share-button";
 import { usePreferredCity } from "@/contexts/city-context";
 import { useNow } from "@/hooks/use-now";
 import { dropPastScreenings } from "@/lib/screening-filters";
-import { groupScreeningsByCinema } from "@/lib/screenings";
+import {
+  fromMovieScreeningsPayload,
+  groupScreeningsByCinema,
+} from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { isChainCinema } from "@/lib/cinema-chains";
 import UncrawledLink from "@/components/common/uncrawled-link";
@@ -20,14 +26,14 @@ import { screeningAnchorId } from "@/lib/screening-anchor";
 import { voivodeshipLocative } from "@/lib/voivodeships";
 
 interface MovieScreeningsProps {
-  screenings: IScreening[];
+  payload: IMovieScreeningsPayload;
   movieTitle: string;
   movieSlug: string;
   movieDuration: number | null;
 }
 
 interface ScreeningTimeProps {
-  screening: IScreening;
+  screening: IMovieScreening;
 }
 
 const formatFullDateLabel = (dateStr: string): string => {
@@ -70,7 +76,7 @@ const ScreeningTime: React.FC<ScreeningTimeProps> = ({ screening }) => {
 };
 
 interface CinemaRowProps {
-  screenings: IScreening[];
+  screenings: IMovieScreening[];
   movieTitle: string;
   movieSlug: string;
   movieDuration: number | null;
@@ -215,7 +221,7 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
 };
 
 const MovieScreenings: React.FC<MovieScreeningsProps> = ({
-  screenings,
+  payload,
   movieTitle,
   movieSlug,
   movieDuration,
@@ -223,6 +229,10 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
   const { cityId, voivodeship, locationLabel, isHydrated, cities } =
     usePreferredCity();
   const now = useNow();
+  const screenings = useMemo(
+    () => fromMovieScreeningsPayload(payload),
+    [payload],
+  );
 
   // The page is cached (ISR), so its list can include showtimes that have
   // started since; drop them once the client clock is known.

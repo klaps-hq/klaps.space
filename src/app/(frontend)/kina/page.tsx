@@ -17,6 +17,10 @@ import Footer from "../(home)/_components/footer";
 
 export const revalidate = 300;
 
+// Links (<a>) are indexable cinemas, UncrawledLink (<span>) the rest.
+const CINEMA_LIST_CLASS =
+  "flex flex-col gap-3 [&>li>*]:block [&>li>*]:truncate [&>li>*]:text-base md:[&>li>*]:text-lg [&>li>*]:transition-colors [&>li>a]:text-white/65 [&>li>span]:text-white/35 [&>li>*:hover]:text-white";
+
 const formatPlural = (
   n: number,
   forms: [singular: string, few: string, many: string]
@@ -169,21 +173,20 @@ const CinemasPage = async () => {
                     )}
                   </h2>
                 </div>
-                <ul className="flex flex-col gap-3">
+                {/* Item styles live on the list rather than on each of the
+                    ~570 links, where the class string was repeated in both
+                    the HTML and the RSC payload. */}
+                <ul className={CINEMA_LIST_CLASS}>
                   {group.cinemas.map((cinema) => (
                     <li key={cinema.id}>
                       {isCinemaLinked(cinema.slug) ? (
-                        <Link
-                          href={`/kina/${cinema.slug}`}
-                          className="text-base md:text-lg text-white/65 hover:text-white transition-colors block truncate"
-                        >
+                        <Link href={`/kina/${cinema.slug}`}>
                           {cinema.name}
                         </Link>
                       ) : (
                         <UncrawledLink
                           basePath="/kina"
                           slug={cinema.slug}
-                          className="text-base md:text-lg text-white/35 hover:text-white transition-colors block truncate"
                         >
                           {cinema.name}
                         </UncrawledLink>
