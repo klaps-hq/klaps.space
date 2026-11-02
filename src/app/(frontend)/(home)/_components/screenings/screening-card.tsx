@@ -7,6 +7,7 @@ import { useNow } from "@/hooks/use-now";
 import {
   IRepertoireCity,
   IRepertoireGroup,
+  isChainRepertoireScreening,
   screeningDate,
   screeningTime,
   upcomingRepertoireGroup,
@@ -103,6 +104,13 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({
         {remaining > 0 && (
           <div className="text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-white/50 mt-0.5">
             +{remaining} więcej
+          </div>
+        )}
+        {/* Chain-only films sort after the independents; the label says
+            why this one is still on an arthouse guide. */}
+        {screenings.every(isChainRepertoireScreening) && (
+          <div className="text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-white/40 mt-0.5">
+            W kinach sieciowych
           </div>
         )}
       </div>

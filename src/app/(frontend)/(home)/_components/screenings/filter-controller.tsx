@@ -6,6 +6,7 @@ import { IRepertoire } from "@/lib/client-screenings";
 import { IGenre } from "@/interfaces/IMovies";
 import { usePreferredCity } from "@/contexts/city-context";
 import { clearFilterPending, takeHomePrefetch } from "@/lib/filter-pending";
+import { STUDIO_ONLY_PARAM } from "@/lib/screening-filters";
 import FilterBar from "./filter-bar";
 
 // Result of an active (non-default) filter query. `null` upstream means the
@@ -100,6 +101,7 @@ const ScreeningsFilterController: React.FC<ScreeningsFilterControllerProps> = ({
   const dateFrom = searchParams.get("dateFrom");
   const dateTo = searchParams.get("dateTo");
   const search = searchParams.get("search");
+  const studioOnly = searchParams.get(STUDIO_ONLY_PARAM) === "1";
 
   const query = useMemo(() => {
     const params = new URLSearchParams();
@@ -109,8 +111,9 @@ const ScreeningsFilterController: React.FC<ScreeningsFilterControllerProps> = ({
     if (dateFrom) params.set("dateFrom", dateFrom);
     if (dateTo) params.set("dateTo", dateTo);
     if (search) params.set("search", search);
+    if (studioOnly) params.set(STUDIO_ONLY_PARAM, "1");
     return params.toString();
-  }, [city, voivodeship, genresParam, dateFrom, dateTo, search]);
+  }, [city, voivodeship, genresParam, dateFrom, dateTo, search, studioOnly]);
 
   // Layout effect: a cached result (back navigation) is applied before the
   // browser paints, so the default grid never shows in between.

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { fetchHomeScreenings } from "@/lib/screenings";
 import { toRepertoire } from "@/lib/client-screenings";
 import { isVoivodeship } from "@/lib/voivodeships";
+import {
+  filterScreeningGroups,
+  STUDIO_ONLY_PARAM,
+} from "@/lib/screening-filters";
 
 // Proxy for the homepage screenings section - the upstream URL and API key
 // must stay server-side, while the section refetches from the client (for
@@ -43,9 +47,14 @@ export async function GET(request: NextRequest) {
     dateTo: validDate(params.get("dateTo")),
     search,
   });
+  // The API has no chain field, so "Tylko kina studyjne" is applied here.
+  const groups =
+    params.get(STUDIO_ONLY_PARAM) === "1"
+      ? filterScreeningGroups(screenings, { independentOnly: true })
+      : screenings;
 
   // Cards are all the client renders from this, so only their fields go out.
-  return NextResponse.json({ repertoire: toRepertoire(screenings), hasMore }, {
+  return NextResponse.json({ repertoire: toRepertoire(groups), hasMore }, {
     // Short shared cache: repertoire data upstream revalidates every 5
     // minutes anyway (apiFetch default), so repeat hits can be served
     // without re-rendering the route.

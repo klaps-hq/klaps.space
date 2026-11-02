@@ -54,6 +54,23 @@ export const FAQ_SECTIONS: FaqSectionData[] = [
           "Multipleks koncentruje się na bieżących premierach i masowym repertuarze. Kino studyjne stawia na program autorski: wznowienia klasyki, filmy spoza komercyjnego obiegu i wydarzenia towarzyszące, takie jak spotkania z twórcami czy dyskusje po seansie.",
       },
       {
+        q: "Dlaczego na Klapsie są też seanse w multipleksach?",
+        a: (
+          <p>
+            Klaps wychodzi od filmu, a&nbsp;nie od sali. Klasyka, wznowienia
+            i&nbsp;retrospektywy coraz częściej trafiają także do kin
+            sieciowych, a&nbsp;widz szukający konkretnego tytułu chce znać
+            każdą okazję, żeby zobaczyć go na dużym ekranie. Sercem serwisu
+            pozostają jednak kina studyjne: ich seanse pokazujemy zawsze jako
+            pierwsze, a&nbsp;pokazy w&nbsp;kinach sieciowych są oznaczone
+            i&nbsp;można je ukryć filtrem „Tylko kina studyjne” na stronie{" "}
+            <Link href="/seanse">Seanse</Link>.
+          </p>
+        ),
+        aText:
+          "Klaps wychodzi od filmu, a nie od sali. Klasyka, wznowienia i retrospektywy coraz częściej trafiają także do kin sieciowych, a widz szukający konkretnego tytułu chce znać każdą okazję, żeby zobaczyć go na dużym ekranie. Sercem serwisu pozostają jednak kina studyjne: ich seanse pokazujemy zawsze jako pierwsze, a pokazy w kinach sieciowych są oznaczone i można je ukryć filtrem „Tylko kina studyjne” na stronie Seanse.",
+      },
+      {
         q: "Co to jest seans specjalny?",
         a: (
           <p>
@@ -109,12 +126,13 @@ export const FAQ_SECTIONS: FaqSectionData[] = [
             Klaps to niezależny serwis internetowy, który agreguje informacje
             o&nbsp;seansach specjalnych, klasyce filmowej
             i&nbsp;retrospektywach w&nbsp;kinach studyjnych na terenie całej
-            Polski. Więcej przeczytasz na stronie{" "}
+            Polski, a&nbsp;także o&nbsp;wybranych pokazach w&nbsp;kinach
+            sieciowych. Więcej przeczytasz na stronie{" "}
             <Link href="/o-projekcie">O&nbsp;projekcie</Link>.
           </p>
         ),
         aText:
-          "Klaps to niezależny serwis internetowy, który agreguje informacje o seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych na terenie całej Polski.",
+          "Klaps to niezależny serwis internetowy, który agreguje informacje o seansach specjalnych, klasyce filmowej i retrospektywach w kinach studyjnych na terenie całej Polski, a także o wybranych pokazach w kinach sieciowych.",
       },
       {
         q: "Czy korzystanie z serwisu jest bezpłatne?",

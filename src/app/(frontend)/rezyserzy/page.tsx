@@ -18,9 +18,9 @@ import DirectorsBrowser, {
 export const revalidate = 300;
 
 export const generateMetadata = async (): Promise<Metadata> => {
-  const title = "Reżyserzy - filmy i seanse w kinach studyjnych";
+  const title = "Reżyserzy - filmy i seanse specjalne w kinach";
   const description =
-    "Przeglądaj reżyserów, których kino wraca na duży ekran w polskich kinach studyjnych. Retrospektywy, klasyka filmowa i seanse specjalne.";
+    "Przeglądaj reżyserów, których kino wraca na duży ekran w polskich kinach. Retrospektywy, klasyka filmowa i seanse specjalne.";
   const url = `${SITE_URL}/rezyserzy`;
 
   return {
@@ -32,7 +32,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
       type: "website",
       title,
       description:
-        "Reżyserzy, których filmy wracają na duży ekran. Seanse specjalne w kinach studyjnych w Polsce.",
+        "Reżyserzy, których filmy wracają na duży ekran. Seanse specjalne w kinach w Polsce.",
       url,
     },
   };
@@ -46,7 +46,7 @@ const buildDirectorsJsonLd = (directors: readonly IDirector[]) => ({
   name: "Reżyserzy",
   url: `${SITE_URL}/rezyserzy`,
   description:
-    "Reżyserzy, których filmy grają na seansach specjalnych w kinach studyjnych w Polsce.",
+    "Reżyserzy, których filmy grają na seansach specjalnych w kinach w Polsce.",
   mainEntity: {
     "@type": "ItemList",
     numberOfItems: directors.length,
@@ -115,8 +115,8 @@ const DirectorsPage = async () => {
           <PageHeadingMuted>Twórcy na dużym ekranie.</PageHeadingMuted>
         </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
-          Reżyserzy, których filmy grają teraz w&nbsp;polskich kinach
-          studyjnych. Retrospektywy, klasyka filmowa i&nbsp;seanse specjalne.
+          Reżyserzy, których filmy grają teraz na&nbsp;seansach
+          specjalnych w&nbsp;polskich kinach. Retrospektywy, klasyka filmowa i&nbsp;seanse specjalne.
           Wybierz nazwisko i&nbsp;zobacz filmografię oraz aktualny repertuar.
         </p>
       </div>

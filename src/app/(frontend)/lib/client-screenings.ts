@@ -1,5 +1,6 @@
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { IGenre, IMovieSummary } from "@/interfaces/IMovies";
+import { isChainCinema } from "./cinema-chains";
 import { ScreeningGroupFilters } from "./screening-filters";
 import { wallTimeToInstant } from "./warsaw-time";
 
@@ -19,8 +20,17 @@ export interface IRepertoireMovie
   genres: Pick<IGenre, "id" | "name">[];
 }
 
-/** A screening as the client holds it: wall-clock dateTime and city id. */
-export type IRepertoireScreening = [dateTime: string, cityId: number];
+/**
+ * A screening as the client holds it: wall-clock dateTime, city id and, only
+ * for a chain multiplex, a trailing 1. Independents leave it out, so the
+ * flag behind the "kino sieciowe" label and the "Tylko kina studyjne"
+ * filter costs nothing on most screenings.
+ */
+export type IRepertoireScreening = [dateTime: string, cityId: number, chain?: 1];
+
+export const isChainRepertoireScreening = (
+  screening: IRepertoireScreening
+): boolean => screening[2] === 1;
 
 export interface IRepertoireCity {
   id: number;
@@ -66,7 +76,9 @@ const buildRepertoire = (groups: IScreeningGroup[]): IRepertoire => {
           voivodeship: city.voivodeship,
         });
       }
-      return [screening.dateTime, city.id];
+      return isChainCinema(screening.cinema.name)
+        ? [screening.dateTime, city.id, 1]
+        : [screening.dateTime, city.id];
     }),
   }));
   return { cities: [...cities.values()], groups: repertoireGroups };
@@ -112,8 +124,9 @@ export const screeningTime = (dateTime: string): string =>
 
 /**
  * Client-side filtering of a listing that is statically cached (ISR) with
- * its full repertoire. Genre and search match the movie; city, voivodeship
- * and date range narrow its screenings, and movies left with none drop out.
+ * its full repertoire. Genre and search match the movie; city, voivodeship,
+ * date range and the independents-only switch narrow its screenings, and
+ * movies left with none drop out.
  */
 export const filterRepertoire = (
   repertoire: IRepertoire,
@@ -124,7 +137,7 @@ export const filterRepertoire = (
   );
   const genreIds = filters.genreIds ?? [];
   const search = filters.search?.trim().toLowerCase() ?? "";
-  const { cityId, voivodeship, dateFrom, dateTo } = filters;
+  const { cityId, voivodeship, dateFrom, dateTo, independentOnly } = filters;
 
   const groups = repertoire.groups.flatMap((group) => {
     const { movie } = group;
@@ -143,14 +156,16 @@ export const filterRepertoire = (
     }
 
     // Dates are ISO "YYYY-MM-DD" strings, safe to compare lexically.
-    const screenings = group.screenings.filter(([dateTime, screeningCityId]) => {
+    const screenings = group.screenings.filter((screening) => {
+      const [dateTime, screeningCityId] = screening;
       const date = screeningDate(dateTime);
       return (
         (cityId == null || screeningCityId === cityId) &&
         (voivodeship == null ||
           voivodeshipByCity.get(screeningCityId) === voivodeship) &&
         (!dateFrom || date >= dateFrom) &&
-        (!dateTo || date <= dateTo)
+        (!dateTo || date <= dateTo) &&
+        (!independentOnly || !isChainRepertoireScreening(screening))
       );
     });
     if (screenings.length === 0) return [];
