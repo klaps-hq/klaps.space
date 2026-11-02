@@ -93,7 +93,6 @@ const buildMovieScreeningEvents = (movie: IMovie, screenings: IScreening[]) =>
       },
       dateTime: screening.dateTime,
     })),
-    `${SITE_URL}/filmy/${movie.slug}`
   );
 
 export default async function MovieLayout({

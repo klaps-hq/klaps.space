@@ -150,18 +150,20 @@ export const LinkGrid = ({ heading, description, items }: LinkGridProps) => {
   );
 };
 
+interface LandingJsonLdProps {
+  name: string;
+  path: string;
+  description: string;
+  screenings: IScreeningGroup[];
+}
+
 /** CollectionPage + ItemList of the films the page lists. */
 export const LandingJsonLd = ({
   name,
   path,
   description,
   screenings,
-}: {
-  name: string;
-  path: string;
-  description: string;
-  screenings: IScreeningGroup[];
-}) => {
+}: LandingJsonLdProps) => {
   const movies = screenings.map((group) => group.movie).slice(0, 24);
   return (
     <JsonLd
@@ -172,16 +174,23 @@ export const LandingJsonLd = ({
         url: `${SITE_URL}${path}`,
         description,
         inLanguage: "pl-PL",
-        mainEntity: {
-          "@type": "ItemList",
-          numberOfItems: movies.length,
-          itemListElement: movies.map((movie, index) => ({
-            "@type": "ListItem",
-            position: index + 1,
-            url: `${SITE_URL}/filmy/${movie.slug}`,
-            name: movie.title,
-          })),
-        },
+        // An empty ItemList (numberOfItems 0) reads as a broken listing,
+        // so the page goes without mainEntity until it has films.
+        ...(movies.length > 0
+          ? {
+              mainEntity: {
+                "@type": "ItemList",
+                name,
+                numberOfItems: movies.length,
+                itemListElement: movies.map((movie, index) => ({
+                  "@type": "ListItem",
+                  position: index + 1,
+                  url: `${SITE_URL}/filmy/${movie.slug}`,
+                  name: movie.title,
+                })),
+              },
+            }
+          : {}),
       }}
     />
   );

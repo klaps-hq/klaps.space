@@ -40,13 +40,6 @@ const buildCinemasJsonLd = (
   const cinemas = cinemaGroups.flatMap((group) => group.cinemas);
   const listed = cinemas.filter((cinema) => isLinked(cinema.slug));
 
-  // Newest cinema updatedAt, i.e. a real data change rather than render
-  // time (ISR re-renders every 5 min, which would fake freshness).
-  const newestUpdatedAt = cinemas.reduce<string | null>((newest, cinema) => {
-    const updatedAt = cinema.updatedAt ?? null;
-    return updatedAt && (!newest || updatedAt > newest) ? updatedAt : newest;
-  }, null);
-
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -54,7 +47,8 @@ const buildCinemasJsonLd = (
     url: `${SITE_URL}/kina`,
     description:
       "Pełna lista kin studyjnych i niezależnych w Polsce wraz z repertuarem seansów specjalnych.",
-    ...(newestUpdatedAt && { dateModified: newestUpdatedAt }),
+    // No dateModified: cinema updatedAt is bumped by every scraper run, so
+    // the newest one always equals the last crawl and fakes freshness.
     mainEntity: {
       "@type": "ItemList",
       // The full count, even though the listed elements are capped. Only
