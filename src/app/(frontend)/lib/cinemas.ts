@@ -76,7 +76,7 @@ const POLAND_BOUNDS = {
   maxLng: 24.2,
 };
 
-function isWithinPoland(latitude: number, longitude: number): boolean {
+export function isWithinPoland(latitude: number, longitude: number): boolean {
   return (
     latitude >= POLAND_BOUNDS.minLat &&
     latitude <= POLAND_BOUNDS.maxLat &&

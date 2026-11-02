@@ -52,6 +52,68 @@ export const todayDigest = (
   return count > 0 ? { count, titles } : null;
 };
 
+export interface UpcomingCounts {
+  /** Screenings still ahead today (Warsaw time). */
+  today: number;
+  /** Screenings still ahead this Saturday and Sunday (the current weekend on weekends). */
+  weekend: number;
+  /** Every screening still ahead. */
+  total: number;
+  /** True on Saturday and Sunday, when the weekend count is the current one. */
+  isWeekend: boolean;
+}
+
+// Built once, like WARSAW_DATE.
+const WARSAW_WEEKDAY = new Intl.DateTimeFormat("en-US", {
+  timeZone: WARSAW_TZ,
+  weekday: "short",
+});
+const WEEKDAY_INDEX: Record<string, number> = {
+  Mon: 0,
+  Tue: 1,
+  Wed: 2,
+  Thu: 3,
+  Fri: 4,
+  Sat: 5,
+  Sun: 6,
+};
+
+const addDays = (isoDate: string, days: number): string => {
+  const date = new Date(`${isoDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+};
+
+/** Counts for the "Dziś / w weekend" strip above a listing. */
+export const upcomingCounts = (
+  groups: readonly DigestGroup[],
+  now: Date = new Date()
+): UpcomingCounts => {
+  const today = WARSAW_DATE.format(now);
+  const weekday = WEEKDAY_INDEX[WARSAW_WEEKDAY.format(now)] ?? 0;
+  // Saturday of this week; on Sunday the weekend already started yesterday.
+  const saturday = addDays(today, 5 - weekday);
+  const sunday = addDays(saturday, 1);
+  const counts: UpcomingCounts = {
+    today: 0,
+    weekend: 0,
+    total: 0,
+    isWeekend: weekday >= 5,
+  };
+
+  for (const group of groups) {
+    for (const { dateTime } of group.screenings) {
+      if (wallTimeToInstant(dateTime).getTime() < now.getTime()) continue;
+      const day = dateTime.slice(0, 10);
+      counts.total += 1;
+      if (day === today) counts.today += 1;
+      if (day === saturday || day === sunday) counts.weekend += 1;
+    }
+  }
+
+  return counts;
+};
+
 /**
  * Phrase variants from longest to shortest, for callers that pick the
  * first one fitting the snippet budget:

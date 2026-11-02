@@ -20,7 +20,12 @@ import {
   pluralPl,
   wPrep,
 } from "@/lib/seo";
-import { todayDigest, todayDigestPhrases } from "@/lib/live-meta";
+import {
+  todayDigest,
+  todayDigestPhrases,
+  upcomingCounts,
+} from "@/lib/live-meta";
+import { getNearbyCities } from "@/lib/nearby-cities";
 import { cityFallbackIntro } from "@/lib/listing-copy";
 import { isChainCinema, splitByChain } from "@/lib/cinema-chains";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
@@ -40,6 +45,10 @@ import { buildCityFaq } from "@/lib/listing-faq";
 import Footer from "../../(home)/_components/footer";
 import { summarizeCityVenues } from "@/lib/city-venues";
 import CityVenues from "./_components/city-venues";
+import RepertoireSummary from "./_components/repertoire-summary";
+
+// Anchor of the "Co gra" heading, target of the summary's jump link.
+const REPERTOIRE_ID = "repertuar";
 import GuideSection from "@/components/common/guide-section";
 import UncrawledLink from "@/components/common/uncrawled-link";
 
@@ -319,6 +328,12 @@ const CityPage = async ({ params }: CityPageProps) => {
   ]);
   const isCinemaLinked = (slug: string): boolean =>
     !indexable || indexable.cinemas.has(slug);
+  // Same indexable set as the sitemap and the /miasta hub; the nationwide
+  // cinema list behind it is one cached call shared by every city page.
+  const nearbyCities = await getNearbyCities(
+    city.id,
+    indexable?.cities ?? null
+  ).catch(() => []);
 
   const cinemas = cinemaGroups
     .flatMap((g) => g.cinemas)
@@ -367,6 +382,10 @@ const CityPage = async ({ params }: CityPageProps) => {
             : "Kina"}{" "}
           {wPrep(cityForCopy)}&nbsp;{cityForCopy}
         </PageHeading>
+        <RepertoireSummary
+          counts={upcomingCounts(screenings)}
+          targetId={REPERTOIRE_ID}
+        />
         {city.description ? (
           <p className="mt-8 md:mt-10 max-w-[64ch] text-base md:text-lg text-white/65 leading-relaxed">
             {city.description}
@@ -448,7 +467,10 @@ const CityPage = async ({ params }: CityPageProps) => {
         hideCity
         className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-8 md:pt-12 pb-20 md:pb-28"
         heading={
-          <h2 className="mb-6 md:mb-8 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
+          <h2
+            id={REPERTOIRE_ID}
+            className="scroll-mt-24 mb-6 md:mb-8 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium"
+          >
             Co gra {wPrep(cityForCopy)}&nbsp;{cityForCopy}
           </h2>
         }
@@ -544,6 +566,16 @@ const CityPage = async ({ params }: CityPageProps) => {
           ]}
         />
       )}
+
+      <LinkGrid
+        heading="Kina studyjne w pobliżu"
+        description={`Najbliższe miasta z kinami studyjnymi. Odległość w linii prostej, liczona od kin ${inPlace(cityForCopy)}.`}
+        items={nearbyCities.map((nearby) => ({
+          href: `/miasta/${nearby.slug}`,
+          label: nearby.name,
+          meta: `${nearby.distanceKm} km`,
+        }))}
+      />
 
       <ListingFaq
         heading={<>Pytania o&nbsp;kina {inPlace(cityForCopy)}</>}
