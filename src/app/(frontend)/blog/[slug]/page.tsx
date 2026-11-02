@@ -18,6 +18,7 @@ import { resolveScreeningBlocks } from "@/lib/post-screening-blocks";
 import { extractPostFaq } from "@/lib/post-faq";
 import type { Post } from "@/payload-types";
 import RichText from "../_components/rich-text";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import Footer from "../../(home)/_components/footer";
 
 // ISR: posts change only on publish, so a 5 minute window keeps pages
@@ -173,7 +174,10 @@ const PostPage = async ({ params }: PostPageProps) => {
   // Resolved here rather than inside the converter: Lexical's JSX
   // converters are synchronous, so the showtimes would otherwise have to be
   // fetched after hydration and would not reach the server HTML.
-  const screeningsByBlockId = await resolveScreeningBlocks(post.content);
+  const [screeningsByBlockId, indexable] = await Promise.all([
+    resolveScreeningBlocks(post.content),
+    getIndexableSlugs(),
+  ]);
   const faqJsonLd = buildFaqJsonLd(post);
   const updatedAt = visibleUpdate(post);
 
@@ -257,6 +261,7 @@ const PostPage = async ({ params }: PostPageProps) => {
             <RichText
               data={post.content}
               screeningsByBlockId={screeningsByBlockId}
+              indexableMovies={indexable?.movies ?? null}
             />
           </div>
 

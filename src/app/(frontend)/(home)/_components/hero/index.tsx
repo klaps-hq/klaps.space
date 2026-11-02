@@ -9,6 +9,7 @@ import { formatDuration, getYouTubeEmbedUrl, WARSAW_TZ } from "@/lib/utils";
 import { wallTimeToInstant } from "@/lib/warsaw-time";
 import { useNow } from "@/hooks/use-now";
 import TrailerModal from "@/components/common/trailer-modal";
+import UncrawledLink from "@/components/common/uncrawled-link";
 import MobileNav from "@/components/common/mobile-nav";
 import { NAV_LINKS } from "@/components/common/nav-links";
 import HeroParallax from "./hero-parallax";
@@ -21,7 +22,13 @@ interface HeroProps {
   // while the full-size hero images load.
   backdropBlurDataUrl?: string | null;
   posterBlurDataUrl?: string | null;
+  // Director slugs whose page is indexable (resolved on the server); the
+  // rest get an uncrawled link. null links every director.
+  indexableDirectorSlugs: string[] | null;
 }
+
+const DIRECTOR_LINK_CLASS =
+  "border-b border-white/30 hover:border-white hover:text-white transition-colors";
 
 // Two CTAs: the fallback points at the full listing, the showcase hero
 // points at the featured movie page, so each label matches its target.
@@ -104,6 +111,7 @@ const Hero: React.FC<HeroProps> = ({
   screening,
   backdropBlurDataUrl,
   posterBlurDataUrl,
+  indexableDirectorSlugs,
 }) => {
   const [trailerOpen, setTrailerOpen] = useState(false);
   const now = useNow();
@@ -229,15 +237,24 @@ const Hero: React.FC<HeroProps> = ({
                       {directors.map((person, index) => (
                         <React.Fragment key={person.id ?? person.name}>
                           {index > 0 && ", "}
-                          {person.slug ? (
+                          {!person.slug ? (
+                            person.name
+                          ) : !indexableDirectorSlugs ||
+                            indexableDirectorSlugs.includes(person.slug) ? (
                             <Link
                               href={`/rezyserzy/${person.slug}`}
-                              className="border-b border-white/30 hover:border-white hover:text-white transition-colors"
+                              className={DIRECTOR_LINK_CLASS}
                             >
                               {person.name}
                             </Link>
                           ) : (
-                            person.name
+                            <UncrawledLink
+                              basePath="/rezyserzy"
+                              slug={person.slug}
+                              className={`${DIRECTOR_LINK_CLASS} cursor-pointer`}
+                            >
+                              {person.name}
+                            </UncrawledLink>
                           )}
                         </React.Fragment>
                       ))}

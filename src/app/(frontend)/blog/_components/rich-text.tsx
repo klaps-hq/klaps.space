@@ -87,10 +87,13 @@ interface RichTextProps {
   // Screenings resolved by the page, keyed by block id. Lexical converters
   // are synchronous, so a block cannot fetch its own data here.
   screeningsByBlockId?: Record<string, IScreeningGroup[]>;
+  // Movie slugs with an indexable page; null links every film.
+  indexableMovies?: ReadonlySet<string> | null;
 }
 
 const buildConverters = (
-  screeningsByBlockId: Record<string, IScreeningGroup[]>
+  screeningsByBlockId: Record<string, IScreeningGroup[]>,
+  indexableMovies: ReadonlySet<string> | null
 ): JSXConvertersFunction<DefaultNodeTypes> =>
   ({ defaultConverters }) => ({
     ...defaultConverters,
@@ -112,6 +115,7 @@ const buildConverters = (
             screenings={screenings}
             moreHref={href}
             moreLabel={label}
+            indexableMovies={indexableMovies}
           />
         );
       },
@@ -121,10 +125,11 @@ const buildConverters = (
 const RichText: React.FC<RichTextProps> = ({
   data,
   screeningsByBlockId = {},
+  indexableMovies = null,
 }) => (
   <PayloadRichText
     data={data}
-    converters={buildConverters(screeningsByBlockId)}
+    converters={buildConverters(screeningsByBlockId, indexableMovies)}
   />
 );
 

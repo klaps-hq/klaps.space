@@ -422,6 +422,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
       <RecentRepertoire
         heading="Ostatnio w repertuarze"
         items={recentScreenings}
+        indexableMovies={indexable?.movies ?? null}
       />
 
       <ProgrammeProfile
