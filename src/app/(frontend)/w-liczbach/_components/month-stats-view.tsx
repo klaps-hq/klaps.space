@@ -22,7 +22,6 @@ import {
   getCinemasOfTheMonth,
 } from "@/lib/cinema-of-the-month";
 import { CLASSIC_MIN_AGE_YEARS } from "@/lib/landing-pages";
-import { getScreenings } from "@/lib/screenings";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { ORGANIZATION_ID, SITE_NAME, SITE_URL } from "@/lib/site-config";
 import { formatPlDate } from "@/lib/seo";
@@ -32,6 +31,7 @@ import SiteHeader from "@/components/common/site-header";
 import EmptyState from "@/components/common/empty-state";
 import JsonLd from "@/components/common/json-ld";
 import MoviePoster from "@/components/common/movie-poster";
+import UncrawledLink from "@/components/common/uncrawled-link";
 import Footer from "../../(home)/_components/footer";
 import CinemaBadgeCode from "./cinema-badge-code";
 
@@ -45,8 +45,9 @@ interface MonthStatsViewProps {
 /**
  * Slugs the page may link. Movie, cinema and city pages without upcoming
  * screenings are noindex, and an archive month is full of those, so only
- * pages Google can index get a link; the rest render as plain text. Each
- * set is null when its source failed, and everything is linked then.
+ * pages Google can index get a link. Cinemas and cities outside the set
+ * render as plain text, films as an uncrawled link. Each set is null when
+ * its source failed, and everything is linked then.
  */
 interface LinkableSlugs {
   movies: ReadonlySet<string> | null;
@@ -55,14 +56,11 @@ interface LinkableSlugs {
 }
 
 const getLinkableSlugs = async (): Promise<LinkableSlugs> => {
-  const [groups, indexable] = await Promise.all([
-    getScreenings(),
-    getIndexableSlugs(),
-  ]);
+  const indexable = await getIndexableSlugs();
   return {
-    // An empty feed means a backend hiccup, not zero screenings nationwide.
-    movies:
-      groups.length > 0 ? new Set(groups.map((g) => g.movie.slug)) : null,
+    // The film sitemap's list, i.e. isMovieIndexable: the screenings feed
+    // used before also held multiplex-only reissues, which are noindex.
+    movies: indexable?.movies ?? null,
     cinemas: indexable?.cinemas ?? null,
     cities: indexable?.cities ?? null,
   };
@@ -84,6 +82,8 @@ interface MaybeLinkProps {
   href: string;
   linked: boolean;
   plain?: boolean;
+  // Film target for the unlinked case: still clickable, never crawlable.
+  uncrawledMovieSlug?: string;
   children: React.ReactNode;
 }
 
@@ -91,12 +91,21 @@ const MaybeLink: React.FC<MaybeLinkProps> = ({
   href,
   linked,
   plain = false,
+  uncrawledMovieSlug,
   children,
 }) =>
   linked ? (
     <Link href={href} className={plain ? PLAIN_LINK_CLASS : LINK_CLASS}>
       {children}
     </Link>
+  ) : uncrawledMovieSlug ? (
+    <UncrawledLink
+      basePath="/filmy"
+      slug={uncrawledMovieSlug}
+      className={`${plain ? PLAIN_LINK_CLASS : LINK_CLASS} cursor-pointer`}
+    >
+      {children}
+    </UncrawledLink>
   ) : (
     <>{children}</>
   );
@@ -305,6 +314,7 @@ const MonthStatsView = async ({
                   <h3 className="text-2xl md:text-4xl font-semibold uppercase leading-tight tracking-tight">
                     <MaybeLink
                       href={`/filmy/${stats.topMovie.movie.slug}`}
+                      uncrawledMovieSlug={stats.topMovie.movie.slug}
                       linked={canLink(
                         linkable.movies,
                         stats.topMovie.movie.slug
@@ -347,6 +357,7 @@ const MonthStatsView = async ({
                       <span className="text-base md:text-lg font-semibold uppercase leading-tight tracking-tight line-clamp-2">
                         <MaybeLink
                           href={`/filmy/${movie.slug}`}
+                          uncrawledMovieSlug={movie.slug}
                           linked={canLink(linkable.movies, movie.slug)}
                         >
                           {movie.title}
@@ -364,6 +375,7 @@ const MonthStatsView = async ({
               <p className="max-w-[52ch] text-lg md:text-2xl text-white/80 -tracking-[0.01em] leading-snug">
                 <MaybeLink
                   href={`/filmy/${stats.oldestMovie.slug}`}
+                  uncrawledMovieSlug={stats.oldestMovie.slug}
                   linked={canLink(linkable.movies, stats.oldestMovie.slug)}
                 >
                   {stats.oldestMovie.title}

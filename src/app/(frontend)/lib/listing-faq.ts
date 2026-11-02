@@ -4,6 +4,7 @@ import { ICinemaDetails } from "@/interfaces/ICinema";
 import { CityVenueSummary, roomLabel, screensPl, seatsPl } from "./city-venues";
 import { formatPlDate, inPlace, pluralPl } from "./seo";
 import { isChainCinema } from "./cinema-chains";
+import { genreLabel } from "./genre-guides";
 import { hasProfileContent, sinceMonth } from "./programme-profile";
 
 /**
@@ -60,7 +61,7 @@ const profileAnswer = (
   const parts = [`${lead} ${joinNames(quoted(films))}.`];
   if (profile.topGenres.length >= 2 && profile.movies >= 3) {
     parts.push(
-      `Przeważają gatunki: ${joinNames(profile.topGenres.slice(0, 3).map((g) => g.name.toLocaleLowerCase("pl")))}.`,
+      `Przeważają gatunki: ${joinNames(profile.topGenres.slice(0, 3).map((g) => genreLabel(g.slug, g.name)))}.`,
     );
   }
   parts.push(

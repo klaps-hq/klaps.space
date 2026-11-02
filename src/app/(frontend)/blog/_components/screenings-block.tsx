@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { formatDateLabel } from "@/lib/utils";
 import MoviePoster from "@/components/common/movie-poster";
+import UncrawledLink from "@/components/common/uncrawled-link";
 
 interface PostScreeningsBlockProps {
   heading?: string | null;
@@ -11,16 +12,26 @@ interface PostScreeningsBlockProps {
   // Where "zobacz wszystkie" points: the hub matching the block's scope.
   moreHref: string;
   moreLabel: string;
+  // Movie slugs with an indexable page; the rest get an uncrawled link
+  // (multiplex-only reissues, KLA-59). null links every film.
+  indexableMovies: ReadonlySet<string> | null;
 }
+
+interface BlockCardProps {
+  group: IScreeningGroup;
+  linkable: boolean;
+}
+
+const BLOCK_CARD_CLASS = "group flex flex-col gap-2";
 
 // Compact card: the article column is narrow, so this stays denser than the
 // listing grid and leads with the poster to break up a wall of prose.
-const BlockCard: React.FC<{ group: IScreeningGroup }> = ({ group }) => {
+const BlockCard: React.FC<BlockCardProps> = ({ group, linkable }) => {
   const { movie, screenings } = group;
   const next = screenings[0];
 
-  return (
-    <Link href={`/filmy/${movie.slug}`} className="group flex flex-col gap-2">
+  const body = (
+    <>
       <div className="relative aspect-[2/3] overflow-hidden bg-white/5">
         {movie.posterUrl ? (
           <MoviePoster
@@ -48,7 +59,21 @@ const BlockCard: React.FC<{ group: IScreeningGroup }> = ({ group }) => {
           </span>
         )}
       </div>
+    </>
+  );
+
+  return linkable ? (
+    <Link href={`/filmy/${movie.slug}`} className={BLOCK_CARD_CLASS}>
+      {body}
     </Link>
+  ) : (
+    <UncrawledLink
+      basePath="/filmy"
+      slug={movie.slug}
+      className={`${BLOCK_CARD_CLASS} cursor-pointer`}
+    >
+      {body}
+    </UncrawledLink>
   );
 };
 
@@ -64,6 +89,7 @@ const PostScreeningsBlock: React.FC<PostScreeningsBlockProps> = ({
   screenings,
   moreHref,
   moreLabel,
+  indexableMovies,
 }) => {
   if (screenings.length === 0) return null;
 
@@ -91,7 +117,11 @@ const PostScreeningsBlock: React.FC<PostScreeningsBlockProps> = ({
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4 gap-y-6">
         {screenings.map((group) => (
-          <BlockCard key={group.movie.id} group={group} />
+          <BlockCard
+            key={group.movie.id}
+            group={group}
+            linkable={!indexableMovies || indexableMovies.has(group.movie.slug)}
+          />
         ))}
       </div>
     </aside>

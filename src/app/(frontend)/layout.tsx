@@ -7,6 +7,7 @@ import SmoothScroll from "@/components/common/smooth-scroll";
 import CustomCursor from "@/components/common/custom-cursor";
 import MotionProvider from "@/components/common/motion-provider";
 import ConsentBanner from "@/components/common/consent-banner";
+import AnalyticsLoader from "@/components/common/analytics-loader";
 import WebVitalsReporter from "@/components/common/web-vitals-reporter";
 import { CityProvider } from "@/contexts/city-context";
 import { SOCIAL_PROFILE_URLS } from "@/constants";
@@ -104,32 +105,9 @@ export default async function RootLayout({
           title="Blog Klaps"
           href="/blog/feed.xml"
         />
-        {process.env.GA_MEASUREMENT_ID && (
-          <>
-            {/* lazyOnload (browser idle) instead of afterInteractive: the
-                180 KB gtag.js otherwise gets a head preload that competes
-                with the LCP hero image and hydration chunks. Events fired
-                before it loads queue safely on the dataLayer stub below. */}
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GA_MEASUREMENT_ID}`}
-              strategy="lazyOnload"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('consent', 'default', {
-                  ad_storage: 'denied',
-                  ad_user_data: 'denied',
-                  ad_personalization: 'denied',
-                  analytics_storage: 'denied'
-                });
-                gtag('js', new Date());
-                gtag('config', '${process.env.GA_MEASUREMENT_ID}');
-              `}
-            </Script>
-          </>
-        )}
+        {/* Google Analytics is injected by AnalyticsLoader, and only after
+            the visitor accepts in ConsentBanner: gtag.js is ~190 KB of
+            script that used to run on every visit, consent or not. */}
         {process.env.AHREFS_ANALYTICS_KEY && (
           <Script
             src="https://analytics.ahrefs.com/analytics.js"
@@ -172,6 +150,9 @@ export default async function RootLayout({
         <MotionProvider>
           <CustomCursor />
           {process.env.GA_MEASUREMENT_ID && <ConsentBanner />}
+          {process.env.GA_MEASUREMENT_ID && (
+            <AnalyticsLoader measurementId={process.env.GA_MEASUREMENT_ID} />
+          )}
           {process.env.GA_MEASUREMENT_ID && <WebVitalsReporter />}
           <CityProvider cities={cities}>{children}</CityProvider>
         </MotionProvider>

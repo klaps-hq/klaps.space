@@ -1,5 +1,6 @@
 import { cinemaLocative } from "./cinema-name";
 import { SITE_URL, cinemaEntityId, movieEntityId } from "./site-config";
+import { screeningEventUrl } from "./screening-anchor";
 import { tmdbPhotoSrc } from "./tmdb";
 import { wallTimeToInstant, wallTimeToWarsawIso } from "./warsaw-time";
 
@@ -33,18 +34,33 @@ export interface ScreeningEventData {
 // Keep the events payload reasonable - soonest screenings first.
 const MAX_JSONLD_EVENTS = 50;
 
-// Stable per-event URL fragment: Google prefers a unique url per event,
-// and all events on a page would otherwise share the page URL, which
-// risks them being deduplicated into one.
-const eventFragment = (cinemaSlug: string, dateTime: string): string =>
-  `#seans-${cinemaSlug}-${dateTime.slice(0, 16).replace(/[T:]/g, "-")}`;
+// Event description from its own facts (film, venue, day and hour), so
+// every event carries unique text instead of a site-wide boilerplate line.
+// The dateTime is Warsaw wall time with a "Z", hence formatting in UTC.
+const formatEventWhen = (dateTime: string): string => {
+  const date = new Date(dateTime);
+  const day = date.toLocaleDateString("pl-PL", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const time = date.toLocaleTimeString("pl-PL", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+  });
+  return `${day}, godz. ${time}`;
+};
 
-const buildEvent = (
-  data: ScreeningEventData,
-  pageUrl: string
-): Record<string, unknown> => {
+const buildEvent = (data: ScreeningEventData): Record<string, unknown> => {
   const { movie, cinema, dateTime } = data;
+  const url = screeningEventUrl(movie.slug, cinema.slug, dateTime);
 
+  // Google's Event guidelines require location name and address, so they
+  // stay next to the @id; the full MovieTheater node (sameAs, telephone,
+  // images) lives on the cinema page under the same @id.
   const location: Record<string, unknown> = {
     "@type": "MovieTheater",
     "@id": cinemaEntityId(cinema.slug),
@@ -68,6 +84,8 @@ const buildEvent = (
   const event: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "ScreeningEvent",
+    // Same @id on the film and cinema pages, so both describe one event.
+    "@id": url,
     // "w kinie X (Miasto)": venue and city names arrive in the nominative
     // ("Kino X" names inflect themselves, see cinema-name),
     // so they sit after "kinie" as an indeclinable apposition and the city
@@ -75,19 +93,17 @@ const buildEvent = (
     name: `${movie.title} - seans w ${cinemaLocative(cinema.name)} (${cinema.cityName})`,
     // image and description are recommended fields for Event rich results;
     // without them Search Console reports warnings on every event.
-    description: `Seans filmu ${movie.title} w ${cinemaLocative(cinema.name)} (${cinema.cityName}). Szczegóły pokazu i pełny repertuar na klaps.space.`,
+    description: `${movie.title} w ${cinemaLocative(cinema.name)} (${cinema.cityName}), ${formatEventWhen(dateTime)}.`,
     // The API's dateTime is Warsaw wall time with a misleading "Z";
     // keep the displayed hour and attach the real offset (see warsaw-time).
     startDate: wallTimeToWarsawIso(dateTime),
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    url: `${pageUrl}${eventFragment(cinema.slug, dateTime)}`,
+    url,
     location,
-    organizer: {
-      "@type": "Organization",
-      name: cinema.name,
-      url: `${SITE_URL}/kina/${cinema.slug}`,
-    },
+    // The venue itself organizes the screening: reference its MovieTheater
+    // node instead of inventing an Organization named after it.
+    organizer: { "@id": cinemaEntityId(cinema.slug) },
     workPresented: {
       "@type": "Movie",
       "@id": movieEntityId(movie.slug),
@@ -115,8 +131,7 @@ const buildEvent = (
 
 /** Upcoming events only, soonest first, capped at MAX_JSONLD_EVENTS. */
 export const buildScreeningEventsJsonLd = (
-  items: ScreeningEventData[],
-  pageUrl: string
+  items: ScreeningEventData[]
 ): Record<string, unknown>[] => {
   const now = Date.now();
 
@@ -129,5 +144,5 @@ export const buildScreeningEventsJsonLd = (
     })
     .sort((a, b) => a.dateTime.localeCompare(b.dateTime))
     .slice(0, MAX_JSONLD_EVENTS)
-    .map((item) => buildEvent(item, pageUrl));
+    .map(buildEvent);
 };

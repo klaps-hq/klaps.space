@@ -17,13 +17,20 @@ export const DIRECTOR_INDEX_THRESHOLD = 3;
  * The Hunger Games) made blockbuster directors indexable "special
  * screenings" pages (content audit, October 2026). Falls back to all
  * upcoming screenings on an API without the independent count.
+ *
+ * A director with a single film is thin even while it plays: the page
+ * repeats that one film's page (/rezyserzy/marek-brodzki, 149 words,
+ * content audit November 2026), so it needs at least two films too.
  */
 export const isDirectorIndexable = (
   director: Pick<
     IDirector,
-    "upcomingScreeningsCount" | "upcomingIndependentScreeningsCount"
+    | "upcomingScreeningsCount"
+    | "upcomingIndependentScreeningsCount"
+    | "moviesCount"
   >
 ): boolean =>
+  director.moviesCount >= 2 &&
   (director.upcomingIndependentScreeningsCount ??
     director.upcomingScreeningsCount) >= DIRECTOR_INDEX_THRESHOLD;
 

@@ -1,10 +1,11 @@
 import { getCityBySlug } from "@/lib/cities";
 import { fetchCinemas } from "@/lib/cinemas";
 import { getScreenings, getScreeningsLastUpdated } from "@/lib/screenings";
-import { SITE_URL } from "@/lib/site-config";
+import { SITE_URL, cinemaEntityId } from "@/lib/site-config";
 import { inPlace, pluralPl } from "@/lib/seo";
 import { ICity } from "@/interfaces/ICities";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
+import { ICinemaSummary } from "@/interfaces/ICinema";
 import JsonLd from "@/components/common/json-ld";
 
 type CityLayoutProps = {
@@ -14,6 +15,7 @@ type CityLayoutProps = {
 
 const buildCityJsonLd = (
   city: ICity,
+  cinemas: Pick<ICinemaSummary, "slug" | "name">[] | null,
   cinemasCount: number | null,
   screeningsCount: number,
   screeningGroups: IScreeningGroup[],
@@ -28,6 +30,21 @@ const buildCityJsonLd = (
   // city (mirrors the visible "Repertuar zaktualizowano" note), i.e. a real
   // data change rather than render time. Omitted when the date is unknown.
   ...(lastUpdated && { dateModified: lastUpdated.toISOString() }),
+  // The city as a Place containing its cinemas, referenced by the same @id
+  // as the MovieTheater node on each cinema page, so the graph links the
+  // city hub to its venues.
+  ...(cinemas &&
+    cinemas.length > 0 && {
+      about: {
+        "@type": "City",
+        name: city.name,
+        containsPlace: cinemas.map((cinema) => ({
+          "@type": "MovieTheater",
+          "@id": cinemaEntityId(cinema.slug),
+          name: cinema.name,
+        })),
+      },
+    }),
   // The visible repertoire mirrored as an ItemList, so AI search gets
   // a machine-readable "what's playing in this city" list.
   // Omitted when nothing is upcoming: an empty list says nothing.
@@ -62,8 +79,8 @@ export default async function CityLayout({
     getScreeningsLastUpdated({ cityId: city.id.toString() }),
   ]);
 
-  const cinemasCount =
-    cinemasResponse?.data.flatMap((g) => g.cinemas).length ?? null;
+  const cinemas = cinemasResponse?.data.flatMap((g) => g.cinemas) ?? null;
+  const cinemasCount = cinemas?.length ?? null;
   const screeningsCount = screenings.reduce(
     (sum, group) => sum + group.screenings.length,
     0
@@ -74,6 +91,7 @@ export default async function CityLayout({
       <JsonLd
         data={buildCityJsonLd(
           city,
+          cinemas,
           cinemasCount,
           screeningsCount,
           screenings,

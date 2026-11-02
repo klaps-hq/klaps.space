@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchHomeScreenings } from "@/lib/screenings";
 import { toRepertoire } from "@/lib/client-screenings";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { isVoivodeship } from "@/lib/voivodeships";
 import {
   filterScreeningGroups,
@@ -39,14 +40,18 @@ export async function GET(request: NextRequest) {
   const search =
     params.get("search")?.trim().slice(0, MAX_SEARCH_LENGTH) || undefined;
 
-  const { screenings, hasMore } = await fetchHomeScreenings({
-    cityId,
-    voivodeship,
-    genreIds,
-    dateFrom: validDate(params.get("dateFrom")),
-    dateTo: validDate(params.get("dateTo")),
-    search,
-  });
+  const [{ screenings, hasMore }, indexable] = await Promise.all([
+    fetchHomeScreenings({
+      cityId,
+      voivodeship,
+      genreIds,
+      dateFrom: validDate(params.get("dateFrom")),
+      dateTo: validDate(params.get("dateTo")),
+      search,
+    }),
+    // Same per-card noindex flags as the server-rendered grid.
+    getIndexableSlugs(),
+  ]);
   // The API has no chain field, so "Tylko kina studyjne" is applied here.
   const groups =
     params.get(STUDIO_ONLY_PARAM) === "1"
@@ -54,7 +59,7 @@ export async function GET(request: NextRequest) {
       : screenings;
 
   // Cards are all the client renders from this, so only their fields go out.
-  return NextResponse.json({ repertoire: toRepertoire(groups), hasMore }, {
+  return NextResponse.json({ repertoire: toRepertoire(groups, indexable?.movies ?? null), hasMore }, {
     // Short shared cache: repertoire data upstream revalidates every 5
     // minutes anyway (apiFetch default), so repeat hits can be served
     // without re-rendering the route.

@@ -240,15 +240,41 @@ export const classicMonthRange = (
   };
 };
 
-export const fetchClassicScreenings = (range?: {
+/**
+ * The API's classic rule (lib/classic.ts there), judged per screening: the
+ * film was made at least CLASSIC_MIN_AGE_YEARS before the screening year.
+ */
+export const isClassicScreening = (
+  productionYear: number,
+  screeningDate: string
+): boolean =>
+  productionYear > 0 &&
+  productionYear <= Number(screeningDate.slice(0, 4)) - CLASSIC_MIN_AGE_YEARS;
+
+/**
+ * Classic screenings. The API filters with `classic=true`; the same rule is
+ * applied here again because an API that ignores the flag returns the whole
+ * repertoire, and the hub then listed Godzilla Minus One (2023) as a classic
+ * (content audit, November 2026).
+ */
+export const fetchClassicScreenings = async (range?: {
   dateFrom: string;
   dateTo: string;
-}) =>
-  fetchScreenings({
+}): Promise<IScreeningGroup[]> => {
+  const groups = await fetchScreenings({
     classic: true,
     dateFrom: range?.dateFrom ?? null,
     dateTo: range?.dateTo ?? null,
   });
+  return groups
+    .map((group) => ({
+      ...group,
+      screenings: group.screenings.filter((screening) =>
+        isClassicScreening(group.movie.productionYear, screening.date)
+      ),
+    }))
+    .filter((group) => group.screenings.length > 0);
+};
 
 /** Index decision for a classics page; null when the call failed. */
 export const isClassicIndexable = (

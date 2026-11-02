@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { IMovie, IMoviePerson } from "@/interfaces/IMovies";
+import UncrawledLink from "@/components/common/uncrawled-link";
 import { cn, formatDatePL, formatDuration, formatNames } from "@/lib/utils";
 import { pluralPl } from "@/lib/seo";
 
@@ -9,25 +10,37 @@ interface CreditItem {
   value: React.ReactNode;
 }
 
+const PERSON_LINK_CLASS =
+  "border-b border-white/25 hover:border-white pb-0.5 transition-colors";
+
 // Directors carry a slug, so render each as a link to its page; other people
 // (scriptwriters, cast) stay plain text. Falls back to a plain name when a
-// director has no slug yet.
+// director has no slug yet. A noindex director page (below the screenings
+// threshold) stays reachable through an uncrawled link, so film pages do
+// not feed crawlers pages Google will not index. null links every director
+// (the indexable list could not be fetched).
 const renderPeopleLinks = (
-  people?: IMoviePerson[] | null
+  people: IMoviePerson[] | null | undefined,
+  indexableDirectors: ReadonlySet<string> | null
 ): React.ReactNode => {
   if (!people || people.length === 0) return null;
   return people.map((person, index) => (
     <React.Fragment key={person.id ?? person.name}>
       {index > 0 && ", "}
-      {person.slug ? (
-        <Link
-          href={`/rezyserzy/${person.slug}`}
-          className="border-b border-white/25 hover:border-white pb-0.5 transition-colors"
-        >
+      {!person.slug ? (
+        person.name
+      ) : !indexableDirectors || indexableDirectors.has(person.slug) ? (
+        <Link href={`/rezyserzy/${person.slug}`} className={PERSON_LINK_CLASS}>
           {person.name}
         </Link>
       ) : (
-        person.name
+        <UncrawledLink
+          basePath="/rezyserzy"
+          slug={person.slug}
+          className={`${PERSON_LINK_CLASS} cursor-pointer`}
+        >
+          {person.name}
+        </UncrawledLink>
       )}
     </React.Fragment>
   ));
@@ -57,6 +70,8 @@ const AboutCell: React.FC<AboutCellProps> = ({ label, children, className }) => 
 
 interface MovieAboutProps {
   movie: IMovie;
+  /** Director slugs with an indexable page; null links every director. */
+  indexableDirectors: ReadonlySet<string> | null;
 }
 
 const LANGUAGE_NAMES = new Intl.DisplayNames(["pl"], { type: "language" });
@@ -75,8 +90,11 @@ const formatLanguage = (code?: string | null): string => {
   return code.toUpperCase();
 };
 
-const MovieAbout: React.FC<MovieAboutProps> = ({ movie }) => {
-  const directorNodes = renderPeopleLinks(movie.directors);
+const MovieAbout: React.FC<MovieAboutProps> = ({
+  movie,
+  indexableDirectors,
+}) => {
+  const directorNodes = renderPeopleLinks(movie.directors, indexableDirectors);
   const scriptwriters = formatNames(movie.scriptwriters ?? movie.screenwriters);
   const actors = formatNames(movie.actors);
   const countries = formatNames(movie.countries ?? movie.countryOfOrigin);

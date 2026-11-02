@@ -100,7 +100,6 @@ const buildCinemaScreeningEvents = (
         dateTime: screening.dateTime,
       }))
     ),
-    `${SITE_URL}/kina/${cinema.slug}`
   );
 
 export default async function CinemaLayout({

@@ -18,6 +18,13 @@ export interface IRepertoireMovie
     "id" | "slug" | "title" | "titleOriginal" | "productionYear" | "posterUrl"
   > {
   genres: Pick<IGenre, "id" | "name">[];
+  /**
+   * Set when the movie page is noindex (isMovieIndexable, e.g. a
+   * multiplex-only reissue): the card then links through UncrawledLink.
+   * One boolean per card instead of the indexable slug set, which would
+   * weigh more than the listing itself. Absent means a regular link.
+   */
+  noindex?: true;
 }
 
 /**
@@ -53,7 +60,10 @@ export interface IRepertoire {
   groups: IRepertoireGroup[];
 }
 
-const toRepertoireMovie = (movie: IMovieSummary): IRepertoireMovie => ({
+const toRepertoireMovie = (
+  movie: IMovieSummary,
+  indexableMovies: ReadonlySet<string> | null
+): IRepertoireMovie => ({
   id: movie.id,
   slug: movie.slug,
   title: movie.title,
@@ -61,12 +71,18 @@ const toRepertoireMovie = (movie: IMovieSummary): IRepertoireMovie => ({
   productionYear: movie.productionYear,
   posterUrl: movie.posterUrl,
   genres: movie.genres.map(({ id, name }) => ({ id, name })),
+  ...(indexableMovies && !indexableMovies.has(movie.slug)
+    ? { noindex: true as const }
+    : {}),
 });
 
-const buildRepertoire = (groups: IScreeningGroup[]): IRepertoire => {
+const buildRepertoire = (
+  groups: IScreeningGroup[],
+  indexableMovies: ReadonlySet<string> | null
+): IRepertoire => {
   const cities = new Map<number, IRepertoireCity>();
   const repertoireGroups = groups.map((group) => ({
-    movie: toRepertoireMovie(group.movie),
+    movie: toRepertoireMovie(group.movie, indexableMovies),
     screenings: group.screenings.map((screening): IRepertoireScreening => {
       const { city } = screening.cinema;
       if (!cities.has(city.id)) {
@@ -87,13 +103,28 @@ const buildRepertoire = (groups: IScreeningGroup[]): IRepertoire => {
 // Memoized per input array: listings pass the same groups to the filter
 // island and to the card grid, and React serializes an object shared by
 // both only once. Two separate conversions shipped every screening twice.
-const repertoireCache = new WeakMap<IScreeningGroup[], IRepertoire>();
+// The indexable set is part of the key; getIndexableSlugs is request-cached,
+// so both callers of one render pass the same Set instance.
+const repertoireCache = new WeakMap<
+  IScreeningGroup[],
+  { indexableMovies: ReadonlySet<string> | null; repertoire: IRepertoire }
+>();
 
-export const toRepertoire = (groups: IScreeningGroup[]): IRepertoire => {
+/**
+ * @param indexableMovies Movie slugs with an indexable page
+ * (IndexableSlugs.movies). Movies outside it are flagged `noindex`. Omit or
+ * pass null to link every movie (unknown list, or a client-side refetch).
+ */
+export const toRepertoire = (
+  groups: IScreeningGroup[],
+  indexableMovies: ReadonlySet<string> | null = null
+): IRepertoire => {
   const cached = repertoireCache.get(groups);
-  if (cached) return cached;
-  const repertoire = buildRepertoire(groups);
-  repertoireCache.set(groups, repertoire);
+  if (cached && cached.indexableMovies === indexableMovies) {
+    return cached.repertoire;
+  }
+  const repertoire = buildRepertoire(groups, indexableMovies);
+  repertoireCache.set(groups, { indexableMovies, repertoire });
   return repertoire;
 };
 

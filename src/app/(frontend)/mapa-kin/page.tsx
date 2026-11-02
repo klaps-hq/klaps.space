@@ -1,6 +1,10 @@
 import React from "react";
 import Link from "next/link";
-import { getCinemas, getCinemasWithCoordinates } from "@/lib/cinemas";
+import {
+  countCinemas,
+  getCinemas,
+  getCinemasWithCoordinates,
+} from "@/lib/cinemas";
 import { isChainCinema } from "@/lib/cinema-chains";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { pluralPl } from "@/lib/seo";
@@ -61,16 +65,14 @@ const CinemaMapPage = async () => {
   // The lead quotes the whole catalogue, the same numbers as /kina; the
   // map can only pin venues with coordinates (audit #10: /kina said 383
   // studio cinemas, the map 380).
-  const catalogCinemas = catalog.data.flatMap((g) =>
-    g.cinemas.map((c) => ({ ...c, cityId: g.city.id }))
-  );
-  const catalogChain = catalogCinemas.filter((c) => isChainCinema(c.name)).length;
-  const catalogOpenAir = catalogCinemas.filter(
-    (c) => !isChainCinema(c.name) && c.isOpenAir
-  ).length;
-  const catalogStudio = catalogCinemas.length - catalogChain - catalogOpenAir;
-  const catalogCities = new Set(catalogCinemas.map((c) => c.cityId)).size;
-  const unpinned = Math.max(0, catalogCinemas.length - cinemas.length);
+  const {
+    total: catalogTotal,
+    cities: catalogCities,
+    studio: catalogStudio,
+    openAir: catalogOpenAir,
+    chain: catalogChain,
+  } = countCinemas(catalog.data);
+  const unpinned = Math.max(0, catalogTotal - cinemas.length);
   const byCity = new Map<number, { slug: string; name: string; count: number }>();
   for (const cinema of independent) {
     const entry = byCity.get(cinema.city.id) ?? {
@@ -142,7 +144,9 @@ const CinemaMapPage = async () => {
               z&nbsp;seansami specjalnymi
             </>
           )}{" "}
-          w&nbsp;{catalogCities} miastach z&nbsp;całej Polski.
+          w&nbsp;{catalogCities}{" "}
+          {pluralPl(catalogCities, "mieście", "miastach", "miastach")}{" "}
+          z&nbsp;całej Polski.
           {unpinned > 0 && (
             <>
               {" "}

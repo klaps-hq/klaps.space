@@ -2,31 +2,41 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { IScreening } from "@/interfaces/IScreenings";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import {
+  IMovieScreening,
+  IMovieScreeningsPayload,
+} from "@/interfaces/IScreenings";
 import CityField from "@/app/(home)/_components/screenings/city-field";
 import AddToCalendarButton from "@/components/common/add-to-calendar-button";
 import ShareButton from "@/components/common/share-button";
 import { usePreferredCity } from "@/contexts/city-context";
 import { useNow } from "@/hooks/use-now";
 import { dropPastScreenings } from "@/lib/screening-filters";
-import { groupScreeningsByCinema } from "@/lib/screenings";
+import {
+  fromMovieScreeningsPayload,
+  groupScreeningsByCinema,
+} from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { isChainCinema } from "@/lib/cinema-chains";
 import UncrawledLink from "@/components/common/uncrawled-link";
+import TrackedCinemaLink from "@/components/common/tracked-cinema-link";
 import { formatDateLabel, cn, WARSAW_TZ } from "@/lib/utils";
 import { wallTimeToInstant } from "@/lib/warsaw-time";
+import { screeningAnchorId } from "@/lib/screening-anchor";
 import { voivodeshipLocative } from "@/lib/voivodeships";
 
 interface MovieScreeningsProps {
-  screenings: IScreening[];
+  payload: IMovieScreeningsPayload;
   movieTitle: string;
   movieSlug: string;
   movieDuration: number | null;
+  // Outbound cinema URLs keyed by cinema slug (see getCinemaOutboundUrls).
+  cinemaUrls?: Record<string, string>;
 }
 
 interface ScreeningTimeProps {
-  screening: IScreening;
+  screening: IMovieScreening;
 }
 
 const formatFullDateLabel = (dateStr: string): string => {
@@ -50,10 +60,14 @@ const formatShortDate = (dateStr: string): string =>
   });
 
 // We do not sell tickets or broker reservations, so the time is plain
-// text and never links out to a booking page.
+// text and never links out to a booking page. The id is the fragment of
+// the screening's ScreeningEvent url, so that url points at this chip.
 const ScreeningTime: React.FC<ScreeningTimeProps> = ({ screening }) => {
   return (
-    <span className="flex flex-col items-center gap-1.5 cursor-default">
+    <span
+      id={screeningAnchorId(screening.cinema.slug, screening.dateTime)}
+      className="flex flex-col items-center gap-1.5 cursor-default scroll-mt-28"
+    >
       <span className="text-2xl md:text-3xl font-semibold tabular-nums -tracking-[0.01em] text-white/80">
         {screening.time}
       </span>
@@ -65,12 +79,49 @@ const ScreeningTime: React.FC<ScreeningTimeProps> = ({ screening }) => {
 };
 
 interface CinemaRowProps {
-  screenings: IScreening[];
+  screenings: IMovieScreening[];
   movieTitle: string;
   movieSlug: string;
   movieDuration: number | null;
   activeDate: string;
+  cinemaUrl: string | undefined;
 }
+
+interface CinemaSiteActionProps {
+  href: string;
+  cinemaSlug: string;
+  cinemaName: string;
+  movieSlug: string;
+  movieTitle: string;
+  className: string;
+}
+
+// Secondary click-out next to the hour chips (which stay plain text). The
+// conversion of the whole guide: the visitor checks the screening, and books
+// it, on the cinema's own site.
+const CinemaSiteAction: React.FC<CinemaSiteActionProps> = ({
+  href,
+  cinemaSlug,
+  cinemaName,
+  movieSlug,
+  movieTitle,
+  className,
+}) => (
+  <TrackedCinemaLink
+    href={href}
+    cinemaSlug={cinemaSlug}
+    movieSlug={movieSlug}
+    placement="movie_screening"
+    aria-label={`Sprawdź seans filmu ${movieTitle} na stronie kina ${cinemaName} (otwiera się w nowej karcie)`}
+    className={cn("group", className)}
+  >
+    Na stronie kina
+    <ArrowUpRight
+      aria-hidden="true"
+      className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+    />
+  </TrackedCinemaLink>
+);
 
 // Weekday + numeric date for the share message, e.g. "czw., 12.06".
 const formatShareDate = (dateStr: string): string =>
@@ -87,6 +138,7 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
   movieSlug,
   movieDuration,
   activeDate,
+  cinemaUrl,
 }) => {
   const first = screenings[0];
   if (!first) return null;
@@ -161,6 +213,16 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
         </div>
         {/* Desktop: quiet icon actions behind a divider. */}
         <div className="hidden md:flex items-center gap-5 self-stretch border-l border-white/10 pl-7">
+          {cinemaUrl && (
+            <CinemaSiteAction
+              href={cinemaUrl}
+              cinemaSlug={first.cinema.slug}
+              cinemaName={first.cinema.name}
+              movieSlug={movieSlug}
+              movieTitle={movieTitle}
+              className="inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] uppercase tracking-[0.2em] text-white/70 hover:text-white border-b border-white/20 hover:border-white/60 pb-0.5 transition-colors"
+            />
+          )}
           <AddToCalendarButton
             title={`${movieTitle} - ${first.cinema.name}`}
             durationMinutes={movieDuration}
@@ -183,6 +245,18 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
         </div>
         {/* Mobile: right-aligned column of labeled buttons with tall touch targets. */}
         <div className="flex md:hidden flex-col items-start gap-y-2 ml-auto">
+          {cinemaUrl && (
+            // Same flat labeled style and 44px target as the other mobile
+            // actions, listed first as the primary one.
+            <CinemaSiteAction
+              href={cinemaUrl}
+              cinemaSlug={first.cinema.slug}
+              cinemaName={first.cinema.name}
+              movieSlug={movieSlug}
+              movieTitle={movieTitle}
+              className="inline-flex items-center min-h-11 gap-2 py-2 text-[10px] uppercase tracking-[0.2em] text-white hover:text-white/70 transition-colors"
+            />
+          )}
           <AddToCalendarButton
             variant="labeled"
             title={`${movieTitle} - ${first.cinema.name}`}
@@ -210,14 +284,19 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
 };
 
 const MovieScreenings: React.FC<MovieScreeningsProps> = ({
-  screenings,
+  payload,
   movieTitle,
   movieSlug,
   movieDuration,
+  cinemaUrls,
 }) => {
   const { cityId, voivodeship, locationLabel, isHydrated, cities } =
     usePreferredCity();
   const now = useNow();
+  const screenings = useMemo(
+    () => fromMovieScreeningsPayload(payload),
+    [payload],
+  );
 
   // The page is cached (ISR), so its list can include showtimes that have
   // started since; drop them once the client clock is known.
@@ -279,14 +358,37 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
   // Shared screening links carry ?date= - preselect that day when it
   // still has showtimes. Read from window (not useSearchParams) to keep
   // the statically cached page free of a Suspense boundary.
+  // A #seans-... fragment (the ScreeningEvent url) selects that
+  // screening's day as well, since only one day is rendered at a time.
+  const [pendingAnchor, setPendingAnchor] = useState<string | null>(null);
   useEffect(() => {
     const dateParam = new URLSearchParams(window.location.search).get("date");
     if (dateParam && screenings.some((s) => s.date === dateParam)) {
       setSelectedDate(dateParam);
     }
+    const hash = decodeURIComponent(window.location.hash.slice(1));
+    const target = hash.startsWith("seans-")
+      ? screenings.find(
+          (s) => screeningAnchorId(s.cinema.slug, s.dateTime) === hash,
+        )
+      : undefined;
+    if (target) {
+      setSelectedDate(target.date);
+      setPendingAnchor(hash);
+    }
     // Run once on mount - the param does not change without navigation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Scroll once the selected day has rendered the target chip. Runs after
+  // the date switch commits, so the element is in the DOM by then.
+  useEffect(() => {
+    if (!pendingAnchor) return;
+    document
+      .getElementById(pendingAnchor)
+      ?.scrollIntoView({ block: "center" });
+    setPendingAnchor(null);
+  }, [pendingAnchor, selectedDate]);
 
   if (upcomingScreenings.length === 0) {
     return (
@@ -390,6 +492,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
               movieSlug={movieSlug}
               movieDuration={movieDuration}
               activeDate={activeDate}
+              cinemaUrl={cinemaUrls?.[cinemaScreenings[0].cinema.slug]}
             />
           </li>
         ))}

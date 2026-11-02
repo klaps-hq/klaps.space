@@ -3,6 +3,7 @@ import { apiFetch } from "./client";
 import { inMonth } from "./month-stats";
 import { inPlace, pluralPl, wPrep } from "./seo";
 import { isChainCinema } from "./cinema-chains";
+import { genreLabel } from "./genre-guides";
 
 export interface ProgrammeProfileScope {
   cinemaSlug?: string;
@@ -100,8 +101,6 @@ export const joinPl = (items: string[]): string =>
     ? items.join("")
     : `${items.slice(0, -1).join(", ")} i ${items.at(-1)}`;
 
-const lower = (name: string): string => name.toLocaleLowerCase("pl");
-
 const capitalize = (text: string): string =>
   text ? `${text[0].toLocaleUpperCase("pl")}${text.slice(1)}` : text;
 
@@ -118,7 +117,7 @@ export const studioCinemas = (profile: IProgrammeProfile) =>
 export type ProfileSubject =
   | { kind: "cinema" }
   | { kind: "city"; cityLocative: string }
-  | { kind: "genre"; genreName: string }
+  | { kind: "genre"; genreGenitive: string }
   | { kind: "director"; directorName: string }
   | { kind: "movie" };
 
@@ -160,7 +159,7 @@ export const buildProfileSentences = (
   } else if (subject.kind === "genre") {
     sentences.push(
       capitalize(
-        `${since}w polskich kinach ${happened} z gatunku ${lower(subject.genreName)}: ${films} w ${venues}${cities}.`
+        `${since}w polskich kinach ${happened} ${subject.genreGenitive}: ${films} w ${venues}${cities}.`
       )
     );
   } else if (subject.kind === "movie") {
@@ -232,7 +231,7 @@ export const buildProfileSentences = (
     profile.movies >= 3
   ) {
     sentences.push(
-      `Dominujące gatunki: ${joinPl(profile.topGenres.slice(0, 3).map((g) => lower(g.name)))}.`
+      `Dominujące gatunki: ${joinPl(profile.topGenres.slice(0, 3).map((g) => genreLabel(g.slug, g.name)))}.`
     );
   }
 
