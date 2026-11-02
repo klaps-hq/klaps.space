@@ -59,11 +59,13 @@
   }
   /* Hide the native cursor only where the custom cursor actually renders
      (fine pointer + md and up). Below md the custom cursor is hidden, so the
-     native one must stay visible - including in responsive emulation. */
+     native one must stay visible - including in responsive emulation.
+     Scoped to [data-custom-cursor], which CustomCursor sets once it is live
+     (it starts on idle), so the native cursor is never hidden before. */
   @media (pointer: fine) and (min-width: 768px) {
-    *,
-    *::before,
-    *::after {
+    html[data-custom-cursor] *,
+    html[data-custom-cursor] *::before,
+    html[data-custom-cursor] *::after {
       cursor: none !important;
     }
   }
