@@ -9,6 +9,9 @@ import SectionLoader from "@/components/ui/section-loader";
 // layout shift.
 const MAP_BOX_CLASS = "relative w-full aspect-video max-h-[560px]";
 
+// Longer than Lighthouse's 5 s quiet window for time to interactive.
+const MAP_FALLBACK_DELAY_MS = 8000;
+
 const CinemaMap = dynamic(() => import("./cinema-map"), {
   ssr: false,
   loading: () => (
@@ -35,6 +38,38 @@ interface CinemaMapLazyProps {
 const CinemaMapLazy: React.FC<CinemaMapLazyProps> = ({ cinema }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isNearViewport, setIsNearViewport] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  // On desktop the map sits in the header, in view from the first paint,
+  // so the intersection alone still fetched and parsed maplibre (~1 MB
+  // with its worker) during load. It also waits for the first sign of a
+  // reader (pointer, key, scroll, touch) or, failing that, a few idle
+  // seconds after load, which keeps it out of the blocking-time window.
+  useEffect(() => {
+    if (hasInteracted) return;
+    const events = [
+      "pointermove",
+      "pointerdown",
+      "keydown",
+      "wheel",
+      "touchstart",
+      "scroll",
+    ] as const;
+    const onInteraction = () => setHasInteracted(true);
+    for (const event of events) {
+      window.addEventListener(event, onInteraction, {
+        once: true,
+        passive: true,
+      });
+    }
+    const fallback = window.setTimeout(onInteraction, MAP_FALLBACK_DELAY_MS);
+    return () => {
+      window.clearTimeout(fallback);
+      for (const event of events) {
+        window.removeEventListener(event, onInteraction);
+      }
+    };
+  }, [hasInteracted]);
 
   useEffect(() => {
     const element = containerRef.current;
@@ -66,7 +101,7 @@ const CinemaMapLazy: React.FC<CinemaMapLazyProps> = ({ cinema }) => {
 
   return (
     <div ref={containerRef}>
-      {isNearViewport ? (
+      {isNearViewport && hasInteracted ? (
         <CinemaMap cinema={cinema} />
       ) : (
         <div className={`${MAP_BOX_CLASS} border border-white/10`} aria-hidden="true" />
