@@ -52,6 +52,12 @@ export type SitemapId = (typeof SITEMAP_IDS)[number];
 export interface IndexableSlugs {
   cinemas: ReadonlySet<string>;
   cities: ReadonlySet<string>;
+  /**
+   * Movies with an upcoming or recent screening in an independent cinema,
+   * the film sitemap's list and the rule movie pages apply for noindex
+   * (isMovieIndexable).
+   */
+  movies: ReadonlySet<string>;
   /** Directors at or above the indexing threshold (the API filters them). */
   directors: ReadonlySet<string>;
   /**
@@ -64,7 +70,7 @@ export interface IndexableSlugs {
 }
 
 /**
- * Cinema and city slugs whose pages are indexable, i.e. the ones the API
+ * Slugs whose pages are indexable, i.e. the ones the API
  * advertises in the sitemap (the pages apply the same rules for noindex).
  * Hubs link only these: /kina and /miasta used to link ~450 noindex pages,
  * which Google kept crawling instead of the ones with content.
@@ -81,6 +87,7 @@ export const getIndexableSlugs = async (): Promise<IndexableSlugs | null> => {
     return {
       cinemas: new Set(entries.cinemas.map((entry) => entry.slug)),
       cities: new Set(entries.cities.map((entry) => entry.slug)),
+      movies: new Set(entries.movies.map((entry) => entry.slug)),
       directors: new Set((entries.directors ?? []).map((entry) => entry.slug)),
       genres:
         groups.length > 0

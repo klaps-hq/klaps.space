@@ -499,6 +499,7 @@ const CityPage = async ({ params }: CityPageProps) => {
           </>
         }
         items={recentScreenings}
+        indexableMovies={indexable?.movies ?? null}
       />
 
       <ProgrammeProfile

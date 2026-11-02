@@ -188,6 +188,7 @@ const OpenAirCityPage = async ({ params }: OpenAirCityPageProps) => {
         heading={<>Ostatni sezon {where}</>}
         description="Filmy pokazywane w kinach plenerowych w ostatnich 12 miesiącach, od najnowszego seansu."
         items={seasonItems}
+        indexableMovies={indexableSlugs?.movies ?? null}
       />
 
       <LinkGrid

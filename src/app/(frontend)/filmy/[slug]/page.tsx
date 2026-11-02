@@ -6,6 +6,7 @@ import {
   getScreenings,
 } from "@/lib/screenings";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
+import { hasIndependentUpcoming, isMovieIndexable } from "@/lib/indexability";
 import { SITE_URL } from "@/lib/site-config";
 import {
   BASE_OPEN_GRAPH,
@@ -68,9 +69,12 @@ export const generateMetadata = async ({
   }).catch(() => null);
   const screenings = upcoming ?? [];
   const screeningsCount = screenings.length;
-  // Only needed between screening runs; [] on failure keeps the old rule.
+  // Only needed while no independent cinema has the film coming up (the
+  // indexability rule then falls back to the 90-day window); [] on failure.
   const recentVenues =
-    upcoming?.length === 0 ? await getRecentVenues(movie.id) : [];
+    upcoming && !hasIndependentUpcoming(upcoming)
+      ? await getRecentVenues(movie.id)
+      : [];
 
   const genreNames = movie.genres.map((g) => g.name).join(", ");
   const directorNames = movie.directors?.map((d) => d.name).join(", ");
@@ -131,14 +135,15 @@ export const generateMetadata = async ({
   );
   const url = `${SITE_URL}/filmy/${movie.slug}`;
 
-  // Movies with neither upcoming nor recent screenings are thin TMDB
-  // duplicates - keep them out of the index until they have showtimes
-  // again. Recent ones stay indexed: classics play in runs, and dropping
-  // the page between runs made it fall out of the index and come back
-  // (the "Ostatnio w kinach" list is their page-specific content). Same
-  // 90-day window as cinema and city pages. Query-param duplicates are
-  // handled by the canonical URL alone.
-  const noindex = upcoming?.length === 0 && recentVenues.length === 0;
+  // Movies with neither upcoming nor recent screenings in an independent
+  // cinema are thin TMDB duplicates or multiplex-only reissues - keep them
+  // out of the index. Recent ones stay indexed: classics play in runs, and
+  // dropping the page between runs made it fall out of the index and come
+  // back (the "Ostatnio w kinach" list is their page-specific content). The
+  // rule is shared with the film sitemap and the hubs, see isMovieIndexable.
+  // Query-param duplicates are handled by the canonical URL alone.
+  const noindex =
+    upcoming !== null && !isMovieIndexable({ upcoming, recentVenues });
 
   return {
     title,
@@ -284,7 +289,10 @@ const MoviePage = async ({ params }: MoviePageProps) => {
             </h2>
           </div>
           <div className="lg:col-span-8">
-            <MovieAbout movie={movie} />
+            <MovieAbout
+              movie={movie}
+              indexableDirectors={profileIndexable?.directors ?? null}
+            />
           </div>
         </div>
       </section>
@@ -301,7 +309,10 @@ const MoviePage = async ({ params }: MoviePageProps) => {
               </p>
             </div>
             <div className="lg:col-span-8">
-              <RelatedMovies movies={relatedMovies} />
+              <RelatedMovies
+                movies={relatedMovies}
+                linkableSlugs={profileIndexable?.movies}
+              />
             </div>
           </div>
         </section>
