@@ -14,7 +14,8 @@ interface AnalyticsEvents {
 }
 
 // No-ops when gtag is missing (GA not configured, blocked, or server render).
-// Consent is handled by gtag Consent Mode, so callers never check it.
+// gtag is only defined once the visitor granted consent (AnalyticsLoader),
+// so callers never check it.
 export const trackEvent = <K extends keyof AnalyticsEvents>(
   name: K,
   params: AnalyticsEvents[K]

@@ -5,7 +5,8 @@ import { useReportWebVitals } from "next/web-vitals";
 // Reports Core Web Vitals (LCP, INP, CLS, FCP, TTFB) to GA4 as events so we
 // get real field data without depending on CrUX sampling (which needs traffic
 // the site does not yet have). Mounted only when GA is configured; it also
-// no-ops until gtag exists, so it never sends before analytics consent.
+// no-ops until gtag exists, which AnalyticsLoader defines only after
+// analytics consent.
 const WebVitalsReporter = () => {
   useReportWebVitals((metric) => {
     if (typeof window === "undefined") return;
