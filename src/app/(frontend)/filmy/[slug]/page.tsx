@@ -4,6 +4,7 @@ import {
   getMovieScreenings,
   getRecentVenues,
   getScreenings,
+  toMovieScreeningsPayload,
 } from "@/lib/screenings";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { SITE_URL } from "@/lib/site-config";
@@ -177,6 +178,9 @@ const MoviePage = async ({ params }: MoviePageProps) => {
   // Instant blurred preview baked into the cached HTML while the full-size
   // backdrop streams in; precomputed by the scraper, served by the API.
   const backdropBlurDataUrl = movie.backdropBlurDataUrl ?? null;
+  // The screenings list is a client island; it gets each venue once instead
+  // of a full cinema record on every showtime.
+  const screeningsPayload = toMovieScreeningsPayload(screenings);
 
   // Internal linking: up to 6 similar movies, taken from the screenings feed
   // rather than the catalogue. Catalogue picks were mostly movies without
@@ -217,7 +221,7 @@ const MoviePage = async ({ params }: MoviePageProps) => {
       >
         {screenings.length === 0 ? (
           <MovieScreenings
-            screenings={screenings}
+            payload={screeningsPayload}
             movieTitle={movie.title}
             movieSlug={movie.slug}
             movieDuration={movie.duration}
@@ -253,7 +257,7 @@ const MoviePage = async ({ params }: MoviePageProps) => {
             </div>
             <div className="lg:col-span-8">
               <MovieScreenings
-                screenings={screenings}
+                payload={screeningsPayload}
                 movieTitle={movie.title}
                 movieSlug={movie.slug}
                 movieDuration={movie.duration}

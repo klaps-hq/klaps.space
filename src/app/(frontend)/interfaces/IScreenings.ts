@@ -53,3 +53,35 @@ export interface IRecentVenue {
   lastScreeningDate: string;
   screeningsCount: number;
 }
+
+/** The venue fields the film page's screenings list renders. */
+export interface IMovieScreeningCinema {
+  id: number;
+  slug: string;
+  name: string;
+  street: string | null;
+  city: { id: number; slug: string; name: string };
+}
+
+/** One screening as rendered by the film page's screenings list. */
+export interface IMovieScreening {
+  id: number;
+  date: string;
+  time: string;
+  dateTime: string;
+  cinema: IMovieScreeningCinema;
+}
+
+/** [id, dateTime, date, time, cinemaId] */
+export type MovieScreeningTuple = [number, string, string, string, number];
+
+/**
+ * Film page screenings as sent to the client island: each venue once and
+ * every screening as a tuple pointing at it. The full IScreening repeated
+ * the venue and its city on every showtime, so a re-release with hundreds
+ * of showtimes shipped most of its HTML as RSC payload.
+ */
+export interface IMovieScreeningsPayload {
+  cinemas: IMovieScreeningCinema[];
+  screenings: MovieScreeningTuple[];
+}
