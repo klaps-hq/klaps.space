@@ -2,7 +2,11 @@ import React from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { getCityBySlug } from "@/lib/cities";
-import { fetchCinemas, getCinemas } from "@/lib/cinemas";
+import {
+  fetchCinemas,
+  getCinemaOutboundUrls,
+  getCinemas,
+} from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
 import {
   fetchRecentScreenings,
@@ -53,57 +57,83 @@ import RepertoireSummary from "./_components/repertoire-summary";
 const REPERTOIRE_ID = "repertuar";
 import GuideSection from "@/components/common/guide-section";
 import UncrawledLink from "@/components/common/uncrawled-link";
+import TrackedCinemaLink from "@/components/common/tracked-cinema-link";
+import { ArrowUpRight } from "lucide-react";
 
 interface CinemaCardsProps {
   cinemas: { id: number; slug: string; name: string; street: string | null }[];
   /** Venues whose page is noindex render as plain cards, without a link. */
   isLinked: (slug: string) => boolean;
+  /** Outbound cinema URLs keyed by slug (see getCinemaOutboundUrls). */
+  siteUrls: Record<string, string>;
 }
 
 const CARD_CLASS =
-  "bg-black border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1";
+  "group relative bg-black hover:bg-white/[0.04] transition-colors border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1";
+
+// The venue name stretches over the whole card (after:inset-0), so the card
+// still opens the cinema page while the outbound link sits on top of it;
+// an <a> inside a card-wide <a> would be invalid HTML.
+const STRETCHED_LINK_CLASS =
+  "after:absolute after:inset-0 after:content-[''] text-sm md:text-base font-medium uppercase -tracking-[0.01em] group-hover:text-white transition-colors";
 
 // Borders live on the cards (not the container) so lines end with the last
 // card instead of running across empty grid columns. Negative margins
 // collapse the doubled inner borders; opaque #1a1a1a (white/10 on black)
 // keeps overlaps from brightening.
-const CinemaCards: React.FC<CinemaCardsProps> = ({ cinemas, isLinked }) => (
+const CinemaCards: React.FC<CinemaCardsProps> = ({
+  cinemas,
+  isLinked,
+  siteUrls,
+}) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-px pl-px">
-    {cinemas.map((cinema) =>
-      isLinked(cinema.slug) ? (
-        <Link
-          key={cinema.id}
-          href={`/kina/${cinema.slug}`}
-          className={`group hover:bg-white/[0.04] transition-colors ${CARD_CLASS}`}
-        >
-          <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
-            {cinema.name}
-          </span>
+    {cinemas.map((cinema) => {
+      const linked = isLinked(cinema.slug);
+      const siteUrl = siteUrls[cinema.slug];
+      return (
+        <div key={cinema.id} className={CARD_CLASS}>
+          {linked ? (
+            <Link
+              href={`/kina/${cinema.slug}`}
+              className={`${STRETCHED_LINK_CLASS} text-white/65`}
+            >
+              {cinema.name}
+            </Link>
+          ) : (
+            // Noindex venue: clickable for people, no crawlable link.
+            <UncrawledLink
+              basePath="/kina"
+              slug={cinema.slug}
+              className={`cursor-pointer ${STRETCHED_LINK_CLASS} text-white/45`}
+            >
+              {cinema.name}
+            </UncrawledLink>
+          )}
           {cinema.street && (
-            <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
+            <span
+              className={`text-[10px] md:text-xs uppercase tracking-[0.22em] ${linked ? "text-white/50" : "text-white/40"}`}
+            >
               {cinema.street}
             </span>
           )}
-        </Link>
-      ) : (
-        // Noindex venue: clickable for people, no crawlable link.
-        <UncrawledLink
-          key={cinema.id}
-          basePath="/kina"
-          slug={cinema.slug}
-          className={`group cursor-pointer hover:bg-white/[0.04] transition-colors ${CARD_CLASS}`}
-        >
-          <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/45 group-hover:text-white transition-colors">
-            {cinema.name}
-          </span>
-          {cinema.street && (
-            <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/40">
-              {cinema.street}
-            </span>
+          {siteUrl && (
+            <TrackedCinemaLink
+              href={siteUrl}
+              cinemaSlug={cinema.slug}
+              placement="city_cinemas"
+              aria-label={`${cinema.name}: repertuar na stronie kina (otwiera się w nowej karcie)`}
+              className="group/site relative z-10 mt-3 w-fit inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-white/60 hover:text-white border-b border-white/20 hover:border-white/60 pb-0.5 transition-colors"
+            >
+              Na stronie kina
+              <ArrowUpRight
+                aria-hidden="true"
+                className="size-3.5 shrink-0 transition-transform group-hover/site:translate-x-0.5 group-hover/site:-translate-y-0.5"
+              />
+            </TrackedCinemaLink>
           )}
-        </UncrawledLink>
-      )
-    )}
+        </div>
+      );
+    })}
   </div>
 );
 
@@ -343,6 +373,8 @@ const CityPage = async ({ params }: CityPageProps) => {
   const cinemas = cinemaGroups
     .flatMap((g) => g.cinemas)
     .sort((a, b) => a.name.localeCompare(b.name, "pl"));
+  // Each venue card gets a click-out to the cinema's own programme.
+  const siteUrls = await getCinemaOutboundUrls(cinemas.map((c) => c.slug));
   const cinemasCount = cinemas.length;
   const cityForCopy = squashSpaces(city.nameDeclinated ?? city.name);
   const { independent: independentCinemas, chain: chainCinemas } =
@@ -432,6 +464,7 @@ const CityPage = async ({ params }: CityPageProps) => {
               <CinemaCards
                 cinemas={yearRoundCinemas}
                 isLinked={isCinemaLinked}
+                siteUrls={siteUrls}
               />
             </div>
           )}
@@ -444,6 +477,7 @@ const CityPage = async ({ params }: CityPageProps) => {
               <CinemaCards
                 cinemas={openAirCinemas}
                 isLinked={isCinemaLinked}
+                siteUrls={siteUrls}
               />
             </div>
           )}
@@ -453,7 +487,11 @@ const CityPage = async ({ params }: CityPageProps) => {
                 Seanse specjalne w&nbsp;kinach sieciowych{" "}
                 {inPlaceNbsp(cityForCopy)}
               </h2>
-              <CinemaCards cinemas={chainCinemas} isLinked={isCinemaLinked} />
+              <CinemaCards
+                cinemas={chainCinemas}
+                isLinked={isCinemaLinked}
+                siteUrls={siteUrls}
+              />
             </div>
           )}
         </section>

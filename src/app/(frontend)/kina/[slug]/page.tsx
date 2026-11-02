@@ -7,6 +7,7 @@ import {
   getCinemaBySlug,
   getCinemas,
   cinemaRepertoireDateTo,
+  cinemaOutboundUrl,
 } from "@/lib/cinemas";
 import { getGenres } from "@/lib/genres";
 import {
@@ -39,7 +40,9 @@ import { todayDigest, todayDigestPhrases } from "@/lib/live-meta";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
-import EmptyState from "@/components/common/empty-state";
+import EmptyState, {
+  EMPTY_STATE_PRIMARY_CLASS,
+} from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
 import RepertoireGrid from "@/components/common/repertoire-grid";
 import RecentRepertoire from "@/components/common/recent-repertoire";
@@ -81,10 +84,13 @@ export const generateStaticParams = async (): Promise<{ slug: string }[]> => {
 
 const MAX_DESCRIPTION_LENGTH = 160;
 
-// Shared style for the small outbound links in the cinema header (official
-// site, Filmweb): subtle until hover, with a nudging arrow.
-const CINEMA_LINK_CLASS =
-  "group inline-flex items-center gap-1 text-white/70 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5";
+// The header click-out to the cinema's own site: a bordered button, the
+// page's main action, instead of a small underlined meta link.
+const CINEMA_SITE_BUTTON_CLASS =
+  "group inline-flex items-center gap-2.5 text-[10px] md:text-xs uppercase tracking-[0.28em] text-white border border-white/25 hover:border-white hover:bg-white/[0.04] px-5 md:px-6 py-3.5 md:py-4 transition-colors";
+
+const ARROW_UP_RIGHT_CLASS =
+  "size-3.5 md:size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5";
 
 // Live repertoire counts and an example title make every cinema's
 // description unique, which improves SERP CTR and avoids the
@@ -256,12 +262,14 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
     cinema.city.nameDeclinated ?? cinema.city.name
   );
 
-  // Outbound link in the header: the cinema's own website only. A followed
-  // link with a referrer is a trust signal and lets cinemas notice
-  // klaps.space in their analytics. Filmweb is intentionally NOT shown.
-  const externalLinks = (
-    cinema.website ? [{ href: cinema.website, label: "Strona kina" }] : []
-  ) as { href: string; label: string }[];
+  // Outbound link to the cinema's own site (its repertoire page when known):
+  // the conversion of the guide. A followed link with a referrer is a trust
+  // signal and lets cinemas notice klaps.space in their analytics. Filmweb
+  // is intentionally NOT shown.
+  const siteUrl = cinemaOutboundUrl(cinema);
+  const siteLabel = cinema.details?.repertoireUrl
+    ? "Repertuar na stronie kina"
+    : "Strona kina";
 
   return (
     <>
@@ -301,27 +309,6 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                   </Link>
                   {cinema.city.voivodeship && <>, {cinema.city.voivodeship}</>}
                 </span>
-                {externalLinks.map((link) => (
-                  <React.Fragment key={link.href}>
-                    <span aria-hidden="true">·</span>
-                    {/* Plain <a> (not next/link) for an outbound absolute URL:
-                        the Link component adds prefetch/onClick handling meant
-                        for internal routes. rel keeps "noopener" only - the
-                        referrer is intentional so cinemas see klaps.space in
-                        their analytics (see externalLinks comment above). */}
-                    <TrackedCinemaLink
-                      href={link.href}
-                      cinemaSlug={cinema.slug}
-                      className={CINEMA_LINK_CLASS}
-                    >
-                      {link.label}
-                      <ArrowUpRight
-                        aria-hidden="true"
-                        className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                      />
-                    </TrackedCinemaLink>
-                  </React.Fragment>
-                ))}
               </span>
               <SaveCinemaButton
                 className="mt-2"
@@ -333,6 +320,21 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                 }}
               />
             </div>
+            {siteUrl && (
+              <div className="mt-6 md:mt-7">
+                {/* Plain <a> (not next/link) for an outbound absolute URL,
+                    see TrackedCinemaLink. */}
+                <TrackedCinemaLink
+                  href={siteUrl}
+                  cinemaSlug={cinema.slug}
+                  placement="cinema_header"
+                  className={CINEMA_SITE_BUTTON_CLASS}
+                >
+                  {siteLabel}
+                  <ArrowUpRight aria-hidden="true" className={ARROW_UP_RIGHT_CLASS} />
+                </TrackedCinemaLink>
+              </div>
+            )}
             <NextScreening
               className="mt-8 md:mt-10 max-w-[60ch]"
               items={cinemaNextScreeningItems(screenings)}
@@ -405,6 +407,21 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                 // Wording varies by slug so empty venues do not share one
                 // sentence (see emptyCinemaSentence).
                 description={emptyCinemaSentence(cinema.name, cinema.slug)}
+                // An empty venue page must not be a dead end: the cinema's
+                // own programme first, then the other venues in the city.
+                primaryAction={
+                  siteUrl && (
+                    <TrackedCinemaLink
+                      href={siteUrl}
+                      cinemaSlug={cinema.slug}
+                      placement="cinema_empty"
+                      className={EMPTY_STATE_PRIMARY_CLASS}
+                    >
+                      {siteLabel}
+                      <ArrowUpRight aria-hidden="true" className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </TrackedCinemaLink>
+                  )
+                }
                 cta={{
                   href: `/miasta/${cinema.city.slug}`,
                   label: `Inne kina ${inPlace(cityForCopy)}`,
