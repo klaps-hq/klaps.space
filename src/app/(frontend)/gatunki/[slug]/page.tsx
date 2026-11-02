@@ -19,11 +19,7 @@ import RepertoireGrid from "@/components/common/repertoire-grid";
 import GuideSection from "@/components/common/guide-section";
 import ListingFaq from "@/components/common/listing-faq";
 import ContentSection from "@/components/common/content-section";
-import {
-  genreSearchName,
-  getGenreForms,
-  getGenreGuide,
-} from "@/lib/genre-guides";
+import { getGenreForms, getGenreGuide } from "@/lib/genre-guides";
 import Footer from "../../(home)/_components/footer";
 
 // ISR: cached HTML revalidated every 5 minutes. The repertoire filters
