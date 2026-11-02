@@ -33,7 +33,7 @@ const Genres = async () => {
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
           Od dramatów po anime, od dokumentów po kino eksperymentalne. Wybierz
           gatunek i&nbsp;zobacz wszystkie filmy z&nbsp;tej kategorii
-          pokazywane w&nbsp;polskich kinach studyjnych.
+          pokazywane na&nbsp;seansach specjalnych w&nbsp;polskich kinach.
         </p>
       </div>
 

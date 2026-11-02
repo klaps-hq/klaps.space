@@ -7,6 +7,7 @@ import CityField from "./city-field";
 import DateField from "./date-field";
 import GenreField from "./genre-field";
 import MyCinemasField from "./my-cinemas-field";
+import StudioOnlyField from "./studio-only-field";
 
 interface FilterBarProps {
   genres: IGenre[];
@@ -14,6 +15,8 @@ interface FilterBarProps {
   hideGenres?: boolean;
   // "Moje kina" chip; only /seanse can serve that view.
   showMyCinemas?: boolean;
+  // "Tylko kina studyjne" chip; pointless on a single cinema's page.
+  hideStudioOnly?: boolean;
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({
@@ -21,11 +24,13 @@ const FilterBar: React.FC<FilterBarProps> = ({
   hideCity = false,
   hideGenres = false,
   showMyCinemas = false,
+  hideStudioOnly = false,
 }) => (
   <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
     <SearchField className="md:w-72 lg:w-80" />
     <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-3 md:ml-auto">
       {showMyCinemas && <MyCinemasField className="w-full md:w-auto" />}
+      {!hideStudioOnly && <StudioOnlyField className="w-full md:w-auto" />}
       <DateField className="w-full md:w-auto" />
       {!hideGenres && <GenreField genres={genres} className="w-full md:w-auto" />}
       {!hideCity && <CityField className="w-full md:w-auto" />}

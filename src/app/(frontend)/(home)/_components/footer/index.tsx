@@ -75,9 +75,9 @@ const Footer: React.FC = () => {
           <SocialLinks className="shrink-0" />
           <p className="max-w-[64ch] text-xs md:text-sm text-white/50 leading-relaxed">
             Klaps to ogólnopolski przewodnik po seansach specjalnych, klasyce
-            filmowej i&nbsp;retrospektywach w&nbsp;kinach studyjnych. Repertuar,
-            filmy i&nbsp;kina w&nbsp;jednym miejscu, bezpłatnie i&nbsp;bez
-            rejestracji.
+            filmowej i&nbsp;retrospektywach w&nbsp;kinach studyjnych, uzupełniony
+            o&nbsp;wybrane pokazy w&nbsp;kinach sieciowych. Repertuar, filmy
+            i&nbsp;kina w&nbsp;jednym miejscu, bezpłatnie i&nbsp;bez rejestracji.
           </p>
         </div>
 

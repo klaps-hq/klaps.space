@@ -24,7 +24,7 @@ const buildGenresJsonLd = (genres: readonly IGenre[]) => ({
   name: "Gatunki filmowe",
   url: `${SITE_URL}/gatunki`,
   description:
-    "Gatunki filmowe w seansach specjalnych kin studyjnych w Polsce.",
+    "Gatunki filmowe na seansach specjalnych w kinach w Polsce.",
   mainEntity: {
     "@type": "ItemList",
     numberOfItems: genres.length,
@@ -68,8 +68,8 @@ const GenresPage = async () => {
           </PageHeadingMuted>
         </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
-          Pełna lista gatunków filmowych dostępnych w&nbsp;polskich kinach
-          studyjnych. Klasyka, retrospektywy, dokumenty, kino autorskie, anime
+          Pełna lista gatunków filmowych granych na&nbsp;seansach specjalnych
+          w&nbsp;polskich kinach. Klasyka, retrospektywy, dokumenty, kino autorskie, anime
           i&nbsp;eksperymenty. Wybierz kategorię i&nbsp;zobacz wszystkie
           seanse z&nbsp;tego gatunku.
         </p>

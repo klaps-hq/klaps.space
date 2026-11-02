@@ -14,6 +14,7 @@ import {
 } from "@/lib/screenings";
 import { getGenres } from "@/lib/genres";
 import { toRepertoire } from "@/lib/client-screenings";
+import { filterScreeningGroups } from "@/lib/screening-filters";
 import { getPreferredLocation } from "@/lib/get-preferred-city";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { PaginatedResponse } from "@/interfaces/IMovies";
@@ -40,6 +41,7 @@ interface SearchParams {
   dateFrom?: string;
   dateTo?: string;
   search?: string;
+  studyjne?: string;
   page?: string;
 }
 
@@ -52,14 +54,14 @@ export const generateMetadata = async ({
 }: ScreeningsPageProps): Promise<Metadata> => {
   const queryParams = await searchParams;
   const description =
-    "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce. Filtruj po mieście, dacie i gatunku.";
+    "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych i wybranych kinach sieciowych w całej Polsce. Filtruj po mieście, dacie i gatunku.";
   const url = `${SITE_URL}/seanse`;
 
   // Filtered views are duplicates of the base listing: noindex.
   // Unknown params (utm_* etc.) fall through to the canonical below.
   if (hasFilterParams(queryParams)) {
     return {
-      title: "Seanse specjalne w kinach studyjnych - repertuar",
+      title: "Seanse specjalne i klasyka w kinach - repertuar",
       description,
       ...NOINDEX_FOLLOW,
     };
@@ -79,7 +81,7 @@ export const generateMetadata = async ({
   // Out of range renders a 404 (see ScreeningsPage); say so here too, so
   // the response never carries indexable metadata for a page that is gone.
   if (requestedPage > totalPages) {
-    return { title: "Seanse specjalne w kinach studyjnych - repertuar", description, ...NOINDEX_FOLLOW };
+    return { title: "Seanse specjalne i klasyka w kinach - repertuar", description, ...NOINDEX_FOLLOW };
   }
 
   const currentPage = requestedPage;
@@ -89,7 +91,7 @@ export const generateMetadata = async ({
   const title =
     currentPage >= 2
       ? `Seanse specjalne - repertuar (strona ${currentPage})`
-      : "Seanse specjalne w kinach studyjnych - repertuar";
+      : "Seanse specjalne i klasyka w kinach - repertuar";
   const { canonical, pagination } = buildPaginationMeta(
     url,
     currentPage,
@@ -156,7 +158,7 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
     search: params.search,
   };
 
-  const allScreenings =
+  const fetchedScreenings =
     genreIds.length > 1
       ? await Promise.all(
           genreIds.map((id) =>
@@ -169,6 +171,10 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
           ...sharedFilters,
           genreId: genreIds[0],
         }).then(unwrapResponse);
+  const allScreenings =
+    params.studyjne === "1"
+      ? filterScreeningGroups(fetchedScreenings, { independentOnly: true })
+      : fetchedScreenings;
 
   const totalPages = Math.max(
     1,
@@ -239,13 +245,13 @@ const buildScreeningsJsonLd = (
   name:
     currentPage >= 2
       ? `Seanse specjalne - repertuar (strona ${currentPage})`
-      : "Seanse specjalne w kinach studyjnych - repertuar",
+      : "Seanse specjalne i klasyka w kinach - repertuar",
   url:
     currentPage >= 2
       ? `${SITE_URL}/seanse?page=${currentPage}`
       : `${SITE_URL}/seanse`,
   description:
-    "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych w całej Polsce.",
+    "Aktualna lista seansów specjalnych, retrospektyw i klasyki filmowej w kinach studyjnych i wybranych kinach sieciowych w całej Polsce.",
   dateModified: dateModified.toISOString(),
   mainEntity: {
     "@type": "ItemList",
@@ -292,14 +298,14 @@ const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
 
       <header className="px-6 md:px-12 lg:px-16 pt-6 md:pt-10 pb-10 md:pb-14">
         <PageHeading variant="editorial">
-          Repertuar kin studyjnych.
+          Repertuar seansów specjalnych.
           <PageHeadingMuted>
             Klasyka i&nbsp;pokazy specjalne w&nbsp;całej Polsce.
           </PageHeadingMuted>
         </PageHeading>
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
-          Aktualny program niezależnych kin studyjnych w&nbsp;Polsce.
-          Retrospektywy, klasyka kina autorskiego, pokazy z&nbsp;dyskusją
+          Aktualny program kin studyjnych w&nbsp;Polsce, uzupełniony
+          o&nbsp;wybrane pokazy w&nbsp;kinach sieciowych. Retrospektywy, klasyka kina autorskiego, pokazy z&nbsp;dyskusją
           i&nbsp;cykle tematyczne. Filtruj seanse po mieście, dacie
           i&nbsp;gatunku poniżej albo przeglądaj repertuar według{" "}
           <Link
@@ -326,7 +332,7 @@ const ScreeningsPage = async ({ searchParams }: ScreeningsPageProps) => {
       {/* The listing had no heading of its own, which left the page without
           a single H2. */}
       <h2 className="px-6 md:px-12 lg:px-16 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] text-white font-medium max-w-[26ch]">
-        Najbliższe seanse w&nbsp;kinach studyjnych
+        Najbliższe seanse specjalne
       </h2>
 
       {/* No Suspense boundary: a streamed boundary put the cards in a

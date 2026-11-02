@@ -1,5 +1,9 @@
 import { IScreening, IScreeningGroup } from "@/interfaces/IScreenings";
+import { isChainCinema } from "./cinema-chains";
 import { wallTimeToInstant } from "./warsaw-time";
+
+/** URL param of the "Tylko kina studyjne" switch (value "1"). */
+export const STUDIO_ONLY_PARAM = "studyjne";
 
 export interface ScreeningGroupFilters {
   genreIds?: number[];
@@ -8,6 +12,8 @@ export interface ScreeningGroupFilters {
   dateFrom?: string | null;
   dateTo?: string | null;
   search?: string | null;
+  /** Drops screenings in chain multiplexes. */
+  independentOnly?: boolean;
 }
 
 export const parseGenreIdsParam = (raw: string | null): number[] => {
@@ -49,12 +55,13 @@ export const filterScreeningGroups = (
 ): IScreeningGroup[] => {
   const genreIds = filters.genreIds ?? [];
   const search = filters.search?.trim().toLowerCase() ?? "";
-  const { cityId, voivodeship, dateFrom, dateTo } = filters;
+  const { cityId, voivodeship, dateFrom, dateTo, independentOnly } = filters;
   const narrows =
     cityId != null ||
     voivodeship != null ||
     Boolean(dateFrom) ||
-    Boolean(dateTo);
+    Boolean(dateTo) ||
+    Boolean(independentOnly);
 
   return groups
     .filter((group) => {
@@ -82,7 +89,8 @@ export const filterScreeningGroups = (
           (voivodeship == null ||
             s.cinema.city.voivodeship === voivodeship) &&
           (!dateFrom || s.date >= dateFrom) &&
-          (!dateTo || s.date <= dateTo)
+          (!dateTo || s.date <= dateTo) &&
+          (!independentOnly || !isChainCinema(s.cinema.name))
       );
       return rebuildGroup(group, screenings);
     })

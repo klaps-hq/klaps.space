@@ -90,8 +90,8 @@ export const genreFallbackIntro = (
   const movieCount = groups.length;
   if (movieCount === 0) {
     return bindOrphans(
-      `Filmy z gatunku ${genreNameLower} pokazywane w polskich kinach ` +
-        `studyjnych. Filtruj po mieście, dacie lub frazie poniżej.`
+      `Filmy z gatunku ${genreNameLower} pokazywane na seansach ` +
+        `specjalnych w polskich kinach. Filtruj po mieście, dacie lub frazie poniżej.`
     );
   }
 
@@ -100,7 +100,7 @@ export const genreFallbackIntro = (
   const totalCities = totalCityCount(groups);
 
   const lead =
-    `W repertuarze polskich kin studyjnych znajdziesz ${movieCount} ` +
+    `Na seansach specjalnych w polskich kinach znajdziesz ${movieCount} ` +
     `${pluralPl(movieCount, "film", "filmy", "filmów")} z gatunku ` +
     genreNameLower;
   const first =
@@ -225,7 +225,7 @@ export const directorFallbackIntro = (
   // genitive the API has no declension data for, so phrase around it.
   if (moviesCount === 0) {
     return bindOrphans(
-      `${name}: filmografia i seanse w polskich kinach studyjnych. ` +
+      `${name}: filmografia i seanse specjalne w polskich kinach. ` +
         `Sprawdź filmografię oraz aktualny repertuar seansów specjalnych, ` +
         `retrospektyw i klasyki filmowej.`
     );
@@ -236,7 +236,7 @@ export const directorFallbackIntro = (
     .map((movie) => `${movie.title} (${movie.productionYear})`);
 
   const lead =
-    `${name} ma w repertuarze polskich kin studyjnych ${moviesCount} ` +
+    `${name} ma na seansach specjalnych w polskich kinach ${moviesCount} ` +
     `${pluralPl(moviesCount, "film", "filmy", "filmów")}`;
   const first =
     titles.length > 0 ? `${lead}, w tym ${joinPl(titles)}.` : `${lead}.`;
@@ -292,7 +292,7 @@ export const classicFallbackIntro = (
   if (movies === 0) {
     return bindOrphans(
       `Klasyka w kinach${when}: filmy sprzed co najmniej ${CLASSIC_MIN_AGE_YEARS} lat na dużym ` +
-        `ekranie, w kinach studyjnych w całej Polsce.`
+        `ekranie, w kinach w całej Polsce.`
     );
   }
 

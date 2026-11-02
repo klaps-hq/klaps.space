@@ -6,7 +6,7 @@ import Footer from "@/app/(home)/_components/footer";
 export const metadata: Metadata = {
   title: "404 - Nie znaleziono",
   description:
-    "Strona, której szukasz, nie istnieje. Wróć do repertuaru kin studyjnych.",
+    "Strona, której szukasz, nie istnieje. Wróć do repertuaru seansów specjalnych.",
   robots: {
     index: false,
     follow: false,

@@ -105,6 +105,8 @@ const SCREENING_FILTER_PARAM_KEYS = [
   "search",
   // "Moje kina": the visitor's starred cinemas, a per-browser view.
   "moje",
+  // "Tylko kina studyjne": chain multiplexes hidden.
+  "studyjne",
 ] as const;
 
 const isNonEmptyParam = (value: unknown): boolean =>
@@ -224,8 +226,7 @@ export const moviePageTitle = (
         `${subject} w kinie`,
       ]
     : [
-        `${subject} - gdzie grano w kinach studyjnych`,
-        `${subject} w kinach studyjnych`,
+        `${subject} - gdzie grano w kinach`,
         `${subject} w kinie`,
       ];
   return candidates.find((text) => text.length <= budget) ?? subject;

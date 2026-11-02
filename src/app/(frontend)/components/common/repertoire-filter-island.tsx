@@ -4,7 +4,7 @@ import React, { useLayoutEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { IGenre } from "@/interfaces/IMovies";
 import { usePreferredCity } from "@/contexts/city-context";
-import { parseGenreIdsParam } from "@/lib/screening-filters";
+import { parseGenreIdsParam, STUDIO_ONLY_PARAM } from "@/lib/screening-filters";
 import { filterRepertoire, IRepertoire } from "@/lib/client-screenings";
 import { isVoivodeship } from "@/lib/voivodeships";
 import { clearFilterPending } from "@/lib/filter-pending";
@@ -15,6 +15,7 @@ interface RepertoireFilterIslandProps {
   genres: IGenre[];
   hideCity?: boolean;
   hideGenres?: boolean;
+  hideStudioOnly?: boolean;
   // Listing pages that span the whole country (genres) also narrow by the
   // city stored in the visitor's preference; per-city and per-cinema pages
   // are already scoped, so they leave this off.
@@ -35,6 +36,7 @@ const RepertoireFilterIsland: React.FC<RepertoireFilterIslandProps> = ({
   genres,
   hideCity = false,
   hideGenres = false,
+  hideStudioOnly = false,
   usePreferredLocation = false,
   onResult,
 }) => {
@@ -49,6 +51,7 @@ const RepertoireFilterIsland: React.FC<RepertoireFilterIslandProps> = ({
   const dateFrom = searchParams.get("dateFrom");
   const dateTo = searchParams.get("dateTo");
   const search = searchParams.get("search");
+  const independentOnly = searchParams.get(STUDIO_ONLY_PARAM) === "1";
 
   // An explicit ?city= / ?voivodeship= deep link wins over the stored
   // preference, with city taking priority over voivodeship.
@@ -76,6 +79,7 @@ const RepertoireFilterIsland: React.FC<RepertoireFilterIslandProps> = ({
     Boolean(dateFrom) ||
     Boolean(dateTo) ||
     Boolean(search) ||
+    independentOnly ||
     cityId !== null ||
     voivodeship !== null;
 
@@ -101,6 +105,7 @@ const RepertoireFilterIsland: React.FC<RepertoireFilterIslandProps> = ({
         dateFrom,
         dateTo,
         search,
+        independentOnly,
       })
     );
   }, [
@@ -109,6 +114,7 @@ const RepertoireFilterIsland: React.FC<RepertoireFilterIslandProps> = ({
     dateFrom,
     dateTo,
     search,
+    independentOnly,
     cityId,
     voivodeship,
     hasFilter,
@@ -117,7 +123,14 @@ const RepertoireFilterIsland: React.FC<RepertoireFilterIslandProps> = ({
     onResult,
   ]);
 
-  return <FilterBar genres={genres} hideCity={hideCity} hideGenres={hideGenres} />;
+  return (
+    <FilterBar
+      genres={genres}
+      hideCity={hideCity}
+      hideGenres={hideGenres}
+      hideStudioOnly={hideStudioOnly}
+    />
+  );
 };
 
 export default RepertoireFilterIsland;

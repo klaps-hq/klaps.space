@@ -150,6 +150,7 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
             {first.cinema.city.name}
           </Link>
           {first.cinema.street ? ` · ${first.cinema.street}` : ""}
+          {isChainCinema(first.cinema.name) ? " · kino sieciowe" : ""}
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 md:justify-end md:gap-x-7 shrink-0">
@@ -296,7 +297,7 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
           </p>
           <p className="text-sm md:text-base text-white/50 leading-relaxed max-w-[52ch]">
             Repertuar aktualizujemy regularnie, zajrzyj ponownie za kilka dni
-            albo sprawdź, co innego grają kina studyjne.
+            albo sprawdź, co innego jest w&nbsp;repertuarze.
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">

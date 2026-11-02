@@ -78,7 +78,7 @@ const ScreeningsEmptyState: React.FC<ScreeningsEmptyStateProps> = ({
       title="Chwilowa przerwa."
       description={
         <>
-          Repertuar jest w&nbsp;trakcie aktualizacji. Kina studyjne dodają
+          Repertuar jest w&nbsp;trakcie aktualizacji. Kina dodają
           seanse na bieżąco, zajrzyj ponownie wkrótce.
         </>
       }
