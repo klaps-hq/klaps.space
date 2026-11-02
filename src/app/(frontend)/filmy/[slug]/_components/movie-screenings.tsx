@@ -16,6 +16,7 @@ import { isChainCinema } from "@/lib/cinema-chains";
 import UncrawledLink from "@/components/common/uncrawled-link";
 import { formatDateLabel, cn, WARSAW_TZ } from "@/lib/utils";
 import { wallTimeToInstant } from "@/lib/warsaw-time";
+import { screeningAnchorId } from "@/lib/screening-anchor";
 import { voivodeshipLocative } from "@/lib/voivodeships";
 
 interface MovieScreeningsProps {
@@ -50,10 +51,14 @@ const formatShortDate = (dateStr: string): string =>
   });
 
 // We do not sell tickets or broker reservations, so the time is plain
-// text and never links out to a booking page.
+// text and never links out to a booking page. The id is the fragment of
+// the screening's ScreeningEvent url, so that url points at this chip.
 const ScreeningTime: React.FC<ScreeningTimeProps> = ({ screening }) => {
   return (
-    <span className="flex flex-col items-center gap-1.5 cursor-default">
+    <span
+      id={screeningAnchorId(screening.cinema.slug, screening.dateTime)}
+      className="flex flex-col items-center gap-1.5 cursor-default scroll-mt-28"
+    >
       <span className="text-2xl md:text-3xl font-semibold tabular-nums -tracking-[0.01em] text-white/80">
         {screening.time}
       </span>
@@ -279,14 +284,37 @@ const MovieScreenings: React.FC<MovieScreeningsProps> = ({
   // Shared screening links carry ?date= - preselect that day when it
   // still has showtimes. Read from window (not useSearchParams) to keep
   // the statically cached page free of a Suspense boundary.
+  // A #seans-... fragment (the ScreeningEvent url) selects that
+  // screening's day as well, since only one day is rendered at a time.
+  const [pendingAnchor, setPendingAnchor] = useState<string | null>(null);
   useEffect(() => {
     const dateParam = new URLSearchParams(window.location.search).get("date");
     if (dateParam && screenings.some((s) => s.date === dateParam)) {
       setSelectedDate(dateParam);
     }
+    const hash = decodeURIComponent(window.location.hash.slice(1));
+    const target = hash.startsWith("seans-")
+      ? screenings.find(
+          (s) => screeningAnchorId(s.cinema.slug, s.dateTime) === hash,
+        )
+      : undefined;
+    if (target) {
+      setSelectedDate(target.date);
+      setPendingAnchor(hash);
+    }
     // Run once on mount - the param does not change without navigation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Scroll once the selected day has rendered the target chip. Runs after
+  // the date switch commits, so the element is in the DOM by then.
+  useEffect(() => {
+    if (!pendingAnchor) return;
+    document
+      .getElementById(pendingAnchor)
+      ?.scrollIntoView({ block: "center" });
+    setPendingAnchor(null);
+  }, [pendingAnchor, selectedDate]);
 
   if (upcomingScreenings.length === 0) {
     return (

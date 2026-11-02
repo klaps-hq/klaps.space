@@ -47,6 +47,8 @@ const HomePage = async () => {
       ? {
           "@context": "https://schema.org",
           "@type": "ItemList",
+          name: "Seanse specjalne w kinach studyjnych",
+          numberOfItems: homeScreenings.screenings.length,
           itemListElement: homeScreenings.screenings.map((group, index) => ({
             "@type": "ListItem",
             position: index + 1,
