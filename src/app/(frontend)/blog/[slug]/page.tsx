@@ -239,6 +239,8 @@ const PostPage = async ({ params }: PostPageProps) => {
                   alt={cover.alt}
                   fill
                   priority
+                  // priority alone does not emit fetchpriority="high".
+                  fetchPriority="high"
                   sizes="(max-width: 1024px) 100vw, 896px"
                   className="object-cover"
                 />

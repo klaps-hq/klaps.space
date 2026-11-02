@@ -69,7 +69,9 @@ const HeroFallback: React.FC = () => (
       <HeroNav />
       <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 lg:p-16">
         <div className="flex flex-col gap-6 max-w-4xl">
-          <h1 className="kx-fade-up text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[1.15]">
+          {/* kx-slide-up, not kx-fade-up: this heading is the LCP
+              candidate, so it must not start at opacity 0. */}
+          <h1 className="kx-slide-up text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-white leading-[1.15]">
             Seanse specjalne i stare filmy w kinach studyjnych w Polsce
           </h1>
           <div
@@ -246,8 +248,10 @@ const Hero: React.FC<HeroProps> = ({
             </div>
 
             <div className="flex flex-col gap-5 md:w-xl md:shrink-0">
+              {/* The largest text block in the hero and an LCP candidate:
+                  slide only, never start at opacity 0. */}
               <p
-                className="kx-fade-up text-base md:text-lg text-white/85 font-light line-clamp-4"
+                className="kx-slide-up text-base md:text-lg text-white/85 font-light line-clamp-4"
                 style={{ animationDelay: "300ms" }}
               >
                 {screening.movie.description}
