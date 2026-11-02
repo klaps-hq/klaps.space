@@ -18,6 +18,7 @@ import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import RepertoireGrid from "@/components/common/repertoire-grid";
 import GuideSection from "@/components/common/guide-section";
 import ListingFaq from "@/components/common/listing-faq";
+import ContentSection from "@/components/common/content-section";
 import { genreSearchName, getGenreGuide } from "@/lib/genre-guides";
 import Footer from "../../(home)/_components/footer";
 
@@ -225,14 +226,12 @@ const GenrePage = async ({ params }: GenrePageProps) => {
       />
 
       {relatedGenres.length > 0 && (
-        <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
-          <div className="mb-8 md:mb-10 flex items-end justify-between gap-6 flex-wrap">
-            <h2 className="text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
-              Inne gatunki
-            </h2>
+        <ContentSection
+          heading="Inne gatunki"
+          aside={
             <Link
               href="/gatunki"
-              className="group inline-flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.28em] text-white/55 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
+              className="group inline-flex items-center gap-2 self-start text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-white/55 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
             >
               Wszystkie gatunki
               <ArrowRight
@@ -240,21 +239,21 @@ const GenrePage = async ({ params }: GenrePageProps) => {
                 className="size-3.5 shrink-0 transition-transform group-hover:translate-x-1"
               />
             </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 border-t border-l border-white/10">
+          }
+        >
+          <ul className="flex flex-wrap gap-2">
             {relatedGenres.map((item) => (
-              <Link
-                key={item.id}
-                href={`/gatunki/${item.slug}`}
-                className="group bg-black hover:bg-white/[0.04] transition-colors border-r border-b border-white/10 px-4 md:px-5 py-5 md:py-6 flex items-center"
-              >
-                <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
+              <li key={item.id}>
+                <Link
+                  href={`/gatunki/${item.slug}`}
+                  className="inline-flex items-center rounded-full border border-white/15 px-4 py-2 text-sm text-white/75 hover:text-white hover:border-white/50 transition-colors"
+                >
                   {item.name}
-                </span>
-              </Link>
+                </Link>
+              </li>
             ))}
-          </div>
-        </section>
+          </ul>
+        </ContentSection>
       )}
 
       <Footer />

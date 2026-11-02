@@ -32,6 +32,7 @@ import RelatedMovies from "./_components/related-movies";
 import { movieNextScreeningItems } from "@/lib/next-screening-items";
 import { pickRelatedMovies } from "@/lib/related-movies";
 import { getProgrammeProfile } from "@/lib/programme-profile";
+import ContentSection from "@/components/common/content-section";
 import ProgrammeProfile from "@/components/common/programme-profile";
 
 // ISR: cached HTML revalidated every 5 minutes. Reading cookies or
@@ -276,35 +277,17 @@ const MoviePage = async ({ params }: MoviePageProps) => {
         indexable={profileIndexable}
       />
 
-      <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-16 md:pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
-          <div className="lg:col-span-4">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white">
-              O filmie
-            </h2>
-          </div>
-          <div className="lg:col-span-8">
-            <MovieAbout movie={movie} />
-          </div>
-        </div>
-      </section>
+      <ContentSection heading="O filmie">
+        <MovieAbout movie={movie} />
+      </ContentSection>
 
       {relatedMovies.length > 0 && (
-        <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-16 md:pb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
-            <div className="lg:col-span-4">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white">
-                Podobne filmy
-              </h2>
-              <p className="mt-4 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
-                Gatunek, epoka i miasta, teraz w kinach
-              </p>
-            </div>
-            <div className="lg:col-span-8">
-              <RelatedMovies movies={relatedMovies} />
-            </div>
-          </div>
-        </section>
+        <ContentSection
+          heading="Podobne filmy"
+          lead="Gatunek, epoka i miasta, teraz w kinach."
+        >
+          <RelatedMovies movies={relatedMovies} />
+        </ContentSection>
       )}
 
       <Footer />
