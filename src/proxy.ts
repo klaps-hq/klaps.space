@@ -40,6 +40,7 @@ const FILTER_PARAM_KEYS = [
   "dateTo",
   "search",
   "moje",
+  "studyjne",
 ];
 
 const hasFilterParam = (search: string): boolean => {

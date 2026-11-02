@@ -69,7 +69,7 @@ export const generateMetadata = async ({
   const guide = getGenreGuide(genre.slug);
   const title = guide
     ? `${genreSearchName(genre.slug, genre.name)} w kinie: klasyka i seanse specjalne`
-    : `${genre.name} - filmy w kinach studyjnych`;
+    : `${genre.name} - seanse specjalne w kinach`;
   const description =
     moviesCount > 0
       ? `${moviesCount} ${pluralPl(moviesCount, "film", "filmy", "filmów")} i ${screeningsCount} ${pluralPl(screeningsCount, "nadchodzący seans", "nadchodzące seanse", "nadchodzących seansów")} z gatunku ${genreLower} w kinach w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy - ${genreLower} na dużym ekranie.`
@@ -77,7 +77,7 @@ export const generateMetadata = async ({
         // so it is clamped to snippet length instead of cut by Google.
         guide?.intro
         ? clampText(guide.intro, 160)
-        : `Filmy z gatunku ${genreLower} dostępne w kinach studyjnych w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy.`;
+        : `Filmy z gatunku ${genreLower} dostępne w kinach w Polsce. Seanse specjalne, klasyka filmowa i retrospektywy.`;
   const url = `${SITE_URL}/gatunki/${genre.slug}`;
 
   // A genre nobody is screening right now renders an empty grid; that is

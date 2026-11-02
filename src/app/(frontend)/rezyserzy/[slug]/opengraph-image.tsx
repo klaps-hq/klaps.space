@@ -17,7 +17,7 @@ export default async function OgImage({ params }: OgImageProps) {
   return buildOgImage({
     eyebrow: "Reżyser",
     title: director.name,
-    subtitle: "Filmy i seanse w kinach studyjnych",
+    subtitle: "Filmy i seanse specjalne w kinach",
     posterUrl: tmdbPhotoSrc(director.photoUrl, "w500"),
   });
 }

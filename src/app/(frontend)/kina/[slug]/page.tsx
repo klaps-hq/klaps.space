@@ -367,6 +367,7 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
         screenings={screenings}
         genres={allGenres}
         hideCity
+        hideStudioOnly
         className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-8 md:pt-12 pb-20 md:pb-28"
         heading={
           <h2 className="mb-6 md:mb-8 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">

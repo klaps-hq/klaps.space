@@ -60,7 +60,7 @@ export async function GET() {
 
 > ${SITE_DESCRIPTION}
 
-Klaps to ogólnopolski przewodnik po seansach specjalnych w kinach studyjnych: klasyka filmowa, retrospektywy, pokazy specjalne i stare filmy na dużym ekranie. Serwis agreguje aktualny repertuar kin studyjnych w całej Polsce i kieruje do oficjalnych stron kin. Dane filmowe dostarcza TMDB.
+Klaps to ogólnopolski przewodnik po seansach specjalnych w kinach studyjnych: klasyka filmowa, retrospektywy, pokazy specjalne i stare filmy na dużym ekranie. Serwis agreguje aktualny repertuar kin studyjnych w całej Polsce, uzupełniony o wybrane pokazy w kinach sieciowych (oznaczone jako kino sieciowe), i kieruje do oficjalnych stron kin. Dane filmowe dostarcza TMDB.
 
 ## Główne sekcje
 

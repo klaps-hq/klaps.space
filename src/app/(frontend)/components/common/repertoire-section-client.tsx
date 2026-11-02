@@ -24,6 +24,7 @@ export interface RepertoireSectionClientProps {
   emptyState: React.ReactNode;
   hideCity?: boolean;
   hideGenres?: boolean;
+  hideStudioOnly?: boolean;
   usePreferredLocation?: boolean;
   className?: string;
   // Server-rendered default grid, passed as children so it lives in the
@@ -38,6 +39,7 @@ const RepertoireSectionInner: React.FC<RepertoireSectionClientProps> = ({
   emptyState,
   hideCity,
   hideGenres,
+  hideStudioOnly,
   usePreferredLocation,
   className,
   children,
@@ -61,6 +63,7 @@ const RepertoireSectionInner: React.FC<RepertoireSectionClientProps> = ({
             genres={genres}
             hideCity={hideCity}
             hideGenres={hideGenres}
+            hideStudioOnly={hideStudioOnly}
             usePreferredLocation={usePreferredLocation}
             onResult={setOverride}
           />

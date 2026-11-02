@@ -36,7 +36,7 @@ declare global {
 // Mirrors FILTER_PARAM_KEYS in proxy.ts and the query built by the home
 // ScreeningsFilterController (same keys, same order), so a prefetched
 // response is only reused for the exact query the controller asks for.
-const QUERY_KEYS = ["genres", "dateFrom", "dateTo", "search"];
+const QUERY_KEYS = ["genres", "dateFrom", "dateTo", "search", "studyjne"];
 
 // Plain ES5 on purpose: it ships inline, unbundled and untranspiled. The
 // timeout is a safety net so a failed hydration never leaves the grid

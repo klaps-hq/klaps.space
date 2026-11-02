@@ -53,10 +53,10 @@ export const generateMetadata = async ({
   const { slug } = await params;
   const director = await getDirectorPageData(slug);
 
-  const title = `${director.name} - filmy i seanse w kinach studyjnych`;
+  const title = `${director.name} - filmy i seanse specjalne w kinach`;
   const description = director.bio
     ? clampToSentences(director.bio)
-    : `${director.name}: filmy na seansach specjalnych w kinach studyjnych w Polsce. Retrospektywy, klasyka filmowa i kino autorskie na dużym ekranie.`;
+    : `${director.name}: filmy na seansach specjalnych w kinach w Polsce. Retrospektywy, klasyka filmowa i kino autorskie na dużym ekranie.`;
   const url = `${SITE_URL}/rezyserzy/${director.slug}`;
 
   // Thin until the director has enough upcoming screenings; keep those pages
@@ -156,7 +156,7 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
                   line is already set apart. */}
               <span className="sr-only"> -</span>
               <PageHeadingMuted className="mt-2 md:mt-3 text-xl md:text-3xl lg:text-4xl normal-case tracking-tight">
-                Filmy i&nbsp;seanse w&nbsp;kinach studyjnych
+                Filmy i&nbsp;seanse specjalne w&nbsp;kinach
               </PageHeadingMuted>
             </PageHeading>
             {director.bio ? (

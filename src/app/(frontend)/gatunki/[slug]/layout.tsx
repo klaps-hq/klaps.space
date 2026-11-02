@@ -15,7 +15,7 @@ const buildGenreJsonLd = (genre: IGenre, movies: readonly IMovieSummary[]) => ({
   "@type": "CollectionPage",
   name: `${genre.name} - Filmy`,
   url: `${SITE_URL}/gatunki/${genre.slug}`,
-  description: `Filmy z gatunku ${genre.name.toLowerCase()} w repertuarze kin studyjnych.`,
+  description: `Filmy z gatunku ${genre.name.toLowerCase()} na seansach specjalnych w kinach.`,
   // Freshness signal for AI Overviews: newest movie `updatedAt` in the set,
   // i.e. a real data change. Omitted when no movie carries a timestamp,
   // which beats fabricating render time.

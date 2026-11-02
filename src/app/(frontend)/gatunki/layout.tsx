@@ -8,7 +8,7 @@ import { BASE_OPEN_GRAPH } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "Gatunki filmowe - klasyka i retrospektywy w kinach",
   description:
-    "Przeglądaj klasykę filmową według gatunku. Dramaty, thrillery, komedie i inne filmy na seansach specjalnych w kinach studyjnych w Polsce.",
+    "Przeglądaj klasykę filmową według gatunku. Dramaty, thrillery, komedie i inne filmy na seansach specjalnych w kinach w Polsce.",
   alternates: {
     canonical: `${SITE_URL}/gatunki`,
   },
@@ -17,9 +17,9 @@ export const metadata: Metadata = {
   openGraph: {
     ...BASE_OPEN_GRAPH,
     type: "website",
-    title: "Gatunki filmowe - klasyka i retrospektywy w kinach studyjnych",
+    title: "Gatunki filmowe - klasyka i retrospektywy w kinach",
     description:
-      "Przeglądaj klasykę filmową według gatunku. Seanse specjalne w kinach studyjnych w Polsce.",
+      "Przeglądaj klasykę filmową według gatunku. Seanse specjalne w kinach w Polsce.",
     url: `${SITE_URL}/gatunki`,
   },
 };
