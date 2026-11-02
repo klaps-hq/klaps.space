@@ -17,7 +17,9 @@ import {
   NOINDEX_FOLLOW,
   formatPlDate,
   inPlace,
+  inPlaceNbsp,
   pluralPl,
+  squashSpaces,
   wPrep,
 } from "@/lib/seo";
 import {
@@ -168,7 +170,8 @@ export const generateMetadata = async ({
   // their own heading rather than under the "studyjne" one.
   // "we Wrocławiu", not "w Wrocławiu": the same locative preposition rule the
   // H1 already applies, now also in the title and description.
-  const prep = wPrep(city.nameDeclinated ?? city.name);
+  const cityLocative = squashSpaces(city.nameDeclinated ?? city.name);
+  const prep = wPrep(cityLocative);
   // Long city names ("Międzyrzeczu Podlaskim") push the full form past the
   // ~60 chars a SERP renders, so the suffix degrades instead of being
   // truncated mid-phrase. The target keyword stays first either way.
@@ -178,8 +181,8 @@ export const generateMetadata = async ({
   const hasIndependent = splitByChain(allVenues).independent.length > 0;
   const titleBase =
     hasIndependent || allVenues.length === 0
-      ? `Kina studyjne ${prep} ${city.nameDeclinated}`
-      : `Kina ${prep} ${city.nameDeclinated}`;
+      ? `Kina studyjne ${prep} ${cityLocative}`
+      : `Kina ${prep} ${cityLocative}`;
   // Colon form shared with the cinema titles ("[kino] [miasto]: repertuar
   // i seanse specjalne"), so the keyword phrase reads as one unit. No
   // "godziny seansów": many cities have nothing upcoming at a given time.
@@ -227,8 +230,10 @@ export const generateMetadata = async ({
     .filter((group) => group.screenings.length > 0);
   const snippetGroups = studioGroups.length > 0 ? studioGroups : screeningGroups;
   const firstTitle = snippetGroups[0]?.movie.title;
-  const titlePart = firstTitle ? `, m.in. „${firstTitle}”` : "";
-  const lead = `${venues} ${prep} ${city.nameDeclinated}`;
+  // "film" keeps a title that looks like a place ("Przy Planty 7/9") from
+  // reading as a fact about the city.
+  const titlePart = firstTitle ? `, m.in. film „${squashSpaces(firstTitle)}”` : "";
+  const lead = `${venues} ${prep} ${cityLocative}`;
   // Today's screenings lead when there are any: a live, dated fact that
   // keeps the snippet unique and current (see live-meta).
   const digest = todayDigest(snippetGroups);
@@ -245,16 +250,16 @@ export const generateMetadata = async ({
           `${lead}: ${counts}${titlePart}. Seanse specjalne, klasyka i retrospektywy, sprawdź repertuar.`,
           `${lead}: ${counts}${titlePart}. Sprawdź repertuar.`,
           `${lead}: ${counts}. Sprawdź repertuar.`,
-          `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`,
+          `${counts} ${prep} ${cityLocative}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`,
         ]
       : [
           `${lead}: seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź aktualny repertuar.`,
           `${lead}: seanse specjalne i klasyka filmowa. Sprawdź repertuar.`,
-          `${counts} ${prep} ${city.nameDeclinated}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`,
+          `${counts} ${prep} ${cityLocative}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`,
         ];
   const description =
     cinemasCount === 0
-      ? `Kina i seanse specjalne ${prep} ${city.nameDeclinated}. Aktualna klasyka filmowa, retrospektywy i pokazy specjalne.`
+      ? `Kina i seanse specjalne ${prep} ${cityLocative}. Aktualna klasyka filmowa, retrospektywy i pokazy specjalne.`
       : (candidates.find((text) => text.length <= MAX_DESCRIPTION_LENGTH) ??
         candidates[candidates.length - 1]);
   const url = `${SITE_URL}/miasta/${city.slug}`;
@@ -339,7 +344,7 @@ const CityPage = async ({ params }: CityPageProps) => {
     .flatMap((g) => g.cinemas)
     .sort((a, b) => a.name.localeCompare(b.name, "pl"));
   const cinemasCount = cinemas.length;
-  const cityForCopy = city.nameDeclinated ?? city.name;
+  const cityForCopy = squashSpaces(city.nameDeclinated ?? city.name);
   const { independent: independentCinemas, chain: chainCinemas } =
     splitByChain(cinemas);
   // Seasonal open-air series get their own list: mixed in, ~19 summer
@@ -377,10 +382,7 @@ const CityPage = async ({ params }: CityPageProps) => {
             the correct w/we preposition. Multiplexes in the list below sit
             under their own heading, so this one stays accurate. */}
         <PageHeading variant="detail" className="max-w-[20ch]">
-          {independentCinemas.length > 0 || cinemasCount === 0
-            ? "Kina studyjne"
-            : "Kina"}{" "}
-          {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+          {`${independentCinemas.length > 0 || cinemasCount === 0 ? "Kina studyjne" : "Kina"} ${inPlaceNbsp(cityForCopy)}`}
         </PageHeading>
         <RepertoireSummary
           counts={upcomingCounts(screenings)}
@@ -425,7 +427,7 @@ const CityPage = async ({ params }: CityPageProps) => {
           {yearRoundCinemas.length > 0 && (
             <div>
               <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
-                Kina studyjne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+                Kina studyjne {inPlaceNbsp(cityForCopy)}
               </h2>
               <CinemaCards
                 cinemas={yearRoundCinemas}
@@ -449,7 +451,7 @@ const CityPage = async ({ params }: CityPageProps) => {
             <div>
               <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
                 Seanse specjalne w&nbsp;kinach sieciowych{" "}
-                {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+                {inPlaceNbsp(cityForCopy)}
               </h2>
               <CinemaCards cinemas={chainCinemas} isLinked={isCinemaLinked} />
             </div>
@@ -471,7 +473,7 @@ const CityPage = async ({ params }: CityPageProps) => {
             id={REPERTOIRE_ID}
             className="scroll-mt-24 mb-6 md:mb-8 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium"
           >
-            Co gra {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+            Co gra {inPlaceNbsp(cityForCopy)}
           </h2>
         }
         emptyState={
@@ -479,7 +481,7 @@ const CityPage = async ({ params }: CityPageProps) => {
             description={
               <>
                 Brak seansów pasujących do wybranych filtrów{" "}
-                {wPrep(cityForCopy)}&nbsp;{cityForCopy}. Spróbuj zmienić zakres dat, gatunek lub frazę.
+                {inPlaceNbsp(cityForCopy)}. Spróbuj zmienić zakres dat, gatunek lub frazę.
               </>
             }
             cta={{ href: "/miasta", label: "Inne miasta" }}
@@ -497,7 +499,7 @@ const CityPage = async ({ params }: CityPageProps) => {
                 description={
                   <>
                     {cinemasCount === 1 ? "Kino" : "Kina"}{" "}
-                    {wPrep(cityForCopy)}&nbsp;{cityForCopy}{" "}
+                    {inPlaceNbsp(cityForCopy)}{" "}
                     {cinemasCount === 1 ? "nie ma" : "nie mają"} teraz
                     zapowiedzianych seansów specjalnych. Repertuar uzupełniamy
                     na bieżąco, zajrzyj ponownie wkrótce.
@@ -517,7 +519,7 @@ const CityPage = async ({ params }: CityPageProps) => {
       <RecentRepertoire
         heading={
           <>
-            Ostatnio grane {wPrep(cityForCopy)}&nbsp;{cityForCopy}
+            Ostatnio grane {inPlaceNbsp(cityForCopy)}
           </>
         }
         items={recentScreenings}

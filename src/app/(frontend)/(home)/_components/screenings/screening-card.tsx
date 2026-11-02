@@ -14,6 +14,7 @@ import {
   upcomingRepertoireGroup,
 } from "@/lib/client-screenings";
 import { formatDateLabel } from "@/lib/utils";
+import { pluralPl } from "@/lib/seo";
 
 interface ScreeningCardProps {
   group: IRepertoireGroup;
@@ -139,7 +140,9 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({
         ))}
         {remaining > 0 && (
           <div className="text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-white/50 mt-0.5">
-            +{remaining} więcej
+            {/* "+312 więcej" did not say more of what; one string with the
+                declined noun reads as "jeszcze 312 seansów". */}
+            {`Jeszcze ${remaining} ${pluralPl(remaining, "seans", "seanse", "seansów")}`}
           </div>
         )}
         {/* Chain-only films sort after the independents; the label says
