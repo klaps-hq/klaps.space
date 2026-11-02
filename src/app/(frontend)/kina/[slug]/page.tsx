@@ -52,6 +52,7 @@ import SaveCinemaButton from "@/components/common/save-cinema-button";
 import TrackedCinemaLink from "@/components/common/tracked-cinema-link";
 import { cinemaNextScreeningItems } from "@/lib/next-screening-items";
 import ListingFaq from "@/components/common/listing-faq";
+import { FIRST_ROW_CLASS, ROW_CLASS } from "@/components/common/collapsible-list";
 import ContentSection, {
   SECTION_META_CLASS,
 } from "@/components/common/content-section";
@@ -479,12 +480,12 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
             </Link>
           }
         >
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 border-b border-white/10">
+          <ul className={`grid grid-cols-1 sm:grid-cols-2 gap-x-10 ${FIRST_ROW_CLASS}`}>
             {siblingCinemas.map((item) => (
               <li key={item.id}>
                 <Link
                   href={`/kina/${item.slug}`}
-                  className="group flex items-baseline justify-between gap-4 border-t border-white/10 py-3"
+                  className={`group ${ROW_CLASS}`}
                 >
                   <span className="text-sm md:text-base text-white/80 group-hover:text-white transition-colors">
                     {item.name}

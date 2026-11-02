@@ -27,10 +27,10 @@ const ListingFaq: React.FC<ListingFaqProps> = ({ heading, questions }) => {
           })),
         }}
       />
-      <ul className="flex flex-col border-b border-white/10">
+      <ul className="flex flex-col">
         {questions.map((qa) => (
-          <li key={qa.q}>
-            <details className="group border-t border-white/10 py-4 md:py-5">
+          <li key={qa.q} className="[&:first-child>details]:border-t-0 [&:first-child>details]:pt-0">
+            <details className="group border-t border-white/[0.06] py-4 md:py-5">
               <summary className="flex items-start justify-between gap-6 cursor-pointer list-none">
                 <h3 className="text-base md:text-lg text-white/85 group-hover:text-white group-open:text-white -tracking-[0.01em] leading-snug font-normal transition-colors">
                   {qa.q}
