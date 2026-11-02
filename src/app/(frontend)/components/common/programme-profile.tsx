@@ -12,6 +12,9 @@ import {
 } from "@/lib/programme-profile";
 import { pluralPl } from "@/lib/seo";
 import UncrawledLink from "@/components/common/uncrawled-link";
+import ContentSection, {
+  SECTION_META_CLASS,
+} from "@/components/common/content-section";
 
 interface ProgrammeProfileProps {
   /** Content of the section's H2. */
@@ -46,14 +49,11 @@ interface RankedListProps {
 
 const WEEKDAY_SHORT = ["pn", "wt", "śr", "cz", "pt", "sb", "nd"];
 
-const CELL_CLASS =
-  "border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1";
-const META_CLASS =
-  "text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50";
+const META_CLASS = SECTION_META_CLASS;
 
 const Stat = ({ value, label }: StatProps) => (
-  <div className={CELL_CLASS}>
-    <span className="text-3xl md:text-5xl font-medium -tracking-[0.03em] text-white tabular-nums">
+  <div className="flex flex-col gap-1.5 border-t border-white/15 pt-4">
+    <span className="text-3xl md:text-4xl font-light -tracking-[0.03em] text-white tabular-nums leading-none">
       {value}
     </span>
     <span className={META_CLASS}>{label}</span>
@@ -64,17 +64,17 @@ const RankedList = ({ title, items }: RankedListProps) => {
   if (items.length === 0) return null;
   return (
     <div>
-      <h3 className={`${META_CLASS} mb-3 md:mb-4`}>{title}</h3>
+      <h3 className={`${META_CLASS} mb-2`}>{title}</h3>
       <ol className="flex flex-col">
         {items.map((item) => (
           <li
             key={item.key}
-            className="flex items-baseline justify-between gap-4 border-t border-white/10 first:border-t-0 first:pt-0 last:pb-0 py-2.5 text-sm md:text-base"
+            className="flex items-baseline justify-between gap-4 border-t border-white/10 py-2 text-sm"
           >
             {item.href ? (
               <Link
                 href={item.href}
-                className="text-white/75 hover:text-white transition-colors"
+                className="min-w-0 text-white/75 hover:text-white transition-colors"
               >
                 {item.label}
               </Link>
@@ -82,14 +82,14 @@ const RankedList = ({ title, items }: RankedListProps) => {
               <UncrawledLink
                 basePath={item.uncrawled.basePath}
                 slug={item.uncrawled.slug}
-                className="cursor-pointer text-white/75 hover:text-white transition-colors"
+                className="min-w-0 cursor-pointer text-white/75 hover:text-white transition-colors"
               >
                 {item.label}
               </UncrawledLink>
             ) : (
-              <span className="text-white/75">{item.label}</span>
+              <span className="min-w-0 text-white/75">{item.label}</span>
             )}
-            <span className="shrink-0 text-xs md:text-sm text-white/45 tabular-nums">
+            <span className="shrink-0 text-xs text-white/40 tabular-nums">
               {item.count}
             </span>
           </li>
@@ -233,16 +233,14 @@ const ProgrammeProfile = ({
           label: pluralPl(profile.cinemas, "kino", "kina", "kin"),
         };
 
-  return (
-    <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
-      <h2 className="text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
-        {heading}
-      </h2>
-      <p className="mt-4 md:mt-5 mb-8 md:mb-10 max-w-[64ch] text-sm md:text-base text-white/55 leading-relaxed">
-        {`Z historii repertuaru zbieranej przez Klaps${profile.since ? ` ${sinceMonth(profile.since)}` : ""}. Liczymy tylko seanse, które już się odbyły.`}
-      </p>
+  const [leadSentence, ...restSentences] = sentences;
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 pt-px pl-px">
+  return (
+    <ContentSection
+      heading={heading}
+      lead={`Z historii repertuaru zbieranej przez Klaps${profile.since ? ` ${sinceMonth(profile.since)}` : ""}. Liczymy tylko seanse, które już się odbyły.`}
+    >
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-6">
         <Stat
           value={profile.screenings}
           label={pluralPl(profile.screenings, "seans", "seanse", "seansów")}
@@ -281,35 +279,45 @@ const ProgrammeProfile = ({
         )}
       </div>
 
-      <div className="mt-10 md:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
-        <div className="lg:col-span-7 flex flex-col gap-4 max-w-[64ch] text-base md:text-lg text-white/70 leading-relaxed">
-          {sentences.map((sentence) => (
-            <p key={sentence}>{sentence}</p>
+      <div className="mt-10 md:mt-12 grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10">
+        <div className="md:col-span-7 flex flex-col gap-3 max-w-[60ch]">
+          {leadSentence && (
+            <p className="text-base md:text-lg text-white/80 leading-relaxed">
+              {leadSentence}
+            </p>
+          )}
+          {restSentences.map((sentence) => (
+            <p
+              key={sentence}
+              className="text-sm md:text-[15px] text-white/55 leading-relaxed"
+            >
+              {sentence}
+            </p>
           ))}
         </div>
 
         {showChart && (
-          <figure className="lg:col-span-5">
-            <figcaption className={`${META_CLASS} mb-4`}>
+          <figure className="md:col-span-5">
+            <figcaption className={`${META_CLASS} mb-3`}>
               Seanse według dnia tygodnia
             </figcaption>
-            <div className="flex items-end gap-6 md:gap-10 h-32 md:h-40" aria-hidden="true">
+            <div className="flex items-end gap-2 md:gap-3 h-24 md:h-28" aria-hidden="true">
               {profile.weekdays.map((count, index) => (
                 <div
                   key={WEEKDAY_SHORT[index]}
-                  className="flex-1 flex flex-col items-center justify-end gap-2 h-full"
+                  className="flex-1 flex flex-col items-center justify-end gap-1.5 h-full"
                 >
-                  <span className="text-[10px] tabular-nums text-white/45">
+                  <span className="text-[10px] tabular-nums text-white/40">
                     {count}
                   </span>
                   <div
-                    className="w-full max-w-6 bg-white/80"
+                    className="w-full max-w-5 bg-white/70"
                     style={{
                       height: `${Math.max((count / maxWeekday) * 100, count > 0 ? 4 : 1)}%`,
                       opacity: count > 0 ? 1 : 0.15,
                     }}
                   />
-                  <span className="text-[10px] uppercase tracking-[0.18em] text-white/50">
+                  <span className="text-[10px] uppercase tracking-[0.18em] text-white/45">
                     {WEEKDAY_SHORT[index]}
                   </span>
                 </div>
@@ -326,12 +334,12 @@ const ProgrammeProfile = ({
         )}
       </div>
 
-      <div className="mt-12 md:mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
+      <div className="mt-10 md:mt-12 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-8">
         {lists.map((list) => (
           <RankedList key={list.title} title={list.title} items={list.items} />
         ))}
       </div>
-    </section>
+    </ContentSection>
   );
 };
 

@@ -9,6 +9,9 @@ import {
 } from "@/lib/city-venues";
 import { pluralPl } from "@/lib/seo";
 import UncrawledLink from "@/components/common/uncrawled-link";
+import ContentSection, {
+  SECTION_META_CLASS,
+} from "@/components/common/content-section";
 
 interface CityVenuesProps {
   heading: React.ReactNode;
@@ -22,12 +25,12 @@ interface StatProps {
   label: string;
 }
 
-const META_CLASS =
-  "text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50";
+const META_CLASS = SECTION_META_CLASS;
 
+// Same figures as the programme profile above it.
 const Stat = ({ value, label }: StatProps) => (
-  <div className="border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1">
-    <span className="text-2xl md:text-4xl font-light tabular-nums text-white -tracking-[0.02em]">
+  <div className="flex flex-col gap-1.5 border-t border-white/15 pt-4">
+    <span className="text-3xl md:text-4xl font-light tabular-nums text-white -tracking-[0.03em] leading-none">
       {value}
     </span>
     <span className={META_CLASS}>{label}</span>
@@ -44,12 +47,8 @@ const CityVenues = ({ heading, summary, isLinked }: CityVenuesProps) => {
   const { rows, largest } = summary;
 
   return (
-    <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
-      <h2 className="mb-8 md:mb-10 text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
-        {heading}
-      </h2>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 pt-px pl-px">
+    <ContentSection heading={heading}>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-6">
         <Stat
           value={rows.length}
           label={pluralPl(rows.length, "kino studyjne", "kina studyjne", "kin studyjnych")}
@@ -84,20 +83,20 @@ const CityVenues = ({ heading, summary, isLinked }: CityVenuesProps) => {
       </div>
 
       <div className="mt-10 md:mt-12 overflow-x-auto">
-        <table className="w-full min-w-[560px] text-left text-sm md:text-base">
+        <table className="w-full min-w-[560px] text-left text-sm">
           <thead>
             <tr className={META_CLASS}>
-              <th scope="col" className="py-3 pr-4 font-normal">Kino</th>
-              <th scope="col" className="py-3 pr-4 font-normal">Sale</th>
-              <th scope="col" className="py-3 pr-4 font-normal">Miejsca</th>
-              <th scope="col" className="py-3 pr-4 font-normal">Dostępność</th>
-              <th scope="col" className="py-3 font-normal">Prowadzi</th>
+              <th scope="col" className="py-2.5 pr-4 font-normal">Kino</th>
+              <th scope="col" className="py-2.5 pr-4 font-normal">Sale</th>
+              <th scope="col" className="py-2.5 pr-4 font-normal">Miejsca</th>
+              <th scope="col" className="py-2.5 pr-4 font-normal">Dostępność</th>
+              <th scope="col" className="py-2.5 font-normal">Prowadzi</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
               <tr key={row.slug} className="border-t border-white/10 align-top">
-                <th scope="row" className="py-3 pr-4 font-medium text-white/85">
+                <th scope="row" className="py-2.5 pr-4 font-medium text-white/85">
                   {isLinked(row.slug) ? (
                     <Link
                       href={`/kina/${row.slug}`}
@@ -115,13 +114,13 @@ const CityVenues = ({ heading, summary, isLinked }: CityVenuesProps) => {
                     </UncrawledLink>
                   )}
                 </th>
-                <td className="py-3 pr-4 tabular-nums text-white/70">
+                <td className="py-2.5 pr-4 tabular-nums text-white/70">
                   {row.screens ?? "-"}
                 </td>
-                <td className="py-3 pr-4 tabular-nums text-white/70">
+                <td className="py-2.5 pr-4 tabular-nums text-white/70">
                   {row.seats ?? "-"}
                 </td>
-                <td className="py-3 pr-4 text-white/70">
+                <td className="py-2.5 pr-4 text-white/70">
                   {[
                     row.wheelchair && "wózki",
                     row.hearingLoop && "pętla indukcyjna",
@@ -129,7 +128,7 @@ const CityVenues = ({ heading, summary, isLinked }: CityVenuesProps) => {
                     .filter(Boolean)
                     .join(", ") || "-"}
                 </td>
-                <td className="py-3 text-white/60">{row.operator ?? "-"}</td>
+                <td className="py-2.5 text-white/60">{row.operator ?? "-"}</td>
               </tr>
             ))}
           </tbody>
@@ -137,7 +136,7 @@ const CityVenues = ({ heading, summary, isLinked }: CityVenuesProps) => {
       </div>
 
       {largest && (
-        <p className="mt-8 max-w-[68ch] text-sm md:text-base text-white/55 leading-relaxed">
+        <p className="mt-6 max-w-[68ch] text-xs md:text-sm text-white/45 leading-relaxed">
           Największa sala to {roomLabel(largest.roomName)} w&nbsp;kinie{" "}
           {largest.cinemaName} ({seatsPl(largest.seats)}).
           {/* With one venue the total just repeats its own row. */}
@@ -146,7 +145,7 @@ const CityVenues = ({ heading, summary, isLinked }: CityVenuesProps) => {
           Dane pochodzą ze stron kin i&nbsp;instytucji, które je prowadzą.
         </p>
       )}
-    </section>
+    </ContentSection>
   );
 };
 

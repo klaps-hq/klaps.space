@@ -22,6 +22,7 @@ import Footer from "../../(home)/_components/footer";
 import EmptyState from "@/components/common/empty-state";
 import RepertoireSection from "@/components/common/repertoire-section";
 import RepertoireGrid from "@/components/common/repertoire-grid";
+import ContentSection from "@/components/common/content-section";
 import ProgrammeProfile from "@/components/common/programme-profile";
 import { getProgrammeProfile } from "@/lib/programme-profile";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
@@ -250,21 +251,9 @@ const DirectorPageContent = async ({ slug }: { slug: string }) => {
       )}
 
       {movies.length > 0 && (
-        <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-16 md:pb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
-            <div className="lg:col-span-4">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white">
-                Filmografia
-              </h2>
-            </div>
-            <div className="lg:col-span-8">
-              <RelatedMovies
-                movies={[...movies]}
-                linkableSlugs={screeningSlugs}
-              />
-            </div>
-          </div>
-        </section>
+        <ContentSection heading="Filmografia">
+          <RelatedMovies movies={[...movies]} linkableSlugs={screeningSlugs} />
+        </ContentSection>
       )}
     </>
   );
