@@ -311,7 +311,7 @@ const MoviePage = async ({ params }: MoviePageProps) => {
             <div className="lg:col-span-8">
               <RelatedMovies
                 movies={relatedMovies}
-                linkableSlugs={profileIndexable?.movies}
+                linkableSlugs={profileIndexable?.movies ?? undefined}
               />
             </div>
           </div>

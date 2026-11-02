@@ -93,7 +93,10 @@ const HomePage = async () => {
           seeAllHref="/seanse"
         >
           <ScreeningsGrid
-            repertoire={toRepertoire(homeScreenings.screenings)}
+            repertoire={toRepertoire(
+              homeScreenings.screenings,
+              indexable?.movies ?? null
+            )}
             genres={genres}
             selectedGenreIds={[]}
             dateFrom={null}

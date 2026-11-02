@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { apiFetch } from "./client";
 import { getScreenings } from "./screenings";
 import { ISitemapResponse } from "@/interfaces/ISitemap";
@@ -55,9 +56,9 @@ export interface IndexableSlugs {
   /**
    * Movies with an upcoming or recent screening in an independent cinema,
    * the film sitemap's list and the rule movie pages apply for noindex
-   * (isMovieIndexable).
+   * (isMovieIndexable). null when the API sent an empty list.
    */
-  movies: ReadonlySet<string>;
+  movies: ReadonlySet<string> | null;
   /** Directors at or above the indexing threshold (the API filters them). */
   directors: ReadonlySet<string>;
   /**
@@ -77,8 +78,11 @@ export interface IndexableSlugs {
  *
  * null when the API call fails - callers then link everything, since a
  * missing link costs more than a crawl of a noindex page.
+ *
+ * Request-memoized: a listing reads it in both the filter island and the
+ * card grid, and toRepertoire relies on getting the same Set back.
  */
-export const getIndexableSlugs = async (): Promise<IndexableSlugs | null> => {
+export const getIndexableSlugs = cache(async (): Promise<IndexableSlugs | null> => {
   try {
     const [entries, groups] = await Promise.all([
       getSitemapEntries(),
@@ -87,7 +91,11 @@ export const getIndexableSlugs = async (): Promise<IndexableSlugs | null> => {
     return {
       cinemas: new Set(entries.cinemas.map((entry) => entry.slug)),
       cities: new Set(entries.cities.map((entry) => entry.slug)),
-      movies: new Set(entries.movies.map((entry) => entry.slug)),
+      // An empty list is a backend hiccup, not a nationwide blank: link all.
+      movies:
+        entries.movies.length > 0
+          ? new Set(entries.movies.map((entry) => entry.slug))
+          : null,
       directors: new Set((entries.directors ?? []).map((entry) => entry.slug)),
       genres:
         groups.length > 0
@@ -101,4 +109,4 @@ export const getIndexableSlugs = async (): Promise<IndexableSlugs | null> => {
   } catch {
     return null;
   }
-};
+});

@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import MoviePoster from "@/components/common/movie-poster";
+import UncrawledLink from "@/components/common/uncrawled-link";
 import { useNow } from "@/hooks/use-now";
 import {
   IRepertoireCity,
@@ -25,6 +26,41 @@ interface ScreeningCardProps {
   priority?: boolean;
 }
 
+interface CardLinkProps {
+  slug: string;
+  title: string;
+  noindex: boolean;
+  children: React.ReactNode;
+}
+
+const CARD_CLASS = "group flex flex-col gap-3";
+
+// A noindex movie page (multiplex-only reissue, KLA-59) stays clickable but
+// gets no crawlable <a href>, like the other hub links to noindex pages.
+const CardLink: React.FC<CardLinkProps> = ({
+  slug,
+  title,
+  noindex,
+  children,
+}) =>
+  noindex ? (
+    <UncrawledLink
+      basePath="/filmy"
+      slug={slug}
+      className={`${CARD_CLASS} cursor-pointer`}
+    >
+      {children}
+    </UncrawledLink>
+  ) : (
+    <Link
+      href={`/filmy/${slug}`}
+      className={CARD_CLASS}
+      aria-label={`Przejdź do filmu: ${title}`}
+    >
+      {children}
+    </Link>
+  );
+
 const ScreeningCard: React.FC<ScreeningCardProps> = ({
   group,
   cities,
@@ -42,10 +78,10 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({
   const remaining = screenings.length - upcoming.length;
 
   return (
-    <Link
-      href={`/filmy/${movie.slug}`}
-      className="group flex flex-col gap-3"
-      aria-label={`Przejdź do filmu: ${movie.title}`}
+    <CardLink
+      slug={movie.slug}
+      title={movie.title}
+      noindex={movie.noindex === true}
     >
       <div className="relative aspect-[2/3] overflow-hidden bg-white/5">
         {movie.posterUrl ? (
@@ -114,7 +150,7 @@ const ScreeningCard: React.FC<ScreeningCardProps> = ({
           </div>
         )}
       </div>
-    </Link>
+    </CardLink>
   );
 };
 

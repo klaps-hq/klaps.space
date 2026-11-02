@@ -14,6 +14,7 @@ import {
 } from "@/lib/screenings";
 import { getGenres } from "@/lib/genres";
 import { toRepertoire } from "@/lib/client-screenings";
+import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { filterScreeningGroups } from "@/lib/screening-filters";
 import { getPreferredLocation } from "@/lib/get-preferred-city";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
@@ -201,9 +202,10 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
     currentPage * PAGE_SIZE
   );
 
-  const [genres, lastUpdated] = await Promise.all([
+  const [genres, lastUpdated, indexable] = await Promise.all([
     getGenres(),
     getScreeningsLastUpdated({ cityId, voivodeship }),
+    getIndexableSlugs(),
   ]);
 
   return (
@@ -216,7 +218,7 @@ const ScreeningsListing = async ({ params }: { params: SearchParams }) => {
         )}
       />
       <ScreeningsPageSection
-        repertoire={toRepertoire(screenings)}
+        repertoire={toRepertoire(screenings, indexable?.movies ?? null)}
         genres={genres}
         selectedGenreIds={genreIds.map(Number)}
         dateFrom={params.dateFrom ?? null}
