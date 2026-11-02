@@ -86,6 +86,9 @@ const MovieHero: React.FC<MovieHeroProps> = ({
               blurDataURL={backdropBlurDataUrl ?? undefined}
               className="object-cover"
               priority
+              // next/image's priority preloads and loads eagerly but does
+              // not set the fetch priority hint on the LCP image itself.
+              fetchPriority="high"
               onError={() => setUseBackdropCdn(true)}
             />
           </m.div>
@@ -127,8 +130,11 @@ const MovieHero: React.FC<MovieHeroProps> = ({
                 {metaParts.join(" · ")}
               </span>
             )}
+            {/* Title and description are LCP candidates next to the
+                backdrop: kx-slide-up animates transform only, so they are
+                painted from the first frame instead of fading in from 0. */}
             <h1
-              className={`kx-fade-up ${PAGE_HEADING_CLASSES.detail}`}
+              className={`kx-slide-up ${PAGE_HEADING_CLASSES.detail}`}
               style={{ animationDelay: "200ms" }}
             >
               {movie.title}
@@ -145,7 +151,7 @@ const MovieHero: React.FC<MovieHeroProps> = ({
                 so the hero skips them to avoid the duplicate. */}
             {movie.description && (
               <p
-                className="kx-fade-up text-base md:text-lg text-white/85 leading-relaxed font-light max-w-2xl mt-2 line-clamp-4 md:line-clamp-none"
+                className="kx-slide-up text-base md:text-lg text-white/85 leading-relaxed font-light max-w-2xl mt-2 line-clamp-4 md:line-clamp-none"
                 style={{ animationDelay: "300ms" }}
               >
                 {movie.description}
