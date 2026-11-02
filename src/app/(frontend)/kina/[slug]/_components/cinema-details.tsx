@@ -5,6 +5,9 @@ import { ICinemaDetails, ICinemaPhoto } from "@/interfaces/ICinema";
 import { pluralPl } from "@/lib/seo";
 import TrackedCinemaLink from "@/components/common/tracked-cinema-link";
 import { CONTACT_EMAIL } from "@/constants";
+import ContentSection, {
+  SECTION_META_CLASS,
+} from "@/components/common/content-section";
 
 interface CinemaDetailsProps {
   cinemaName: string;
@@ -23,15 +26,14 @@ interface OutboundLinkProps {
   children: React.ReactNode;
 }
 
-const META_CLASS =
-  "text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50";
+const META_CLASS = SECTION_META_CLASS;
 const LINK_CLASS =
   "group inline-flex items-center gap-1 text-white/80 hover:text-white transition-colors border-b border-white/20 hover:border-white/60 pb-0.5";
 
 const DetailRow = ({ label, children }: DetailRowProps) => (
-  <div className="border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-2">
-    <dt className={META_CLASS}>{label}</dt>
-    <dd className="text-sm md:text-base text-white/80 leading-relaxed flex flex-col gap-1.5 items-start">
+  <div className="grid grid-cols-1 sm:grid-cols-[11rem_1fr] gap-x-6 gap-y-1.5 border-t border-white/10 py-4">
+    <dt className={`${META_CLASS} sm:pt-1`}>{label}</dt>
+    <dd className="text-sm md:text-base text-white/80 leading-relaxed flex flex-wrap gap-x-5 gap-y-1.5 items-baseline">
       {children}
     </dd>
   </div>
@@ -65,7 +67,7 @@ interface DataRequestProps {
  * the contact is a natural opening for a link back to klaps.space.
  */
 const DataRequest = ({ cinemaName, className }: DataRequestProps) => (
-  <p className={`max-w-[68ch] text-sm md:text-base text-white/55 leading-relaxed ${className ?? ""}`}>
+  <p className={`max-w-[68ch] text-xs md:text-sm text-white/45 leading-relaxed ${className ?? ""}`}>
     Prowadzicie to kino? Jeśli brakuje danych albo coś się zmieniło,
     prześlijcie nam liczbę sal i&nbsp;miejsc, informacje o&nbsp;dostępności,
     logo lub lepsze zdjęcia. Jeśli któreś zdjęcie ma zniknąć, napiszcie, a&nbsp;usuniemy
@@ -136,8 +138,10 @@ const CinemaDetails = ({
   details,
 }: CinemaDetailsProps) => {
   const requestOnly = (
-    <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-10 md:pt-12 pb-12 md:pb-16">
-      <DataRequest cinemaName={cinemaName} />
+    <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 py-8 md:py-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-12">
+        <DataRequest cinemaName={cinemaName} className="lg:col-start-5 lg:col-span-8" />
+      </div>
     </section>
   );
   if (!details) return requestOnly;
@@ -178,34 +182,30 @@ const CinemaDetails = ({
   if (!hasAnything) return requestOnly;
 
   return (
-    <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
-      <div className="mb-8 md:mb-10 flex items-center gap-5 md:gap-6">
+    <ContentSection heading={<>Informacje o&nbsp;kinie</>}>
+      <dl className="flex flex-col border-b border-white/10">
         {logoUrl && (
-          <div className="relative size-14 md:size-16 shrink-0 bg-white rounded-sm p-2">
-            <Image
-              src={logoUrl}
-              alt={`Logo: ${cinemaName}`}
-              fill
-              sizes="64px"
-              className="object-contain p-1.5"
-            />
-          </div>
+          <DetailRow label="Logo">
+            <span className="relative block h-14 w-28 md:h-16 md:w-32 bg-white rounded-sm">
+              <Image
+                src={logoUrl}
+                alt={`Logo: ${cinemaName}`}
+                fill
+                sizes="128px"
+                className="object-contain p-2"
+              />
+            </span>
+          </DetailRow>
         )}
-        <h2 className="text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
-          Informacje o&nbsp;kinie
-        </h2>
-      </div>
-
-      <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 pt-px pl-px">
         {screens !== null && (
           <DetailRow label="Sale">
-            <span>
+            <span className="basis-full">
               {screens} {pluralPl(screens, "sala", "sale", "sal")}
               {totalSeats !== null && <>, łącznie {seatsLabel(totalSeats)}</>}
             </span>
             {rooms.length > 1 &&
               rooms.map((room) => (
-                <span key={room.name} className="text-white/60">
+                <span key={room.name} className="text-sm text-white/50">
                   {roomLabel(room.name)}
                   {room.seats !== null && <>: {seatsLabel(room.seats)}</>}
                 </span>
@@ -268,7 +268,9 @@ const CinemaDetails = ({
               <span key={item}>{item}</span>
             ))}
             {accessibility?.note && (
-              <span className="text-white/60">{accessibility.note}</span>
+              <span className="basis-full text-sm text-white/50">
+                {accessibility.note}
+              </span>
             )}
           </DetailRow>
         )}
@@ -287,7 +289,7 @@ const CinemaDetails = ({
       </dl>
 
       {photos.length > 0 && (
-        <div className="mt-10 md:mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+        <div className="mt-8 md:mt-10 grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
           {photos.map((photo, index) => (
             <figure key={photo.url} className="flex flex-col gap-2">
               <div className="relative aspect-[4/3] overflow-hidden bg-white/[0.04]">
@@ -295,7 +297,7 @@ const CinemaDetails = ({
                   src={photo.url}
                   alt={`${cinemaName}, zdjęcie ${index + 1}`}
                   fill
-                  sizes="(min-width: 768px) 33vw, 100vw"
+                  sizes="(min-width: 1024px) 22vw, (min-width: 768px) 33vw, 50vw"
                   className="object-cover grayscale hover:grayscale-0 transition duration-500"
                 />
               </div>
@@ -305,8 +307,8 @@ const CinemaDetails = ({
         </div>
       )}
 
-      <DataRequest cinemaName={cinemaName} className="mt-10 md:mt-12" />
-    </section>
+      <DataRequest cinemaName={cinemaName} className="mt-8 md:mt-10" />
+    </ContentSection>
   );
 };
 

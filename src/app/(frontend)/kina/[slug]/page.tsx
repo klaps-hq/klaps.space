@@ -47,6 +47,9 @@ import SaveCinemaButton from "@/components/common/save-cinema-button";
 import TrackedCinemaLink from "@/components/common/tracked-cinema-link";
 import { cinemaNextScreeningItems } from "@/lib/next-screening-items";
 import ListingFaq from "@/components/common/listing-faq";
+import ContentSection, {
+  SECTION_META_CLASS,
+} from "@/components/common/content-section";
 import { buildCinemaFaq } from "@/lib/listing-faq";
 import Footer from "../../(home)/_components/footer";
 import CinemaMapLazy from "./_components/cinema-map-lazy";
@@ -438,14 +441,16 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
         // Contextual links out of this page: they spread crawl paths across
         // the cinema group instead of funnelling everything through /kina,
         // and the anchors carry the city phrase the hub links lack.
-        <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 pt-12 md:pt-16 pb-20 md:pb-28">
-          <div className="mb-8 md:mb-10 flex items-end justify-between gap-6 flex-wrap">
-            <h2 className="text-2xl md:text-4xl lg:text-5xl leading-[1.05] -tracking-[0.02em] max-w-[26ch] text-white font-medium">
+        <ContentSection
+          heading={
+            <>
               Inne kina {wPrep(cityForCopy)}&nbsp;{cityForCopy}
-            </h2>
+            </>
+          }
+          aside={
             <Link
               href={`/miasta/${cinema.city.slug}`}
-              className="group inline-flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.28em] text-white/55 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
+              className="group inline-flex items-center gap-2 self-start text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-white/55 hover:text-white transition-colors border-b border-transparent hover:border-white/40 pb-0.5"
             >
               Kina studyjne {wPrep(cityForCopy)}&nbsp;{cityForCopy}
               <ArrowUpRight
@@ -453,26 +458,28 @@ const CinemaPageContent = async ({ slug }: { slug: string }) => {
                 className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
               />
             </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-px pl-px">
+          }
+        >
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 border-b border-white/10">
             {siblingCinemas.map((item) => (
-              <Link
-                key={item.id}
-                href={`/kina/${item.slug}`}
-                className="group bg-black hover:bg-white/[0.04] transition-colors border border-[#1a1a1a] -mt-px -ml-px px-4 md:px-5 py-5 md:py-6 flex flex-col gap-1"
-              >
-                <span className="text-sm md:text-base font-medium uppercase -tracking-[0.01em] text-white/65 group-hover:text-white transition-colors">
-                  {item.name}
-                </span>
-                {item.street && (
-                  <span className="text-[10px] md:text-xs uppercase tracking-[0.22em] text-white/50">
-                    {item.street}
+              <li key={item.id}>
+                <Link
+                  href={`/kina/${item.slug}`}
+                  className="group flex items-baseline justify-between gap-4 border-t border-white/10 py-3"
+                >
+                  <span className="text-sm md:text-base text-white/80 group-hover:text-white transition-colors">
+                    {item.name}
                   </span>
-                )}
-              </Link>
+                  {item.street && (
+                    <span className={`${SECTION_META_CLASS} shrink-0 text-right`}>
+                      {item.street}
+                    </span>
+                  )}
+                </Link>
+              </li>
             ))}
-          </div>
-        </section>
+          </ul>
+        </ContentSection>
       )}
 
       <ListingFaq
