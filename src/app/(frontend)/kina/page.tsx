@@ -1,8 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import { getCinemas } from "@/lib/cinemas";
+import { countCinemas, getCinemas } from "@/lib/cinemas";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
-import { isChainCinema } from "@/lib/cinema-chains";
 import { ICinemaGroup } from "@/interfaces/ICinema";
 import { SITE_URL } from "@/lib/site-config";
 import JsonLd from "@/components/common/json-ld";
@@ -87,19 +86,15 @@ const CinemasPage = async () => {
   const sortedGroups = [...cinemaGroups].sort((a, b) =>
     a.city.name.localeCompare(b.city.name, "pl")
   );
-  const totalCinemas = sortedGroups.reduce(
-    (acc, g) => acc + g.cinemas.length,
-    0
-  );
-  const totalCities = sortedGroups.length;
   // The lead used to call all ~570 venues "kina" under a "kina studyjne"
   // heading; it now names the multiplexes and open-air spots apart.
-  const allCinemas = sortedGroups.flatMap((g) => g.cinemas);
-  const chainCount = allCinemas.filter((c) => isChainCinema(c.name)).length;
-  const openAirCount = allCinemas.filter(
-    (c) => !isChainCinema(c.name) && c.isOpenAir
-  ).length;
-  const independentCount = totalCinemas - chainCount - openAirCount;
+  const {
+    total: totalCinemas,
+    cities: totalCities,
+    studio: independentCount,
+    openAir: openAirCount,
+    chain: chainCount,
+  } = countCinemas(sortedGroups);
 
   return (
     <main className="bg-black text-white min-h-screen">

@@ -3,6 +3,7 @@ import { ICinema, ICinemaGroup, ICinemaSummary } from "@/interfaces/ICinema";
 import { IScreeningGroup } from "@/interfaces/IScreenings";
 import { apiFetch, fetchOrNotFound } from "./client";
 import { getScreenings } from "./screenings";
+import { isChainCinema } from "./cinema-chains";
 
 interface GetCinemasParams {
   cityId?: string | null;
@@ -59,6 +60,68 @@ export const getCinemas = async (
     console.warn("Falling back to empty cinemas list:", error);
     return { data: [] };
   }
+};
+
+export interface CinemaCounts {
+  /** Every venue in the catalogue: studio, open-air and chain. */
+  total: number;
+  /** Cities with at least one venue of any kind. */
+  cities: number;
+  /** Year-round independent venues ("kina studyjne"). */
+  studio: number;
+  /** Cities with at least one studio venue. */
+  studioCities: number;
+  /** Non-chain open-air venues. */
+  openAir: number;
+  /** Multiplex-chain venues. */
+  chain: number;
+  /** Every venue except the chain ones (studio + open-air). */
+  nonChain: number;
+}
+
+/**
+ * The single source for catalogue counts shown in prose, metadata and
+ * JSON-LD, so /kina, /mapa-kin and static pages never disagree. The split
+ * follows isChainCinema and isOpenAir, same as the listing labels.
+ */
+export const countCinemas = (
+  groups: readonly ICinemaGroup[]
+): CinemaCounts => {
+  let total = 0;
+  let chain = 0;
+  let openAir = 0;
+  let cities = 0;
+  let studioCities = 0;
+  for (const group of groups) {
+    if (group.cinemas.length > 0) cities += 1;
+    let studioInCity = 0;
+    for (const cinema of group.cinemas) {
+      total += 1;
+      if (isChainCinema(cinema.name)) chain += 1;
+      else if (cinema.isOpenAir) openAir += 1;
+      else studioInCity += 1;
+    }
+    if (studioInCity > 0) studioCities += 1;
+  }
+  return {
+    total,
+    cities,
+    studio: total - chain - openAir,
+    studioCities,
+    openAir,
+    chain,
+    nonChain: total - chain,
+  };
+};
+
+/**
+ * Catalogue counts from the full cinema list. Same URL as the /kina hub's
+ * getCinemas call, so it shares one cached fetch. All zeros on failure:
+ * callers fall back to number-free copy.
+ */
+export const getCinemaCounts = async (): Promise<CinemaCounts> => {
+  const { data } = await getCinemas({ limit: 1000 });
+  return countCinemas(data);
 };
 
 export const getCinemaBySlug = async (slug: string): Promise<ICinema> => {
