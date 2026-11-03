@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     locale: "pl_PL",
     type: "profile",
-    title: "Robert Siński - twórca Klaps",
+    title: "Robert Siński - twórca Klapsa",
     description:
       "Kto stoi za klaps.space i jak powstaje przewodnik po seansach specjalnych w kinach studyjnych.",
     url: FOUNDER.url,

@@ -24,7 +24,7 @@ import {
 import { CLASSIC_MIN_AGE_YEARS } from "@/lib/landing-pages";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { ORGANIZATION_ID, SITE_NAME, SITE_URL } from "@/lib/site-config";
-import { formatPlDate } from "@/lib/seo";
+import { formatPlDate, pluralPl } from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import PageHeading, { PageHeadingMuted } from "@/components/ui/page-heading";
 import SiteHeader from "@/components/common/site-header";
@@ -270,9 +270,18 @@ const MonthStatsView = async ({
           <section className="border-t border-white/10 px-6 md:px-12 lg:px-16 py-12 md:py-16">
             <dl className="grid grid-cols-1 sm:grid-cols-3 gap-x-10 gap-y-10">
               {[
-                { label: "seansów klasyki", value: stats.screenings },
-                { label: "kin", value: stats.cinemas },
-                { label: "miast", value: stats.cities },
+                {
+                  label: `${pluralPl(stats.screenings, "seans", "seanse", "seansów")} klasyki`,
+                  value: stats.screenings,
+                },
+                {
+                  label: pluralPl(stats.cinemas, "kino", "kina", "kin"),
+                  value: stats.cinemas,
+                },
+                {
+                  label: pluralPl(stats.cities, "miasto", "miasta", "miast"),
+                  value: stats.cities,
+                },
               ].map((item) => (
                 <div key={item.label} className="flex flex-col-reverse gap-3">
                   <dt className="text-xs md:text-sm uppercase tracking-[0.25em] text-white/50">
@@ -518,7 +527,7 @@ const MonthStatsView = async ({
         <div className="flex flex-col gap-4 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
           <p>
             Klasyka to filmy sprzed co najmniej {CLASSIC_MIN_AGE_YEARS} lat,
-            ta sama definicja co w&nbsp;dziale Klasyka w&nbsp;kinach. Liczymy każdy seans
+            ta sama definicja co w&nbsp;dziale „Klasyka w&nbsp;kinach”. Liczymy każdy seans
             takiego filmu w&nbsp;repertuarach kin, które śledzi Klaps, od
             pierwszego do ostatniego dnia miesiąca. Miasto i&nbsp;kino trafiają
             do zestawienia, jeśli pokazały co najmniej jeden taki seans.

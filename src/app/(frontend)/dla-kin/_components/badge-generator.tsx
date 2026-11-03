@@ -207,7 +207,7 @@ const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({ cinemas }) => {
         )}
         {query.trim().length >= 2 && results.length === 0 && (
           <p className="mt-4 text-sm text-white/50">
-            Nie znaleźliśmy takiego kina. Sprawdź pisownię albo napisz do nas.
+            Nie znaleźliśmy takiego kina. Sprawdźcie pisownię albo napiszcie do nas.
           </p>
         )}
         <p className="mt-4 text-sm md:text-base text-white/55" aria-live="polite">

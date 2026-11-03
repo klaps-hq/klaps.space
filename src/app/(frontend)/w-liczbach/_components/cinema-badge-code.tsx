@@ -121,7 +121,7 @@ const CinemaBadgeCode: React.FC<CinemaBadgeCodeProps> = ({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={selected.src[theme]}
-            alt={`Podgląd odznaki Kino klasyki miesiąca dla kina ${selected.name}`}
+            alt={`Podgląd odznaki „Kino klasyki miesiąca” dla kina ${selected.name}`}
             width={width}
             height={height}
             className="max-w-full h-auto"
