@@ -33,6 +33,7 @@ const slimCinema = (cinema: ICinemaSummary): ICinemaSummary => ({
   slug: cinema.slug,
   name: cinema.name,
   street: cinema.street,
+  postalCode: cinema.postalCode,
   city: {
     id: cinema.city.id,
     slug: cinema.city.slug,

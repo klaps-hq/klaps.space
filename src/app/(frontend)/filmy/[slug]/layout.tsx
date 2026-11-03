@@ -87,6 +87,7 @@ const buildMovieScreeningEvents = (movie: IMovie, screenings: IScreening[]) =>
         name: screening.cinema.name,
         slug: screening.cinema.slug,
         street: screening.cinema.street,
+        postalCode: screening.cinema.postalCode,
         cityName: screening.cinema.city.name,
         latitude: screening.cinema.latitude,
         longitude: screening.cinema.longitude,

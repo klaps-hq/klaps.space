@@ -20,6 +20,7 @@ export interface ScreeningEventCinema {
   name: string;
   slug: string;
   street: string | null;
+  postalCode?: string | null;
   cityName: string;
   latitude?: number | null;
   longitude?: number | null;
@@ -68,6 +69,7 @@ const buildEvent = (data: ScreeningEventData): Record<string, unknown> => {
     address: {
       "@type": "PostalAddress",
       streetAddress: cinema.street ?? undefined,
+      postalCode: cinema.postalCode ?? undefined,
       addressLocality: cinema.cityName,
       addressCountry: "PL",
     },

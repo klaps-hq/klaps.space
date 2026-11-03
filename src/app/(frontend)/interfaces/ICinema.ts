@@ -5,6 +5,8 @@ export interface ICinemaSummary {
   slug: string;
   name: string;
   street: string | null;
+  // Postal code (e.g. "38-400"); absent on older API responses.
+  postalCode?: string | null;
   city: ICity;
   // Optional: present when the API includes coordinates; consumed by
   // ScreeningEvent JSON-LD (location.geo) on movie pages.
@@ -22,6 +24,8 @@ export interface ICinema {
   slug: string;
   name: string;
   street: string | null;
+  // Postal code (e.g. "38-400"); absent on older API responses.
+  postalCode?: string | null;
   city: ICity;
   description: string | null;
   latitude: number | null;
@@ -34,6 +38,9 @@ export interface ICinema {
   details?: ICinemaDetails;
   // Open-air venue (summer cinema series); absent on older API responses.
   isOpenAir?: boolean;
+  // Set when this record duplicates another venue (e.g. an operator listed
+  // next to its own cinema); the page redirects to the canonical one.
+  duplicateOfSlug?: string | null;
 }
 
 export interface ICinemaRoom {
