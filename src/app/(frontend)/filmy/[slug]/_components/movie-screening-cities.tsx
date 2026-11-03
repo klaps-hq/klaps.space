@@ -69,7 +69,7 @@ export const buildMovieScreeningContext = (
     new Date().getFullYear() - productionYear >= REVIVAL_AGE_YEARS;
   const opening = isRevival
     ? `${movieTitle} z ${productionYear} roku wraca na duży ekran`
-    : `${movieTitle} można zobaczyć w kinach`;
+    : `Film „${movieTitle}” można zobaczyć`;
   const where =
     `${joinPl(named)}${moreCinemas > 0 ? ` oraz ${moreCinemas} ${pluralPl(moreCinemas, "inne kino", "inne kina", "innych kin")}` : ""}`;
   const venueKind =

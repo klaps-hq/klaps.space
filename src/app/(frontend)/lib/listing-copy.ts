@@ -269,7 +269,7 @@ export const openAirFallbackIntro = (
       ? `Kino plenerowe${where}: pokazy filmowe pod gołym niebem.`
       : `Kino plenerowe${where}: ${venues} ` +
         `${pluralPl(venues, "miejsce", "miejsca", "miejsc")} z pokazami pod gołym niebem` +
-        (venues <= 3 ? `, takich jak ${joinPl(venueNames)}.` : ".");
+        (venues <= 3 ? ` (${joinPl(venueNames)}).` : ".");
 
   const upcomingTitles = uniqueTitles(upcoming, 3);
   const second =
@@ -290,7 +290,7 @@ export const classicFallbackIntro = (
   monthLocative: string | null,
   groups: IScreeningGroup[]
 ): string => {
-  const when = monthLocative ? ` w ${monthLocative}` : "";
+  const when = monthLocative ? ` ${inPlace(monthLocative)}` : "";
   const movies = groups.length;
   if (movies === 0) {
     return bindOrphans(

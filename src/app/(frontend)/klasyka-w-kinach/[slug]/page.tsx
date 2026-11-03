@@ -3,7 +3,13 @@ import { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getGenres } from "@/lib/genres";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
+import {
+  BASE_OPEN_GRAPH,
+  inPlace,
+  inPlaceNbsp,
+  NOINDEX_FOLLOW,
+  pluralPl,
+} from "@/lib/seo";
 import { classicFallbackIntro } from "@/lib/listing-copy";
 import {
   CLASSIC_PATH,
@@ -64,11 +70,11 @@ export const generateMetadata = async ({
 
   const movies = groups?.length ?? 0;
   const screenings = groups ? countScreenings(groups) : 0;
-  const title = `Klasyka w kinach w ${month.locative} ${month.year}`;
+  const title = `Klasyka w kinach ${inPlace(month.locative)} ${month.year}`;
   const description =
     movies > 0
-      ? `Klasyka w kinach w ${month.locative} ${month.year}: ${movies} ${pluralPl(movies, "film", "filmy", "filmów")} i ${screenings} ${pluralPl(screenings, "seans", "seanse", "seansów")} w kinach w całej Polsce. Sprawdź, gdzie i kiedy obejrzeć klasykę na dużym ekranie.`
-      : `Klasyka w kinach w ${month.locative} ${month.year}: seanse filmów sprzed lat w kinach w całej Polsce, uzupełniane na bieżąco.`;
+      ? `Klasyka w kinach ${inPlace(month.locative)} ${month.year}: ${movies} ${pluralPl(movies, "film", "filmy", "filmów")} i ${screenings} ${pluralPl(screenings, "seans", "seanse", "seansów")} w kinach w całej Polsce. Sprawdź, gdzie i kiedy obejrzeć klasykę na dużym ekranie.`
+      : `Klasyka w kinach ${inPlace(month.locative)} ${month.year}: seanse filmów sprzed lat w kinach w całej Polsce, uzupełniane na bieżąco.`;
   const url = `${SITE_URL}${CLASSIC_PATH}/${month.slug}`;
 
   return {
@@ -103,7 +109,7 @@ const ClassicMonthPage = async ({ params }: ClassicMonthPageProps) => {
     <main className="bg-black text-white min-h-screen">
       <SiteHeader />
       <LandingJsonLd
-        name={`Klasyka w kinach w ${month.locative} ${month.year}`}
+        name={`Klasyka w kinach ${inPlace(month.locative)} ${month.year}`}
         path={path}
         description={intro}
         screenings={screenings}
@@ -116,7 +122,7 @@ const ClassicMonthPage = async ({ params }: ClassicMonthPageProps) => {
         ]}
         title={
           <>
-            Klasyka w&nbsp;kinach w&nbsp;{month.locative} {month.year}
+            Klasyka w&nbsp;kinach {inPlaceNbsp(month.locative)} {month.year}
           </>
         }
         intro={intro}
@@ -125,11 +131,11 @@ const ClassicMonthPage = async ({ params }: ClassicMonthPageProps) => {
       <LandingRepertoire
         screenings={screenings}
         genres={genres}
-        heading={<>Seanse klasyki w&nbsp;{month.locative}</>}
+        heading={<>Seanse klasyki {inPlaceNbsp(month.locative)}</>}
         emptyDescription={
           <>
-            Nie ma jeszcze zapowiedzianych seansów klasyki w&nbsp;
-            {month.locative}. Kina publikują repertuar z&nbsp;kilkutygodniowym
+            Nie ma jeszcze zapowiedzianych seansów klasyki{" "}
+            {inPlaceNbsp(month.locative)}. Kina publikują repertuar z&nbsp;kilkutygodniowym
             wyprzedzeniem, a my dodajemy go na bieżąco.
           </>
         }
@@ -141,7 +147,7 @@ const ClassicMonthPage = async ({ params }: ClassicMonthPageProps) => {
         items={[
           ...otherMonths.map((other) => ({
             href: `${CLASSIC_PATH}/${other.slug}`,
-            label: `Klasyka w ${other.locative}`,
+            label: `Klasyka ${inPlace(other.locative)}`,
             meta: String(other.year),
           })),
           { href: CLASSIC_PATH, label: "Klasyka w kinach" },

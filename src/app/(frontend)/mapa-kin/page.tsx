@@ -131,7 +131,8 @@ const CinemaMapPage = async () => {
           {pluralPl(catalogStudio, "kino studyjne", "kina studyjne", "kin studyjnych")}
           {catalogOpenAir > 0 && (
             <>
-              , {catalogOpenAir}{" "}
+              {catalogChain > 0 ? ", " : " i "}
+              {catalogOpenAir}{" "}
               {pluralPl(catalogOpenAir, "miejsce", "miejsca", "miejsc")} kina
               plenerowego
             </>
@@ -150,7 +151,9 @@ const CinemaMapPage = async () => {
           {unpinned > 0 && (
             <>
               {" "}
-              Na mapie jest {cinemas.length} z&nbsp;nich, {unpinned}{" "}
+              Na mapie{" "}
+              {pluralPl(cinemas.length, "jest", "są", "jest")}{" "}
+              {cinemas.length} z&nbsp;nich, {unpinned}{" "}
               {pluralPl(unpinned, "nie ma", "nie mają", "nie ma")} jeszcze
               współrzędnych.
             </>

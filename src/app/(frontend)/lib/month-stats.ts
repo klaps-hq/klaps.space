@@ -176,7 +176,7 @@ export const monthComparison = (
     sentences.push(
       stats.topMovie.movie.id === previous.topMovie.movie.id
         ? `Na czele drugi miesiąc z rzędu: „${stats.topMovie.movie.title}”.`
-        : `${capitalize(prevLabel)} na czele był „${previous.topMovie.movie.title}”.`
+        : `${capitalize(prevLabel)} na czele: „${previous.topMovie.movie.title}”.`
     );
   }
   return sentences;

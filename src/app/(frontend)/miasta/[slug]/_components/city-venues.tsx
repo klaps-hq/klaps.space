@@ -7,6 +7,7 @@ import {
   screensPl,
   seatsPl,
 } from "@/lib/city-venues";
+import { cinemaLocative } from "@/lib/cinema-name";
 import { pluralPl } from "@/lib/seo";
 import UncrawledLink from "@/components/common/uncrawled-link";
 import ContentSection, {
@@ -137,11 +138,11 @@ const CityVenues = ({ heading, summary, isLinked }: CityVenuesProps) => {
 
       {largest && (
         <p className="mt-6 max-w-[68ch] text-xs md:text-sm text-white/45 leading-relaxed">
-          Największa sala to {roomLabel(largest.roomName)} w&nbsp;kinie{" "}
-          {largest.cinemaName} ({seatsPl(largest.seats)}).
+          Największa sala to {roomLabel(largest.roomName)} w&nbsp;{cinemaLocative(largest.cinemaName)}{" "}
+          ({seatsPl(largest.seats)}).
           {/* With one venue the total just repeats its own row. */}
           {summary.venuesWithScreens > 1 &&
-            ` Kina, które podają liczbę sal, mają ich łącznie ${screensPl(summary.screens)}.`}{" "}
+            ` Kina, które podają liczbę sal, mają łącznie ${screensPl(summary.screens)}.`}{" "}
           Dane pochodzą ze stron kin i&nbsp;instytucji, które je prowadzą.
         </p>
       )}

@@ -2,7 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 import { getGenres } from "@/lib/genres";
 import { SITE_URL } from "@/lib/site-config";
-import { BASE_OPEN_GRAPH, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
+import { BASE_OPEN_GRAPH, inPlace, NOINDEX_FOLLOW, pluralPl } from "@/lib/seo";
 import { classicFacts, classicFallbackIntro } from "@/lib/listing-copy";
 import {
   CLASSIC_MIN_AGE_YEARS,
@@ -87,7 +87,7 @@ const ClassicPage = async () => {
         heading="Klasyka miesiąc po miesiącu"
         items={getClassicMonths().map((month) => ({
           href: `${CLASSIC_PATH}/${month.slug}`,
-          label: `Klasyka w ${month.locative}`,
+          label: `Klasyka ${inPlace(month.locative)}`,
           meta: String(month.year),
         }))}
       />

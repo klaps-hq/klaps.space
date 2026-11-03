@@ -41,9 +41,9 @@ const BENEFITS: BenefitItem[] = [
 ];
 
 const STEPS = [
-  "Wyszukaj swoje kino w generatorze poniżej.",
-  "Wybierz wersję odznaki pasującą do koloru Waszej strony.",
-  "Skopiuj kod i wklej go w stopce, w zakładce z repertuarem albo w sekcji z partnerami.",
+  "Wyszukajcie swoje kino w generatorze poniżej.",
+  "Wybierzcie wersję odznaki pasującą do koloru Waszej strony.",
+  "Skopiujcie kod i wklejcie go w stopce, w zakładce z repertuarem albo w sekcji z partnerami.",
 ];
 
 const ForCinemasPage = async () => {
@@ -150,7 +150,7 @@ const ForCinemasPage = async () => {
             {latestMonth && (
               <p className="mt-4 max-w-[40ch] text-sm md:text-base text-white/55 leading-relaxed">
                 Co miesiąc kina z&nbsp;największą liczbą seansów klasyki
-                dostają też odznakę Kino klasyki miesiąca. Znajdziecie ją
+                dostają też odznakę „Kino klasyki miesiąca”. Znajdziecie ją
                 w&nbsp;
                 <Link
                   href={monthPath(latestMonth)}

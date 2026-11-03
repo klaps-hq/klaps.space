@@ -280,12 +280,12 @@ export const generateMetadata = async ({
           `${lead}: ${counts}${titlePart}. Seanse specjalne, klasyka i retrospektywy, sprawdź repertuar.`,
           `${lead}: ${counts}${titlePart}. Sprawdź repertuar.`,
           `${lead}: ${counts}. Sprawdź repertuar.`,
-          `${counts} ${prep} ${cityLocative}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`,
+          `${counts} ${prep} ${cityLocative}. Seanse specjalne i klasyka filmowa, sprawdź repertuar.`,
         ]
       : [
           `${lead}: seanse specjalne, klasyka filmowa i retrospektywy. Sprawdź aktualny repertuar.`,
           `${lead}: seanse specjalne i klasyka filmowa. Sprawdź repertuar.`,
-          `${counts} ${prep} ${cityLocative}. Seanse specjalne i klasyka filmowa - sprawdź repertuar.`,
+          `${counts} ${prep} ${cityLocative}. Seanse specjalne i klasyka filmowa, sprawdź repertuar.`,
         ];
   const description =
     cinemasCount === 0

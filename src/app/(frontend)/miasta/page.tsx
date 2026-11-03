@@ -4,6 +4,7 @@ import { getCities } from "@/lib/cities";
 import { getIndexableSlugs } from "@/lib/sitemap-entries";
 import { formatVoivodeship } from "@/lib/voivodeships";
 import { ICity } from "@/interfaces/ICities";
+import { pluralPl } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site-config";
 import JsonLd from "@/components/common/json-ld";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
@@ -98,7 +99,8 @@ const CitiesPage = async () => {
         <p className="mt-4 md:mt-5 max-w-[64ch] text-base md:text-lg text-white/55 leading-relaxed">
           Lista wszystkich {totalCities} miast, w&nbsp;których działają
           niezależne kina studyjne, pogrupowana według województw. Łącznie{" "}
-          {totalCinemas} ekranów z&nbsp;klasyką, retrospektywami
+          {totalCinemas}{" "}
+          {pluralPl(totalCinemas, "ekran", "ekrany", "ekranów")} z&nbsp;klasyką, retrospektywami
           i&nbsp;pokazami specjalnymi. Wybierz miasto, żeby zobaczyć lokalne
           kina i&nbsp;ich aktualne repertuary.
         </p>

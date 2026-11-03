@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { SITE_URL } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "O Klaps - przewodnik po kinach studyjnych w Polsce",
+  title: "O Klapsie - przewodnik po kinach studyjnych w Polsce",
   description:
     "Czym jest Klaps i dlaczego kino klasyczne zasługuje na jedno, czytelne miejsce w sieci. Niezależny przewodnik po seansach specjalnych w kinach studyjnych.",
   alternates: {
