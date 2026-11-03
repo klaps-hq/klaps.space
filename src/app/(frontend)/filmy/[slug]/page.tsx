@@ -241,9 +241,12 @@ const MoviePage = async ({ params }: MoviePageProps) => {
             cinemaUrls={cinemaUrls}
           />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-12">
-            <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start flex flex-col gap-8 md:gap-10">
-              <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-10 md:gap-12">
+            {/* Header row: prose lead on the left, the one fact most visitors
+                want (the next screening) on the right. The list below gets
+                the full width instead of sharing it with a sticky panel. */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-8 gap-x-12 lg:items-end">
+              <div className="lg:col-span-7 flex flex-col gap-5">
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium uppercase -tracking-[0.02em] leading-[1] text-white">
                   Seanse
                 </h2>
@@ -255,29 +258,24 @@ const MoviePage = async ({ params }: MoviePageProps) => {
                   )}
                 </p>
               </div>
-              {/* Framed panel keeps the data blocks apart from the prose lead. */}
-              <div className="flex flex-col border border-white/15">
-                <NextScreening
-                  preferCity
-                  className="border-0 px-5 py-5"
-                  items={movieNextScreeningItems(screenings, movie)}
-                />
-                <MovieScreeningCities
-                  className="border-t border-white/15 px-5 pt-5 pb-2"
-                  movieTitle={movie.title}
-                  screenings={screenings}
-                />
-              </div>
-            </div>
-            <div className="lg:col-span-8">
-              <MovieScreenings
-                payload={screeningsPayload}
-                movieTitle={movie.title}
-                movieSlug={movie.slug}
-                movieDuration={movie.duration}
-                cinemaUrls={cinemaUrls}
+              <NextScreening
+                preferCity
+                className="lg:col-span-5"
+                items={movieNextScreeningItems(screenings, movie)}
               />
             </div>
+            <MovieScreenings
+              payload={screeningsPayload}
+              movieTitle={movie.title}
+              movieSlug={movie.slug}
+              movieDuration={movie.duration}
+              cinemaUrls={cinemaUrls}
+            />
+            <MovieScreeningCities
+              className="border-t border-white/10 pt-8 md:pt-10"
+              movieTitle={movie.title}
+              screenings={screenings}
+            />
           </div>
         )}
       </section>
