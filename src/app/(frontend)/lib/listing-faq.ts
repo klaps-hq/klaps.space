@@ -4,6 +4,7 @@ import { ICinemaDetails } from "@/interfaces/ICinema";
 import { CityVenueSummary, roomLabel, screensPl, seatsPl } from "./city-venues";
 import { formatPlDate, inPlace, pluralPl } from "./seo";
 import { isChainCinema } from "./cinema-chains";
+import { cinemaLocative } from "./cinema-name";
 import { genreLabel } from "./genre-guides";
 import { hasProfileContent, sinceMonth } from "./programme-profile";
 
@@ -110,7 +111,7 @@ const cityVenuesFaq = (place: string, venues: CityVenueSummary): FaqItem[] => {
   if (largest && venues.rows.length > 1) {
     questions.push({
       q: `Które kino studyjne ${place} ma największą salę?`,
-      a: `Największa sala to ${roomLabel(largest.roomName)} w kinie ${largest.cinemaName}: ${seatsPl(largest.seats)}.`,
+      a: `Największa sala to ${roomLabel(largest.roomName)} w ${cinemaLocative(largest.cinemaName)}: ${seatsPl(largest.seats)}.`,
     });
   }
 
@@ -136,9 +137,9 @@ const cityVenuesFaq = (place: string, venues: CityVenueSummary): FaqItem[] => {
   if (venues.wheelchair.length > 0 || venues.hearingLoop.length > 0) {
     const parts = [
       venues.wheelchair.length > 0 &&
-        `Dostępność dla osób na wózkach deklarują: ${joinNames(venues.wheelchair)}.`,
+        `Dostępność dla osób na wózkach ${venues.wheelchair.length === 1 ? "deklaruje" : "deklarują"}: ${joinNames(venues.wheelchair)}.`,
       venues.hearingLoop.length > 0 &&
-        `Pętlę indukcyjną ma: ${joinNames(venues.hearingLoop)}.`,
+        `Pętlę indukcyjną ${venues.hearingLoop.length === 1 ? "ma" : "mają"}: ${joinNames(venues.hearingLoop)}.`,
     ].filter(Boolean);
     questions.push({
       q: `Które kina ${place} są dostępne dla osób z niepełnosprawnościami?`,
@@ -294,7 +295,7 @@ const cinemaDetailsFaq = (
       total !== null && screens === 1 ? ` na ${seatsPl(total)}` : "",
       ".",
       largest && total !== null && screens > 1
-        ? ` Największa to ${largest.name} (${seatsPl(largest.seats ?? 0)}).`
+        ? ` Największa to ${roomLabel(largest.name)} (${seatsPl(largest.seats ?? 0)}).`
         : "",
     ];
     questions.push({

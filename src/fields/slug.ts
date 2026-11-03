@@ -41,7 +41,7 @@ export const slugField = ({
   admin: {
     position: "sidebar",
     description:
-      "Adres URL wpisu. Zostawione puste wygeneruje się z tytułu.",
+      "Adres URL wpisu. Jeśli zostawisz to pole puste, adres wygeneruje się z tytułu.",
   },
   hooks: {
     beforeValidate: [formatSlugHook(fallbackField)],

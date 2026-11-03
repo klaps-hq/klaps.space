@@ -69,7 +69,7 @@ export const buildMovieScreeningContext = (
     new Date().getFullYear() - productionYear >= REVIVAL_AGE_YEARS;
   const opening = isRevival
     ? `${movieTitle} z ${productionYear} roku wraca na duży ekran`
-    : `${movieTitle} można zobaczyć w kinach`;
+    : `Film „${movieTitle}” można zobaczyć`;
   const where =
     `${joinPl(named)}${moreCinemas > 0 ? ` oraz ${moreCinemas} ${pluralPl(moreCinemas, "inne kino", "inne kina", "innych kin")}` : ""}`;
   const venueKind =
@@ -99,7 +99,7 @@ export const buildMovieScreeningContext = (
 };
 
 // Server-rendered overview of where the movie plays. The screenings list
-// next to it is client-side and shows one day at a time, so without this
+// above it is client-side and shows one day at a time, so without this
 // the cached HTML would name only the first day's cinemas; it also links
 // each city hub with the city name as anchor.
 const MovieScreeningCities: React.FC<MovieScreeningCitiesProps> = ({
@@ -126,15 +126,17 @@ const MovieScreeningCities: React.FC<MovieScreeningCitiesProps> = ({
   const hidden = cities.length - shown.length;
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div className={cn("flex flex-col gap-4", className)}>
       <h3 className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/50">
         {movieTitle} w kinach: {screenings.length}{" "}
         {pluralPl(screenings.length, "seans", "seanse", "seansów")} w{" "}
         {cities.length} {pluralPl(cities.length, "mieście", "miastach", "miastach")}
       </h3>
-      <ul className="flex flex-col divide-y divide-white/10">
+      {/* Full-width row under the list: a grid of city cells, each with its
+          own rule, so a short list stays one tidy line on desktop. */}
+      <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-8 border-t border-white/10">
         {shown.map((city) => (
-          <li key={city.slug}>
+          <li key={city.slug} className="border-b border-white/10">
             <Link
               href={`/miasta/${city.slug}`}
               className="group flex items-baseline justify-between gap-4 py-2.5 text-sm uppercase -tracking-[0.01em] text-white/70 hover:text-white transition-colors"

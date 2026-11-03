@@ -19,6 +19,7 @@ import {
 } from "@/lib/screenings";
 import { SITE_URL } from "@/lib/site-config";
 import { isChainCinema } from "@/lib/cinema-chains";
+import { cinemaGenitive, cinemaLocative } from "@/lib/cinema-name";
 import UncrawledLink from "@/components/common/uncrawled-link";
 import TrackedCinemaLink from "@/components/common/tracked-cinema-link";
 import { formatDateLabel, cn, WARSAW_TZ } from "@/lib/utils";
@@ -112,7 +113,7 @@ const CinemaSiteAction: React.FC<CinemaSiteActionProps> = ({
     cinemaSlug={cinemaSlug}
     movieSlug={movieSlug}
     placement="movie_screening"
-    aria-label={`Sprawdź seans filmu ${movieTitle} na stronie kina ${cinemaName} (otwiera się w nowej karcie)`}
+    aria-label={`Sprawdź seans filmu ${movieTitle} na stronie ${cinemaGenitive(cinemaName)} (otwiera się w nowej karcie)`}
     className={cn("group", className)}
   >
     Na stronie kina
@@ -166,7 +167,7 @@ const CinemaRow: React.FC<CinemaRowProps> = ({
     uid: `screening-${screening.id}@klaps.space`,
     fileName: `${movieSlug}-${screening.date}-${screening.time.replace(":", "")}.ics`,
     description: [
-      `Seans filmu "${movieTitle}" w ${first.cinema.name}, ${first.cinema.city.name}.`,
+      `Seans filmu „${movieTitle}” w ${cinemaLocative(first.cinema.name)}, ${first.cinema.city.name}.`,
       `Szczegóły: ${movieUrl}`,
     ].join("\n"),
   }));
