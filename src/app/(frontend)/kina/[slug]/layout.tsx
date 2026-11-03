@@ -1,3 +1,4 @@
+import { permanentRedirect } from "next/navigation";
 import { getCinemaBySlug, cinemaRepertoireDateTo } from "@/lib/cinemas";
 import { getScreenings } from "@/lib/screenings";
 import { SITE_URL, cinemaEntityId } from "@/lib/site-config";
@@ -21,6 +22,7 @@ const buildCinemaJsonLd = (cinema: ICinema) => {
     address: {
       "@type": "PostalAddress",
       streetAddress: cinema.street ?? undefined,
+      postalCode: cinema.postalCode ?? undefined,
       addressLocality: cinema.city.name,
       addressCountry: "PL",
     },
@@ -93,6 +95,7 @@ const buildCinemaScreeningEvents = (
           name: cinema.name,
           slug: cinema.slug,
           street: cinema.street,
+          postalCode: cinema.postalCode,
           cityName: cinema.city.name,
           latitude: cinema.latitude,
           longitude: cinema.longitude,
@@ -108,6 +111,10 @@ export default async function CinemaLayout({
 }: Readonly<CinemaLayoutProps>) {
   const { slug } = await params;
   const cinema = await getCinemaBySlug(slug);
+
+  // A duplicate record (operator listed next to its venue) has no page of
+  // its own: send visitors and crawlers to the canonical cinema.
+  if (cinema.duplicateOfSlug) permanentRedirect(`/kina/${cinema.duplicateOfSlug}`);
 
   // Same call as the page body: deduped by the fetch cache. Falls back
   // to [] internally, so a screenings hiccup never breaks the layout.
